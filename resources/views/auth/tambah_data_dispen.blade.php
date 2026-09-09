@@ -26,6 +26,7 @@
         .app-container {
             width: 390px;
             height: 844px;
+            border-radius: 12px;
             background: #F4F6F9;
             position: relative;
             display: flex;

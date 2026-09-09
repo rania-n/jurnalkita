@@ -25,8 +25,9 @@
         /* Mobile Container Layout */
         .app-container {
             width: 390px;
-            min-height: 874px;
-            height: 874px;
+            min-height: 844px;
+            height: 844px;
+            border-radius: 12px;
             background: #F4F6F9;
             position: relative;
             display: flex;
@@ -296,7 +297,7 @@
                     <h1 class="header-title">Jam Pelajaran</h1>
                     <p class="header-subtitle">Konfigurasi rentang waktu jam pelajaran</p>
                 </div>
-                <a href="javascript:history.back()" class="btn-back">
+                <a href="{{ route('login') }}" class="back-btn" aria-label="Kembali">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
@@ -366,9 +367,9 @@
             </div>
 
             <!-- Edit Button -->
-            <button class="btn-primary">
+            <a href="{{ route('edit_jam_pelajaran') }}" class="btn-primary">
                 Edit Jam Pelajaran
-            </button>
+            </a>
             
         </div>
 

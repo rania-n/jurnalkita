@@ -27,6 +27,7 @@
             width: 390px;
             height: 844px;
             background: #F4F6F9;
+            border-radius: 12px;
             position: relative;
             display: flex;
             flex-direction: column;

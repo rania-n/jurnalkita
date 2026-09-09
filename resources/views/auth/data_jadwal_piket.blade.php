@@ -104,9 +104,8 @@
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 24px;
+      padding: 60px 24px 16px;
       width: 390px;
-      height: 74px;
       flex: none;
       order: 1;
       align-self: stretch;
@@ -438,11 +437,11 @@
           <h1 class="header-title">Daftar Jadwal Piket</h1>
           <p class="header-subtitle">Kelola jadwal piket yang tersedia</p>
         </div>
-        <button class="back-btn" aria-label="Kembali">
+        <a href="{{ route('login') }}" class="back-btn" aria-label="Kembali">
           <svg viewBox="0 0 24 24">
             <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
           </svg>
-        </button>
+        </a>
       </div>
 
       <!-- Frame Konten -->
@@ -469,14 +468,14 @@
         </div>
 
         <!-- Tambah Jadwal Piket Button -->
-        <button class="tambah-jadwal-frame">
+        <a href="{{ route('tambah_jadwal_piket')}}" class="tambah-jadwal-frame">
           <span class="tambah-jadwal-text">Tambah Jadwal Piket</span>
           <div class="tambah-jadwal-icon">
             <svg viewBox="0 0 24 24">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
           </div>
-        </button>
+        </a>
 
         <!-- Cards List -->
         <div class="cards-wrapper">

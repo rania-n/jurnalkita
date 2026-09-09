@@ -25,6 +25,7 @@
         .app-container {
             width: 390px;
             height: 844px;
+            border-radius: 12px;
             background: #F4F6F9;
             position: relative;
             display: flex;
@@ -169,13 +170,15 @@
             font-weight: 600;
             font-size: 16px;
             cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.2s;
         }
 
         .home-indicator-wrapper {
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding: 21px 0px 8px;
+            padding: 12px 0px 8px;
             width: 100%;
         }
 

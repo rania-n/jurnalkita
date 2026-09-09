@@ -32,6 +32,7 @@
             flex-direction: column;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             overflow: hidden;
+            border-radius: 12px;
         }
 
         /* Status Bar */
@@ -65,9 +66,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 24px;
+            padding: 60px 24px 16px;
             flex-shrink: 0;
-            height: 74px;
         }
 
         .header-text {
@@ -271,25 +271,30 @@
 
         .btn-primary {
             display: flex;
+            flex-direction: row;
             justify-content: center;
             align-items: center;
+            padding: 0 16px;
             width: 100%;
             height: 48px;
             background: #1B2A4A;
             border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            color: #FFFFFF;
             border: none;
             cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 19px;
+            color: #FFFFFF;
+            transition: opacity 0.2s ease;
         }
 
         .home-indicator {
             display: flex;
+            flex-direction: row;
             justify-content: center;
-            align-items: flex-end;
-            height: 34px;
-            padding-bottom: 8px;
+            align-items: flex-start;
+            padding: 12px 0 8px;
+            width: 100%;
         }
 
         .indicator-bar {
@@ -419,7 +424,7 @@
 
         <!-- Bottom Actions -->
         <div class="bottom-action">
-            <button class="btn-primary">Lanjut ke Presensi Siswa</button>
+            <a href="{{ route('input_absensi_siswa') }}" class="btn-primary">Lanjut ke Presensi Siswa</a>
             <div class="home-indicator">
                 <div class="indicator-bar"></div>
             </div>

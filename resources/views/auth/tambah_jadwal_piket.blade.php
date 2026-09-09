@@ -193,25 +193,30 @@
 
         .submit-btn {
             display: flex;
+            flex-direction: row;
             justify-content: center;
             align-items: center;
+            padding: 0 16px;
+            width: 100%;
             height: 48px;
             background: #1B2A4A;
             border-radius: 12px;
             border: none;
-            color: #FFFFFF;
+            cursor: pointer;
             font-weight: 600;
             font-size: 16px;
-            width: 100%;
-            cursor: pointer;
+            line-height: 19px;
+            color: #FFFFFF;
+            transition: opacity 0.2s ease;
         }
 
         .home-indicator-wrapper {
             display: flex;
+            flex-direction: row;
             justify-content: center;
             align-items: flex-start;
-            padding: 21px 0px 8px;
-            height: 34px;
+            padding: 12px 0 8px;
+            width: 100%;
         }
 
         .home-indicator {
@@ -232,9 +237,9 @@
                 <h1>Tambah Jadwal Piket</h1>
                 <p>Atur jadwal piket harian staff</p>
             </div>
-            <button class="back-btn">
+            <a href="{{ route('data_jadwal_piket') }}" class="back-btn">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            </button>
+            </a>
         </div>
 
         <!-- Form Elements -->

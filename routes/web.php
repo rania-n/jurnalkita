@@ -93,3 +93,19 @@ Route::get('/tambah_jadwal_piket', function () {
 Route::get('/data_jadwal_piket', function () {
     return view('auth.data_jadwal_piket');
 })->name('data_jadwal_piket');
+
+Route::get('/input_absensi_siswa', function () {
+    return view('auth.input_absensi_siswa');
+})->name('input_absensi_siswa');
+
+Route::get('/master_data', function () {
+    return view('auth.master_data');
+})->name('master_data');
+
+Route::get('/tambah_guru', function () {
+    return view('auth.tambah_guru');
+})->name('tambah_guru');
+
+Route::get('/data_guru', function () {
+    return view('auth.data_guru');
+})->name('data_guru');

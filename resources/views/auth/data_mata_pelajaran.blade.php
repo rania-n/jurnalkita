@@ -26,6 +26,7 @@
         .app-container {
             width: 390px;
             height: 844px;
+            border-radius: 12px;
             background: #F4F6F9;
             position: relative;
             display: flex;
@@ -130,7 +131,7 @@
             align-items: center;
             padding: 8px 12px;
             width: 100%;
-            height: 29px;
+            height: 36px;
             background: #1B2A4A;
             border-radius: 8px;
             border: none;
@@ -251,7 +252,7 @@
             <!-- Add Button -->
             <a href="{{ route('tambah_data_mata_pelajaran') }}" class="btn-add">
                 <span>Tambah Mata Pelajaran</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="8.5" cy="7" r="4"></circle>
                     <line x1="20" y1="8" x2="20" y2="14"></line>
