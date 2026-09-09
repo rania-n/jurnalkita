@@ -5,110 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pilih Peran - Jurnalkita</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #e5e5e5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .register-container {
-            width: 390px;
-            height: 844px;
-            border-radius:12px;
-            background: #F4F6F9;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        /* Status Bar */
-        .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px 0px; height: 44px; }
-        .time-text { font-weight: 600; font-size: 14px; color: #1B2A4A; }
-        .status-icons { display: flex; gap: 6px; align-items: center; }
-
-        /* Header */
-        .screen-header { display: flex; justify-content: space-between; align-items: center; padding: 60px 24px 16px;}
-        .header-text h1 { font-weight: 700; font-size: 20px; color: #1B2A4A; line-height: 24px; }
-        .header-text p { font-weight: 400; font-size: 12px; color: #5A6E7F; line-height: 15px; margin-top: 2px; }
-        
-        .btn-back { width: 34px; height: 34px; background: #EBEFF4; border-radius: 100px; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; text-decoration: none; }
-
-        /* Role Cards */
-        .role-container { display: flex; flex-direction: column; padding: 0px 24px; gap: 20px; flex-grow: 1; margin-top: 8px; }
-        
-        .role-card { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0px 4px 12px rgba(27, 42, 74, 0.06); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
-        .role-card:hover { border-color: #1B2A4A; transform: translateY(-2px); }
-        
-        .role-top { display: flex; justify-content: space-between; align-items: center; }
-        .icon-box { width: 48px; height: 48px; background: #EBEFF4; border-radius: 12px; display: flex; justify-content: center; align-items: center; }
-        
-        .role-info h2 { font-weight: 700; font-size: 18px; color: #1B2A4A; line-height: 22px; margin-bottom: 4px; }
-        .role-info p { font-weight: 400; font-size: 13px; color: #5A6E7F; line-height: 140%; }
-        
-        /* Bottom Indicator */
-        .bottom-indicator { padding: 21px 0px 8px; display: flex; justify-content: center; }
-        .home-indicator { width: 139px; height: 5px; background: #1B2A4A; border-radius: 100px; }
-    </style>
+    <!-- Memanggil Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-[#e5e5e5] flex justify-center items-center min-h-screen font-['Inter',sans-serif] m-0 p-0 box-border">
 
-    <div class="register-container">
+    <div class="w-[390px] h-[844px] rounded-xl bg-[#F4F6F9] relative flex flex-col justify-between overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.1)]">
 
-        <div class="screen-header">
-            <div class="header-text">
-                <h1>Pilih Peran Daftar</h1>
-                <p>Silakan pilih jenis keanggotaan Anda</p>
+        <div class="flex justify-between items-center pt-[60px] px-6 pb-4">
+            <div class="flex flex-col">
+                <h1 class="font-bold text-[20px] text-[#1B2A4A] leading-6">Pilih Peran Daftar</h1>
+                <p class="font-normal text-[12px] text-[#5A6E7F] leading-[15px] mt-0.5">Silakan pilih jenis keanggotaan Anda</p>
             </div>
             <!-- Menggunakan fungsi route() dari Laravel untuk kembali ke login -->
-            <a href="{{ route('login') }}" class="btn-back">
+            <a href="{{ route('login') }}" class="w-[34px] h-[34px] bg-[#EBEFF4] rounded-full flex justify-center items-center cursor-pointer border-none no-underline">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
             </a>
         </div>
 
-        <div class="role-container">
-            <a href="{{ route('register_guru') }}" class="role-card">
-                <div class="role-top">
-                    <div class="icon-box">
+        <div class="flex flex-col px-6 gap-5 flex-grow mt-2">
+            <a href="{{ route('register_guru') }}" class="bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(27,42,74,0.06)] rounded-2xl p-6 flex flex-col gap-4 cursor-pointer transition-all duration-200 ease-in-out no-underline hover:border-[#1B2A4A] hover:-translate-y-0.5">
+                <div class="flex justify-between items-center">
+                    <div class="w-12 h-12 bg-[#EBEFF4] rounded-xl flex justify-center items-center">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
                     </div>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6E7F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
-                <div class="role-info">
-                    <h2>Guru Mata Pelajaran</h2>
-                    <p>Daftar sebagai tenaga pengajar untuk melakukan pengisian jurnal KBM dan absensi siswa di kelas.</p>
+                <div class="flex flex-col">
+                    <h2 class="font-bold text-[18px] text-[#1B2A4A] leading-[22px] mb-1">Guru Mata Pelajaran</h2>
+                    <p class="font-normal text-[13px] text-[#5A6E7F] leading-[140%]">Daftar sebagai tenaga pengajar untuk melakukan pengisian jurnal KBM dan absensi siswa di kelas.</p>
                 </div>
             </a>
 
-            <a href="{{ route('register_pengurus_kelas') }}" class="role-card">
-                <div class="role-top">
-                    <div class="icon-box">
+            <a href="{{ route('register_pengurus_kelas') }}" class="bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(27,42,74,0.06)] rounded-2xl p-6 flex flex-col gap-4 cursor-pointer transition-all duration-200 ease-in-out no-underline hover:border-[#1B2A4A] hover:-translate-y-0.5">
+                <div class="flex justify-between items-center">
+                    <div class="w-12 h-12 bg-[#EBEFF4] rounded-xl flex justify-center items-center">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     </div>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6E7F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
-                <div class="role-info">
-                    <h2>Pengurus Kelas / Siswa</h2>
-                    <p>Mewakili ketua kelas atau sekretaris untuk melihat riwayat jurnal dan membantu administrasi KBM harian.</p>
+                <div class="flex flex-col">
+                    <h2 class="font-bold text-[18px] text-[#1B2A4A] leading-[22px] mb-1">Pengurus Kelas / Siswa</h2>
+                    <p class="font-normal text-[13px] text-[#5A6E7F] leading-[140%]">Mewakili ketua kelas atau sekretaris untuk melihat riwayat jurnal dan membantu administrasi KBM harian.</p>
                 </div>
             </a>
         </div>
 
-        <div class="bottom-indicator">
-            <div class="home-indicator"></div>
+        <div class="pt-[21px] pb-2 flex justify-center">
+            <div class="w-[139px] h-[5px] bg-[#1B2A4A] rounded-full"></div>
         </div>
 
     </div>

@@ -4,352 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Jam Pelajaran</title>
+    <!-- Google Font & Tailwind CDN -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#1B2A4A',
+                        },
+                    }
+                }
+            }
         }
-
-        body {
-            background-color: #e5e5e5; /* Dark backdrop for preview */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* Mobile Container Layout */
-        .app-container {
-            width: 390px;
-            min-height: 844px;
-            height: 844px;
-            border-radius: 12px;
-            background: #F4F6F9;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        /* Top Section */
-        .top-section {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
-        }
-
-        /* Status Bar */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 24px;
-            width: 100%;
-            height: 44px;
-            flex-shrink: 0;
-        }
-
-        .time {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1B2A4A;
-        }
-
-        .status-icons {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        /* Header Area */
-        .screen-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 60px 24px 16px;
-            width: 100%;
-            flex-shrink: 0;
-        }
-
-        .header-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            width: 308px;
-        }
-
-        .header-title {
-            font-weight: 700;
-            font-size: 20px;
-            line-height: 24px;
-            color: #1B2A4A;
-        }
-
-        .header-subtitle {
-            font-weight: 400;
-            font-size: 13px;
-            line-height: 16px;
-            color: #4A5568;
-        }
-
-        .btn-back {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 34px;
-            height: 34px;
-            background: #E2E8F0;
-            border-radius: 100px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            flex-shrink: 0;
-            transition: background 0.2s ease;
-        }
-
-        .btn-back:hover {
-            background: #cbd5e1;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0px 24px;
-            gap: 16px;
-            width: 100%;
-            flex: 1;
-        }
-
-        /* Segmented Control */
-        .segmented-control {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            width: 342px;
-            height: 28px;
-            background: #FFFFFF;
-            box-shadow: 0px 4px 12px rgba(27, 42, 74, 0.06);
-            border-radius: 8px;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        .segment-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
-            height: 100%;
-            font-weight: 600;
-            font-size: 11px;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .segment-btn.active {
-            background: #1B2A4A;
-            color: #FFFFFF;
-        }
-
-        .segment-btn:not(.active) {
-            background: transparent;
-            color: #4A5568;
-        }
-
-        /* Time Table Card */
-        .time-table-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px 16px 16px;
-            gap: 8px;
-            width: 342px;
-            background: #FFFFFF;
-            box-shadow: 0px 4px 12px rgba(27, 42, 74, 0.06);
-            border-radius: 12px;
-        }
-
-        .table-header {
-            display: flex;
-            align-items: center;
-            width: 310px;
-            height: 16px;
-        }
-
-        .col-jp-head {
-            width: 52px;
-            font-weight: 600;
-            font-size: 13px;
-            color: #4A5568;
-        }
-
-        .col-time-head-start {
-            width: 115px;
-            font-weight: 600;
-            font-size: 13px;
-            color: #4A5568;
-        }
-
-        .col-time-head-end {
-            flex: 1;
-            font-weight: 600;
-            font-size: 13px;
-            color: #4A5568;
-        }
-
-        .divider {
-            width: 310px;
-            height: 0px;
-            border: 1px solid #E2E8F0;
-            margin: 4px 0;
-        }
-
-        .table-body {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 310px;
-        }
-
-        .table-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 310px;
-            height: 28px;
-        }
-
-        .col-jp-label {
-            width: 44px;
-            font-weight: 700;
-            font-size: 13px;
-            color: #1B2A4A;
-        }
-
-        .time-input-box {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            width: 107px;
-            height: 28px;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 8px;
-            font-weight: 400;
-            font-size: 11px;
-            color: #4A5568;
-            outline: none;
-        }
-
-        .btn-delete {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 28px;
-            height: 28px;
-            background: #FFE4E6;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .btn-delete:hover {
-            background: #fecdd3;
-        }
-
-        .btn-add-jam {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            width: 310px;
-            height: 33px;
-            background: #E0F2FE;
-            border: 1px solid #0369A1;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 4px;
-            transition: background 0.2s;
-        }
-        
-        .btn-add-jam:hover {
-            background: #bae6fd;
-        }
-
-        .btn-add-jam span {
-            font-weight: 600;
-            font-size: 14px;
-            color: #0369A1;
-        }
-
-        /* Primary Button */
-        .btn-primary {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 12px 0px;
-            width: 342px;
-            height: 48px;
-            background: #1B2A4A;
-            border-radius: 12px;
-            border: none;
-            font-weight: 600;
-            font-size: 16px;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-primary:hover {
-            background: #2a3f6c;
-        }
-
-        /* Home Indicator Bar */
-        .home-indicator {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 0px 0px 8px;
-            width: 100%;
-            height: 13px;
-            flex-shrink: 0;
-        }
-
-        .indicator-bar {
-            width: 139px;
-            height: 5px;
-            background: #1B2A4A;
-            border-radius: 100px;
-        }
-    </style>
+    </script>
 </head>
-<body>
+<body class="bg-[#e5e5e5] flex justify-center items-center min-h-screen p-5 font-sans">
 
-    <div class="app-container">
+    <!-- Mobile Container -->
+    <div class="w-[390px] h-[844px] min-h-[844px] rounded-xl bg-[#F4F6F9] relative flex flex-col justify-between overflow-hidden shadow-2xl">
         
         <!-- Top Section -->
-        <div class="top-section">
+        <div class="flex flex-col items-start w-full">
             <!-- Screen Header -->
-            <div class="screen-header">
-                <div class="header-text">
-                    <h1 class="header-title">Edit Jam Pelajaran</h1>
-                    <p class="header-subtitle">Konfigurasi rentang waktu jam pelajaran</p>
+            <div class="flex justify-between items-center pt-[60px] px-6 pb-4 w-full shrink-0">
+                <div class="flex flex-col gap-0.5 w-[308px]">
+                    <h1 class="font-bold text-xl leading-6 text-navy-800">Edit Jam Pelajaran</h1>
+                    <p class="font-normal text-xs leading-4 text-[#4A5568]">Konfigurasi rentang waktu jam pelajaran</p>
                 </div>
-                <a href="{{ route('data_jam_pelajaran') }}" class="btn-back">
+                <a href="{{ route('data_jam_pelajaran') }}" class="w-[34px] h-[34px] bg-[#E2E8F0] hover:bg-[#cbd5e1] rounded-full flex justify-center items-center shrink-0 transition-colors no-underline">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
@@ -359,32 +47,32 @@
         </div>
 
         <!-- Main Content -->
-        <div class="main-content">
+        <div class="flex flex-col items-center px-6 gap-4 w-full flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
             
             <!-- Segmented Control -->
-            <div class="segmented-control">
-                <button class="segment-btn active">Senin-Kamis</button>
-                <button class="segment-btn">Jumat</button>
-                <button class="segment-btn">Kustom</button>
+            <div class="flex items-center w-[342px] h-[28px] bg-white shadow-[0_4px_12px_rgba(27,42,74,0.06)] rounded-lg p-0 overflow-hidden shrink-0">
+                <button class="flex-1 h-full font-semibold text-[11px] bg-navy-800 text-white rounded-lg border-none cursor-pointer transition-all">Senin-Kamis</button>
+                <button class="flex-1 h-full font-semibold text-[11px] bg-transparent text-[#4A5568] rounded-lg border-none cursor-pointer transition-all">Jumat</button>
+                <button class="flex-1 h-full font-semibold text-[11px] bg-transparent text-[#4A5568] rounded-lg border-none cursor-pointer transition-all">Kustom</button>
             </div>
 
             <!-- Time Table Card -->
-            <div class="time-table-card">
-                <div class="table-header">
-                    <div class="col-jp-head">JP</div>
-                    <div class="col-time-head-start">JAM MULAI</div>
-                    <div class="col-time-head-end">JAM SELESAI</div>
+            <div class="flex flex-col items-center p-2 px-4 pb-4 gap-2 w-[342px] bg-white shadow-[0_4px_12px_rgba(27,42,74,0.06)] rounded-xl shrink-0">
+                <div class="flex items-center w-[310px] h-4 text-xs font-semibold text-[#4A5568]">
+                    <div class="w-[52px]">JP</div>
+                    <div class="w-[115px]">JAM MULAI</div>
+                    <div class="flex-1">JAM SELESAI</div>
                 </div>
                 
-                <div class="divider"></div>
+                <div class="w-[310px] h-0 border-b border-[#E2E8F0] my-1"></div>
                 
-                <div class="table-body">
+                <div class="flex flex-col gap-2 w-[310px]">
                     <!-- JP 1 -->
-                    <div class="table-row">
-                        <div class="col-jp-label">JP 1</div>
-                        <input type="text" class="time-input-box" value="07:00">
-                        <input type="text" class="time-input-box" value="07:00">
-                        <button class="btn-delete">
+                    <div class="flex items-center gap-2 w-[310px] h-7">
+                        <div class="w-[44px] font-bold text-xs text-navy-800">JP 1</div>
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <button class="w-7 h-7 bg-[#FFE4E6] hover:bg-[#fecdd3] rounded-lg flex justify-center items-center border-none cursor-pointer transition-colors">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -394,11 +82,11 @@
                         </button>
                     </div>
                     <!-- JP 2 -->
-                    <div class="table-row">
-                        <div class="col-jp-label">JP 2</div>
-                        <input type="text" class="time-input-box" value="07:00">
-                        <input type="text" class="time-input-box" value="07:00">
-                        <button class="btn-delete">
+                    <div class="flex items-center gap-2 w-[310px] h-7">
+                        <div class="w-[44px] font-bold text-xs text-navy-800">JP 2</div>
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <button class="w-7 h-7 bg-[#FFE4E6] hover:bg-[#fecdd3] rounded-lg flex justify-center items-center border-none cursor-pointer transition-colors">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -408,11 +96,11 @@
                         </button>
                     </div>
                     <!-- JP 3 -->
-                    <div class="table-row">
-                        <div class="col-jp-label">JP 3</div>
-                        <input type="text" class="time-input-box" value="07:00">
-                        <input type="text" class="time-input-box" value="07:00">
-                        <button class="btn-delete">
+                    <div class="flex items-center gap-2 w-[310px] h-7">
+                        <div class="w-[44px] font-bold text-xs text-navy-800">JP 3</div>
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <button class="w-7 h-7 bg-[#FFE4E6] hover:bg-[#fecdd3] rounded-lg flex justify-center items-center border-none cursor-pointer transition-colors">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -422,42 +110,42 @@
                         </button>
                     </div>
                     <!-- JP 4 -->
-                    <div class="table-row">
-                        <div class="col-jp-label">JP 4</div>
-                        <input type="text" class="time-input-box" value="07:00">
-                        <input type="text" class="time-input-box" value="07:00">
-                        <button class="btn-delete">
+                    <div class="flex items-center gap-2 w-[310px] h-7">
+                        <div class="w-[44px] font-bold text-xs text-navy-800">JP 4</div>
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <button class="w-7 h-7 bg-[#FFE4E6] hover:bg-[#fecdd3] rounded-lg flex justify-center items-center border-none cursor-pointer transition-colors">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                 <line x1="10" y1="11" x2="10" y2="17"></line>
                                 <line x1="14" y1="11" x2="14" y2="17"></line>
                             </svg>
                         </button>
                     </div>
                     <!-- JP 5 -->
-                    <div class="table-row">
-                        <div class="col-jp-label">JP 5</div>
-                        <input type="text" class="time-input-box" value="07:00">
-                        <input type="text" class="time-input-box" value="07:00">
-                        <button class="btn-delete">
+                    <div class="flex items-center gap-2 w-[310px] h-7">
+                        <div class="w-[44px] font-bold text-xs text-navy-800">JP 5</div>
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <button class="w-7 h-7 bg-[#FFE4E6] hover:bg-[#fecdd3] rounded-lg flex justify-center items-center border-none cursor-pointer transition-colors">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                 <line x1="10" y1="11" x2="10" y2="17"></line>
                                 <line x1="14" y1="11" x2="14" y2="17"></line>
                             </svg>
                         </button>
                     </div>
                     <!-- JP 6 -->
-                    <div class="table-row">
-                        <div class="col-jp-label">JP 6</div>
-                        <input type="text" class="time-input-box" value="07:00">
-                        <input type="text" class="time-input-box" value="07:00">
-                        <button class="btn-delete">
+                    <div class="flex items-center gap-2 w-[310px] h-7">
+                        <div class="w-[44px] font-bold text-xs text-navy-800">JP 6</div>
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <input type="text" class="w-[107px] h-7 bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 font-normal text-[11px] text-[#4A5568] outline-none" value="07:00">
+                        <button class="w-7 h-7 bg-[#FFE4E6] hover:bg-[#fecdd3] rounded-lg flex justify-center items-center border-none cursor-pointer transition-colors">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                 <line x1="10" y1="11" x2="10" y2="17"></line>
                                 <line x1="14" y1="11" x2="14" y2="17"></line>
                             </svg>
@@ -466,8 +154,8 @@
                 </div>
 
                 <!-- Add Button -->
-                <button class="btn-add-jam">
-                    <span>Tambah Jam Pelajaran</span>
+                <button class="flex justify-between items-center px-4 py-3 w-[310px] h-[33px] bg-[#E0F2FE] hover:bg-[#bae6fd] border border-[#0369A1] rounded-lg cursor-pointer mt-1 transition-colors">
+                    <span class="font-semibold text-sm text-[#0369A1]">Tambah Jam Pelajaran</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22a10 10 0 1 1 10-10"></path>
                         <polyline points="12 6 12 12 16 14"></polyline>
@@ -478,15 +166,15 @@
             </div>
 
             <!-- Save Button -->
-            <button class="btn-primary">
+            <button class="flex justify-center items-center py-3 w-[342px] h-[48px] bg-navy-800 hover:bg-[#2a3f6c] rounded-xl border-none font-semibold text-base text-white cursor-pointer transition-colors shrink-0">
                 Simpan Perubahan
             </button>
             
         </div>
 
         <!-- Home Indicator -->
-        <div class="home-indicator">
-            <div class="indicator-bar"></div>
+        <div class="flex justify-center items-start pb-2 w-full h-[13px] shrink-0">
+            <div class="w-[139px] h-[5px] bg-navy-800 rounded-full"></div>
         </div>
         
     </div>

@@ -1,372 +1,188 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Dispensasi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #e5e5e5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Mobile App Container */
-        .app-container {
-            width: 390px;
-            height: 844px;
-            border-radius: 12px;
-            background: #F4F6F9;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        /* Status Bar */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 24px;
-            height: 44px;
-            flex-shrink: 0;
-        }
-
-        .time {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1B2A4A;
-        }
-
-        .status-icons {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .status-icons svg {
-            fill: #1B2A4A;
-        }
-
-        /* Header Area */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 60px 24px 16px;
-            flex-shrink: 0;
-        }
-
-        .header-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            max-width: 280px;
-        }
-
-        .header-title {
-            font-weight: 700;
-            font-size: 20px;
-            color: #1B2A4A;
-            line-height: 24px;
-        }
-
-        .header-subtitle {
-            font-weight: 400;
-            font-size: 13px;
-            color: #4A5568;
-            line-height: 140%;
-        }
-
-        .btn-back {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 34px;
-            height: 34px;
-            background: #E2E8F0;
-            border-radius: 100px;
-            border: none;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        /* Main Content */
-        .content {
-            flex: 1;
-            padding: 0 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            padding-bottom: 20px;
-        }
-        
-        .content::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Search Box */
-        .search-box {
-            display: flex;
-            align-items: center;
-            padding: 10px 14px;
-            gap: 8px;
-            background: #E2E8F0;
-            border-radius: 10px;
-            width: 100%;
-        }
-
-        .search-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-weight: 400;
-            font-size: 13px;
-            color: #1B2A4A;
-        }
-
-        .search-input::placeholder {
-            color: #4A5568;
-        }
-
-        /* Filters Row */
-        .filters-row {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .filter-item {
-            flex: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .filter-item span {
-            font-weight: 700;
-            font-size: 11px;
-            color: #4A5568;
-        }
-
-        /* Action Button */
-        .btn-action {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            background: #1B2A4A;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .btn-action span {
-            font-weight: 700;
-            font-size: 12px;
-            color: #FFFFFF;
-        }
-
-        /* Cards List */
-        .card-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px;
-            background: #FFFFFF;
-            box-shadow: 0px 2px 8px rgba(27, 42, 74, 0.04);
-            border-radius: 12px;
-        }
-
-        .card-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .card-name {
-            font-weight: 700;
-            font-size: 14px;
-            color: #1B2A4A;
-        }
-
-        .card-class {
-            font-weight: 400;
-            font-size: 11px;
-            color: #4A5568;
-        }
-
-        .card-date {
-            font-weight: 600;
-            font-size: 11px;
-            color: #1B2A4A;
-            margin-top: 2px;
-        }
-
-        .card-actions {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .status-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-        }
-
-        /* Status Colors */
-        .status-pending { background: #FFF4B8; color: #C67A00; }
-        .status-approved { background: #D1FFC2; color: #0A5C36; }
-        .status-rejected { background: #FFE4E6; color: #B91C1C; }
-        .status-neutral { background: #E2E8F0; color: #4A5568; }
-
-        .btn-detail {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 34px;
-            height: 34px;
-            background: #E2E8F0;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            margin-left: 2px;
-        }
-
-        /* Footer Indicator */
-        .home-indicator-wrapper {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            padding: 12px 0 8px;
-            background: #F4F6F9;
-            flex-shrink: 0;
-        }
-
-        .home-indicator {
-            width: 139px;
-            height: 5px;
-            background: #1B2A4A;
-            border-radius: 100px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Dispensasi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
 </head>
-<body>
+<body class="bg-[#F4F6F9] flex justify-center">
 
-    <div class="app-container">
-
-        <!-- Header -->
-        <header class="header">
-            <div class="header-text">
-                <h1 class="header-title">Daftar Dispensasi</h1>
-                <p class="header-subtitle">Riwayat dan status persetujuan dispensasi oleh Staff Piket dan Waka Kesiswaan.</p>
-            </div>
-            <a href="#" class="btn-back">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </a>
-        </header>
-
-        <!-- Main Content -->
-        <main class="content">
-            
-            <!-- Search Box -->
-            <div class="search-box">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" class="search-input" placeholder="Cari nama atau alasan dispensasi...">
-            </div>
-
-            <!-- Filters -->
-            <div class="filters-row">
-                <div class="filter-item">
-                    <span>Semua Kelas</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
-                <div class="filter-item">
-                    <span>Tanggal</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                </div>
-            </div>
-
-            <!-- Action Button -->
-            <a href="{{ route('tambah_data_dispen') }}" class="btn-action">
-                <span>Ajukan Dispensasi</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <circle cx="10" cy="13" r="2"></circle>
-                    <path d="M7 18v-1a3 3 0 0 1 6 0v1"></path>
-                    <line x1="16" y1="13" x2="18" y2="13"></line>
-                    <line x1="16" y1="17" x2="18" y2="17"></line>
-                </svg>
-            </a>
-
-            <!-- Cards List -->
-            <div class="card-list">
-                
-                <!-- Card: Dude Fahrezi -->
-                <div class="card">
-                    <div class="card-info">
-                        <div class="card-name">Dude Fahrezi</div>
-                        <div class="card-class">XI RPL 2</div>
-                        <div class="card-date">Tanggal: 06-09-2026</div>
-                    </div>
-                    <div class="card-actions">
-                        <div class="status-icon status-pending">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </div>
-                        <div class="status-icon status-neutral">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </div>
-                        <a href="{{ route('detail_dispen') }}" button class="btn-detail">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><circle cx="10" cy="13" r="2"></circle><path d="M7 18v-1a3 3 0 0 1 6 0v1"></path><line x1="16" y1="13" x2="18" y2="13"></line><line x1="16" y1="17" x2="18" y2="17"></line></svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Home Indicator -->
-        <div class="home-indicator-wrapper">
-            <div class="home-indicator"></div>
-        </div>
-
+  <!-- Mobile Container -->
+  <div class="w-full max-w-[390px] min-h-screen bg-[#F4F6F9] flex flex-col relative pb-8 shadow-sm">
+    
+    <!-- Top Header & Back Button -->
+    <div class="flex justify-between items-center px-[24px] pt-[40px] pb-[16px]">
+      <div class="flex flex-col gap-[2px]">
+        <h1 class="text-[20px] font-bold text-[#1B2A4A] leading-[24px]">Daftar Dispensasi</h1>
+        <p class="text-[13px] text-[#4A5568] leading-[16px] max-w-[270px]">
+          Riwayat dan status persetujuan dispensasi oleh Staff Piket dan Waka Kesiswaan.
+        </p>
+      </div>
+      <a href="#" class="flex justify-center items-center w-[34px] h-[34px] bg-[#E2E8F0] hover:bg-slate-300 rounded-full shrink-0 transition-colors">
+        <svg class="w-[18px] h-[18px] text-[#1B2A4A]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+      </a>
     </div>
 
+    <!-- Main Content -->
+    <div class="flex flex-col px-[24px] gap-[16px]">
+      
+      <!-- Search Bar -->
+      <div class="flex items-center bg-[#E2E8F0] rounded-[10px] px-[14px] py-[10px] gap-[8px]">
+        <svg class="w-[16px] h-[16px] text-[#4A5568]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" placeholder="Cari nama atau alasan dispensasi..." class="bg-transparent border-none outline-none text-[13px] w-full text-[#4A5568] placeholder-[#4A5568]">
+      </div>
+
+      <!-- Filter Row -->
+      <div class="flex gap-[8px] w-full">
+        <button class="flex-1 flex justify-between items-center bg-white border border-[#E2E8F0] rounded-[8px] px-[12px] py-[8px]">
+          <span class="text-[11px] font-bold text-[#4A5568]">Semua Kelas</span>
+          <svg class="w-[16px] h-[16px] text-[#4A5568]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <button class="flex-1 flex justify-between items-center bg-white border border-[#E2E8F0] rounded-[8px] px-[12px] py-[8px]">
+          <span class="text-[11px] font-bold text-[#4A5568]">Tanggal</span>
+          <svg class="w-[16px] h-[16px] text-[#4A5568]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="flex w-full bg-white shadow-[0_4px_12px_rgba(27,42,74,0.06)] rounded-[8px] p-[2px]">
+        <button class="flex-1 flex justify-center items-center h-[28px] bg-[#1B2A4A] rounded-[6px]">
+          <span class="text-[11px] font-semibold text-white">Semua</span>
+        </button>
+        <button class="flex-1 flex justify-center items-center h-[28px] bg-transparent rounded-[6px]">
+          <span class="text-[11px] font-semibold text-[#4A5568]">Menunggu</span>
+        </button>
+        <button class="flex-1 flex justify-center items-center h-[28px] bg-transparent rounded-[6px]">
+          <span class="text-[11px] font-semibold text-[#4A5568]">Disetujui</span>
+        </button>
+        <button class="flex-1 flex justify-center items-center h-[28px] bg-transparent rounded-[6px]">
+          <span class="text-[11px] font-semibold text-[#4A5568]">Ditolak</span>
+        </button>
+      </div>
+
+      <!-- Action Button -->
+      <a href="#" class="flex justify-between items-center bg-[#1B2A4A] hover:bg-slate-800 rounded-[8px] px-[12px] py-[8px] transition-colors">
+        <span class="text-[11px] font-bold text-white">Ajukan Dispensasi</span>
+        <svg class="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+          <line x1="12" y1="14" x2="12" y2="18"></line>
+          <line x1="10" y1="16" x2="14" y2="16"></line>
+        </svg>
+      </a>
+
+      <!-- Card List Container -->
+      <div class="flex flex-col gap-[16px] pb-4">
+        
+        <!-- Card 1 (Menunggu) -->
+        <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-[12px] p-[14px]">
+          <div class="flex flex-col gap-[2px]">
+            <div class="flex items-center bg-[#FEF3C7] shadow-[0_4px_12px_rgba(0,0,0,0.06)] rounded-[4px] px-[8px] py-[2px] w-fit mb-1">
+              <span class="text-[11px] font-semibold text-[#F59E0B]">Menunggu</span>
+            </div>
+            <h3 class="text-[14px] font-bold text-[#1B2A4A] leading-[17px]">Dude Fahrezi</h3>
+            <p class="text-[11px] text-[#4A5568] leading-[13px]">XI RPL 2</p>
+            <p class="text-[11px] font-semibold text-[#1B2A4A] leading-[13px] mt-1">Tanggal: 06-09-2026</p>
+          </div>
+          <a href="#" class="flex items-center gap-[4px] h-[30px] bg-[#E2E8F0] hover:bg-slate-300 rounded-[4px] pl-[6px] pr-[8px] transition-colors">
+            <span class="text-[12px] font-semibold text-[#1B2A4A]">Detail</span>
+            <svg class="w-[16px] h-[16px] text-[#1B2A4A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Card 2 (Disetujui) -->
+        <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-[12px] p-[14px]">
+          <div class="flex flex-col gap-[2px]">
+            <div class="flex items-center bg-[#D1FFC2] shadow-[0_4px_12px_rgba(0,0,0,0.06)] rounded-[4px] px-[8px] py-[2px] w-fit mb-1">
+              <span class="text-[11px] font-semibold text-[#0A5C36]">Disetujui</span>
+            </div>
+            <h3 class="text-[14px] font-bold text-[#1B2A4A] leading-[17px]">Putri Zahwa</h3>
+            <p class="text-[11px] text-[#4A5568] leading-[13px]">XI RPL 2</p>
+            <p class="text-[11px] font-semibold text-[#1B2A4A] leading-[13px] mt-1">Tanggal: 06-09-2026</p>
+          </div>
+          <a href="#" class="flex items-center gap-[4px] h-[30px] bg-[#E2E8F0] hover:bg-slate-300 rounded-[4px] pl-[6px] pr-[8px] transition-colors">
+            <span class="text-[12px] font-semibold text-[#1B2A4A]">Detail</span>
+            <svg class="w-[16px] h-[16px] text-[#1B2A4A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Card 3 (Ditolak) -->
+        <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-[12px] p-[14px]">
+          <div class="flex flex-col gap-[2px]">
+            <div class="flex items-center bg-[#FFE4E6] shadow-[0_4px_12px_rgba(0,0,0,0.06)] rounded-[4px] px-[8px] py-[2px] w-fit mb-1">
+              <span class="text-[11px] font-semibold text-[#B91C1C]">Ditolak</span>
+            </div>
+            <h3 class="text-[14px] font-bold text-[#1B2A4A] leading-[17px]">Varadita April</h3>
+            <p class="text-[11px] text-[#4A5568] leading-[13px]">XI RPL 2</p>
+            <p class="text-[11px] font-semibold text-[#1B2A4A] leading-[13px] mt-1">Tanggal: 06-09-2026</p>
+          </div>
+          <a href="#" class="flex items-center gap-[4px] h-[30px] bg-[#E2E8F0] hover:bg-slate-300 rounded-[4px] pl-[6px] pr-[8px] transition-colors">
+            <span class="text-[12px] font-semibold text-[#1B2A4A]">Detail</span>
+            <svg class="w-[16px] h-[16px] text-[#1B2A4A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Card 4 (Ditolak) -->
+        <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-[12px] p-[14px]">
+          <div class="flex flex-col gap-[2px]">
+            <div class="flex items-center bg-[#FFE4E6] shadow-[0_4px_12px_rgba(0,0,0,0.06)] rounded-[4px] px-[8px] py-[2px] w-fit mb-1">
+              <span class="text-[11px] font-semibold text-[#B91C1C]">Ditolak</span>
+            </div>
+            <h3 class="text-[14px] font-bold text-[#1B2A4A] leading-[17px]">Fitra Fahrezi</h3>
+            <p class="text-[11px] text-[#4A5568] leading-[13px]">XI RPL 2</p>
+            <p class="text-[11px] font-semibold text-[#1B2A4A] leading-[13px] mt-1">Tanggal: 06-09-2026</p>
+          </div>
+          <a href="{{ route('detail_dispen') }}" class="flex items-center gap-[4px] h-[30px] bg-[#E2E8F0] hover:bg-slate-300 rounded-[4px] pl-[6px] pr-[8px] transition-colors">
+            <span class="text-[12px] font-semibold text-[#1B2A4A]">Detail</span>
+            <svg class="w-[16px] h-[16px] text-[#1B2A4A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </body>
 </html>

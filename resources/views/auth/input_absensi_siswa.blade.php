@@ -4,345 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Presensi Siswa</title>
-    <!-- Google Fonts Inter -->
+    <!-- Google Fonts & Tailwind CDN -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons CDN (Untuk Search & Upload) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <style>
-        /* =======================================
-           BASE STYLES (SAMA DENGAN FORM JURNAL)
-           ======================================= */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#1B2A4A',
+                        },
+                    }
+                }
+            }
         }
-
-        body {
-            background-color: #e5e5e5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Mobile App Container */
-        .app-container {
-            width: 390px;
-            height: 844px;
-            background: #F4F6F9;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            overflow: hidden;
-            border-radius: 12px;
-        }
-
-        /* Header Area */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 60px 24px 16px;
-            flex-shrink: 0;
-        }
-
-        .header-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            flex: 1;
-        }
-
-        .header-title {
-            font-weight: 700;
-            font-size: 20px;
-            color: #1B2A4A;
-            line-height: 24px;
-        }
-
-        .header-subtitle {
-            font-weight: 400;
-            font-size: 13px;
-            color: #5A6E7F;
-            line-height: 16px;
-        }
-
-        .btn-back {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 34px;
-            height: 34px;
-            background: #E2E8F0;
-            border-radius: 100px;
-            border: none;
-            cursor: pointer;
-            flex-shrink: 0;
-            text-decoration: none;
-        }
-
-        /* Main Content */
-        .content {
-            display: flex;
-            flex-direction: column;
-            padding: 0 24px 20px;
-            gap: 16px;
-            flex: 1;
-            overflow-y: auto;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        .content::-webkit-scrollbar {
-            display: none;
-        }
-
-        .form-label {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1B2A4A;
-            line-height: 17px;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        /* Bottom Action Area */
-        .bottom-action {
-            display: flex;
-            flex-direction: column;
-            padding: 16px 24px 8px;
-            background: #F4F6F9;
-            width: 100%;
-        }
-
-        .btn-primary {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 48px;
-            background: #1B2A4A;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            color: #FFFFFF;
-            border: none;
-            cursor: pointer;
-        }
-
-        .home-indicator {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            height: 34px;
-            padding-bottom: 8px;
-        }
-
-        .indicator-bar {
-            width: 139px;
-            height: 5px;
-            background: #1B2A4A;
-            border-radius: 100px;
-        }
-
-        /* =======================================
-           SPECIFIC STYLES (HALAMAN PRESENSI)
-           ======================================= */
-        
-        /* Search Input */
-        .search-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            color: #5A6E7F;
-        }
-
-        .search-input {
-            width: 100%;
-            background: #FFFFFF;
-            border: 1px solid #EBEFF4;
-            border-radius: 10px;
-            padding: 0 16px 0 42px;
-            height: 46px;
-            font-size: 14px;
-            color: #5E6F8D;
-            outline: none;
-        }
-
-        .search-input::placeholder {
-            color: #5A6E7F;
-        }
-
-        .search-input:focus {
-            border-color: #1B2A4A;
-        }
-
-        /* Student Card List */
-        .student-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .student-card {
-            background: #FFFFFF;
-            border: 1px solid #EBEFF4;
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-        }
-
-        .student-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .avatar-male { background-color: #E0F2FE; color: #0369A1; }
-        .avatar-female { background-color: #FCE7F3; color: #BE185D; }
-
-        .student-info { display: flex; flex-direction: column; gap: 2px; }
-        .student-name { font-size: 14px; font-weight: 600; color: #1B2A4A; }
-        .student-nis { font-size: 11px; font-weight: 600; color: #5A6E7F; }
-
-        /* Status Buttons Bar */
-        .status-bar-container {
-            width: 100%;
-            height: 32px;
-            background: #F4F6F9;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px;
-        }
-
-        .status-btn {
-            flex: 1;
-            height: 100%;
-            border-radius: 6px;
-            border: none;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            background: transparent;
-            color: #5E6F8D;
-            transition: all 0.2s;
-        }
-
-        .status-btn.active {
-            background: #1B2A4A;
-            color: #FFFFFF;
-            box-shadow: 0 2px 4px rgba(27, 42, 74, 0.15);
-        }
-
-        /* Attendance Summary Section */
-        .summary-card {
-            width: 100%;
-            background: #FFFFFF;
-            border: 1px solid #EBEFF4;
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .summary-item {
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 6px;
-            flex: 1;
-            margin: 0 2px;
-        }
-
-        .bg-hadir { background: #D1FFC2; }
-        .bg-sakit { background: #FFF4B8; }
-        .bg-izin { background: #E0F2FE; }
-        .bg-alpha { background: #FFE4E6; }
-        .bg-dispen { background: #F3E8FF; }
-
-        .summary-label {
-            font-size: 9px;
-            font-weight: 600;
-            color: #4A5568;
-            margin-bottom: 2px;
-        }
-
-        .summary-value {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .txt-hadir { color: #0A5C36; }
-        .txt-sakit { color: #C67A00; }
-        .txt-izin { color: #0369A1; }
-        .txt-alpha { color: #B91C1C; }
-        .txt-dispen { color: #6D28D9; }
-
-        /* Photo Upload Container */
-        .upload-box {
-            width: 100%;
-            background: #FFFFFF;
-            border: 1px dashed #B8C4D9;
-            border-radius: 12px;
-            padding: 24px 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-
-        .upload-box:hover { border-color: #1B2A4A; }
-        .upload-title { font-size: 13px; font-weight: 600; color: #1B2A4A; }
-        .upload-desc { font-size: 11px; font-weight: 400; color: #5A6E7F; }
-    </style>
+    </script>
 </head>
-<body>
+<body class="bg-[#e5e5e5] flex justify-center items-center min-h-screen font-sans">
 
-    <div class="app-container">
+    <!-- Mobile App Container -->
+    <div class="w-[390px] h-[844px] bg-[#F4F6F9] relative flex flex-col shadow-2xl overflow-hidden rounded-xl">
 
         <!-- Header -->
-        <header class="header">
-            <div class="header-text">
-                <h1 class="header-title">Form Jurnal Mengajar</h1>
-                <p class="header-subtitle">Isi jurnal mengajar dan kehadiran siswa</p>
+        <header class="flex justify-between items-center pt-[60px] px-6 pb-4 shrink-0">
+            <div class="flex flex-col gap-0.5 flex-1">
+                <h1 class="font-bold text-xl text-navy-800 leading-6">Form Jurnal Mengajar</h1>
+                <p class="font-normal text-xs text-[#5A6E7F] leading-4">Isi jurnal mengajar dan kehadiran siswa</p>
             </div>
-            <!-- Gunakan URL route kamu di atribut href ini -->
-            <a href="{{ route('tambah_isi_jurnal') }}" class="btn-back">
+            <a href="{{ route('tambah_isi_jurnal') }}" class="w-[34px] h-[34px] bg-[#E2E8F0] rounded-full flex justify-center items-center shrink-0 no-underline">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
@@ -351,57 +46,59 @@
         </header>
 
         <!-- Main Content -->
-        <main class="content">
+        <main class="flex flex-col px-6 pb-[20px] gap-4 flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
 
             <!-- Search -->
             <div>
-                <label class="form-label">Input Presensi Siswa</label>
-                <div class="search-wrapper">
-                    <i data-lucide="search" class="search-icon"></i>
+                <label class="block font-semibold text-sm text-navy-800 leading-[17px] mb-1.5">Input Presensi Siswa</label>
+                <div class="relative w-full">
+                    <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#5A6E7F]"></i>
                     <input type="text" id="searchInput" oninput="filterStudents()" 
-                        placeholder="Cari nama atau NIS siswa..." class="search-input">
+                        placeholder="Cari nama atau NIS siswa..." 
+                        class="w-full bg-white border border-[#EBEFF4] focus:border-navy-800 rounded-lg pl-10 pr-4 h-[46px] text-sm text-[#5E6F8D] outline-none">
                 </div>
             </div>
 
             <!-- List Siswa -->
-            <div id="studentList" class="student-list">
+            <div id="studentList" class="flex flex-col gap-3">
                 <!-- Di-render oleh Javascript -->
             </div>
 
             <!-- Ringkasan Presensi -->
-            <div class="summary-card">
-                <div class="summary-item bg-hadir">
-                    <span class="summary-label">Hadir</span>
-                    <span id="countHadir" class="summary-value txt-hadir">0</span>
+            <div class="w-full bg-white border border-[#EBEFF4] rounded-xl p-3 flex justify-between items-center">
+                <div class="flex-1 m-0.5 p-1.5 rounded-md flex flex-col justify-center items-center bg-[#D1FFC2]">
+                    <span class="text-[9px] font-semibold text-[#4A5568] mb-0.5">Hadir</span>
+                    <span id="countHadir" class="text-base font-bold text-[#0A5C36]">0</span>
                 </div>
-                <div class="summary-item bg-sakit">
-                    <span class="summary-label">Sakit</span>
-                    <span id="countSakit" class="summary-value txt-sakit">0</span>
+                <div class="flex-1 m-0.5 p-1.5 rounded-md flex flex-col justify-center items-center bg-[#FFF4B8]">
+                    <span class="text-[9px] font-semibold text-[#4A5568] mb-0.5">Sakit</span>
+                    <span id="countSakit" class="text-base font-bold text-[#C67A00]">0</span>
                 </div>
-                <div class="summary-item bg-izin">
-                    <span class="summary-label">Izin</span>
-                    <span id="countIzin" class="summary-value txt-izin">0</span>
+                <div class="flex-1 m-0.5 p-1.5 rounded-md flex flex-col justify-center items-center bg-[#E0F2FE]">
+                    <span class="text-[9px] font-semibold text-[#4A5568] mb-0.5">Izin</span>
+                    <span id="countIzin" class="text-base font-bold text-[#0369A1]">0</span>
                 </div>
-                <div class="summary-item bg-alpha">
-                    <span class="summary-label">Alpha</span>
-                    <span id="countAlpha" class="summary-value txt-alpha">0</span>
+                <div class="flex-1 m-0.5 p-1.5 rounded-md flex flex-col justify-center items-center bg-[#FFE4E6]">
+                    <span class="text-[9px] font-semibold text-[#4A5568] mb-0.5">Alpha</span>
+                    <span id="countAlpha" class="text-base font-bold text-[#B91C1C]">0</span>
                 </div>
-                <div class="summary-item bg-dispen">
-                    <span class="summary-label">Dispen</span>
-                    <span id="countDispen" class="summary-value txt-dispen">0</span>
+                <div class="flex-1 m-0.5 p-1.5 rounded-md flex flex-col justify-center items-center bg-[#F3E8FF]">
+                    <span class="text-[9px] font-semibold text-[#4A5568] mb-0.5">Dispen</span>
+                    <span id="countDispen" class="text-base font-bold text-[#6D28D9]">0</span>
                 </div>
             </div>
 
             <!-- Upload Foto -->
             <div>
-                <label class="form-label">Lampiran Foto Suasana Kelas</label>
-                <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
+                <label class="block font-semibold text-sm text-navy-800 leading-[17px] mb-1.5">Lampiran Foto Suasana Kelas</label>
+                <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
                 
-                <div onclick="document.getElementById('photoInput').click()" class="upload-box">
-                    <div id="photoPreviewContainer" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                        <i data-lucide="image-plus" style="color: #1B2A4A;"></i>
-                        <span class="upload-title">Lampirkan Foto Suasana Kelas</span>
-                        <span class="upload-desc">Foto bukti pembelajaran sedang berlangsung</span>
+                <div onclick="document.getElementById('photoInput').click()" 
+                    class="w-full bg-white border border-dashed border-[#B8C4D9] hover:border-navy-800 rounded-xl py-6 px-5 flex flex-col justify-center items-center gap-2 cursor-pointer transition-colors">
+                    <div id="photoPreviewContainer" class="flex flex-col items-center gap-2">
+                        <i data-lucide="image-plus" class="text-navy-800"></i>
+                        <span class="text-xs font-semibold text-navy-800">Lampirkan Foto Suasana Kelas</span>
+                        <span class="text-[11px] font-normal text-[#5A6E7F]">Foto bukti pembelajaran sedang berlangsung</span>
                     </div>
                 </div>
             </div>
@@ -409,10 +106,10 @@
         </main>
 
         <!-- Bottom Actions -->
-        <div class="bottom-action">
-            <button onclick="submitForm()" class="btn-primary">Simpan Jurnal & Absensi</button>
-            <div class="home-indicator">
-                <div class="indicator-bar"></div>
+        <div class="flex flex-col pt-4 px-6 pb-2 bg-[#F4F6F9] w-full">
+            <button onclick="submitForm()" class="flex justify-center items-center w-full h-[48px] bg-navy-800 rounded-xl font-semibold text-base text-white border-none cursor-pointer">Simpan Jurnal & Absensi</button>
+            <div class="flex justify-center items-end h-[34px] pb-2">
+                <div class="w-[139px] h-[5px] bg-navy-800 rounded-full"></div>
             </div>
         </div>
 
@@ -444,33 +141,39 @@
             );
 
             if(filtered.length === 0) {
-                listContainer.innerHTML = `<div style="text-align: center; padding: 20px 0; font-size: 13px; color: #94a3b8;">Siswa tidak ditemukan</div>`;
+                listContainer.innerHTML = `<div class="text-center py-5 text-xs text-slate-400">Siswa tidak ditemukan</div>`;
                 return;
             }
 
             filtered.forEach((student) => {
-                const avatarClass = student.gender === "male" ? "avatar-male" : "avatar-female";
+                const avatarClass = student.gender === "male" 
+                    ? "bg-[#E0F2FE] text-[#0369A1]" 
+                    : "bg-[#FCE7F3] text-[#BE185D]";
+
                 const card = document.createElement('div');
-                card.className = "student-card";
+                card.className = "bg-white border border-[#EBEFF4] rounded-xl p-3 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)]";
                 
                 let buttonsHTML = statusOptions.map(opt => {
-                    const activeClass = student.status === opt ? "active" : "";
+                    const activeClass = student.status === opt 
+                        ? "bg-navy-800 text-white shadow-[0_2px_4px_rgba(27,42,74,0.15)]" 
+                        : "bg-transparent text-[#5E6F8D]";
+
                     return `
-                        <button onclick="setStatus('${student.id}', '${opt}')" class="status-btn ${activeClass}">
+                        <button onclick="setStatus('${student.id}', '${opt}')" class="flex-1 h-full rounded-md text-[11px] font-semibold border-none cursor-pointer transition-all ${activeClass}">
                             ${opt}
                         </button>
                     `;
                 }).join('');
 
                 card.innerHTML = `
-                    <div class="student-header">
-                        <div class="avatar ${avatarClass}">${student.id}</div>
-                        <div class="student-info">
-                            <span class="student-name">${student.name}</span>
-                            <span class="student-nis">NIS: ${student.nis}</span>
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0 ${avatarClass}">${student.id}</div>
+                        <div class="flex flex-col gap-0.5">
+                            <span class="text-sm font-semibold text-navy-800">${student.name}</span>
+                            <span class="text-[11px] font-semibold text-[#5A6E7F]">NIS: ${student.nis}</span>
                         </div>
                     </div>
-                    <div class="status-bar-container">
+                    <div class="w-full h-8 bg-[#F4F6F9] rounded-lg flex items-center gap-1 p-0.5">
                         ${buttonsHTML}
                     </div>
                 `;
@@ -512,8 +215,8 @@
                 reader.onload = function(e) {
                     const container = document.getElementById('photoPreviewContainer');
                     container.innerHTML = `
-                        <img src="${e.target.result}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;">
-                        <span class="upload-desc" style="color: #16a34a; font-weight: 600; margin-top: 4px;">✓ Foto berhasil dipilih</span>
+                        <img src="${e.target.result}" class="w-full h-[90px] object-cover rounded-lg">
+                        <span class="text-[11px] font-semibold text-green-600 mt-1">✓ Foto berhasil dipilih</span>
                     `;
                 }
                 reader.readAsDataURL(file);

@@ -5,223 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrasi Guru - Jurnalkita</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #e5e5e5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Container utama menyerupai layar HP */
-        .app-container {
-            width: 390px;
-            height: 844px;
-            border-radius: 12px;
-            background: #F4F6F9;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            overflow-y: auto; /* Mengaktifkan scroll jika konten panjang */
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        
-        .app-container::-webkit-scrollbar {
-            display: none; /* Sembunyikan scrollbar di Chrome/Safari */
-        }
-
-        /* Header (Judul & Tombol Back) */
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 60px 24px 16px; /* Padding atas ekstra untuk area status bar */
-        }
-
-        .header-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .header-title {
-            font-weight: 700;
-            font-size: 20px;
-            color: #1B2A4A;
-        }
-
-        .header-subtitle {
-            font-weight: 400;
-            font-size: 12px;
-            color: #5A6E7F;
-        }
-
-        .btn-back {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 34px;
-            height: 34px;
-            background: #EBEFF4;
-            border-radius: 100px;
-            text-decoration: none;
-            color: #1B2A4A;
-        }
-
-        /* Alert Box */
-        .alert-box {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            gap: 10px;
-            background: #FEF3C7;
-            border-left: 4px solid #F59E0B;
-            margin-bottom: 24px;
-        }
-
-        .alert-text {
-            font-weight: 500;
-            font-size: 12px;
-            line-height: 140%;
-            color: #1B2A4A;
-        }
-
-        /* Bagian Form */
-        .form-section {
-            display: flex;
-            flex-direction: column;
-            padding: 0px 24px 34px;
-            gap: 14px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-group label {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1B2A4A;
-        }
-
-        .input-wrapper {
-            display: flex;
-            align-items: center;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 10px;
-            height: 46px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .input-wrapper input {
-            border: none;
-            outline: none;
-            width: 100%;
-            height: 100%;
-            padding: 0px 16px;
-            font-weight: 400;
-            font-size: 14px;
-            color: #1B2A4A;
-            background: transparent;
-        }
-
-        .input-wrapper input::placeholder, 
-        .input-wrapper select:invalid {
-            color: #94A3B8;
-        }
-
-        /* Custom Select (Dropdown) */
-        .custom-select {
-            appearance: none; /* Menghilangkan panah bawaan browser */
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            border: none;
-            outline: none;
-            width: 100%;
-            height: 100%;
-            padding: 0px 40px 0px 16px;
-            font-weight: 400;
-            font-size: 14px;
-            color: #1B2A4A;
-            background: transparent;
-            cursor: pointer;
-        }
-        
-        .custom-select option {
-            color: #1B2A4A;
-        }
-
-        .select-icon {
-            position: absolute;
-            right: 16px;
-            pointer-events: none; /* Agar klik tembus ke select */
-            display: flex;
-        }
-
-        .eye-icon {
-            cursor: pointer;
-            background: none;
-            border: none;
-            position: absolute;
-            right: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            outline: none;
-        }
-
-        /* Tombol Daftar */
-        .btn-submit {
-            margin-top: 12px;
-            background: #1B2A4A;
-            border-radius: 12px;
-            border: none;
-            width: 100px;
-            height: 48px;
-            color: #FFFFFF;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .home-indicator {
-            width: 139px;
-            height: 5px;
-            background: #1B2A4A;
-            border-radius: 100px;
-            margin: 24px auto 8px;
-        }
+        /* Utility untuk menyembunyikan scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
+<body class="bg-[#e5e5e5] flex justify-center items-center min-h-screen font-['Inter']">
 
-    <div class="app-container">
+    <div class="w-[390px] h-[844px] rounded-xl bg-[#F4F6F9] relative flex flex-col shadow-[0_10px_25px_rgba(0,0,0,0.1)] overflow-y-auto no-scrollbar">
         
         <!-- Header -->
-        <div class="header-section">
-            <div class="header-text">
-                <h1 class="header-title">Registrasi Guru</h1>
-                <p class="header-subtitle">Lengkapi biodata pengajar Anda</p>
+        <div class="flex justify-between items-center pt-[60px] px-6 pb-4">
+            <div class="flex flex-col gap-0.5">
+                <h1 class="font-bold text-[20px] text-[#1B2A4A]">Registrasi Guru</h1>
+                <p class="font-normal text-[12px] text-[#5A6E7F]">Lengkapi biodata pengajar Anda</p>
             </div>
-            <!-- Tombol Back mengarah ke halaman login -->
-            <a href="{{ route('pilih_peran') }}" class="btn-back">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Tombol Back -->
+            <a href="{{ route('pilih_peran') }}" class="flex justify-center items-center w-[34px] h-[34px] bg-[#EBEFF4] rounded-full text-[#1B2A4A]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
@@ -229,58 +33,57 @@
         </div>
 
         <!-- Alert Box -->
-        <div class="alert-box">
+        <div class="flex items-center p-3 mx-6 mb-6 gap-2.5 bg-[#FEF3C7] border-l-4 border-[#F59E0B]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
-            <span class="alert-text">Akun Anda akan diverifikasi oleh Admin sebelum dapat digunakan.</span>
+            <span class="font-medium text-[12px] leading-[1.4] text-[#1B2A4A]">Akun Anda akan diverifikasi oleh Admin sebelum dapat digunakan.</span>
         </div>
 
         <!-- Form Registrasi -->
-        <form class="form-section" action="" method="POST">
+        <form class="flex flex-col px-6 pb-[34px] gap-[14px]" action="" method="POST">
             
-            <div class="input-group">
-                <label for="name">Nama Lengkap</label>
-                <div class="input-wrapper">
-                    <input type="text" id="name" name="name" placeholder="Ahmad Suryadi, S.Pd">
+            <div class="flex flex-col gap-1.5">
+                <label for="name" class="font-semibold text-[14px] text-[#1B2A4A]">Nama Lengkap</label>
+                <div class="flex items-center bg-white border border-[#E2E8F0] rounded-[10px] h-[46px] relative overflow-hidden">
+                    <input type="text" id="name" name="name" placeholder="Ahmad Suryadi, S.Pd" class="w-full h-full px-4 font-normal text-[14px] text-[#1B2A4A] bg-transparent outline-none placeholder:text-[#94A3B8]">
                 </div>
             </div>
 
-            <div class="input-group">
-                <label for="nik">NIK</label>
-                <div class="input-wrapper">
-                    <input type="number" id="nik" name="nik" placeholder="12345678901">
+            <div class="flex flex-col gap-1.5">
+                <label for="nik" class="font-semibold text-[14px] text-[#1B2A4A]">NIK</label>
+                <div class="flex items-center bg-white border border-[#E2E8F0] rounded-[10px] h-[46px] relative overflow-hidden">
+                    <input type="number" id="nik" name="nik" placeholder="12345678901" class="w-full h-full px-4 font-normal text-[14px] text-[#1B2A4A] bg-transparent outline-none placeholder:text-[#94A3B8]">
                 </div>
             </div>
 
-            <div class="input-group">
-                <label for="email">Email</label>
-                <div class="input-wrapper">
-                    <input type="email" id="email" name="email" placeholder="ahmad@smkn1boyolangu.sch.id">
+            <div class="flex flex-col gap-1.5">
+                <label for="email" class="font-semibold text-[14px] text-[#1B2A4A]">Email</label>
+                <div class="flex items-center bg-white border border-[#E2E8F0] rounded-[10px] h-[46px] relative overflow-hidden">
+                    <input type="email" id="email" name="email" placeholder="ahmad@smkn1boyolangu.sch.id" class="w-full h-full px-4 font-normal text-[14px] text-[#1B2A4A] bg-transparent outline-none placeholder:text-[#94A3B8]">
                 </div>
             </div>
 
-            <div class="input-group">
-                <label for="phone">No. WhatsApp</label>
-                <div class="input-wrapper">
-                    <input type="number" id="phone" name="phone" placeholder="081234567890">
+            <div class="flex flex-col gap-1.5">
+                <label for="phone" class="font-semibold text-[14px] text-[#1B2A4A]">No. WhatsApp</label>
+                <div class="flex items-center bg-white border border-[#E2E8F0] rounded-[10px] h-[46px] relative overflow-hidden">
+                    <input type="number" id="phone" name="phone" placeholder="081234567890" class="w-full h-full px-4 font-normal text-[14px] text-[#1B2A4A] bg-transparent outline-none placeholder:text-[#94A3B8]">
                 </div>
             </div>
 
-            <div class="input-group">
-                <label for="subject">Mata Pelajaran Utama</label>
-                <div class="input-wrapper">
-                    <select id="subject" name="subject" class="custom-select" required>
+            <div class="flex flex-col gap-1.5">
+                <label for="subject" class="font-semibold text-[14px] text-[#1B2A4A]">Mata Pelajaran Utama</label>
+                <div class="flex items-center bg-white border border-[#E2E8F0] rounded-[10px] h-[46px] relative overflow-hidden">
+                    <select id="subject" name="subject" class="appearance-none w-full h-full pl-4 pr-10 font-normal text-[14px] text-[#1B2A4A] bg-transparent outline-none cursor-pointer invalid:text-[#94A3B8]" required>
                         <option value="" disabled selected hidden>Pilih Mata Pelajaran</option>
-                        <option value="matematika">Matematika</option>
-                        <option value="bahasa_indonesia">Bahasa Indonesia</option>
-                        <option value="rpl">Kejuruan RPL</option>
-                        <!-- Tambahkan opsi lain sesuai kebutuhan -->
+                        <option value="matematika" class="text-[#1B2A4A]">Matematika</option>
+                        <option value="bahasa_indonesia" class="text-[#1B2A4A]">Bahasa Indonesia</option>
+                        <option value="rpl" class="text-[#1B2A4A]">Kejuruan RPL</option>
                     </select>
                     <!-- Ikon Chevron Down -->
-                    <div class="select-icon">
+                    <div class="absolute right-4 pointer-events-none flex">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6E7F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
@@ -288,19 +91,19 @@
                 </div>
             </div>
 
-            <div class="input-group">
-                <label for="username">Username</label>
-                <div class="input-wrapper">
-                    <input type="text" id="username" name="username" placeholder="ahmadsuryadi">
+            <div class="flex flex-col gap-1.5">
+                <label for="username" class="font-semibold text-[14px] text-[#1B2A4A]">Username</label>
+                <div class="flex items-center bg-white border border-[#E2E8F0] rounded-[10px] h-[46px] relative overflow-hidden">
+                    <input type="text" id="username" name="username" placeholder="ahmadsuryadi" class="w-full h-full px-4 font-normal text-[14px] text-[#1B2A4A] bg-transparent outline-none placeholder:text-[#94A3B8]">
                 </div>
             </div>
 
             <!-- Password Baru -->
-            <div class="input-group">
-                <label for="password">Password</label>
-                <div class="input-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Buat kata sandi baru">
-                    <button type="button" id="togglePassword" class="eye-icon">
+            <div class="flex flex-col gap-1.5">
+                <label for="password" class="font-semibold text-[14px] text-[#1B2A4A]">Password</label>
+                <div class="flex items-center bg-white border border-[#E2E8F0] rounded-[10px] h-[46px] relative overflow-hidden">
+                    <input type="password" id="password" name="password" placeholder="Buat kata sandi baru" class="w-full h-full pl-4 pr-10 font-normal text-[14px] text-[#1B2A4A] bg-transparent outline-none placeholder:text-[#94A3B8]">
+                    <button type="button" id="togglePassword" class="absolute right-4 flex items-center justify-center p-0 bg-transparent outline-none cursor-pointer">
                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1.54628 8.73976C1.48378 8.90815 1.48378 9.09337 1.54628 9.26176C2.15506 10.7379 3.18842 12 4.51536 12.8881C5.8423 13.7762 7.40307 14.2503 8.99978 14.2503C10.5965 14.2503 12.1573 13.7762 13.4842 12.8881C14.8111 12 15.8445 10.7379 16.4533 9.26176C16.5158 9.09337 16.5158 8.90815 16.4533 8.73976C15.8445 7.26365 14.8111 6.00154 13.4842 5.11343C12.1573 4.22533 10.5965 3.75122 8.99978 3.75122C7.40307 3.75122 5.8423 4.22533 4.51536 5.11343C3.18842 6.00154 2.15506 7.26365 1.54628 8.73976Z" stroke="#5A6E7F" stroke-width="2" stroke-linecap="round"/>
                             <circle cx="9" cy="9" r="2.5" stroke="#5A6E7F" stroke-width="2"/>
@@ -310,11 +113,11 @@
             </div>
 
             <!-- Konfirmasi Password -->
-            <div class="input-group">
-                <label for="password_confirmation">Konfirmasi Password</label>
-                <div class="input-wrapper">
-                    <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Ulangi kata sandi">
-                    <button type="button" id="togglePasswordConfirm" class="eye-icon">
+            <div class="flex flex-col gap-1.5">
+                <label for="password_confirmation" class="font-semibold text-[14px] text-[#1B2A4A]">Konfirmasi Password</label>
+                <div class="flex items-center bg-white border border-[#E2E8F0] rounded-[10px] h-[46px] relative overflow-hidden">
+                    <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Ulangi kata sandi" class="w-full h-full pl-4 pr-10 font-normal text-[14px] text-[#1B2A4A] bg-transparent outline-none placeholder:text-[#94A3B8]">
+                    <button type="button" id="togglePasswordConfirm" class="absolute right-4 flex items-center justify-center p-0 bg-transparent outline-none cursor-pointer">
                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1.54628 8.73976C1.48378 8.90815 1.48378 9.09337 1.54628 9.26176C2.15506 10.7379 3.18842 12 4.51536 12.8881C5.8423 13.7762 7.40307 14.2503 8.99978 14.2503C10.5965 14.2503 12.1573 13.7762 13.4842 12.8881C14.8111 12 15.8445 10.7379 16.4533 9.26176C16.5158 9.09337 16.5158 8.90815 16.4533 8.73976C15.8445 7.26365 14.8111 6.00154 13.4842 5.11343C12.1573 4.22533 10.5965 3.75122 8.99978 3.75122C7.40307 3.75122 5.8423 4.22533 4.51536 5.11343C3.18842 6.00154 2.15506 7.26365 1.54628 8.73976Z" stroke="#5A6E7F" stroke-width="2" stroke-linecap="round"/>
                             <circle cx="9" cy="9" r="2.5" stroke="#5A6E7F" stroke-width="2"/>
@@ -323,30 +126,25 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-start;">
-                <button type="submit" class="btn-submit">Daftar</button>
+            <div class="flex justify-start">
+                <button type="submit" class="mt-3 bg-[#1B2A4A] rounded-xl w-[100px] h-[48px] text-white font-semibold text-[16px] cursor-pointer">Daftar</button>
             </div>
             
-            <div class="home-indicator"></div>
+            <div class="w-[139px] h-[5px] bg-[#1B2A4A] rounded-full mx-auto mt-6 mb-2"></div>
         </form>
-
     </div>
 
     <!-- Script JavaScript untuk 2 tombol mata -->
     <script>
-        // Fungsi Toggle untuk Password Baru
         const togglePassword = document.querySelector('#togglePassword');
         const passwordInput = document.querySelector('#password');
-
         togglePassword.addEventListener('click', function () {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
         });
 
-        // Fungsi Toggle untuk Konfirmasi Password
         const togglePasswordConfirm = document.querySelector('#togglePasswordConfirm');
         const passwordConfirmInput = document.querySelector('#password_confirmation');
-
         togglePasswordConfirm.addEventListener('click', function () {
             const type = passwordConfirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordConfirmInput.setAttribute('type', type);

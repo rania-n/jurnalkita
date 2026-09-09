@@ -3,311 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Jadwal Pelajaran</title>
+    <title>Daftar Jadwal Pelajaran</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #e5e5e5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Mobile App Container */
-        .app-container {
-            width: 390px;
-            height: 844px;
-            border-radius: 12px;
-            background: #F4F6F9;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        /* Status Bar Mockup */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 24px;
-            height: 44px;
-            flex-shrink: 0;
-        }
-
-        .time {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1B2A4A;
-        }
-
-        .status-icons {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .status-icons svg {
-            fill: #1B2A4A;
-        }
-
-        /* Header Area */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 60px 24px 16px;
-            flex-shrink: 0;
-        }
-
-        .header-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            width: 308px;
-        }
-
-        .header-title {
-            font-weight: 700;
-            font-size: 20px;
-            color: #1B2A4A;
-            line-height: 24px;
-        }
-
-        .header-subtitle {
-            font-weight: 400;
-            font-size: 13px;
-            color: #5A6E7F;
-            line-height: 16px;
-        }
-
-        .btn-back {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 34px;
-            height: 34px;
-            background: #E2E8F0;
-            border-radius: 100px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            flex-shrink: 0;
-        }
-
-        /* Content Area / Form */
-        .content {
-            flex: 1;
-            padding: 0 24px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        .content::-webkit-scrollbar {
-            display: none;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 100%;
-        }
-
-        .form-row {
-            display: flex;
-            flex-direction: row;
-            gap: 12px;
-            width: 100%;
-        }
-
-        .form-label {
-            font-weight: 600;
-            font-size: 14px;
-            line-height: 17px;
-            color: #1B2A4A;
-        }
-
-        .form-select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            width: 100%;
-            height: 46px;
-            background: #FFFFFF;
-            border: 1px solid #EBEFF4;
-            border-radius: 10px;
-            padding: 0 40px 0 16px;
-            font-weight: 400;
-            font-size: 14px;
-            color: #5E6F8D;
-            outline: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%234A5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-        }
-
-        .form-select:invalid {
-            color: #5E6F8D;
-        }
-        
-        .form-select option {
-            color: #1B2A4A;
-        }
-
-        /* Footer / Button Area */
-        .footer {
-            padding: 0 24px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 21px;
-            flex-shrink: 0;
-            background: #F4F6F9;
-        }
-
-        .btn-submit {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 48px;
-            background: #1B2A4A;
-            border-radius: 12px;
-            border: none;
-            color: #FFFFFF;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .home-indicator-wrapper {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            padding-bottom: 8px;
-        }
-
-        .home-indicator {
-            width: 139px;
-            height: 5px;
-            background: #1B2A4A;
-            border-radius: 100px;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
+<body class="bg-[#e5e5e5] flex justify-center items-center min-h-screen font-['Inter']">
 
-    <div class="app-container">
-
+    <div class="w-[390px] h-[844px] bg-[#F4F6F9] rounded-xl relative flex flex-col shadow-[0_10px_25px_rgba(0,0,0,0.1)] overflow-hidden">
+        
         <!-- Header -->
-        <header class="header">
-            <div class="header-text">
-                <h1 class="header-title">Tambah Jadwal Pelajaran</h1>
-                <p class="header-subtitle">Kelola jadwal kelas per hari & jam pelajaran</p>
+        <header class="flex justify-between items-center pt-[60px] px-6 pb-4 shrink-0">
+            <div class="flex flex-col gap-0.5">
+                <h1 class="font-bold text-[20px] text-[#1B2A4A] leading-6">Daftar Jadwal Pelajaran</h1>
+                <p class="font-normal text-[13px] text-[#4A5568] leading-4">Kelola jadwal pelajaran yang tersedia</p>
             </div>
-            <a href="{{ route('data_jadwal_pelajaran') }}" class="btn-back">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <a href="#" class="flex justify-center items-center w-[34px] h-[34px] bg-[#E2E8F0] rounded-full border-none cursor-pointer shrink-0">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
             </a>
         </header>
 
-        <!-- Main Content (Forms) -->
-        <main class="content">
+        <!-- Main Content -->
+        <main class="flex-1 px-6 flex flex-col gap-4 overflow-y-auto no-scrollbar">
             
-            <div class="form-group">
-                <label class="form-label">Hari</label>
-                <select class="form-select" required>
-                    <option value="" disabled selected hidden>Pilih Hari (e.g. Senin)</option>
-                    <option value="senin">Senin</option>
-                    <option value="selasa">Selasa</option>
-                    <option value="rabu">Rabu</option>
-                    <option value="kamis">Kamis</option>
-                    <option value="jumat">Jumat</option>
+            <!-- Search -->
+            <div class="flex items-center bg-[#E2E8F0] rounded-[10px] p-[10px_14px] gap-2 h-[36px]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" placeholder="Cari mata pelajaran..." class="flex-1 bg-transparent border-none outline-none font-normal text-[13px] text-[#1B2A4A] placeholder:text-[#4A5568]">
+            </div>
+
+            <!-- Filters -->
+            <div class="flex gap-2 w-full">
+                <select class="flex-1 flex items-center justify-between bg-white border border-[#E2E8F0] rounded-lg p-[8px_12px] pr-6 h-[32px] font-bold text-[11px] text-[#4A5568] cursor-pointer appearance-none outline-none bg-[url('data:image/svg+xml,%3Csvg%20width=%2212%22%20height=%2212%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath%20d=%22M6%209L12%2015L18%209%22%20stroke=%22%234A5568%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E')] bg-no-repeat bg-[right_8px_center]">
+                    <option>Semua Kelas</option>
+                </select>
+                <select class="flex-[0.7] flex items-center justify-between bg-white border border-[#E2E8F0] rounded-lg p-[8px_12px] pr-6 h-[32px] font-bold text-[11px] text-[#4A5568] cursor-pointer appearance-none outline-none bg-[url('data:image/svg+xml,%3Csvg%20width=%2212%22%20height=%2212%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath%20d=%22M6%209L12%2015L18%209%22%20stroke=%22%234A5568%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E')] bg-no-repeat bg-[right_8px_center]">
+                    <option>Hari</option>
+                </select>
+                <select class="flex-1 flex items-center justify-between bg-white border border-[#E2E8F0] rounded-lg p-[8px_12px] pr-6 h-[32px] font-bold text-[11px] text-[#4A5568] cursor-pointer appearance-none outline-none bg-[url('data:image/svg+xml,%3Csvg%20width=%2212%22%20height=%2212%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath%20d=%22M6%209L12%2015L18%209%22%20stroke=%22%234A5568%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E')] bg-no-repeat bg-[right_8px_center]">
+                    <option>Nama Guru</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Kelas</label>
-                <select class="form-select" required>
-                    <option value="" disabled selected hidden>Pilih Kelas (e.g. X RPL 1)</option>
-                    <option value="xrpl1">X RPL 1</option>
-                    <option value="xrpl2">X RPL 2</option>
-                </select>
-            </div>
+            <!-- Add Button -->
+            <a href="{{ route('tambah_data_jadwal_pelajaran') }}" class="flex items-center justify-between bg-[#1B2A4A] rounded-lg p-[10px_12px] h-[36px] border-none text-white font-bold text-[11px] cursor-pointer w-full">
+                Tambah Jadwal Pelajaran
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                    <line x1="12" y1="12" x2="12" y2="18"></line>
+                </svg>
+            </a>
 
-            <div class="form-row">
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Jam Mulai</label>
-                    <select class="form-select" required>
-                        <option value="" disabled selected hidden>JP-1</option>
-                        <option value="1">JP-1</option>
-                        <option value="2">JP-2</option>
-                    </select>
+            <!-- Schedule List -->
+            <div class="flex flex-col gap-3 pb-6">
+                
+                <!-- Card 1 -->
+                <div class="flex justify-between items-start bg-white rounded-xl p-[14px] shadow-[0_2px_8px_rgba(27,42,74,0.04)] min-h-[88px]">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="font-bold text-[14px] leading-[17px] text-[#1B2A4A] mb-0.5">Matematika</h3>
+                        <p class="font-normal text-[11px] leading-[14px] text-[#4A5568] whitespace-pre-line">Senin | JP 1 - JP 2 | R58<br>Winartin, S.pd</p>
+                        <p class="font-semibold text-[11px] leading-[13px] text-[#1B2A4A] mt-1">Kelas: X RPL 1</p>
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Jam Selesai</label>
-                    <select class="form-select" required>
-                        <option value="" disabled selected hidden>JP-3</option>
-                        <option value="2">JP-2</option>
-                        <option value="3">JP-3</option>
-                        <option value="4">JP-4</option>
-                    </select>
+
+                <!-- Card 2 -->
+                <div class="flex justify-between items-start bg-white rounded-xl p-[14px] shadow-[0_2px_8px_rgba(27,42,74,0.04)] min-h-[88px]">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="font-bold text-[14px] leading-[17px] text-[#1B2A4A] mb-0.5">Matematika</h3>
+                        <p class="font-normal text-[11px] leading-[14px] text-[#4A5568] whitespace-pre-line">Selasa | JP 1 - JP 2 | R58<br>Winartin, S.pd</p>
+                        <p class="font-semibold text-[11px] leading-[13px] text-[#1B2A4A] mt-1">Kelas: X RPL 1</p>
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label class="form-label">Mata Pelajaran</label>
-                <select class="form-select" required>
-                    <option value="" disabled selected hidden>Pilih Mata Pelajaran</option>
-                    <option value="mtk">Matematika</option>
-                    <option value="pbo">PBO</option>
-                </select>
-            </div>
+                <!-- Card 3 -->
+                <div class="flex justify-between items-start bg-white rounded-xl p-[14px] shadow-[0_2px_8px_rgba(27,42,74,0.04)] min-h-[88px]">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="font-bold text-[14px] leading-[17px] text-[#1B2A4A] mb-0.5">Matematika</h3>
+                        <p class="font-normal text-[11px] leading-[14px] text-[#4A5568] whitespace-pre-line">Rabu | JP 1 - JP 2 | R58<br>Winartin, S.pd</p>
+                        <p class="font-semibold text-[11px] leading-[13px] text-[#1B2A4A] mt-1">Kelas: X RPL 1</p>
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Guru Pengajar</label>
-                <select class="form-select" required>
-                    <option value="" disabled selected hidden>Pilih Guru Pengajar</option>
-                    <option value="guru1">Guru A</option>
-                    <option value="guru2">Guru B</option>
-                </select>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">Ruangan</label>
-                <select class="form-select" required>
-                    <option value="" disabled selected hidden>Pilih Ruangan (e.g. Lab 1)</option>
-                    <option value="lab1">Lab 1</option>
-                    <option value="lab2">Lab 2</option>
-                </select>
-            </div>
-
         </main>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <button class="btn-submit">Tambah Jadwal</button>
-            <div class="home-indicator-wrapper">
-                <div class="home-indicator"></div>
-            </div>
-        </footer>
+        <!-- Home Indicator -->
+        <div class="flex justify-center w-full py-2 bg-[#F4F6F9]">
+            <div class="w-[139px] h-[5px] bg-[#1B2A4A] rounded-full"></div>
+        </div>
 
     </div>
 

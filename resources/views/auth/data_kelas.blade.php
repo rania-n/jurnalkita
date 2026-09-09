@@ -5,228 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Kelas - Jurnalkita</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #e5e5e5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .app-container {
-            width: 390px;
-            height: 844px;
-            border-radius: 12px;
-            background: #F4F6F9;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            overflow: hidden; /* Prevent body scroll, handle inside */
-        }
-
-        /* Top Header Area (Fixed) */
-        .header-area {
-            background: #F4F6F9;
-            padding: 60px 24px 16px; /* 60px atas untuk simulasi status bar */
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            z-index: 10;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .header-title {
-            font-weight: 700;
-            font-size: 20px;
-            color: #1B2A4A;
-        }
-
-        .header-subtitle {
-            font-weight: 400;
-            font-size: 13px;
-            color: #4A5568;
-        }
-
-        .btn-back {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 34px;
-            height: 34px;
-            background: #E2E8F0;
-            border-radius: 100px;
-            text-decoration: none;
-            color: #1B2A4A;
-        }
-
-        /* Search Bar */
-        .search-wrapper {
-            display: flex;
-            align-items: center;
-            background: #E2E8F0;
-            border-radius: 10px;
-            height: 36px;
-            padding: 0 14px;
-            gap: 8px;
-        }
-
-        .search-wrapper input {
-            border: none;
-            background: transparent;
-            outline: none;
-            width: 100%;
-            font-weight: 400;
-            font-size: 13px;
-            color: #1B2A4A;
-        }
-
-        .search-wrapper input::placeholder {
-            color: #4A5568;
-        }
-
-        /* Scrollable Content Area */
-        .content-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 24px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        .content-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Add Button */
-        .btn-add {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1B2A4A;
-            border-radius: 8px;
-            padding: 8px 12px;
-            height: 36px;
-            text-decoration: none;
-        }
-
-        .btn-add span {
-            font-weight: 700;
-            font-size: 11px;
-            color: #FFFFFF;
-        }
-
-        /* Class Card */
-        .class-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #FFFFFF;
-            box-shadow: 0px 2px 8px rgba(27, 42, 74, 0.04);
-            border-radius: 12px;
-            padding: 14px;
-            gap: 12px;
-        }
-
-        .card-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            flex-grow: 1;
-        }
-
-        .card-title {
-            font-weight: 700;
-            font-size: 14px;
-            color: #1B2A4A;
-        }
-
-        .card-student-count {
-            font-weight: 400;
-            font-size: 11px;
-            color: #4A5568;
-        }
-
-        .card-teacher {
-            font-weight: 600;
-            font-size: 11px;
-            color: #1B2A4A;
-        }
-
-        /* Action Buttons Wrapper */
-        .card-actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        .action-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-view { background: #E2E8F0; }
-        .btn-edit { background: #E0F2FE; }
-        .btn-delete { background: #FFE4E6; }
-
-        /* Home Indicator */
-        .home-indicator-wrapper {
-            display: flex;
-            justify-content: center;
-            padding: 12px 0 8px;
-            background: #F4F6F9;
-        }
-
-        .home-indicator {
-            width: 139px;
-            height: 5px;
-            background: #1B2A4A;
-            border-radius: 100px;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-[#e5e5e5] flex justify-center items-center min-h-screen font-['Inter']">
 
-    <div class="app-container">
+    <!-- Mobile Container -->
+    <div class="w-[390px] h-[844px] rounded-xl bg-[#F4F6F9] relative flex flex-col shadow-2xl overflow-hidden">
         
         <!-- Header & Search (Fixed at top) -->
-        <div class="header-area">
-            <div class="header-top">
-                <div class="header-text">
-                    <h1 class="header-title">Data Kelas</h1>
-                    <p class="header-subtitle">Kelola Data Kelas</p>
+        <div class="bg-[#F4F6F9] pt-[60px] px-6 pb-4 flex flex-col gap-4 z-10">
+            <div class="flex justify-between items-center">
+                <div class="flex flex-col gap-[2px]">
+                    <h1 class="font-bold text-[20px] text-[#1B2A4A]">Data Kelas</h1>
+                    <p class="font-normal text-[13px] text-[#4A5568]">Kelola Data Kelas</p>
                 </div>
                 <!-- Tombol Back -->
-                <a href="#" class="btn-back">
+                <a href="#" class="flex justify-center items-center w-[34px] h-[34px] bg-[#E2E8F0] rounded-full text-[#1B2A4A] hover:bg-slate-300 transition-colors">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
@@ -235,21 +29,21 @@
             </div>
 
             <!-- Search Bar -->
-            <div class="search-wrapper">
+            <div class="flex items-center bg-[#E2E8F0] rounded-[10px] h-[36px] px-[14px] gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" placeholder="Cari kelas...">
+                <input type="text" placeholder="Cari kelas..." class="border-none bg-transparent outline-none w-full font-normal text-[13px] text-[#1B2A4A] placeholder-[#4A5568]">
             </div>
         </div>
 
         <!-- Scrollable List Area -->
-        <div class="content-scroll">
+        <div class="flex-1 overflow-y-auto px-6 pb-6 flex flex-col gap-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             
             <!-- Tombol Tambah Data -->
-            <a href="{{ route('tambah_data_kelas') }}" class="btn-add">
-                <span>Tambah Data Kelas</span>
+            <a href="{{ route('tambah_data_kelas') }}" class="flex justify-between items-center bg-[#1B2A4A] rounded-lg px-3 h-[36px] text-white no-underline">
+                <span class="font-bold text-[11px] text-white">Tambah Data Kelas</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="8.5" cy="7" r="4"></circle>
@@ -261,14 +55,14 @@
             <!-- LIST KELAS DIMULAI DARI SINI -->
             
             <!-- Card 1 -->
-            <div class="class-card">
-                <div class="card-info">
-                    <h3 class="card-title">X RPL 1</h3>
-                    <p class="card-student-count">36 Siswa</p>
-                    <p class="card-teacher">Wali Kelas: Winartin, S.pd</p>
+            <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-xl p-[14px] gap-3">
+                <div class="flex flex-col gap-[2px] grow">
+                    <h3 class="font-bold text-[14px] text-[#1B2A4A]">X RPL 1</h3>
+                    <p class="font-normal text-[11px] text-[#4A5568]">36 Siswa</p>
+                    <p class="font-semibold text-[11px] text-[#1B2A4A]">Wali Kelas: Winartin, S.pd</p>
                 </div>
-                <div class="card-actions">
-                    <button class="action-btn btn-view" title="Lihat">
+                <div class="flex gap-1">
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E2E8F0]" title="Lihat">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                             <circle cx="9" cy="7" r="4"></circle>
@@ -276,13 +70,13 @@
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
                     </button>
-                    <button class="action-btn btn-edit" title="Edit">
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]" title="Edit">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
-                    <button class="action-btn btn-delete" title="Hapus">
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]" title="Hapus">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -292,80 +86,80 @@
             </div>
 
             <!-- Card 2 -->
-            <div class="class-card">
-                <div class="card-info">
-                    <h3 class="card-title">X RPL 2</h3>
-                    <p class="card-student-count">36 Siswa</p>
-                    <p class="card-teacher">Wali Kelas: Winartin, S.pd</p>
+            <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-xl p-[14px] gap-3">
+                <div class="flex flex-col gap-[2px] grow">
+                    <h3 class="font-bold text-[14px] text-[#1B2A4A]">X RPL 2</h3>
+                    <p class="font-normal text-[11px] text-[#4A5568]">36 Siswa</p>
+                    <p class="font-semibold text-[11px] text-[#1B2A4A]">Wali Kelas: Winartin, S.pd</p>
                 </div>
-                <div class="card-actions">
-                    <button class="action-btn btn-view"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
-                    <button class="action-btn btn-edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                    <button class="action-btn btn-delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                <div class="flex gap-1">
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E2E8F0]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                 </div>
             </div>
 
             <!-- Card 3 -->
-            <div class="class-card">
-                <div class="card-info">
-                    <h3 class="card-title">XI TKJ 1</h3>
-                    <p class="card-student-count">36 Siswa</p>
-                    <p class="card-teacher">Wali Kelas: Winartin, S.pd</p>
+            <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-xl p-[14px] gap-3">
+                <div class="flex flex-col gap-[2px] grow">
+                    <h3 class="font-bold text-[14px] text-[#1B2A4A]">XI TKJ 1</h3>
+                    <p class="font-normal text-[11px] text-[#4A5568]">36 Siswa</p>
+                    <p class="font-semibold text-[11px] text-[#1B2A4A]">Wali Kelas: Winartin, S.pd</p>
                 </div>
-                <div class="card-actions">
-                    <button class="action-btn btn-view"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
-                    <button class="action-btn btn-edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                    <button class="action-btn btn-delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                <div class="flex gap-1">
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E2E8F0]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                 </div>
             </div>
 
             <!-- Card 4 -->
-            <div class="class-card">
-                <div class="card-info">
-                    <h3 class="card-title">XI TKJ 2</h3>
-                    <p class="card-student-count">36 Siswa</p>
-                    <p class="card-teacher">Wali Kelas: Winartin, S.pd</p>
+            <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-xl p-[14px] gap-3">
+                <div class="flex flex-col gap-[2px] grow">
+                    <h3 class="font-bold text-[14px] text-[#1B2A4A]">XI TKJ 2</h3>
+                    <p class="font-normal text-[11px] text-[#4A5568]">36 Siswa</p>
+                    <p class="font-semibold text-[11px] text-[#1B2A4A]">Wali Kelas: Winartin, S.pd</p>
                 </div>
-                <div class="card-actions">
-                    <button class="action-btn btn-view"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
-                    <button class="action-btn btn-edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                    <button class="action-btn btn-delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                <div class="flex gap-1">
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E2E8F0]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                 </div>
             </div>
 
             <!-- Card 5 -->
-            <div class="class-card">
-                <div class="card-info">
-                    <h3 class="card-title">XII RPL 1</h3>
-                    <p class="card-student-count">36 Siswa</p>
-                    <p class="card-teacher">Wali Kelas: Winartin, S.pd</p>
+            <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-xl p-[14px] gap-3">
+                <div class="flex flex-col gap-[2px] grow">
+                    <h3 class="font-bold text-[14px] text-[#1B2A4A]">XII RPL 1</h3>
+                    <p class="font-normal text-[11px] text-[#4A5568]">36 Siswa</p>
+                    <p class="font-semibold text-[11px] text-[#1B2A4A]">Wali Kelas: Winartin, S.pd</p>
                 </div>
-                <div class="card-actions">
-                    <button class="action-btn btn-view"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
-                    <button class="action-btn btn-edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                    <button class="action-btn btn-delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                <div class="flex gap-1">
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E2E8F0]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                 </div>
             </div>
 
             <!-- Card 6 -->
-            <div class="class-card">
-                <div class="card-info">
-                    <h3 class="card-title">XI RPL 2</h3>
-                    <p class="card-student-count">36 Siswa</p>
-                    <p class="card-teacher">Wali Kelas: Winartin, S.pd</p>
+            <div class="flex justify-between items-center bg-white shadow-[0_2px_8px_rgba(27,42,74,0.04)] rounded-xl p-[14px] gap-3">
+                <div class="flex flex-col gap-[2px] grow">
+                    <h3 class="font-bold text-[14px] text-[#1B2A4A]">XI RPL 2</h3>
+                    <p class="font-normal text-[11px] text-[#4A5568]">36 Siswa</p>
+                    <p class="font-semibold text-[11px] text-[#1B2A4A]">Wali Kelas: Winartin, S.pd</p>
                 </div>
-                <div class="card-actions">
-                    <button class="action-btn btn-view"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
-                    <button class="action-btn btn-edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                    <button class="action-btn btn-delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                <div class="flex gap-1">
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E2E8F0]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#E0F2FE]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    <button class="flex justify-center items-center w-[28px] h-[28px] rounded-lg border-none cursor-pointer bg-[#FFE4E6]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                 </div>
             </div>
             
         </div>
 
         <!-- Bottom Home Indicator -->
-        <div class="home-indicator-wrapper">
-            <div class="home-indicator"></div>
+        <div class="flex justify-center pt-3 pb-2 bg-[#F4F6F9]">
+            <div class="w-[139px] h-[5px] bg-[#1B2A4A] rounded-full"></div>
         </div>
 
     </div>
