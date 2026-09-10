@@ -13,93 +13,92 @@
     />
 
     {{-- Status verifikasi --}}
-    <div class="mb-4">
-        @php $vs = $jurnal->status_verifikasi; @endphp
-        <x-alert :type="$vs === 'terverifikasi' ? 'success' : ($vs === 'revisi' ? 'error' : 'info')">
-            @if ($vs === 'terverifikasi')
-                Jurnal sudah <strong>diverifikasi</strong> oleh pengurus kelas
-                @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.
-            @elseif ($vs === 'revisi')
-                Pengurus kelas meminta <strong>perbaikan</strong>: {{ $jurnal->catatan_verifikasi ?: 'tidak ada catatan.' }}
-                Perbaiki materi/presensi di bawah lalu simpan — jurnal akan diperiksa ulang.
-            @else
-                Menunggu verifikasi pengurus kelas. Selama menunggu, jurnal masih bisa diubah.
-            @endif
-        </x-alert>
-    </div>
-
-    {{-- Ringkasan / form ubah --}}
-    <form method="POST" action="{{ route('jurnal.update', $jurnal) }}" class="flex flex-col gap-4">
-        @csrf
-
-        <div class="grid grid-cols-2 gap-3">
-            <x-ui.field-static label="Jam ke- (mulai)" icon="lock_clock">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
-            @if ($bisaUbah)
-                <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai">
-                    @for ($i = $jurnal->jam_ke_mulai; $i <= 13; $i++)
-                        <option value="{{ $i }}" @selected($jurnal->jam_ke_selesai == $i)>Jam ke-{{ $i }}</option>
-                    @endfor
-                </x-ui.select>
-            @else
-                <x-ui.field-static label="Jam ke- (selesai)">Jam ke-{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
-            @endif
-        </div>
-
-        @if ($bisaUbah)
-            <x-ui.choice
-                label="Status Kehadiran Anda"
-                name="status_guru"
-                :options="$statusGuru"
-                :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
-                :value="$jurnal->status_guru"
-            />
-            <x-ui.textarea label="Materi" name="materi" :rows="3">{{ $jurnal->materi }}</x-ui.textarea>
-            <x-ui.textarea label="Metode Pembelajaran" name="metode" :rows="2">{{ $jurnal->metode }}</x-ui.textarea>
-            <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2">{{ $jurnal->tugas_tambahan }}</x-ui.textarea>
-            <x-ui.button type="submit" icon="save" class="self-start">Simpan Perubahan</x-ui.button>
+    @php $vs = $jurnal->status_verifikasi; @endphp
+    <x-alert :type="$vs === 'terverifikasi' ? 'success' : ($vs === 'revisi' ? 'error' : 'info')" class="mb-4">
+        @if ($vs === 'terverifikasi')
+            Jurnal sudah <strong>diverifikasi</strong> oleh pengurus kelas
+            @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.
+        @elseif ($vs === 'revisi')
+            Pengurus kelas meminta <strong>perbaikan</strong>: {{ $jurnal->catatan_verifikasi ?: 'tidak ada catatan.' }}
+            Perbaiki lalu simpan — jurnal akan diperiksa ulang.
         @else
-            <x-ui.field-static label="Status Kehadiran Anda">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
-            <x-ui.field-static label="Materi">{{ $jurnal->materi }}</x-ui.field-static>
-            <x-ui.field-static label="Metode">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
-            <x-ui.field-static label="Tugas Tambahan">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
+            Menunggu verifikasi pengurus kelas. Selama menunggu, jurnal masih bisa diubah.
         @endif
-    </form>
+    </x-alert>
 
-    {{-- Foto bukti --}}
-    @if ($jurnal->foto_bukti)
-        <div class="mt-4 flex flex-col gap-1.5">
-            <x-ui.label>Foto Suasana Kelas</x-ui.label>
-            <a href="{{ Storage::url($jurnal->foto_bukti) }}" target="_blank" rel="noopener">
-                <img src="{{ Storage::url($jurnal->foto_bukti) }}" alt="Foto suasana kelas"
-                     class="max-h-72 w-full rounded-xl border border-surface-alt object-cover">
-            </a>
-        </div>
-    @endif
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,28rem)_1fr] xl:gap-10">
+        {{-- Kolom kiri: isi jurnal --}}
+        <form method="POST" action="{{ route('jurnal.update', $jurnal) }}" class="flex flex-col gap-4">
+            @csrf
 
-    {{-- Presensi --}}
-    <div class="mt-6">
-        <div class="mb-2 flex items-center justify-between">
-            <h2 class="text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <x-ui.field-static label="Jam ke- (mulai)" icon="lock_clock">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
+                @if ($bisaUbah)
+                    <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai">
+                        @for ($i = $jurnal->jam_ke_mulai; $i <= 13; $i++)
+                            <option value="{{ $i }}" @selected($jurnal->jam_ke_selesai == $i)>Jam ke-{{ $i }}</option>
+                        @endfor
+                    </x-ui.select>
+                @else
+                    <x-ui.field-static label="Jam ke- (selesai)">Jam ke-{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
+                @endif
+            </div>
+
             @if ($bisaUbah)
-                <x-ui.button :href="route('jurnal.presensi', $jurnal)" variant="secondary" icon="edit" class="!h-9 !px-3 !text-sm">Ubah Presensi</x-ui.button>
+                <x-ui.choice
+                    label="Status Kehadiran Anda"
+                    name="status_guru"
+                    :options="$statusGuru"
+                    :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
+                    :value="$jurnal->status_guru"
+                />
+                <x-ui.textarea label="Materi" name="materi" :rows="3">{{ $jurnal->materi }}</x-ui.textarea>
+                <x-ui.textarea label="Metode Pembelajaran" name="metode" :rows="2">{{ $jurnal->metode }}</x-ui.textarea>
+                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2">{{ $jurnal->tugas_tambahan }}</x-ui.textarea>
+                <x-ui.button type="submit" icon="save" class="self-start">Simpan Perubahan</x-ui.button>
+            @else
+                <x-ui.field-static label="Status Kehadiran Anda">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
+                <x-ui.field-static label="Materi">{{ $jurnal->materi }}</x-ui.field-static>
+                <x-ui.field-static label="Metode">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
+                <x-ui.field-static label="Tugas Tambahan">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
             @endif
-        </div>
 
-        <div class="mb-3 flex gap-1.5 overflow-x-auto rounded-xl border border-surface-alt bg-card p-2">
-            @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
-                <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
-            @endforeach
-        </div>
+            @if ($jurnal->foto_bukti)
+                <div class="flex flex-col gap-1.5">
+                    <x-ui.label>Foto Suasana Kelas</x-ui.label>
+                    <a href="{{ Storage::url($jurnal->foto_bukti) }}" target="_blank" rel="noopener">
+                        <img src="{{ Storage::url($jurnal->foto_bukti) }}" alt="Foto suasana kelas"
+                             class="max-h-72 w-full rounded-xl border border-surface-alt object-cover">
+                    </a>
+                </div>
+            @endif
+        </form>
 
-        <x-admin.table :head="['No', 'Nama', 'Status', 'Catatan']">
-            @foreach ($jurnal->absensis->sortBy('siswa.no_absen') as $a)
-                <tr>
-                    <td class="px-4 py-2.5 text-muted">{{ $a->siswa->no_absen ?? '–' }}</td>
-                    <td class="px-4 py-2.5 font-semibold text-ink">{{ $a->siswa->nama }}</td>
-                    <td class="px-4 py-2.5"><x-ui.status-badge :status="$a->status" /></td>
-                    <td class="px-4 py-2.5 text-muted">{{ $a->catatan ?: '—' }}</td>
-                </tr>
-            @endforeach
-        </x-admin.table>
+        {{-- Kolom kanan: presensi --}}
+        <div>
+            <div class="mb-2 flex items-center justify-between">
+                <h2 class="text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</h2>
+                @if ($bisaUbah)
+                    <x-ui.button :href="route('jurnal.presensi', $jurnal)" variant="secondary" icon="edit" class="!h-9 !px-3 !text-sm">Ubah Presensi</x-ui.button>
+                @endif
+            </div>
+
+            <div class="mb-3 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
+                @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
+                    <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
+                @endforeach
+            </div>
+
+            <x-admin.table :head="['No', 'Nama', 'Status', 'Catatan']">
+                @foreach ($jurnal->absensis->sortBy('siswa.no_absen') as $a)
+                    <tr>
+                        <td class="px-4 py-2.5 text-muted">{{ $a->siswa->no_absen ?? '–' }}</td>
+                        <td class="px-4 py-2.5 font-semibold text-ink">{{ $a->siswa->nama }}</td>
+                        <td class="px-4 py-2.5"><x-ui.status-badge :status="$a->status" /></td>
+                        <td class="px-4 py-2.5 text-muted">{{ $a->catatan ?: '—' }}</td>
+                    </tr>
+                @endforeach
+            </x-admin.table>
+        </div>
     </div>
 </x-layouts.app>

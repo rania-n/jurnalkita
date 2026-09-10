@@ -9,7 +9,7 @@
 
 @php $id = $attributes->get('id', $name); @endphp
 
-<div class="flex flex-col gap-1.5">
+<div {{ $attributes->only('class')->class('flex flex-col gap-1.5') }}>
     @if ($label)
         <x-ui.label :for="$id">{{ $label }}</x-ui.label>
     @endif

@@ -27,12 +27,12 @@
     $pad = $size === 'sm' ? 'px-2.5 py-1.5 text-xs' : 'px-3.5 py-2.5 text-[13px]';
 @endphp
 
-<div class="flex flex-col gap-1.5">
+<div {{ $attributes->only('class')->class('flex flex-col gap-1.5') }}>
     @if ($label)
         <x-ui.label>{{ $label }}</x-ui.label>
     @endif
 
-    <div {{ $attributes->class('flex flex-wrap gap-1.5') }} role="radiogroup" @if ($label) aria-label="{{ $label }}" @endif>
+    <div class="flex flex-wrap gap-1.5" role="radiogroup" @if ($label) aria-label="{{ $label }}" @endif>
         @foreach ($options as $optValue => $optLabel)
             <label class="grow basis-20 cursor-pointer select-none">
                 <input

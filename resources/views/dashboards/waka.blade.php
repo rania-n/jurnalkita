@@ -6,7 +6,7 @@
 <x-layouts.app title="Beranda Waka" width="wide">
     <x-page-header title="Beranda Waka Kesiswaan" subtitle="Persetujuan dispensasi tahap 2" />
 
-    <a href="{{ route('dispensasi.index') }}" class="press flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+    <a href="{{ route('dispensasi.index') }}" class="press flex max-w-md items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
         <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
             <x-icon name="approval" :size="24" />
         </span>

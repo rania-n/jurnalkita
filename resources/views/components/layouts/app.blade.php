@@ -1,7 +1,7 @@
 @props([
     'title' => null,
     'menu' => null,
-    'width' => 'form',   // 'form' (kolom formulir) | 'wide' (daftar / menu)
+    'width' => null,   // dipertahankan utk kompatibilitas; konten kini selalu mengikuti lebar wadah
 ])
 
 @php
@@ -14,14 +14,6 @@
         'waka' => 'waka',
         default => 'default',
     };
-
-    // Konten rata kiri mengikuti sidebar (bukan mengambang di tengah), lebar naik
-    // bertahap: HP penuh → tablet lega → desktop mengisi ruang setelah sidebar.
-    // 'wide' (daftar/dashboard, kartu 2 kolom) boleh selebar mungkin;
-    // 'form' dibatasi ~900px supaya kolom isian tidak melar terlalu panjang.
-    $maxW = $width === 'wide'
-        ? 'sm:max-w-xl md:max-w-3xl lg:max-w-6xl 2xl:max-w-7xl'
-        : 'sm:max-w-lg md:max-w-2xl lg:max-w-4xl';
 @endphp
 
 <!DOCTYPE html>
@@ -35,7 +27,9 @@
         <div class="flex w-full min-w-0 flex-col">
             <x-app-topbar :menu="$menu" />
 
-            <main class="mx-auto w-full flex-1 px-5 pb-24 pt-6 sm:px-6 {{ $maxW }} lg:mx-0 lg:px-10 lg:pb-14 lg:pt-10">
+            {{-- Konten mengalir memenuhi lebar wadah (setelah sidebar di desktop),
+                 dengan gutter yang konsisten. Dibatasi hanya di layar sangat besar. --}}
+            <main class="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-10">
                 @foreach (['success' => 'success', 'error' => 'error', 'info' => 'info'] as $key => $type)
                     @if (session($key))
                         <x-alert :type="$type" class="mb-4">{{ session($key) }}</x-alert>

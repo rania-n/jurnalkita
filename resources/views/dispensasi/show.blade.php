@@ -13,18 +13,18 @@
         :back="route('dispensasi.index')"
     />
 
-    <div class="flex flex-col gap-3">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <x-ui.field-static label="Jam">
             {{ $dispensasi->jam_ke_mulai ? "JP {$dispensasi->jam_ke_mulai}–{$dispensasi->jam_ke_selesai}" : 'Sehari penuh' }}
         </x-ui.field-static>
-        <x-ui.field-static label="Alasan">{{ $dispensasi->alasan }}</x-ui.field-static>
         <x-ui.field-static label="Diajukan oleh (guru piket)">{{ $dispensasi->pengaju->name }}</x-ui.field-static>
+        <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $dispensasi->alasan }}</x-ui.field-static>
         @if ($dispensasi->no_hp)
             <x-ui.field-static label="No. HP" icon="call">{{ $dispensasi->no_hp }}</x-ui.field-static>
         @endif
         @if ($dispensasi->surat_path)
             @php $suratUrl = Storage::url($dispensasi->surat_path); $isPdf = str_ends_with(strtolower($dispensasi->surat_path), '.pdf'); @endphp
-            <div class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
                 <x-ui.label>Surat / Bukti</x-ui.label>
                 @if ($isPdf)
                     <a href="{{ $suratUrl }}" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 py-3 text-sm font-semibold text-navy">
@@ -41,7 +41,7 @@
     </div>
 
     {{-- Keputusan Waka Kesiswaan --}}
-    <div class="mt-5 flex items-start gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+    <div class="mt-5 flex max-w-xl items-start gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
         <x-icon :name="$waIcon" :size="22" class="{{ $waColor }}" />
         <div>
             <p class="text-sm font-bold text-ink">Waka Kesiswaan: {{ $waText }}</p>
@@ -51,7 +51,7 @@
     </div>
 
     @if ($bisaWaka)
-        <form method="POST" action="{{ route('dispensasi.waka', $dispensasi) }}" class="mt-5 flex flex-col gap-3">
+        <form method="POST" action="{{ route('dispensasi.waka', $dispensasi) }}" class="mt-5 flex max-w-xl flex-col gap-3">
             @csrf
             <x-ui.input label="Catatan (opsional)" name="catatan" :value="old('catatan')" />
             <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">

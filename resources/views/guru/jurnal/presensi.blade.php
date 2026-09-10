@@ -22,7 +22,7 @@
         @csrf
 
         {{-- Rekap (dihitung ulang tiap simpan) --}}
-        <div class="flex gap-1.5 overflow-x-auto rounded-xl border border-surface-alt bg-card p-2">
+        <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
             @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
                 <x-ui.stat :label="$statuses[$s]" :tone="$tones[$s]" :value="$rekap[$s] ?? 0" />
             @endforeach
@@ -30,7 +30,7 @@
 
         <p class="text-xs text-muted-2">Semua siswa awalnya <strong>Hadir</strong>. Ketuk status siswa yang berhalangan, lalu simpan.</p>
 
-        <div class="flex flex-col gap-3">
+        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
             @foreach ($jurnal->absensis->sortBy('siswa.no_absen') as $a)
                 @php $terkunciDispen = $a->status === 'dispensasi' && str_starts_with((string) $a->catatan, 'Dispensasi'); @endphp
                 <div class="flex flex-col gap-3 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]">
