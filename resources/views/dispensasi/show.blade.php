@@ -1,59 +1,69 @@
+@php
+    [$waIcon, $waColor, $waText] = match ($dispensasi->status_waka) {
+        'approved' => ['check_circle', 'text-hadir', 'Disetujui'],
+        'rejected' => ['cancel', 'text-alpha', 'Ditolak'],
+        default => ['schedule', 'text-sakit', 'Menunggu keputusan'],
+    };
+@endphp
+
 <x-layouts.app title="Detail Dispensasi">
     <x-page-header
-        title="Detail Dispensasi"
-        subtitle="Detail dispensasi siswa."
+        :title="$dispensasi->siswa->nama"
+        :subtitle="$dispensasi->siswa->kelas?->nama . ' · ' . $dispensasi->tanggal->translatedFormat('d M Y')"
         :back="route('dispensasi.index')"
     />
 
-    <div class="flex flex-col gap-4">
-        <div class="rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
-            <p class="text-lg font-bold text-ink">Dude Fahrezi</p>
-            <p class="text-sm text-muted">XI RPL 2</p>
-            <p class="mt-1 text-sm font-semibold text-ink">Tanggal: 06-09-2026</p>
-        </div>
-
-        <x-ui.field-static label="Alasan Dispensasi">Lomba Futsal Tingkat Nasional</x-ui.field-static>
-        <x-ui.field-static label="No. Telepon">085648830046</x-ui.field-static>
-
-        <div class="flex flex-col gap-1.5">
-            <x-ui.label>Surat Dispensasi / Izin</x-ui.label>
-            <a href="#" class="flex items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 py-3">
-                <x-icon name="description" :size="20" class="shrink-0 text-navy" />
-                <span class="flex-1 truncate text-sm text-ink">Surat_Dispensasi_Lomba_Futsal.pdf</span>
-                <span class="text-xs font-bold text-navy">LIHAT</span>
-            </a>
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-            <x-ui.label>Status Persetujuan</x-ui.label>
-            <div class="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
-                <div class="flex items-start gap-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-hadir-soft text-hadir">
-                        <x-icon name="check" :size="18" />
-                    </span>
-                    <div>
-                        <p class="text-sm font-bold text-ink">Staff Piket: Disetujui</p>
-                        <p class="text-xs text-muted">Oleh: Bpk. Hariyadi · 09:12</p>
-                    </div>
-                </div>
-                <div class="h-px bg-surface-alt"></div>
-                <div class="flex items-start gap-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sakit-soft text-sakit">
-                        <x-icon name="schedule" :size="18" />
-                    </span>
-                    <div>
-                        <p class="text-sm font-bold text-ink">Waka Kesiswaan: Menunggu</p>
-                        <p class="text-xs text-muted">Proses peninjauan dokumen</p>
-                    </div>
-                </div>
+    <div class="flex flex-col gap-3">
+        <x-ui.field-static label="Jam">
+            {{ $dispensasi->jam_ke_mulai ? "JP {$dispensasi->jam_ke_mulai}–{$dispensasi->jam_ke_selesai}" : 'Sehari penuh' }}
+        </x-ui.field-static>
+        <x-ui.field-static label="Alasan">{{ $dispensasi->alasan }}</x-ui.field-static>
+        <x-ui.field-static label="Diajukan oleh (guru piket)">{{ $dispensasi->pengaju->name }}</x-ui.field-static>
+        @if ($dispensasi->no_hp)
+            <x-ui.field-static label="No. HP" icon="call">{{ $dispensasi->no_hp }}</x-ui.field-static>
+        @endif
+        @if ($dispensasi->surat_path)
+            @php $suratUrl = Storage::url($dispensasi->surat_path); $isPdf = str_ends_with(strtolower($dispensasi->surat_path), '.pdf'); @endphp
+            <div class="flex flex-col gap-1.5">
+                <x-ui.label>Surat / Bukti</x-ui.label>
+                @if ($isPdf)
+                    <a href="{{ $suratUrl }}" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 py-3 text-sm font-semibold text-navy">
+                        <x-icon name="picture_as_pdf" :size="20" /> Buka surat (PDF)
+                    </a>
+                @else
+                    <a href="{{ $suratUrl }}" target="_blank" rel="noopener">
+                        <img src="{{ $suratUrl }}" alt="Surat / bukti dispensasi"
+                             class="max-h-72 w-full rounded-xl border border-surface-alt object-cover">
+                    </a>
+                @endif
             </div>
+        @endif
+    </div>
+
+    {{-- Keputusan Waka Kesiswaan --}}
+    <div class="mt-5 flex items-start gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+        <x-icon :name="$waIcon" :size="22" class="{{ $waColor }}" />
+        <div>
+            <p class="text-sm font-bold text-ink">Waka Kesiswaan: {{ $waText }}</p>
+            @if ($dispensasi->waka)<p class="text-xs text-muted">Oleh {{ $dispensasi->waka->name }}</p>@endif
+            @if ($dispensasi->catatan_waka)<p class="mt-0.5 text-xs text-muted">"{{ $dispensasi->catatan_waka }}"</p>@endif
         </div>
     </div>
 
-    <x-ui.sticky-bar>
-        <div class="flex gap-3">
-            <x-ui.button type="button" variant="success" block icon="check">Setujui</x-ui.button>
-            <x-ui.button type="button" variant="danger" block icon="close" data-confirm="Yakin tolak pengajuan dispensasi ini?">Tolak</x-ui.button>
-        </div>
-    </x-ui.sticky-bar>
+    @if ($bisaWaka)
+        <form method="POST" action="{{ route('dispensasi.waka', $dispensasi) }}" class="mt-5 flex flex-col gap-3">
+            @csrf
+            <x-ui.input label="Catatan (opsional)" name="catatan" :value="old('catatan')" />
+            <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                <button type="submit" name="keputusan" value="approved"
+                    class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-hadir/25 bg-hadir-soft text-base font-bold text-hadir">
+                    <x-icon name="check" :size="20" /> Setujui
+                </button>
+                <button type="submit" name="keputusan" value="rejected" data-confirm="Yakin tolak dispensasi ini?"
+                    class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-alpha/25 bg-alpha-soft text-base font-bold text-alpha">
+                    <x-icon name="close" :size="20" /> Tolak
+                </button>
+            </div>
+        </form>
+    @endif
 </x-layouts.app>

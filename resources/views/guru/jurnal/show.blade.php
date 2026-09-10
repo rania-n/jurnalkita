@@ -2,7 +2,7 @@
     $statusGuru = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
     $statusAbsen = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
     $rekap = $jurnal->absensis->countBy('status');
-    $bisaUbah = $jurnal->isPending();
+    $bisaUbah = $jurnal->bisaDiubah();
 @endphp
 
 <x-layouts.app title="Detail Jurnal">
@@ -18,9 +18,10 @@
         <x-alert :type="$vs === 'terverifikasi' ? 'success' : ($vs === 'revisi' ? 'error' : 'info')">
             @if ($vs === 'terverifikasi')
                 Jurnal sudah <strong>diverifikasi</strong> oleh pengurus kelas
-                @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif.
+                @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.
             @elseif ($vs === 'revisi')
                 Pengurus kelas meminta <strong>perbaikan</strong>: {{ $jurnal->catatan_verifikasi ?: 'tidak ada catatan.' }}
+                Perbaiki materi/presensi di bawah lalu simpan — jurnal akan diperiksa ulang.
             @else
                 Menunggu verifikasi pengurus kelas. Selama menunggu, jurnal masih bisa diubah.
             @endif
@@ -32,24 +33,26 @@
         @csrf
 
         <div class="grid grid-cols-2 gap-3">
-            <x-ui.field-static label="Jam ke- (mulai)">{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
+            <x-ui.field-static label="Jam ke- (mulai)" icon="lock_clock">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
             @if ($bisaUbah)
                 <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai">
-                    @for ($i = 1; $i <= 13; $i++)
+                    @for ($i = $jurnal->jam_ke_mulai; $i <= 13; $i++)
                         <option value="{{ $i }}" @selected($jurnal->jam_ke_selesai == $i)>Jam ke-{{ $i }}</option>
                     @endfor
                 </x-ui.select>
             @else
-                <x-ui.field-static label="Jam ke- (selesai)">{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
+                <x-ui.field-static label="Jam ke- (selesai)">Jam ke-{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
             @endif
         </div>
 
         @if ($bisaUbah)
-            <x-ui.select label="Status Kehadiran Anda" name="status_guru">
-                @foreach ($statusGuru as $v => $l)
-                    <option value="{{ $v }}" @selected($jurnal->status_guru === $v)>{{ $l }}</option>
-                @endforeach
-            </x-ui.select>
+            <x-ui.choice
+                label="Status Kehadiran Anda"
+                name="status_guru"
+                :options="$statusGuru"
+                :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
+                :value="$jurnal->status_guru"
+            />
             <x-ui.textarea label="Materi" name="materi" :rows="3">{{ $jurnal->materi }}</x-ui.textarea>
             <x-ui.textarea label="Metode Pembelajaran" name="metode" :rows="2">{{ $jurnal->metode }}</x-ui.textarea>
             <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2">{{ $jurnal->tugas_tambahan }}</x-ui.textarea>
@@ -62,6 +65,17 @@
         @endif
     </form>
 
+    {{-- Foto bukti --}}
+    @if ($jurnal->foto_bukti)
+        <div class="mt-4 flex flex-col gap-1.5">
+            <x-ui.label>Foto Suasana Kelas</x-ui.label>
+            <a href="{{ Storage::url($jurnal->foto_bukti) }}" target="_blank" rel="noopener">
+                <img src="{{ Storage::url($jurnal->foto_bukti) }}" alt="Foto suasana kelas"
+                     class="max-h-72 w-full rounded-xl border border-surface-alt object-cover">
+            </a>
+        </div>
+    @endif
+
     {{-- Presensi --}}
     <div class="mt-6">
         <div class="mb-2 flex items-center justify-between">
@@ -71,7 +85,7 @@
             @endif
         </div>
 
-        <div class="mb-3 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
+        <div class="mb-3 flex gap-1.5 overflow-x-auto rounded-xl border border-surface-alt bg-card p-2">
             @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
                 <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
             @endforeach

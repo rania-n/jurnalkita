@@ -33,24 +33,25 @@
             </x-ui.select>
 
             <div class="flex gap-3">
-                <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai" class="flex-1">
-                    @for ($i = 1; $i <= $jpMaks; $i++)
-                        <option value="{{ $i }}" @selected(old('jam_ke_mulai', $jpSekarang) == $i)>Jam ke-{{ $i }}</option>
-                    @endfor
-                </x-ui.select>
+                <div class="flex-1">
+                    <x-ui.field-static label="Jam ke- (mulai)" icon="lock_clock">Jam ke-{{ $jpSekarang }}</x-ui.field-static>
+                    <input type="hidden" name="jam_ke_mulai" value="{{ $jpSekarang }}">
+                </div>
                 <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" class="flex-1">
-                    @for ($i = 1; $i <= $jpMaks; $i++)
+                    @for ($i = $jpSekarang; $i <= $jpMaks; $i++)
                         <option value="{{ $i }}" @selected(old('jam_ke_selesai', $jpSekarang) == $i)>Jam ke-{{ $i }}</option>
                     @endfor
                 </x-ui.select>
             </div>
-            <p class="-mt-1 text-xs text-muted-2">Jam mulai otomatis mengikuti jam sekarang (Jam ke-{{ $jpSekarang }}). Sesuaikan bila perlu.</p>
+            <p class="-mt-1 text-xs text-muted-2">Jam mulai terkunci mengikuti jam pelajaran sekarang (Jam ke-{{ $jpSekarang }}). Atur jam selesai sesuai lama mengajar.</p>
 
-            <x-ui.select label="Status Kehadiran Anda" name="status_guru">
-                <option value="hadir" @selected(old('status_guru', 'hadir') === 'hadir')>Hadir</option>
-                <option value="tugas" @selected(old('status_guru') === 'tugas')>Tugas Luar</option>
-                <option value="tidak_hadir" @selected(old('status_guru') === 'tidak_hadir')>Tidak Hadir</option>
-            </x-ui.select>
+            <x-ui.choice
+                label="Status Kehadiran Anda"
+                name="status_guru"
+                :options="['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir']"
+                :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
+                :value="old('status_guru', 'hadir')"
+            />
 
             <x-ui.textarea label="Materi" name="materi" :rows="3" placeholder="Materi yang diajarkan...">{{ old('materi') }}</x-ui.textarea>
             <x-ui.textarea label="Metode Pembelajaran" name="metode" :rows="2" placeholder="Ceramah, diskusi, praktik, ulangan, dll...">{{ old('metode') }}</x-ui.textarea>

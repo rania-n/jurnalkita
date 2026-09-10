@@ -15,12 +15,15 @@ class Jurnal extends Model
     protected $fillable = [
         'jadwal_id', 'guru_id', 'tanggal', 'jam_ke_mulai', 'jam_ke_selesai',
         'status_guru', 'materi', 'metode', 'tugas_tambahan', 'foto_bukti',
-        'status_verifikasi', 'verifikator_id', 'catatan_verifikasi',
+        'diisi_oleh_pengurus', 'status_verifikasi', 'verifikator_id', 'catatan_verifikasi',
     ];
 
     protected function casts(): array
     {
-        return ['tanggal' => 'date'];
+        return [
+            'tanggal' => 'date',
+            'diisi_oleh_pengurus' => 'boolean',
+        ];
     }
 
     public function jadwal(): BelongsTo
@@ -46,5 +49,11 @@ class Jurnal extends Model
     public function isPending(): bool
     {
         return $this->status_verifikasi === 'pending';
+    }
+
+    /** Guru masih boleh mengubah jurnal selama belum terverifikasi (pending) atau saat diminta revisi. */
+    public function bisaDiubah(): bool
+    {
+        return in_array($this->status_verifikasi, ['pending', 'revisi'], true);
     }
 }

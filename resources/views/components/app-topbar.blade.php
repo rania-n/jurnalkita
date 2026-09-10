@@ -26,9 +26,8 @@
         @if ($roleLabel)
             <span class="rounded-md bg-surface-alt px-2 py-1 text-[11px] font-bold text-ink">{{ $roleLabel }}</span>
         @endif
-        <a href="{{ route('profil') }}" class="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-xs font-bold text-card" aria-label="Profil">
+        <a href="{{ route('profil') }}" class="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-xs font-bold text-card" aria-label="Profil &amp; keluar">
             {{ $inisial }}
         </a>
-        <x-logout-button />
     </div>
 </header>

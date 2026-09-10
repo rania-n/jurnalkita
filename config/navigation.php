@@ -18,7 +18,7 @@ return [
 
     'sekretaris' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'sekretaris.dashboard'],
-        ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
+        ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'sekretaris.jurnal.index', 'match' => 'sekretaris.jurnal.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 

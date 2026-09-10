@@ -53,6 +53,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'siswa' && $this->siswa?->jabatan === 'pengurus';
     }
 
+    /** Kelas yang diampu pengurus kelas ini. */
+    public function kelasSekretaris(): ?Kelas
+    {
+        return $this->siswa?->kelas;
+    }
+
     /** Nama folder/route dashboard sesuai peran efektif. */
     public function homeRoute(): string
     {

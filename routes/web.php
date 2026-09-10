@@ -8,7 +8,9 @@ use App\Http\Controllers\Admin\JamPelajaranController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MapelController;
 use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\DispensasiController;
 use App\Http\Controllers\Guru\JurnalController;
+use App\Http\Controllers\Sekretaris\JurnalController as VerifikasiJurnalController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,12 +18,9 @@ use Illuminate\Support\Facades\Route;
 | Web Routes — jurnalkita
 |--------------------------------------------------------------------------
 | Auth (login, registrasi 2 jalur, reset, verifikasi, logout) ada di routes/auth.php.
-|
-| FE MVP: view menampilkan data seeder. Aksi tulis (store/update/delete) sementara
-| diarahkan ke $stub sampai controller modul terkait dibuat. Lihat docs/roadmap.md.
+| Grup route dibagi per role: admin, guru, sekretaris (pengurus kelas), waka.
+| Lihat docs/roadmap.md untuk status tiap modul.
 */
-
-$stub = fn () => back()->with('info', 'Fitur ini sedang dikerjakan (backend belum selesai).');
 
 Route::get('/', fn () => auth()->check()
     ? redirect()->route(auth()->user()->homeRoute())
@@ -29,7 +28,7 @@ Route::get('/', fn () => auth()->check()
 
 require __DIR__.'/auth.php';
 
-Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', fn () => redirect()->route(auth()->user()->homeRoute()))->name('dashboard');
     Route::view('/profil', 'profil')->name('profil');
@@ -83,9 +82,15 @@ Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
         Route::post('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensiSave'])->name('jurnal.presensi.save');
     });
 
-    /* ============================ SEKRETARIS ============================ */
-    Route::middleware('role:siswa')->group(function () {
-        Route::view('/sekretaris', 'dashboards.sekretaris')->name('sekretaris.dashboard');
+    /* ==================== SEKRETARIS (pengurus kelas) ==================== */
+    Route::middleware('role:siswa')->prefix('sekretaris')->name('sekretaris.')->group(function () {
+        Route::view('/', 'dashboards.sekretaris')->name('dashboard');
+
+        Route::get('/jurnal', [VerifikasiJurnalController::class, 'index'])->name('jurnal.index');
+        Route::get('/jurnal/pengganti', [VerifikasiJurnalController::class, 'createPengganti'])->name('jurnal.pengganti');
+        Route::post('/jurnal/pengganti', [VerifikasiJurnalController::class, 'storePengganti'])->name('jurnal.pengganti.store');
+        Route::get('/jurnal/{jurnal}', [VerifikasiJurnalController::class, 'show'])->name('jurnal.show');
+        Route::post('/jurnal/{jurnal}/verifikasi', [VerifikasiJurnalController::class, 'verifikasi'])->name('jurnal.verifikasi');
     });
 
     /* =============================== WAKA =============================== */
@@ -93,11 +98,16 @@ Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
         Route::view('/waka', 'dashboards.waka')->name('waka.dashboard');
     });
 
-    /* ===================== DISPENSASI (guru piket, sekretaris, waka) ===================== */
-    Route::middleware('role:guru,siswa,waka')->group(function () use ($stub) {
-        Route::view('/dispensasi', 'dispensasi.index')->name('dispensasi.index');
-        Route::view('/dispensasi/ajukan', 'dispensasi.create')->name('dispensasi.create');
-        Route::view('/dispensasi/detail', 'dispensasi.show')->name('dispensasi.show');
-        Route::post('/dispensasi', $stub)->name('dispensasi.store');
+    /* ===================== DISPENSASI (guru piket + waka) ===================== */
+    Route::middleware('role:guru,waka')->group(function () {
+        Route::get('/dispensasi', [DispensasiController::class, 'index'])->name('dispensasi.index');
+        Route::get('/dispensasi/{dispensasi}', [DispensasiController::class, 'show'])->name('dispensasi.show');
+    });
+    Route::middleware('role:guru')->group(function () {
+        Route::get('/dispensasi-ajukan/baru', [DispensasiController::class, 'create'])->name('dispensasi.create');
+        Route::post('/dispensasi', [DispensasiController::class, 'store'])->name('dispensasi.store');
+    });
+    Route::middleware('role:waka')->group(function () {
+        Route::post('/dispensasi/{dispensasi}/waka', [DispensasiController::class, 'approveWaka'])->name('dispensasi.waka');
     });
 });

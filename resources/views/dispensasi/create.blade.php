@@ -1,42 +1,44 @@
-<x-layouts.app title="Form Pengajuan Dispensasi">
+<x-layouts.app title="Ajukan Dispensasi">
     <x-page-header
         title="Form Pengajuan Dispensasi"
-        subtitle="Ajukan dispensasi siswa"
+        subtitle="Diajukan oleh guru piket"
         :back="route('dispensasi.index')"
     />
 
-    <form method="POST" action="{{ route('dispensasi.store') }}" class="flex flex-col gap-4">
+    <form method="POST" action="{{ route('dispensasi.store') }}" enctype="multipart/form-data" class="flex flex-col gap-4">
         @csrf
 
-        <x-ui.select label="Kelas" name="kelas">
-            <option value="" disabled selected hidden>Pilih Kelas</option>
-            <option value="x-rpl-1">X RPL 1</option>
-            <option value="xi-rpl-2">XI RPL 2</option>
+        <x-ui.select label="Siswa" name="siswa_id">
+            <option value="" disabled selected hidden>Pilih siswa</option>
+            @foreach ($kelasList as $k)
+                <optgroup label="{{ $k->nama }}">
+                    @foreach ($k->siswas->sortBy('nama') as $s)
+                        <option value="{{ $s->id }}">{{ $s->nama }} · {{ $s->nis }}</option>
+                    @endforeach
+                </optgroup>
+            @endforeach
         </x-ui.select>
 
-        <x-ui.select label="Nama Siswa" name="siswa">
-            <option value="" disabled selected hidden>Pilih Siswa</option>
-            <option value="1">Ahmad Fauzi</option>
-            <option value="2">Dewi Lestari</option>
-        </x-ui.select>
+        <x-ui.input label="Tanggal" name="tanggal" type="date" :value="old('tanggal', now()->toDateString())" />
 
-        <x-ui.input label="No. Telepon" name="telepon" inputmode="numeric" placeholder="Masukkan nomor WhatsApp aktif" />
+        <div class="flex gap-3">
+            <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai" class="flex-1">
+                <option value="">Sehari penuh</option>
+                @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
+            </x-ui.select>
+            <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" class="flex-1">
+                <option value="">Sehari penuh</option>
+                @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
+            </x-ui.select>
+        </div>
 
-        <x-ui.input label="Tanggal" name="tanggal" type="date" icon="calendar_month" :value="now()->format('Y-m-d')" />
+        <x-ui.textarea label="Alasan Dispensasi" name="alasan" :rows="3" placeholder="Contoh: mengikuti lomba tingkat kabupaten.">{{ old('alasan') }}</x-ui.textarea>
+        <x-ui.input label="No. HP yang bisa dihubungi (opsional)" name="no_hp" inputmode="numeric" :value="old('no_hp')" />
 
-        <x-ui.textarea label="Alasan Dispensasi / Lomba / Kegiatan" name="alasan" :rows="4"
-            placeholder="Contoh: Mengikuti Lomba Informatika" />
-
-        <x-ui.upload
-            label="Surat Dispensasi / Izin"
-            name="surat"
-            accept="image/*,application/pdf"
-            title="Lampirkan Foto / File Bukti Pendukung"
-            hint="Foto / file bukti pendukung dispensasi"
-        />
+        <x-ui.upload label="Surat / Bukti Pendukung (opsional)" name="surat" accept="image/*,application/pdf" title="Lampirkan surat atau foto" hint="JPG, PNG, atau PDF" />
 
         <x-ui.sticky-bar>
-            <x-ui.button type="submit" block icon="send">Kirim Dispensasi</x-ui.button>
+            <x-ui.button type="submit" block icon="send">Ajukan ke Waka Kesiswaan</x-ui.button>
         </x-ui.sticky-bar>
     </form>
 </x-layouts.app>

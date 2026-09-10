@@ -9,15 +9,19 @@
 | 3 | Master Data (admin) | ✅ selesai | CRUD guru, kelas (nama otomatis), siswa, mapel, jadwal pelajaran, jadwal piket, jam pelajaran + validasi + audit log |
 | 4 | Manajemen Akun | ✅ selesai | Buat akun (dari data / baru), setujui/tolak pendaftaran, kirim reset sandi via email |
 | 5 | Jurnal & Absensi (guru) | ✅ selesai | Isi jurnal (auto tanggal + jam), absensi otomatis (default hadir / dispensasi), editor presensi + foto, riwayat + edit selama pending |
-| 2 | Approval & Verifikasi | ⏳ **belum** | Lihat di bawah |
+| 2 | Approval & Verifikasi | 🔨 hampir | 2b & 2c selesai, 2a dikerjakan teman |
 
-## Modul 2 (yang tersisa) — 3 bagian
+## Modul 2 — 3 bagian
 
 | Bagian | Status | Isi |
 |---|---|---|
 | 2a. Audit Log (halaman) | 🔨 dikerjakan teman | Halaman `/admin/audit-log` read-only + filter |
-| 2b. Verifikasi Jurnal | ⏳ belum | Pengurus kelas lihat jurnal kelasnya → setujui / minta revisi. Guru bisa isi jurnal pengganti (tugas luar / tidak hadir) |
-| 2c. Dispensasi | ⏳ belum | Guru piket ajukan → approve piket → approve waka → status akhir. Absensi siswa otomatis jadi "dispensasi" |
+| 2b. Verifikasi Jurnal | ✅ selesai | Pengurus kelas (`/sekretaris/jurnal`) lihat jurnal kelasnya → setujui / minta revisi. Guru bisa memperbaiki jurnal saat diminta revisi (balik ke antre). Bisa isi jurnal pengganti (tugas luar / tidak hadir), auto terverifikasi |
+| 2c. Dispensasi | ✅ selesai | Guru piket ajukan (tahap piket otomatis lolos karena pengaju = piket) → Waka setujui / tolak → status akhir. Saat disetujui, absensi siswa di jam terkait otomatis jadi "dispensasi" + catatan |
+
+**Catatan alur dispensasi:** sesuai spec guru, dispensasi **diisi** guru piket lalu langsung ke Waka —
+tidak ada langkah "piket menyetujui" terpisah. Kolom `status_piket` tetap ada (default `approved`
+saat diajukan) untuk jaga-jaga bila nanti perlu.
 
 ## Urutan
 

@@ -8,10 +8,10 @@ use App\Models\AuditLog;
 use App\Models\Dispensasi;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
-use App\Models\Siswa;
 use App\Support\Waktu;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -66,6 +66,9 @@ class JurnalController extends Controller
     {
         $guru = $this->guru();
 
+        // Jam mulai terkunci ke jam pelajaran sekarang (tidak bisa di-backdate dari form).
+        $request->merge(['jam_ke_mulai' => Waktu::jpSekarang()]);
+
         $data = $request->validate([
             'jadwal_id' => ['required', 'exists:jadwals,id'],
             'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:15'],
@@ -79,7 +82,20 @@ class JurnalController extends Controller
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
         abort_unless($jadwal->guru_id === $guru->id, 403);
 
-        $jurnal = DB::transaction(function () use ($data, $jadwal, $guru) {
+        // Cegah jurnal ganda untuk jadwal yang sama di hari yang sama.
+        $sudahAda = Jurnal::where('jadwal_id', $jadwal->id)
+            ->whereDate('tanggal', now()->toDateString())
+            ->first();
+        if ($sudahAda) {
+            return redirect()->route('jurnal.show', $sudahAda)
+                ->with('info', 'Jurnal untuk jadwal ini hari ini sudah dibuat.');
+        }
+
+        $siswaDispensasi = $this->siswaDispensasiHariIni(
+            $jadwal->kelas_id, now()->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
+        );
+
+        $jurnal = DB::transaction(function () use ($data, $jadwal, $guru, $siswaDispensasi) {
             $jurnal = Jurnal::create([
                 ...$data,
                 'guru_id' => $guru->id,
@@ -88,11 +104,12 @@ class JurnalController extends Controller
 
             // Absensi otomatis: default hadir, atau dispensasi bila ada dispensasi disetujui.
             foreach ($jadwal->kelas->siswas as $siswa) {
+                $dispen = $siswaDispensasi->contains($siswa->id);
                 Absensi::create([
                     'jurnal_id' => $jurnal->id,
                     'siswa_id' => $siswa->id,
-                    'status' => $this->adaDispensasi($siswa, $jurnal) ? 'dispensasi' : 'hadir',
-                    'catatan' => $this->adaDispensasi($siswa, $jurnal) ? 'Dispensasi (otomatis dari sistem)' : null,
+                    'status' => $dispen ? 'dispensasi' : 'hadir',
+                    'catatan' => $dispen ? 'Dispensasi (otomatis dari sistem)' : null,
                 ]);
             }
 
@@ -117,7 +134,7 @@ class JurnalController extends Controller
     public function presensiSave(Jurnal $jurnal, Request $request): RedirectResponse
     {
         $this->milikSendiri($jurnal);
-        abort_unless($jurnal->isPending(), 403, 'Jurnal sudah diverifikasi, tidak bisa diubah.');
+        abort_unless($jurnal->bisaDiubah(), 403, 'Jurnal sudah diverifikasi, tidak bisa diubah.');
 
         $data = $request->validate([
             'presensi' => ['required', 'array'],
@@ -137,11 +154,13 @@ class JurnalController extends Controller
             if ($request->hasFile('foto_bukti')) {
                 $jurnal->update(['foto_bukti' => $request->file('foto_bukti')->store('jurnal-bukti', 'public')]);
             }
+
+            $this->kembalikanKePending($jurnal);
         });
 
         AuditLog::catat('jurnal.presensi', "Simpan presensi jurnal #{$jurnal->id}", $jurnal);
 
-        return redirect()->route('jurnal.index')->with('success', 'Jurnal & absensi tersimpan.');
+        return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal & absensi tersimpan.');
     }
 
     /* ---------------------------------------------------------------- Detail */
@@ -156,7 +175,10 @@ class JurnalController extends Controller
     public function update(Jurnal $jurnal, Request $request): RedirectResponse
     {
         $this->milikSendiri($jurnal);
-        abort_unless($jurnal->isPending(), 403, 'Jurnal sudah diverifikasi, tidak bisa diubah.');
+        abort_unless($jurnal->bisaDiubah(), 403, 'Jurnal sudah diverifikasi, tidak bisa diubah.');
+
+        // Jam mulai tidak ikut diubah — pakai nilai jurnal untuk validasi jam selesai.
+        $request->merge(['jam_ke_mulai' => $jurnal->jam_ke_mulai]);
 
         $data = $request->validate([
             'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
@@ -167,19 +189,36 @@ class JurnalController extends Controller
         ]);
 
         $jurnal->update($data);
+        $this->kembalikanKePending($jurnal);
         AuditLog::catat('jurnal.ubah', "Ubah jurnal #{$jurnal->id}", $jurnal);
 
         return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal diperbarui.');
     }
 
-    private function adaDispensasi(Siswa $siswa, Jurnal $jurnal): bool
+    /** Setelah guru merevisi, jurnal kembali antre untuk diperiksa pengurus kelas. */
+    private function kembalikanKePending(Jurnal $jurnal): void
     {
-        return Dispensasi::where('siswa_id', $siswa->id)
-            ->whereDate('tanggal', $jurnal->tanggal)
+        if ($jurnal->status_verifikasi === 'revisi') {
+            $jurnal->update([
+                'status_verifikasi' => 'pending',
+                'catatan_verifikasi' => null,
+                'verifikator_id' => null,
+            ]);
+        }
+    }
+
+    /**
+     * ID siswa yang punya dispensasi disetujui pada tanggal & rentang jam tertentu.
+     * Satu query untuk seluruh kelas (hindari N+1 saat membuat absensi).
+     */
+    private function siswaDispensasiHariIni(int $kelasId, string $tanggal, int $jamMulai, int $jamSelesai): Collection
+    {
+        return Dispensasi::whereDate('tanggal', $tanggal)
             ->where('status_akhir', 'approved')
+            ->whereHas('siswa', fn ($q) => $q->where('kelas_id', $kelasId))
             ->where(fn ($q) => $q->whereNull('jam_ke_mulai')
-                ->orWhere(fn ($q2) => $q2->where('jam_ke_mulai', '<=', $jurnal->jam_ke_selesai)
-                    ->where('jam_ke_selesai', '>=', $jurnal->jam_ke_mulai)))
-            ->exists();
+                ->orWhere(fn ($q2) => $q2->where('jam_ke_mulai', '<=', $jamSelesai)
+                    ->where('jam_ke_selesai', '>=', $jamMulai)))
+            ->pluck('siswa_id');
     }
 }

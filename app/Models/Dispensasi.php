@@ -44,7 +44,7 @@ class Dispensasi extends Model
         return $this->belongsTo(User::class, 'waka_id');
     }
 
-    /** Hitung ulang status akhir dari kedua tahap persetujuan. */
+    /** Hitung ulang status akhir; jika disetujui, terapkan ke presensi siswa. */
     public function segarkanStatusAkhir(): void
     {
         $this->status_akhir = match (true) {
@@ -53,5 +53,23 @@ class Dispensasi extends Model
             default => 'pending',
         };
         $this->save();
+
+        if ($this->status_akhir === 'approved') {
+            $this->terapkanKeAbsensi();
+        }
+    }
+
+    /** Set absensi siswa jadi "dispensasi" untuk jurnal di tanggal & jam yang sesuai. */
+    public function terapkanKeAbsensi(): void
+    {
+        Absensi::where('siswa_id', $this->siswa_id)
+            ->whereHas('jurnal', function ($q) {
+                $q->whereDate('tanggal', $this->tanggal);
+                if ($this->jam_ke_mulai) {
+                    $q->where('jam_ke_mulai', '<=', $this->jam_ke_selesai ?? $this->jam_ke_mulai)
+                        ->where('jam_ke_selesai', '>=', $this->jam_ke_mulai);
+                }
+            })
+            ->update(['status' => 'dispensasi', 'catatan' => 'Dispensasi (disetujui)']);
     }
 }

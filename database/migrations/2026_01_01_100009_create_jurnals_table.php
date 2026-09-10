@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('metode')->nullable();
             $table->text('tugas_tambahan')->nullable();
             $table->string('foto_bukti')->nullable();
+            $table->boolean('diisi_oleh_pengurus')->default(false);
             $table->enum('status_verifikasi', ['pending', 'terverifikasi', 'revisi'])->default('pending');
             $table->foreignId('verifikator_id')->nullable()->constrained('siswas')->nullOnDelete();
             $table->text('catatan_verifikasi')->nullable();

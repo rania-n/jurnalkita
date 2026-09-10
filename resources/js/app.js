@@ -19,27 +19,6 @@ function initPasswordToggles() {
     });
 }
 
-/* Segmented control / tabs tombol (pilih satu).
- * <div data-segmented>
- *   <button data-segment value="hadir" aria-pressed="true">Hadir</button>
- *   <input type="hidden" name="status" data-segment-value>
- * </div>
- */
-function initSegmented() {
-    document.querySelectorAll('[data-segmented]').forEach((group) => {
-        const buttons = group.querySelectorAll('[data-segment]');
-        const hidden = group.querySelector('[data-segment-value]');
-        buttons.forEach((btn) => {
-            btn.addEventListener('click', () => {
-                buttons.forEach((b) => b.setAttribute('aria-pressed', 'false'));
-                btn.setAttribute('aria-pressed', 'true');
-                if (hidden) hidden.value = btn.value;
-                group.dispatchEvent(new CustomEvent('segment:change', { detail: { value: btn.value } }));
-            });
-        });
-    });
-}
-
 /* Pratinjau gambar setelah pilih file di <x-ui.upload>. */
 function initUploadPreview() {
     document.querySelectorAll('[data-upload-input]').forEach((input) => {
@@ -144,7 +123,6 @@ function initModals() {
 
 function init() {
     initPasswordToggles();
-    initSegmented();
     initUploadPreview();
     initConfirm();
     initModals();

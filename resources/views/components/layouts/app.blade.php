@@ -15,8 +15,10 @@
         default => 'default',
     };
 
-    // Desktop: konten rata kiri mengikuti sidebar, lebar dibatasi biar tetap terbaca.
-    $maxW = $width === 'wide' ? 'lg:max-w-5xl' : 'lg:max-w-3xl';
+    // Lebar konten naik bertahap: HP penuh → tablet lebih lega → desktop dibatasi biar terbaca.
+    $maxW = $width === 'wide'
+        ? 'sm:max-w-xl md:max-w-3xl lg:max-w-5xl'
+        : 'sm:max-w-lg md:max-w-2xl lg:max-w-3xl';
 @endphp
 
 <!DOCTYPE html>
@@ -30,7 +32,7 @@
         <div class="flex w-full min-w-0 flex-col">
             <x-app-topbar :menu="$menu" />
 
-            <main class="mx-auto w-full max-w-lg flex-1 px-5 pb-24 pt-6 sm:px-6 {{ $maxW }} lg:mx-0 lg:px-10 lg:pb-14 lg:pt-10">
+            <main class="mx-auto w-full flex-1 px-5 pb-24 pt-6 sm:px-6 {{ $maxW }} lg:mx-0 lg:px-10 lg:pb-14 lg:pt-10">
                 @foreach (['success' => 'success', 'error' => 'error', 'info' => 'info'] as $key => $type)
                     @if (session($key))
                         <x-alert :type="$type" class="mb-4">{{ session($key) }}</x-alert>

@@ -64,6 +64,20 @@ class JurnalTest extends TestCase
         $this->assertTrue($jurnal->absensis->every(fn ($a) => $a->status === 'hadir'));
     }
 
+    public function test_tidak_bisa_buat_jurnal_ganda_untuk_jadwal_sama_hari_ini(): void
+    {
+        $payload = [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+        ];
+
+        $this->actingAs($this->user)->post('/guru/jurnal', $payload)->assertRedirect();
+        $this->actingAs($this->user)->post('/guru/jurnal', $payload)->assertRedirect();
+
+        $this->assertSame(1, Jurnal::where('jadwal_id', $this->jadwal->id)->whereDate('tanggal', today())->count());
+    }
+
     public function test_siswa_dengan_dispensasi_disetujui_otomatis_dispensasi(): void
     {
         $siswa = Siswa::first();
@@ -101,7 +115,7 @@ class JurnalTest extends TestCase
                 $jurnal->absensis->last()->id => ['status' => 'hadir'],
             ],
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
-        ])->assertRedirect('/guru/jurnal');
+        ])->assertRedirect("/guru/jurnal/{$jurnal->id}");
 
         $this->assertSame('sakit', $absen->fresh()->status);
         $this->assertSame('demam', $absen->fresh()->catatan);

@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin', 'status' => 'approved',
         ]);
 
-        User::create([
+        $waka = User::create([
             'name' => 'Hariyadi, M.Pd', 'email' => 'waka@jurnalkita.test',
             'email_verified_at' => now(), 'password' => Hash::make('password'),
             'role' => 'waka', 'status' => 'approved',
@@ -170,21 +170,23 @@ class DatabaseSeeder extends Seeder
         });
 
         // ------------------------------------------------------- Contoh dispensasi
+        // Dispensasi selalu diajukan guru piket (tahap piket otomatis lolos),
+        // lalu menunggu keputusan Waka Kesiswaan.
+        $piketUser = $gurus->firstWhere(fn (Guru $g) => $g->user_id && $g->jadwalPikets()->exists())?->user_id ?? $admin->id;
         $siswaList = Siswa::inRandomOrder()->take(4)->get();
-        $states = [
-            ['status_piket' => 'pending', 'status_waka' => 'pending'],
-            ['status_piket' => 'approved', 'status_waka' => 'pending'],
-            ['status_piket' => 'approved', 'status_waka' => 'approved'],
-            ['status_piket' => 'rejected', 'status_waka' => 'pending'],
-        ];
+        $wakaStates = ['pending', 'approved', 'rejected', 'pending'];
         foreach ($siswaList as $i => $s) {
             $d = Dispensasi::create([
                 'siswa_id' => $s->id,
-                'diajukan_oleh_id' => $admin->id,
+                'diajukan_oleh_id' => $piketUser,
+                'piket_id' => $piketUser,
                 'tanggal' => now()->subDays($i),
                 'alasan' => 'Mengikuti lomba tingkat kabupaten.',
                 'no_hp' => '08'.fake()->numerify('##########'),
-                ...$states[$i],
+                'status_piket' => 'approved',
+                'status_waka' => $wakaStates[$i],
+                'waka_id' => $wakaStates[$i] === 'pending' ? null : $waka->id,
+                'catatan_waka' => $wakaStates[$i] === 'rejected' ? 'Surat belum lengkap.' : null,
             ]);
             $d->segarkanStatusAkhir();
         }

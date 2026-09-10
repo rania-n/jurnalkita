@@ -1,58 +1,47 @@
 @php
-    $data = [
-        ['status' => 'menunggu', 'nama' => 'Dude Fahrezi', 'kelas' => 'XI RPL 2', 'tanggal' => '06-09-2026'],
-        ['status' => 'disetujui', 'nama' => 'Putri Zahwa', 'kelas' => 'XI RPL 2', 'tanggal' => '06-09-2026'],
-        ['status' => 'ditolak', 'nama' => 'Varadita April', 'kelas' => 'XI RPL 2', 'tanggal' => '05-09-2026'],
-        ['status' => 'disetujui', 'nama' => 'Fitra Fahrezi', 'kelas' => 'X RPL 1', 'tanggal' => '05-09-2026'],
-    ];
-    $tab = request('status', 'semua');
     $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'ditolak' => 'Ditolak'];
-    $rows = collect($data)->when($tab !== 'semua', fn ($c) => $c->where('status', $tab))->values();
+    $badgeAkhir = ['pending' => 'menunggu', 'approved' => 'disetujui', 'rejected' => 'ditolak'];
 @endphp
 
-<x-layouts.app title="Daftar Dispensasi" menu="default" width="wide">
-    <x-page-header
-        title="Daftar Dispensasi"
-        subtitle="Riwayat dan status persetujuan dispensasi oleh Staff Piket dan Waka Kesiswaan."
-    />
-
-    <div class="flex flex-col gap-3">
-        <x-ui.search-bar name="cari" placeholder="Cari nama atau alasan dispensasi..." />
-
-        <div class="flex gap-2">
-            <x-ui.filter-select name="kelas">
-                <option value="">Semua Kelas</option>
-                <option value="x-rpl-1">X RPL 1</option>
-                <option value="xi-rpl-2">XI RPL 2</option>
-            </x-ui.filter-select>
-            <x-ui.filter-select name="tanggal">
-                <option value="">Tanggal</option>
-                <option value="hari-ini">Hari ini</option>
-                <option value="minggu-ini">Minggu ini</option>
-            </x-ui.filter-select>
-        </div>
-
-        <x-ui.tabs :tabs="collect($tabs)->map(fn ($label, $value) => [
-            'label' => $label,
-            'url' => $value === 'semua' ? route('dispensasi.index') : route('dispensasi.index', ['status' => $value]),
-            'active' => $tab === $value,
-        ])->values()->all()" />
-
-        <x-ui.add-button :href="route('dispensasi.create')">Ajukan Dispensasi</x-ui.add-button>
-
-        @if ($rows->isEmpty())
-            <x-ui.empty icon="fact_check" title="Belum ada dispensasi" desc="Pengajuan dispensasi akan muncul di sini." class="mt-1" />
-        @else
-            <x-ui.card-list class="mt-1">
-                @foreach ($rows as $d)
-                    <x-ui.list-card :title="$d['nama']" :meta="[$d['kelas'], 'Tanggal: ' . $d['tanggal']]">
-                        <x-slot:badge><x-ui.status-badge :status="$d['status']" /></x-slot:badge>
-                        <x-slot:actions>
-                            <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.show')" />
-                        </x-slot:actions>
-                    </x-ui.list-card>
-                @endforeach
-            </x-ui.card-list>
+<x-layouts.app title="Dispensasi" width="wide">
+    <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
+        @if ($bolehAjukan)
+            <x-ui.button :href="route('dispensasi.create')" icon="add">Ajukan Dispensasi</x-ui.button>
         @endif
+    </x-page-header>
+
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
+        @foreach ($tabs as $key => $label)
+            <a href="{{ route('dispensasi.index', ['tab' => $key]) }}"
+               @class(['shrink-0 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap', 'bg-navy text-card' => $tab === $key, 'text-muted-2 hover:text-ink' => $tab !== $key])>
+                {{ $label }}
+            </a>
+        @endforeach
     </div>
+
+    @if ($items->isEmpty())
+        <x-ui.empty icon="fact_check" title="Belum ada dispensasi" />
+    @else
+        <x-ui.card-list>
+            @foreach ($items as $d)
+                <x-ui.list-card
+                    :title="$d->siswa->nama"
+                    :meta="[
+                        $d->siswa->kelas?->nama . ' · ' . $d->tanggal->translatedFormat('d M Y'),
+                        ($d->jam_ke_mulai ? 'JP ' . $d->jam_ke_mulai . '–' . $d->jam_ke_selesai : 'Sehari penuh') . ' · ' . str($d->alasan)->limit(40),
+                    ]"
+                >
+                    <x-slot:badge>
+                        <x-ui.status-badge :status="$badgeAkhir[$d->status_akhir]">
+                            {{ ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$d->status_akhir] }}
+                        </x-ui.status-badge>
+                    </x-slot:badge>
+                    <x-slot:actions>
+                        <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.show', $d)" />
+                    </x-slot:actions>
+                </x-ui.list-card>
+            @endforeach
+        </x-ui.card-list>
+        <div class="mt-4">{{ $items->links() }}</div>
+    @endif
 </x-layouts.app>

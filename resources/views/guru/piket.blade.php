@@ -25,6 +25,7 @@
     @endif
 
     <x-alert type="info" class="mt-6">
-        Saat bertugas piket, Anda bisa menyetujui pengajuan dispensasi lewat menu Dispensasi.
+        Saat bertugas piket, Anda bisa mengajukan dispensasi siswa lewat menu <strong>Dispensasi</strong>.
+        Pengajuan diteruskan ke Waka Kesiswaan untuk disetujui.
     </x-alert>
 </x-layouts.app>
