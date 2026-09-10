@@ -10,7 +10,7 @@ return [
 
     'guru' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
-        ['label' => 'Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'match' => 'jurnal.*'],
+        ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
         ['label' => 'Piket', 'icon' => 'event_available', 'route' => 'piket.index'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],

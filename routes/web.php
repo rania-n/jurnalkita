@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\JamPelajaranController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MapelController;
 use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\Guru\JurnalController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -69,12 +70,17 @@ Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
     });
 
     /* =============================== GURU =============================== */
-    Route::middleware('role:guru')->group(function () use ($stub) {
+    Route::middleware('role:guru')->group(function () {
         Route::view('/guru', 'dashboards.guru')->name('guru.dashboard');
-        Route::view('/guru/jurnal/tambah', 'jurnal.create')->name('jurnal.create');
-        Route::view('/guru/jurnal/presensi', 'jurnal.presensi')->name('jurnal.presensi');
-        Route::post('/guru/jurnal', $stub)->name('jurnal.store');
         Route::view('/guru/piket', 'guru.piket')->name('piket.index');
+
+        Route::get('/guru/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
+        Route::get('/guru/jurnal/tambah', [JurnalController::class, 'create'])->name('jurnal.create');
+        Route::post('/guru/jurnal', [JurnalController::class, 'store'])->name('jurnal.store');
+        Route::get('/guru/jurnal/{jurnal}', [JurnalController::class, 'show'])->name('jurnal.show');
+        Route::post('/guru/jurnal/{jurnal}', [JurnalController::class, 'update'])->name('jurnal.update');
+        Route::get('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensi'])->name('jurnal.presensi');
+        Route::post('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensiSave'])->name('jurnal.presensi.save');
     });
 
     /* ============================ SEKRETARIS ============================ */
