@@ -15,10 +15,13 @@
         default => 'default',
     };
 
-    // Lebar konten naik bertahap: HP penuh → tablet lebih lega → desktop dibatasi biar terbaca.
+    // Konten rata kiri mengikuti sidebar (bukan mengambang di tengah), lebar naik
+    // bertahap: HP penuh → tablet lega → desktop mengisi ruang setelah sidebar.
+    // 'wide' (daftar/dashboard, kartu 2 kolom) boleh selebar mungkin;
+    // 'form' dibatasi ~900px supaya kolom isian tidak melar terlalu panjang.
     $maxW = $width === 'wide'
-        ? 'sm:max-w-xl md:max-w-3xl lg:max-w-5xl'
-        : 'sm:max-w-lg md:max-w-2xl lg:max-w-3xl';
+        ? 'sm:max-w-xl md:max-w-3xl lg:max-w-6xl 2xl:max-w-7xl'
+        : 'sm:max-w-lg md:max-w-2xl lg:max-w-4xl';
 @endphp
 
 <!DOCTYPE html>
