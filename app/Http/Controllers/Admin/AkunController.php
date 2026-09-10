@@ -10,8 +10,9 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AkunController extends Controller
 {
@@ -27,20 +28,19 @@ class AkunController extends Controller
             'sumber' => ['nullable', 'string'],
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'lowercase', Rule::unique('users', 'email')->withoutTrashed()],
+            'password' => ['required', 'confirmed', PasswordRule::defaults()],
             'nip' => ['nullable', 'string', 'max:30'],
             'nis' => ['nullable', 'string', 'max:20'],
             'kelas_id' => ['nullable', 'exists:kelas,id'],
             'jenis_kelamin' => ['nullable', 'in:L,P'],
         ]);
 
-        [$sumberTipe, $sumberId] = array_pad(explode(':', $data['sumber'] ?? 'baru'), 2, null);
-
-        $temp = Str::password(10, symbols: false);
+        [, $sumberId] = array_pad(explode(':', $data['sumber'] ?? 'baru'), 2, null);
 
         $user = User::create([
             'name' => $data['nama'],
             'email' => $data['email'],
-            'password' => Hash::make($temp),
+            'password' => Hash::make($data['password']),
             'role' => $data['role'],
             'status' => 'approved',
             'email_verified_at' => now(),
@@ -72,7 +72,7 @@ class AkunController extends Controller
 
         AuditLog::catat('akun.buat', "Buat akun {$data['role']}: {$data['email']}", $user);
 
-        return back()->with('success', "Akun dibuat. Password sementara: {$temp} — catat & beri ke yang bersangkutan.");
+        return back()->with('success', "Akun {$user->name} berhasil dibuat.");
     }
 
     public function approve(User $user): RedirectResponse
@@ -91,12 +91,18 @@ class AkunController extends Controller
         return back()->with('success', "Akun {$user->name} ditolak.");
     }
 
-    public function resetPassword(User $user): RedirectResponse
+    /** Kirim email tautan reset password ke user (admin tidak menyentuh password). */
+    public function sendResetLink(User $user): RedirectResponse
     {
-        $temp = Str::password(10, symbols: false);
-        $user->update(['password' => Hash::make($temp)]);
-        AuditLog::catat('akun.reset_sandi', "Reset sandi: {$user->email}", $user);
+        $status = Password::sendResetLink(['email' => $user->email]);
 
-        return back()->with('success', "Password baru untuk {$user->name}: {$temp}");
+        AuditLog::catat('akun.kirim_reset', "Kirim tautan reset sandi: {$user->email}", $user);
+
+        return back()->with(
+            $status === Password::RESET_LINK_SENT ? 'success' : 'error',
+            $status === Password::RESET_LINK_SENT
+                ? "Tautan reset sandi dikirim ke {$user->email}."
+                : 'Gagal mengirim tautan reset. Cek konfigurasi email.'
+        );
     }
 }

@@ -65,8 +65,10 @@
                                     <button class="flex h-8 items-center gap-1 rounded-lg bg-alpha-soft px-2.5 text-xs font-bold text-alpha hover:bg-[#fecdd3]">Tolak</button>
                                 </form>
                             @elseif ($u->role !== 'admin')
-                                <form method="POST" action="{{ route('master.akun.reset', $u) }}" class="contents" data-confirm="Reset password {{ $u->name }}? Password lama tidak berlaku lagi.">@csrf
-                                    <button class="flex h-8 items-center gap-1 rounded-lg bg-surface-alt px-2.5 text-xs font-bold text-ink hover:bg-[#cbd5e1]">Reset Sandi</button>
+                                <form method="POST" action="{{ route('master.akun.reset', $u) }}" class="contents" data-confirm="Kirim email tautan reset sandi ke {{ $u->email }}?">@csrf
+                                    <button class="flex h-8 items-center gap-1 rounded-lg bg-surface-alt px-2.5 text-xs font-bold text-ink hover:bg-[#cbd5e1]">
+                                        <x-icon name="mail" :size="14" /> Kirim Reset
+                                    </button>
                                 </form>
                             @endif
                         </div>
@@ -104,8 +106,10 @@
             <x-ui.input label="Nama Lengkap" name="nama" id="akun-nama" />
             <x-ui.input label="Email" name="email" type="email" placeholder="email@sekolah.sch.id" />
 
-            {{-- field data baru --}}
+            {{-- khusus data guru baru --}}
             <x-ui.input label="NIP (opsional)" name="nip" data-grup="guru-baru" />
+
+            {{-- khusus data pengurus kelas baru --}}
             <div data-grup="siswa-baru" class="flex flex-col gap-4">
                 <x-ui.select label="Kelas" name="kelas_id">
                     <option value="" disabled selected hidden>Pilih kelas</option>
@@ -118,7 +122,14 @@
                 </x-ui.select>
             </div>
 
-            <p class="rounded-lg bg-izin-soft px-3 py-2 text-xs text-izin">Sistem membuat password sementara — akan ditampilkan setelah simpan.</p>
+            <x-ui.input label="Password" name="password" type="password" id="akun-password" placeholder="Minimal 8 karakter">
+                <button type="button" data-toggle-password="#akun-password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan">
+                    <x-icon name="visibility" :size="18" />
+                </button>
+            </x-ui.input>
+            <x-ui.input label="Konfirmasi Password" name="password_confirmation" type="password" placeholder="Ulangi password" />
+
+            <p class="rounded-lg bg-izin-soft px-3 py-2 text-xs text-izin">Beri password ini ke yang bersangkutan. Nanti dia bisa reset sendiri lewat "Lupa Sandi".</p>
 
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save">Buat Akun</x-ui.button>
@@ -162,7 +173,7 @@
 
                 role.addEventListener('change', refresh);
                 sumber.addEventListener('change', refresh);
-                document.getElementById('modal-akun').addEventListener('toggle', refresh);
+                document.getElementById('modal-akun').addEventListener('modal:open', refresh);
                 refresh();
             })();
         </script>

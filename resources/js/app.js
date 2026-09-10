@@ -125,6 +125,7 @@ function initModals() {
             }
 
             dlg.showModal();
+            dlg.dispatchEvent(new CustomEvent('modal:open'));
             return;
         }
 
