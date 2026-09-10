@@ -13,14 +13,16 @@
 - **piket** = guru yang punya jadwal piket (bukan peran).
 - **wali kelas** = guru yang jadi `kelas.wali_id` (bukan peran).
 
+Aturan alur detail (dispensasi, jurnal, verifikasi sekretaris): **`docs/spec.md`**.
+
 ## MVP yang tersisa (backend)
 
 | # | Modul | Isi |
 |---|---|---|
-| 2 | Approval & Verifikasi | dispensasi piket→waka, verifikasi jurnal (sekretaris), audit log |
+| 2 | Approval & Verifikasi | dispensasi (diisi guru piket → approve waka), verifikasi jurnal + request perubahan (sekretaris), sekretaris isi jurnal pengganti, audit log |
 | 3 | Master Data A | CRUD kelas, siswa, mapel |
 | 4 | Master Data B + Akun | CRUD jam pelajaran, jadwal, jadwal piket, guru; buat akun dari data |
-| 5 | Jurnal & Absensi | form jurnal terikat jadwal + absensi + foto |
+| 5 | Jurnal & Absensi | form jurnal (auto tanggal + auto JP-lock) + absensi (default hadir, auto-dispensasi, catatan per siswa) + foto |
 
 Modul 3/4/5 paralel. Modul 2 setelah model jurnal/dispensasi dipakai.
 
