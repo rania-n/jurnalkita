@@ -1,7 +1,10 @@
 @props([
     'id',
     'title' => '',
+    'size' => 'md',   // md ~32rem | lg ~44rem
 ])
+
+@php $w = $size === 'lg' ? '44rem' : '32rem'; @endphp
 
 {{--
     Modal (native <dialog>) dengan background blur.
@@ -10,7 +13,8 @@
 --}}
 <dialog
     id="{{ $id }}"
-    class="fixed inset-0 m-auto h-fit max-h-[calc(100dvh-2rem)] w-[min(32rem,calc(100vw-2rem))] overflow-visible rounded-2xl border-0 bg-card p-0 text-ink shadow-2xl backdrop:bg-navy/30 backdrop:backdrop-blur-sm"
+    style="width: min({{ $w }}, calc(100vw - 2rem))"
+    class="fixed inset-0 m-auto h-fit max-h-[calc(100dvh-2rem)] overflow-visible rounded-2xl border-0 bg-card p-0 text-ink shadow-2xl backdrop:bg-navy/30 backdrop:backdrop-blur-sm"
 >
     <div class="flex items-center justify-between border-b border-surface-alt px-5 py-3.5">
         <h3 class="text-base font-bold text-ink" data-modal-title>{{ $title }}</h3>

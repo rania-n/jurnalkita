@@ -12,9 +12,11 @@
 
 <x-layouts.admin title="Beranda" heading="Beranda">
     @if ($pendingAkun > 0)
-        <x-alert type="warning" class="mb-6">
-            Ada <strong>{{ $pendingAkun }}</strong> pendaftaran akun menunggu persetujuan.
-        </x-alert>
+        <a href="{{ route('master.akun.index', ['tab' => 'pending']) }}" class="mb-6 block">
+            <x-alert type="warning">
+                Ada <strong>{{ $pendingAkun }}</strong> pendaftaran akun menunggu persetujuan — klik untuk tinjau.
+            </x-alert>
+        </a>
     @endif
 
     <div class="grid grid-cols-2 gap-4 md:grid-cols-3">

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AkunController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\JadwalPiketController;
@@ -42,8 +43,14 @@ Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
         Route::view('/admin/mapel', 'admin.mapel.index')->name('master.mapel.index');
         Route::view('/admin/jadwal-pelajaran', 'admin.jadwal-pelajaran.index')->name('master.jadwal-pelajaran.index');
         Route::view('/admin/jam-pelajaran', 'admin.jam-pelajaran.index')->name('master.jam-pelajaran.index');
-        Route::view('/admin/jam-pelajaran/edit', 'admin.jam-pelajaran.edit')->name('master.jam-pelajaran.edit');
         Route::view('/admin/jadwal-piket', 'admin.jadwal-piket.index')->name('master.jadwal-piket.index');
+        Route::view('/admin/akun', 'admin.akun.index')->name('master.akun.index');
+
+        /* Manajemen akun */
+        Route::post('/admin/akun', [AkunController::class, 'save'])->name('master.akun.save');
+        Route::post('/admin/akun/{user}/setujui', [AkunController::class, 'approve'])->name('master.akun.approve');
+        Route::post('/admin/akun/{user}/tolak', [AkunController::class, 'reject'])->name('master.akun.reject');
+        Route::post('/admin/akun/{user}/reset-sandi', [AkunController::class, 'resetPassword'])->name('master.akun.reset');
 
         /* Tulis master data (tambah/ubah = save, hapus = destroy) */
         Route::post('/admin/guru', [GuruController::class, 'save'])->name('master.guru.save');

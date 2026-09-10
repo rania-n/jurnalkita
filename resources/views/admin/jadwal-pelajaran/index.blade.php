@@ -7,7 +7,7 @@
         ->when($hari, fn ($b) => $b->where('hari', $hari))
         ->when($kelasId, fn ($b) => $b->where('kelas_id', $kelasId))
         ->when($guruId, fn ($b) => $b->where('guru_id', $guruId))
-        ->orderByRaw("field(hari,'senin','selasa','rabu','kamis','jumat')")
+        ->orderByRaw(\App\Support\Db::hariOrder())
         ->orderBy('jam_ke_mulai')
         ->get();
 

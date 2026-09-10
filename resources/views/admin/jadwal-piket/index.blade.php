@@ -7,7 +7,7 @@
     $rows = \App\Models\JadwalPiket::with('guru')
         ->when($hari !== 'semua', fn ($b) => $b->where('hari', $hari))
         ->when($q, fn ($b) => $b->whereHas('guru', fn ($g) => $g->where('nama', 'like', "%{$q}%")))
-        ->orderByRaw("field(hari,'senin','selasa','rabu','kamis','jumat')")
+        ->orderByRaw(\App\Support\Db::hariOrder())
         ->get();
 
     $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);

@@ -7,6 +7,7 @@
     $user = auth()->user();
     $nav = [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'admin.dashboard'],
+        ['label' => 'Manajemen Akun', 'icon' => 'manage_accounts', 'route' => 'master.akun.index'],
         ['label' => 'Data Guru', 'icon' => 'groups', 'route' => 'master.guru.index'],
         ['label' => 'Data Kelas', 'icon' => 'meeting_room', 'route' => 'master.kelas.index'],
         ['label' => 'Data Siswa', 'icon' => 'school', 'route' => 'master.siswa.index'],

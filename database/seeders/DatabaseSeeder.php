@@ -185,5 +185,24 @@ class DatabaseSeeder extends Seeder
             ]);
             $d->segarkanStatusAkhir();
         }
+
+        // ------------------------------------------- Contoh pendaftaran menunggu
+        $pendingGuru = User::create([
+            'name' => 'Ahmad Suryadi, S.Pd', 'email' => 'ahmad.daftar@jurnalkita.test',
+            'email_verified_at' => now(), 'password' => Hash::make('password'),
+            'role' => 'guru', 'status' => 'pending',
+        ]);
+        Guru::create(['user_id' => $pendingGuru->id, 'nama' => 'Ahmad Suryadi, S.Pd']);
+
+        $pendingKelas = User::create([
+            'name' => 'Ketua XI RPL 1', 'email' => 'xirpl1.daftar@jurnalkita.test',
+            'email_verified_at' => now(), 'password' => Hash::make('password'),
+            'role' => 'siswa', 'status' => 'pending',
+        ]);
+        Siswa::create([
+            'user_id' => $pendingKelas->id, 'kelas_id' => $kelas[2]->id,
+            'nis' => fake()->unique()->numerify('2026####'), 'nama' => 'Ketua XI RPL 1',
+            'jenis_kelamin' => 'P', 'jabatan' => 'pengurus',
+        ]);
     }
 }
