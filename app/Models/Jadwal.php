@@ -2,25 +2,43 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Jadwal extends Model
 {
-    protected $table = 'jadwal';
-    protected $primaryKey = 'id';
+    use HasFactory, SoftDeletes;
 
-    const CREATED_AT = 'createdat';
-    const UPDATED_AT = 'updatedat';
+    protected $fillable = [
+        'kelas_id', 'mapel_id', 'guru_id', 'guru_pendamping_id',
+        'ruang', 'hari', 'jam_ke_mulai', 'jam_ke_selesai',
+    ];
 
-    protected $guarded = [];
-
-    public function kelas()
+    public function kelas(): BelongsTo
     {
-        return $this->belongsTo(Kelas::class, 'kelasid', 'id');
+        return $this->belongsTo(Kelas::class);
     }
 
-    public function mapel()
+    public function mapel(): BelongsTo
     {
-        return $this->belongsTo(Mapel::class, 'mapelid', 'id');
+        return $this->belongsTo(Mapel::class);
+    }
+
+    public function guru(): BelongsTo
+    {
+        return $this->belongsTo(Guru::class);
+    }
+
+    public function guruPendamping(): BelongsTo
+    {
+        return $this->belongsTo(Guru::class, 'guru_pendamping_id');
+    }
+
+    public function jurnals(): HasMany
+    {
+        return $this->hasMany(Jurnal::class);
     }
 }

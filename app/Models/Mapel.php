@@ -2,15 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Mapel extends Model
 {
-    protected $table = 'mapel';
-    protected $primaryKey = 'id';
+    use HasFactory, SoftDeletes;
 
-    const CREATED_AT = 'createdat';
-    const UPDATED_AT = 'updatedat';
+    protected $fillable = ['kode', 'nama'];
 
-    protected $guarded = [];
+    public function gurus(): BelongsToMany
+    {
+        return $this->belongsToMany(Guru::class, 'guru_mapel')->withTimestamps();
+    }
+
+    public function jadwals(): HasMany
+    {
+        return $this->hasMany(Jadwal::class);
+    }
 }

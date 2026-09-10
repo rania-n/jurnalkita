@@ -9,21 +9,14 @@
         Akun Anda akan diverifikasi oleh Admin sebelum dapat digunakan.
     </x-alert>
 
-    <form method="POST" action="{{ route('register_pengurus_kelas') }}" class="flex flex-col gap-4 pb-28">
+    <form method="POST" action="{{ route('register.kelas') }}" class="flex flex-col gap-4 pb-28">
         @csrf
 
-        <x-ui.select label="Tingkat" name="tingkat">
-            <option value="" disabled selected hidden>Pilih Tingkat (X, XI, XII)</option>
-            <option value="X">X</option>
-            <option value="XI">XI</option>
-            <option value="XII">XII</option>
-        </x-ui.select>
-
-        <x-ui.select label="Jurusan" name="jurusan">
-            <option value="" disabled selected hidden>Pilih Jurusan (e.g. Rekayasa Perangkat Lunak)</option>
-            <option value="RPL">Rekayasa Perangkat Lunak</option>
-            <option value="TKJ">Teknik Komputer dan Jaringan</option>
-            <option value="MM">Multimedia</option>
+        <x-ui.select label="Kelas" name="kelas_id">
+            <option value="" disabled selected hidden>Pilih Kelas</option>
+            @foreach ($kelasList as $k)
+                <option value="{{ $k->id }}" @selected(old('kelas_id') == $k->id)>{{ $k->nama }}</option>
+            @endforeach
         </x-ui.select>
 
         <x-ui.input label="Nama Lengkap" name="nama" placeholder="Masukkan nama lengkap" :value="old('nama')" />

@@ -1,11 +1,22 @@
 @props([
     'title' => null,
-    'menu' => 'default',
-    'width' => 'form',   // 'form' (kolom sempit, untuk formulir) | 'wide' (untuk daftar/menu)
+    'menu' => null,
+    'width' => 'form',   // 'form' (kolom formulir) | 'wide' (daftar / menu)
 ])
 
 @php
-    $maxW = $width === 'wide' ? 'lg:max-w-4xl' : 'lg:max-w-2xl';
+    // Menu navigasi menyesuaikan peran user (fallback: 'default').
+    $role = auth()->user()->role ?? null;
+    $menu ??= match ($role) {
+        'admin' => 'admin',
+        'guru' => 'guru',
+        'siswa' => 'sekretaris',
+        'waka' => 'waka',
+        default => 'default',
+    };
+
+    // Desktop: konten rata kiri mengikuti sidebar, lebar dibatasi biar tetap terbaca.
+    $maxW = $width === 'wide' ? 'lg:max-w-5xl' : 'lg:max-w-3xl';
 @endphp
 
 <!DOCTYPE html>
@@ -16,17 +27,15 @@
     <div class="lg:flex lg:min-h-screen">
         <x-side-nav :menu="$menu" />
 
-        <div class="flex w-full flex-col lg:items-center">
-            <main class="mx-auto w-full max-w-lg flex-1 px-5 pb-24 pt-8 sm:px-6 {{ $maxW }} lg:px-10 lg:pb-14 lg:pt-14">
-                @if (session('success'))
-                    <x-alert type="success" class="mb-4">{{ session('success') }}</x-alert>
-                @endif
-                @if (session('error'))
-                    <x-alert type="error" class="mb-4">{{ session('error') }}</x-alert>
-                @endif
-                @if (session('info'))
-                    <x-alert type="info" class="mb-4">{{ session('info') }}</x-alert>
-                @endif
+        <div class="flex w-full min-w-0 flex-col">
+            <x-app-topbar :menu="$menu" />
+
+            <main class="mx-auto w-full max-w-lg flex-1 px-5 pb-24 pt-6 sm:px-6 {{ $maxW }} lg:mx-0 lg:px-10 lg:pb-14 lg:pt-10">
+                @foreach (['success' => 'success', 'error' => 'error', 'info' => 'info'] as $key => $type)
+                    @if (session($key))
+                        <x-alert :type="$type" class="mb-4">{{ session($key) }}</x-alert>
+                    @endif
+                @endforeach
 
                 {{ $slot }}
             </main>

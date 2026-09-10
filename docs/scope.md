@@ -1,74 +1,47 @@
 # Ruang Lingkup jurnalkita
 
-Dokumen ini memisahkan **yang dikerjakan sekarang** dari **yang ditunda**, supaya
-tidak keseret scope. Semua ide yang muncul dicatat di sini biar tidak hilang.
+Rencana kerja lengkap ada di **`docs/roadmap.md`**. Dokumen ini cuma memisahkan
+**MVP** vs **backlog** supaya tidak keseret scope.
 
 ---
 
-## SEKARANG — "FE MVP selesai"
+## MVP — dikerjakan sekarang (ringkas)
 
-Batasnya jelas: **25 layar yang sudah ada di Figma** (`docs/figma/`), dibuat rapi,
-konsisten, responsif (HP → desktop), dan bisa dinavigasi. Belum ada backend/auth
-betulan — route masih menampilkan view dengan data contoh.
+Auth + approval akun · Master data (admin, tabel desktop) · Buat akun dari data ·
+Jurnal + absensi + foto bukti · Verifikasi jurnal oleh sekretaris ·
+Dispensasi 2 tahap (piket → waka) · Dashboard + header per role · Audit log.
 
-### Yang termasuk
-
-- **Fondasi** (sudah): token warna, font Inter, layout + komponen, build Vite.
-- **Auth** (sudah, akan disesuaikan ke Figma): login, lupa sandi, pilih peran,
-  registrasi guru, registrasi pengurus kelas.
-- **Jurnal**: form jurnal mengajar → input presensi siswa.
-- **Dispensasi**: daftar, form pengajuan, detail + approve/tolak.
-- **Piket**: daftar jadwal piket + form, daftar data guru + form.
-- **Master (admin)**: menu master data, kelas, siswa, mapel, jadwal pelajaran,
-  jam pelajaran (lihat + edit).
-- **Navigasi**: bottom nav minimal (HP) / sidebar (desktop), tombol back kiri-atas.
-- **Perbaikan UX kecil** yang aman: teks minimal 12–13px, dialog konfirmasi hapus,
-  notifikasi sukses, istilah diseragamkan ("Presensi"), "JP-1" → "Jam ke-1 · 07:00",
-  input presensi default semua "Hadir".
-
-### Struktur (keputusan MVP)
-
-- View per **fitur**, bukan per role: `resources/views/{auth,jurnal,dispensasi,piket,master}/`.
-- Route dikelompokkan per fitur. **Belum ada middleware role** — ditambahkan saat backend.
-- Data contoh inline di Blade, ditandai `{{-- TODO: data dari controller --}}`.
+Detail & pembagian tim: `docs/roadmap.md`.
 
 ---
 
-## NANTI — butuh desain dulu, lalu FE, lalu backend
+## BACKLOG — JANGAN dikerjakan di MVP
 
-Belum ada frame Figma-nya. Tidak menghalangi MVP.
+Butuh desain / effort besar, tidak memblokir MVP. Dicatat di sini biar tidak hilang.
 
-### Layar yang belum ada
-- **Dashboard / Beranda** per peran (isi bottom nav mengarah ke sini).
-- **Profil** (hanya lihat, tidak bisa diubah sendiri).
-- **Riwayat jurnal** + edit jurnal yang sudah dibuat.
-- **Notifikasi**.
-- **Output surat dispensasi** yang sudah disetujui (PDF/cetak).
+### Fitur
+- **Guru pengganti** (`gurupengganti`) — piket menunjuk guru pengganti saat guru tidak hadir.
+- **Tukar jam / penyerahan jam** (`tukarjam`) — antar guru.
+- **Ekspor laporan** untuk guru piket — per hari, per guru / semua guru, per kelas / semua kelas (Excel/PDF).
+- **Surat dispensasi** yang disetujui → PDF + **QR code**.
+- **Role satpam** — terima surat dispensasi approved untuk cek siswa keluar sekolah (scan QR).
+- **Notifikasi** (in-app / email / WA).
+- **Rekap wali kelas** — dashboard kehadiran + dispensasi murid kelasnya.
+- **Riwayat & edit jurnal** lanjutan (revisi setelah ditolak sekretaris, dsb).
 
-### Peran & hak akses (perlu dikonfirmasi ke guru pembimbing)
-- **Guru** — akun dasar, daftar sendiri. Bisa jadi pengajar (isi jurnal + presensi).
-- **Guru Piket** — guru yang kebagian piket. Approve dispensasi tahap 1.
-  Ekspor laporan harian: semua guru / per guru, semua kelas / per kelas.
-- **Wali Kelas** — guru yang jadi FK di satu kelas. Lihat rekap kehadiran +
-  dispensasi murid kelasnya.
-- **Waka Kesiswaan** — approve dispensasi tahap 2. Detail akun dibuat admin.
-- **Admin** — kelola semua master data.
-- **Pengurus Kelas / Siswa** — daftar sendiri. Lihat riwayat jurnal, bantu admin KBM harian.
-- **Satpam** (paling belakang) — terima surat dispensasi yang sudah disetujui staff +
-  waka, untuk cek siswa keluar sekolah. Kemungkinan pakai **QR code**.
+### Teknis
+- Geolokasi + deteksi telat pada pengisian jurnal (`latitude`/`longitude`/`islate`).
+- SMTP produksi (dev pakai `MAIL_MAILER=log`).
+- Auto-verifikasi jurnal (`autoverified`) bila sekretaris tidak merespons dalam X jam.
 
-### Fitur backend besar (fase setelah FE)
-- Autentikasi + verifikasi akun oleh admin.
-- Alur approval dispensasi 2 tahap (piket → waka) + status.
-- Ekspor laporan (Excel/PDF) untuk guru piket.
-- Rekap wali kelas.
-- Generate surat dispensasi + QR.
-- Notifikasi.
+### Peran & catatan yang belum final
+- Detail teknis akun **waka** (dibuat admin) — perlu konfirmasi ke guru pembimbing.
+- Apakah pengurus kelas bisa lebih dari 1 orang per kelas.
 
 ---
 
 ## Prinsip
 
-1. Kalau layarnya belum ada di Figma, itu **NANTI**.
-2. Perbaikan yang tidak mengubah alur = aman dikerjakan sekarang.
-3. Struktur dibuat sesederhana mungkin dulu; dirombak saat kebutuhannya nyata.
+1. Kalau fiturnya ada di daftar backlog ini → **NANTI**, bukan sekarang.
+2. Utamakan alur MVP jalan end-to-end dulu, baru poles.
+3. Struktur sesederhana mungkin; dirombak saat kebutuhannya nyata.

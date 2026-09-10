@@ -4,80 +4,79 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes — jurnalkita (FE MVP)
+| Web Routes — jurnalkita
 |--------------------------------------------------------------------------
-| Tahap ini masih frontend: route menampilkan view dengan data contoh.
-| Controller + auth + middleware role ditambahkan saat backend (lihat docs/scope.md).
+| Auth (login, registrasi 2 jalur, reset, verifikasi, logout) ada di routes/auth.php.
 |
-| Form yang butuh POST diarahkan ke $stub: mengembalikan pesan "belum aktif"
-| supaya tombol tidak menghasilkan error 405 selama FE dikembangkan.
+| TRANSISI: route fitur masih "flat" (belum dipecah per folder role). Modul FE
+| berikutnya memindahkan view ke folder per role + mengetatkan middleware `role:*`.
+| Untuk sekarang cukup 'auth' + 'verified'; dashboard per role sudah dipisah.
+| Aksi store/update/destroy sementara -> $stub. Lihat docs/roadmap.md.
 */
 
-$stub = fn () => redirect()->back()->with('info', 'Fitur ini akan aktif setelah backend siap.');
+$stub = fn () => back()->with('info', 'Fitur ini sedang dikerjakan.');
 
-Route::redirect('/', '/login');
-
-/* ---------------------------------------------------------------- Auth / umum */
-Route::view('/login', 'auth.login')->name('login');
-Route::view('/lupa-sandi', 'auth.lupa_sandi')->name('lupa_sandi');
-Route::view('/pilih-peran', 'auth.pilih_peran')->name('pilih_peran');
-Route::view('/daftar/guru', 'auth.register_guru')->name('register_guru');
-Route::view('/daftar/pengurus-kelas', 'auth.register_pengurus_kelas')->name('register_pengurus_kelas');
-
-Route::post('/login', $stub);
-Route::post('/lupa-sandi', $stub);
-Route::post('/daftar/guru', $stub);
-Route::post('/daftar/pengurus-kelas', $stub);
-
-/* ------------------------------------------------------------------- Beranda */
-Route::view('/beranda', 'beranda')->name('beranda');
-Route::view('/profil', 'profil')->name('profil');
-
-/* -------------------------------------------------------------------- Jurnal */
-Route::prefix('jurnal')->name('jurnal.')->group(function () {
-    Route::view('/tambah', 'jurnal.create')->name('create');
-    Route::view('/presensi', 'jurnal.presensi')->name('presensi');
-});
-Route::post('jurnal/presensi', $stub)->name('jurnal.store');
-
-/* ---------------------------------------------------------------- Dispensasi */
-Route::prefix('dispensasi')->name('dispensasi.')->group(function () {
-    Route::view('/', 'dispensasi.index')->name('index');
-    Route::view('/ajukan', 'dispensasi.create')->name('create');
-    Route::view('/detail', 'dispensasi.show')->name('show');
-});
-Route::post('dispensasi', $stub)->name('dispensasi.store');
-
-/* ------------------------------------------------------------------- Piket */
-Route::prefix('piket')->name('piket.')->group(function () {
-    Route::view('/jadwal', 'piket.jadwal.index')->name('jadwal.index');
-    Route::view('/jadwal/tambah', 'piket.jadwal.create')->name('jadwal.create');
-    Route::view('/guru', 'piket.guru.index')->name('guru.index');
-    Route::view('/guru/tambah', 'piket.guru.create')->name('guru.create');
-});
-Route::post('piket/jadwal', $stub)->name('piket.jadwal.store');
-Route::post('piket/guru', $stub)->name('piket.guru.store');
-
-/* --------------------------------------------------------- Master data (admin) */
-Route::prefix('master')->name('master.')->group(function () {
-    Route::view('/', 'master.index')->name('index');
-
-    Route::view('/kelas', 'master.kelas.index')->name('kelas.index');
-    Route::view('/kelas/tambah', 'master.kelas.create')->name('kelas.create');
-
-    Route::view('/siswa', 'master.siswa.index')->name('siswa.index');
-    Route::view('/siswa/tambah', 'master.siswa.create')->name('siswa.create');
-
-    Route::view('/mapel', 'master.mapel.index')->name('mapel.index');
-    Route::view('/mapel/tambah', 'master.mapel.create')->name('mapel.create');
-
-    Route::view('/jadwal-pelajaran', 'master.jadwal-pelajaran.index')->name('jadwal-pelajaran.index');
-    Route::view('/jadwal-pelajaran/tambah', 'master.jadwal-pelajaran.create')->name('jadwal-pelajaran.create');
-
-    Route::view('/jam-pelajaran', 'master.jam-pelajaran.index')->name('jam-pelajaran.index');
-    Route::view('/jam-pelajaran/edit', 'master.jam-pelajaran.edit')->name('jam-pelajaran.edit');
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route(auth()->user()->homeRoute())
+        : redirect()->route('login');
 });
 
-Route::post('master/{resource}', $stub)
-    ->whereIn('resource', ['kelas', 'siswa', 'mapel', 'jadwal-pelajaran', 'jam-pelajaran'])
-    ->name('master.store');
+require __DIR__.'/auth.php';
+
+Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
+
+    /* Redirect pintar ke dashboard sesuai peran (dipakai Breeze & tautan umum) */
+    Route::get('/dashboard', fn () => redirect()->route(auth()->user()->homeRoute()))->name('dashboard');
+
+    /* Dashboard per role (target redirect setelah login) */
+    Route::middleware('role:admin')->get('/admin', fn () => view('dashboards.admin'))->name('admin.dashboard');
+    Route::middleware('role:guru')->get('/guru', fn () => view('dashboards.guru'))->name('guru.dashboard');
+    Route::middleware('role:siswa')->get('/sekretaris', fn () => view('dashboards.sekretaris'))->name('sekretaris.dashboard');
+    Route::middleware('role:waka')->get('/waka', fn () => view('dashboards.waka'))->name('waka.dashboard');
+
+    Route::view('/profil', 'profil')->name('profil');
+
+    /* -------- Master data (admin) -------- */
+    Route::middleware('role:admin')->group(function () use ($stub) {
+        Route::view('/master', 'master.index')->name('master.index');
+        Route::view('/master/kelas', 'master.kelas.index')->name('master.kelas.index');
+        Route::view('/master/kelas/tambah', 'master.kelas.create')->name('master.kelas.create');
+        Route::view('/master/siswa', 'master.siswa.index')->name('master.siswa.index');
+        Route::view('/master/siswa/tambah', 'master.siswa.create')->name('master.siswa.create');
+        Route::view('/master/mapel', 'master.mapel.index')->name('master.mapel.index');
+        Route::view('/master/mapel/tambah', 'master.mapel.create')->name('master.mapel.create');
+        Route::view('/master/jadwal-pelajaran', 'master.jadwal-pelajaran.index')->name('master.jadwal-pelajaran.index');
+        Route::view('/master/jadwal-pelajaran/tambah', 'master.jadwal-pelajaran.create')->name('master.jadwal-pelajaran.create');
+        Route::view('/master/jam-pelajaran', 'master.jam-pelajaran.index')->name('master.jam-pelajaran.index');
+        Route::view('/master/jam-pelajaran/edit', 'master.jam-pelajaran.edit')->name('master.jam-pelajaran.edit');
+        Route::post('/master/{resource}', $stub)
+            ->whereIn('resource', ['kelas', 'siswa', 'mapel', 'jadwal-pelajaran', 'jam-pelajaran'])
+            ->name('master.store');
+    });
+
+    /* -------- Jurnal (guru) -------- */
+    Route::middleware('role:guru')->group(function () use ($stub) {
+        Route::view('/jurnal/tambah', 'jurnal.create')->name('jurnal.create');
+        Route::view('/jurnal/presensi', 'jurnal.presensi')->name('jurnal.presensi');
+        Route::post('/jurnal', $stub)->name('jurnal.store');
+    });
+
+    /* -------- Piket (guru piket & admin) -------- */
+    Route::middleware('role:guru,admin')->group(function () use ($stub) {
+        Route::view('/piket/jadwal', 'piket.jadwal.index')->name('piket.jadwal.index');
+        Route::view('/piket/jadwal/tambah', 'piket.jadwal.create')->name('piket.jadwal.create');
+        Route::view('/piket/guru', 'piket.guru.index')->name('piket.guru.index');
+        Route::view('/piket/guru/tambah', 'piket.guru.create')->name('piket.guru.create');
+        Route::post('/piket/jadwal', $stub)->name('piket.jadwal.store');
+        Route::post('/piket/guru', $stub)->name('piket.guru.store');
+    });
+
+    /* -------- Dispensasi (sekretaris ajukan, piket & waka approve) -------- */
+    Route::middleware('role:guru,siswa,waka')->group(function () use ($stub) {
+        Route::view('/dispensasi', 'dispensasi.index')->name('dispensasi.index');
+        Route::view('/dispensasi/ajukan', 'dispensasi.create')->name('dispensasi.create');
+        Route::view('/dispensasi/detail', 'dispensasi.show')->name('dispensasi.show');
+        Route::post('/dispensasi', $stub)->name('dispensasi.store');
+    });
+});

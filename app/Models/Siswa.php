@@ -2,21 +2,42 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Siswa extends Model
 {
-    protected $table = 'siswa';
-    protected $primaryKey = 'id';
+    use HasFactory, SoftDeletes;
 
-    const CREATED_AT = 'createdat';
-    const UPDATED_AT = 'updatedat';
+    protected $fillable = [
+        'user_id', 'kelas_id', 'nis', 'nama', 'jenis_kelamin', 'no_absen', 'jabatan',
+    ];
 
-    protected $guarded = [];
-
-    // Relasi: Siswa milik satu Kelas
-    public function kelas()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Kelas::class, 'kelasid', 'id');
+        return $this->belongsTo(User::class);
+    }
+
+    public function kelas(): BelongsTo
+    {
+        return $this->belongsTo(Kelas::class);
+    }
+
+    public function absensis(): HasMany
+    {
+        return $this->hasMany(Absensi::class);
+    }
+
+    public function dispensasis(): HasMany
+    {
+        return $this->hasMany(Dispensasi::class);
+    }
+
+    public function isPengurus(): bool
+    {
+        return $this->jabatan === 'pengurus';
     }
 }

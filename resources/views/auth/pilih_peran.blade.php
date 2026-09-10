@@ -8,8 +8,8 @@
     <div class="flex flex-col gap-5">
         @php
             $peran = [
-                ['route' => 'register_guru', 'icon' => 'school', 'title' => 'Guru Mata Pelajaran / Staff Piket', 'desc' => 'Daftar sebagai tenaga pengajar untuk melakukan pengisian jurnal KBM dan absensi siswa di kelas.'],
-                ['route' => 'register_pengurus_kelas', 'icon' => 'groups', 'title' => 'Pengurus Kelas / Siswa', 'desc' => 'Mewakili ketua kelas atau sekretaris untuk melihat riwayat jurnal dan membantu administrasi KBM harian.'],
+                ['route' => 'register.guru', 'icon' => 'school', 'title' => 'Guru Mata Pelajaran / Staff Piket', 'desc' => 'Daftar sebagai tenaga pengajar untuk melakukan pengisian jurnal KBM dan absensi siswa di kelas.'],
+                ['route' => 'register.kelas', 'icon' => 'groups', 'title' => 'Pengurus Kelas / Siswa', 'desc' => 'Mewakili ketua kelas atau sekretaris untuk melihat riwayat jurnal dan membantu administrasi KBM harian.'],
             ];
         @endphp
 

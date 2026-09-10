@@ -9,14 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kelas', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->string('namakelas');
+            $table->id();
+            $table->string('nama');
             $table->enum('tingkat', ['X', 'XI', 'XII']);
-            $table->string('nikwalikelas')->nullable();
-            $table->integer('jumlahsiswa')->default(0);
-            $table->timestamp('createdat')->useCurrent();
-            $table->timestamp('updatedat')->useCurrent()->useCurrentOnUpdate();
-            $table->timestamp('deletedat')->nullable();
+            $table->string('jurusan')->nullable();
+            $table->foreignId('wali_id')->nullable()->constrained('gurus')->nullOnDelete();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

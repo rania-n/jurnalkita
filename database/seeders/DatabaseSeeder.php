@@ -2,24 +2,184 @@
 
 namespace Database\Seeders;
 
+use App\Models\Absensi;
+use App\Models\Dispensasi;
+use App\Models\Guru;
+use App\Models\Jadwal;
+use App\Models\JadwalPiket;
+use App\Models\JamPelajaran;
+use App\Models\Jurnal;
+use App\Models\Kelas;
+use App\Models\Mapel;
+use App\Models\Siswa;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // ---------------------------------------------------------------- Akun tetap
+        $admin = User::create([
+            'name' => 'Administrator', 'email' => 'admin@jurnalkita.test',
+            'email_verified_at' => now(), 'password' => Hash::make('password'),
+            'role' => 'admin', 'status' => 'approved',
         ]);
+
+        User::create([
+            'name' => 'Hariyadi, M.Pd', 'email' => 'waka@jurnalkita.test',
+            'email_verified_at' => now(), 'password' => Hash::make('password'),
+            'role' => 'waka', 'status' => 'approved',
+        ]);
+
+        // ----------------------------------------------------------------- Mapel
+        $mapels = collect([
+            ['kode' => 'MAT', 'nama' => 'Matematika'],
+            ['kode' => 'BIN', 'nama' => 'Bahasa Indonesia'],
+            ['kode' => 'BIG', 'nama' => 'Bahasa Inggris'],
+            ['kode' => 'PBO', 'nama' => 'Pemrograman Berorientasi Objek'],
+            ['kode' => 'PWL', 'nama' => 'Pemrograman Web dan Perangkat Bergerak'],
+        ])->map(fn ($m) => Mapel::create($m));
+
+        // ----------------------------------------------------------------- Guru
+        $guruData = [
+            ['nama' => 'Winartin, S.Pd', 'mapel' => 'BIG', 'akun' => true, 'piket' => 'senin'],
+            ['nama' => 'Budi Santoso, S.Pd', 'mapel' => 'MAT', 'akun' => true, 'piket' => 'rabu'],
+            ['nama' => 'Drs. M. Yusuf', 'mapel' => 'BIN', 'akun' => true, 'piket' => 'rabu'],
+            ['nama' => 'Sarah Amelia, M.Pd', 'mapel' => 'PBO', 'akun' => false, 'piket' => 'kamis'],
+            ['nama' => 'Rendra Prakoso, S.Kom', 'mapel' => 'PWL', 'akun' => true, 'piket' => null],
+            ['nama' => 'Dewi Anjani, S.Pd', 'mapel' => 'MAT', 'akun' => false, 'piket' => null],
+        ];
+
+        $gurus = collect($guruData)->map(function ($g, $i) use ($mapels) {
+            $user = $g['akun'] ? User::create([
+                'name' => $g['nama'],
+                'email' => 'guru'.($i + 1).'@jurnalkita.test',
+                'email_verified_at' => now(), 'password' => Hash::make('password'),
+                'role' => 'guru', 'status' => 'approved',
+            ]) : null;
+
+            $guru = Guru::create([
+                'user_id' => $user?->id,
+                'nip' => fake()->numerify('19#########'),
+                'nama' => $g['nama'],
+                'no_hp' => '08'.fake()->numerify('##########'),
+            ]);
+            $guru->mapels()->attach($mapels->firstWhere('kode', $g['mapel']));
+
+            if ($g['piket']) {
+                JadwalPiket::create([
+                    'guru_id' => $guru->id, 'hari' => $g['piket'],
+                    'mulai' => '07:00', 'selesai' => '12:00',
+                ]);
+            }
+
+            return $guru;
+        });
+
+        // -------------------------------------------------------- Jam pelajaran
+        $jamMulai = ['07:00', '07:45', '08:30', '09:15', '10:15', '11:00', '11:45', '12:30'];
+        foreach ($jamMulai as $idx => $mulai) {
+            $selesai = date('H:i', strtotime($mulai) + 45 * 60);
+            JamPelajaran::create([
+                'jam_ke' => $idx + 1, 'mulai' => $mulai, 'selesai' => $selesai,
+                'kategori' => 'senin_kamis',
+            ]);
+            JamPelajaran::create([
+                'jam_ke' => $idx + 1, 'mulai' => $mulai, 'selesai' => date('H:i', strtotime($mulai) + 35 * 60),
+                'kategori' => 'jumat',
+            ]);
+        }
+
+        // ----------------------------------------------------------------- Kelas
+        $kelas = collect([
+            ['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL'],
+            ['nama' => 'X RPL 2', 'tingkat' => 'X', 'jurusan' => 'RPL'],
+            ['nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL'],
+            ['nama' => 'XI TKJ 1', 'tingkat' => 'XI', 'jurusan' => 'TKJ'],
+        ])->map(fn ($k, $i) => Kelas::create([...$k, 'wali_id' => $gurus[$i % $gurus->count()]->id]));
+
+        // ----------------------------------------------------------------- Siswa
+        $kelas->each(function (Kelas $k, $ki) {
+            for ($n = 1; $n <= 8; $n++) {
+                $isPengurus = $n === 1;
+                $jk = fake()->randomElement(['L', 'P']);
+
+                $user = $isPengurus ? User::create([
+                    'name' => 'Pengurus '.$k->nama,
+                    'email' => 'kelas'.($ki + 1).'@jurnalkita.test',
+                    'email_verified_at' => now(), 'password' => Hash::make('password'),
+                    'role' => 'siswa', 'status' => 'approved',
+                ]) : null;
+
+                Siswa::create([
+                    'user_id' => $user?->id,
+                    'kelas_id' => $k->id,
+                    'nis' => fake()->unique()->numerify('2026####'),
+                    'nama' => fake()->name($jk === 'L' ? 'male' : 'female'),
+                    'jenis_kelamin' => $jk,
+                    'no_absen' => $n,
+                    'jabatan' => $isPengurus ? 'pengurus' : 'anggota',
+                ]);
+            }
+        });
+
+        // ----------------------------------------------------------------- Jadwal
+        $hariList = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
+        $kelas->each(function (Kelas $k) use ($mapels, $gurus, $hariList) {
+            foreach ($hariList as $hi => $hari) {
+                Jadwal::create([
+                    'kelas_id' => $k->id,
+                    'mapel_id' => $mapels[$hi % $mapels->count()]->id,
+                    'guru_id' => $gurus[$hi % $gurus->count()]->id,
+                    'ruang' => 'R'.fake()->numberBetween(10, 40),
+                    'hari' => $hari,
+                    'jam_ke_mulai' => 1,
+                    'jam_ke_selesai' => 2,
+                ]);
+            }
+        });
+
+        // -------------------------------------------------- Contoh jurnal + absensi
+        Jadwal::with('kelas.siswas')->take(3)->get()->each(function (Jadwal $jadwal, $i) {
+            $jurnal = Jurnal::create([
+                'jadwal_id' => $jadwal->id,
+                'guru_id' => $jadwal->guru_id,
+                'tanggal' => now()->subDays($i),
+                'jam_ke_mulai' => $jadwal->jam_ke_mulai,
+                'jam_ke_selesai' => $jadwal->jam_ke_selesai,
+                'status_guru' => 'hadir',
+                'materi' => 'Materi pertemuan '.($i + 1).': dasar dan latihan.',
+                'metode' => 'Ceramah, diskusi, latihan',
+                'status_verifikasi' => $i === 0 ? 'pending' : 'terverifikasi',
+            ]);
+
+            $jadwal->kelas->siswas->each(fn (Siswa $s) => Absensi::create([
+                'jurnal_id' => $jurnal->id,
+                'siswa_id' => $s->id,
+                'status' => fake()->randomElement(['hadir', 'hadir', 'hadir', 'sakit', 'izin']),
+            ]));
+        });
+
+        // ------------------------------------------------------- Contoh dispensasi
+        $siswaList = Siswa::inRandomOrder()->take(4)->get();
+        $states = [
+            ['status_piket' => 'pending', 'status_waka' => 'pending'],
+            ['status_piket' => 'approved', 'status_waka' => 'pending'],
+            ['status_piket' => 'approved', 'status_waka' => 'approved'],
+            ['status_piket' => 'rejected', 'status_waka' => 'pending'],
+        ];
+        foreach ($siswaList as $i => $s) {
+            $d = Dispensasi::create([
+                'siswa_id' => $s->id,
+                'diajukan_oleh_id' => $admin->id,
+                'tanggal' => now()->subDays($i),
+                'alasan' => 'Mengikuti lomba tingkat kabupaten.',
+                'no_hp' => '08'.fake()->numerify('##########'),
+                ...$states[$i],
+            ]);
+            $d->segarkanStatusAkhir();
+        }
     }
 }

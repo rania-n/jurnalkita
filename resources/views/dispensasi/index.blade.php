@@ -7,6 +7,7 @@
     ];
     $tab = request('status', 'semua');
     $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'ditolak' => 'Ditolak'];
+    $rows = collect($data)->when($tab !== 'semua', fn ($c) => $c->where('status', $tab))->values();
 @endphp
 
 <x-layouts.app title="Daftar Dispensasi" menu="default" width="wide">
@@ -39,16 +40,19 @@
 
         <x-ui.add-button :href="route('dispensasi.create')">Ajukan Dispensasi</x-ui.add-button>
 
-        <x-ui.card-list class="mt-1">
-            @foreach ($data as $d)
-                @continue($tab !== 'semua' && $tab !== $d['status'])
-                <x-ui.list-card :title="$d['nama']" :meta="[$d['kelas'], 'Tanggal: ' . $d['tanggal']]">
-                    <x-slot:badge><x-ui.status-badge :status="$d['status']" /></x-slot:badge>
-                    <x-slot:actions>
-                        <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.show')" />
-                    </x-slot:actions>
-                </x-ui.list-card>
-            @endforeach
-        </x-ui.card-list>
+        @if ($rows->isEmpty())
+            <x-ui.empty icon="fact_check" title="Belum ada dispensasi" desc="Pengajuan dispensasi akan muncul di sini." class="mt-1" />
+        @else
+            <x-ui.card-list class="mt-1">
+                @foreach ($rows as $d)
+                    <x-ui.list-card :title="$d['nama']" :meta="[$d['kelas'], 'Tanggal: ' . $d['tanggal']]">
+                        <x-slot:badge><x-ui.status-badge :status="$d['status']" /></x-slot:badge>
+                        <x-slot:actions>
+                            <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.show')" />
+                        </x-slot:actions>
+                    </x-ui.list-card>
+                @endforeach
+            </x-ui.card-list>
+        @endif
     </div>
 </x-layouts.app>

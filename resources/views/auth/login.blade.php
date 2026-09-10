@@ -7,6 +7,10 @@
         <p class="text-[13px] font-medium text-muted-2">Sistem Jurnal &amp; Absensi Guru SMKN 1 Boyolangu</p>
     </div>
 
+    @if (session('status') || session('info'))
+        <x-alert type="info" class="mb-4">{{ session('status') ?? session('info') }}</x-alert>
+    @endif
+
     <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-4">
         @csrf
 
@@ -23,7 +27,7 @@
                 <input type="checkbox" name="remember" class="h-5 w-5 rounded accent-navy">
                 <span class="text-[13px] text-muted-2">Tetap masuk selama 30 hari</span>
             </label>
-            <a href="{{ route('lupa_sandi') }}" class="text-[13px] font-bold text-navy">Lupa Sandi?</a>
+            <a href="{{ route('password.request') }}" class="text-[13px] font-bold text-navy">Lupa Sandi?</a>
         </div>
 
         <x-ui.button type="submit" block class="mt-2">Masuk</x-ui.button>
