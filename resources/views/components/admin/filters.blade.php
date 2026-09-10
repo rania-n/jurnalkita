@@ -1,19 +1,18 @@
 @props(['action'])
 
 @php
-    // Aktif jika ada query filter selain 'page'
-    $hasFilter = collect(request()->except('page'))->filter(fn ($v) => $v !== '' && $v !== null)->isNotEmpty();
+    $hasFilter = collect(request()->except('page', 'hari'))->filter(fn ($v) => $v !== '' && $v !== null)->isNotEmpty();
 @endphp
 
 <form method="GET" action="{{ $action }}" class="mb-4 flex flex-wrap items-end gap-2">
     {{ $slot }}
 
-    <button type="submit" class="press flex h-10 items-center gap-1.5 rounded-lg bg-navy px-4 text-sm font-semibold text-card hover:bg-navy-hover">
-        <x-icon name="filter_alt" :size="16" /> Terapkan
+    <button type="submit" class="press flex h-10 items-center gap-1.5 rounded-lg border border-surface-alt bg-card px-3 text-sm font-semibold text-ink hover:bg-surface">
+        <x-icon name="search" :size="16" /> Cari
     </button>
 
     @if ($hasFilter)
-        <a href="{{ $action }}" class="flex h-10 items-center gap-1 rounded-lg px-3 text-sm font-semibold text-muted hover:text-ink">
+        <a href="{{ $action }}" class="flex h-10 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-muted hover:text-alpha">
             <x-icon name="close" :size="16" /> Reset
         </a>
     @endif

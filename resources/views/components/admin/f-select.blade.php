@@ -8,7 +8,7 @@
 <label class="flex flex-col gap-1">
     <span class="text-xs font-semibold text-muted-2">{{ $label }}</span>
     <span class="relative">
-        <select name="{{ $name }}"
+        <select name="{{ $name }}" onchange="this.form.requestSubmit()"
             class="h-10 w-44 appearance-none rounded-lg border border-surface-alt bg-card pl-3 pr-8 text-sm font-medium text-ink outline-none focus:border-navy">
             <option value="">{{ $all }}</option>
             @foreach ($options as $value => $text)

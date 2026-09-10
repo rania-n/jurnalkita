@@ -55,7 +55,7 @@
 
     {{-- Konten --}}
     <div class="flex w-full flex-col lg:pl-60">
-        <header class="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-surface-alt bg-card/95 px-5 py-3 backdrop-blur lg:px-8">
+        <header class="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-surface-alt bg-card/95 px-5 py-3 backdrop-blur sm:px-6 lg:px-10 2xl:px-16">
             <div class="flex items-center gap-3">
                 <button type="button" class="lg:hidden" onclick="document.getElementById('admin-sidebar').classList.toggle('hidden')" aria-label="Menu">
                     <x-icon name="menu" :size="24" class="text-ink" />
@@ -68,7 +68,7 @@
             </div>
         </header>
 
-        <main class="mx-auto w-full max-w-5xl flex-1 px-5 py-6 lg:px-8 lg:py-8">
+        <main class="w-full flex-1 px-5 py-6 sm:px-6 lg:px-10 lg:py-8 2xl:px-16">
             @foreach (['success', 'error', 'info'] as $key)
                 @if (session($key))
                     <x-alert :type="$key === 'error' ? 'error' : ($key === 'info' ? 'info' : 'success')" class="mb-4">{{ session($key) }}</x-alert>
