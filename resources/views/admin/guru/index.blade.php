@@ -41,7 +41,7 @@
                             edit-title="Ubah Guru"
                             :edit-id="$g->id"
                             :edit-fill="['nama' => $g->nama, 'nip' => $g->nip, 'no_hp' => $g->no_hp]"
-                            :delete-action="route('admin.stub')"
+                            :delete-action="route('master.guru.destroy', $g)"
                             delete-confirm="Yakin hapus data guru {{ $g->nama }}?"
                         />
                     </td>
@@ -51,7 +51,7 @@
     @endif
 
     <x-admin.modal id="modal-guru" title="Tambah Guru">
-        <form method="POST" action="{{ route('master.store', 'guru') }}" class="flex flex-col gap-4">
+        <form method="POST" action="{{ route('master.guru.save') }}" class="flex flex-col gap-4">
             @csrf
             <p class="text-xs text-muted-2">Data guru saja. Akun login dibuat lewat menu "Buat Akun".</p>
             <x-ui.input label="Nama Lengkap" name="nama" />

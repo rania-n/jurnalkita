@@ -47,7 +47,7 @@
                             edit-title="Ubah Jadwal Piket"
                             :edit-id="$p->id"
                             :edit-fill="['hari' => $p->hari, 'guru_id' => $p->guru_id, 'mulai' => $p->mulai?->format('H:i'), 'selesai' => $p->selesai?->format('H:i'), 'keterangan' => $p->keterangan]"
-                            :delete-action="route('admin.stub')"
+                            :delete-action="route('master.jadwal-piket.destroy', $p)"
                             delete-confirm="Hapus jadwal piket ini?"
                         />
                     </td>
@@ -57,7 +57,7 @@
     @endif
 
     <x-admin.modal id="modal-piket" title="Tambah Jadwal Piket">
-        <form method="POST" action="{{ route('master.store', 'jadwal-piket') }}" class="flex flex-col gap-4">
+        <form method="POST" action="{{ route('master.jadwal-piket.save') }}" class="flex flex-col gap-4">
             @csrf
             <x-ui.select label="Hari" name="hari">
                 <option value="" disabled selected hidden>Pilih hari</option>

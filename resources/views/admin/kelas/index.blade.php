@@ -40,7 +40,7 @@
                             edit-title="Ubah Kelas"
                             :edit-id="$k->id"
                             :edit-fill="['nama' => $k->nama, 'tingkat' => $k->tingkat, 'jurusan' => $k->jurusan, 'wali_id' => $k->wali_id]"
-                            :delete-action="route('admin.stub')"
+                            :delete-action="route('master.kelas.destroy', $k)"
                             delete-confirm="Yakin hapus kelas {{ $k->nama }}?"
                         />
                     </td>
@@ -50,7 +50,7 @@
     @endif
 
     <x-admin.modal id="modal-kelas" title="Tambah Kelas">
-        <form method="POST" action="{{ route('master.store', 'kelas') }}" class="flex flex-col gap-4">
+        <form method="POST" action="{{ route('master.kelas.save') }}" class="flex flex-col gap-4">
             @csrf
             <x-ui.input label="Nama Kelas" name="nama" placeholder="Contoh: X RPL 1" />
             <x-ui.select label="Tingkat" name="tingkat">

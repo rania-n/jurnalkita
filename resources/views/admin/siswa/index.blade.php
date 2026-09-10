@@ -49,7 +49,7 @@
                             edit-title="Ubah Siswa"
                             :edit-id="$s->id"
                             :edit-fill="['nis' => $s->nis, 'nama' => $s->nama, 'kelas_id' => $s->kelas_id, 'no_absen' => $s->no_absen, 'jenis_kelamin' => $s->jenis_kelamin, 'jabatan' => $s->jabatan]"
-                            :delete-action="route('admin.stub')"
+                            :delete-action="route('master.siswa.destroy', $s)"
                             delete-confirm="Yakin hapus {{ $s->nama }}?"
                         />
                     </td>
@@ -61,7 +61,7 @@
     @endif
 
     <x-admin.modal id="modal-siswa" title="Tambah Siswa">
-        <form method="POST" action="{{ route('master.store', 'siswa') }}" class="flex flex-col gap-4">
+        <form method="POST" action="{{ route('master.siswa.save') }}" class="flex flex-col gap-4">
             @csrf
             <x-ui.select label="Kelas" name="kelas_id">
                 <option value="" disabled selected hidden>Pilih kelas</option>

@@ -48,7 +48,7 @@
                             edit-title="Ubah Jadwal"
                             :edit-id="$j->id"
                             :edit-fill="['hari' => $j->hari, 'kelas_id' => $j->kelas_id, 'mapel_id' => $j->mapel_id, 'guru_id' => $j->guru_id, 'jam_ke_mulai' => $j->jam_ke_mulai, 'jam_ke_selesai' => $j->jam_ke_selesai, 'ruang' => $j->ruang]"
-                            :delete-action="route('admin.stub')"
+                            :delete-action="route('master.jadwal-pelajaran.destroy', $j)"
                             delete-confirm="Hapus jadwal ini?"
                         />
                     </td>
@@ -58,7 +58,7 @@
     @endif
 
     <x-admin.modal id="modal-jadwal" title="Tambah Jadwal">
-        <form method="POST" action="{{ route('master.store', 'jadwal-pelajaran') }}" class="flex flex-col gap-4">
+        <form method="POST" action="{{ route('master.jadwal-pelajaran.save') }}" class="flex flex-col gap-4">
             @csrf
             <x-ui.select label="Hari" name="hari">
                 <option value="" disabled selected hidden>Pilih hari</option>

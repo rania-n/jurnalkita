@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\GuruController;
+use App\Http\Controllers\Admin\JadwalController;
+use App\Http\Controllers\Admin\JadwalPiketController;
+use App\Http\Controllers\Admin\JamPelajaranController;
+use App\Http\Controllers\Admin\KelasController;
+use App\Http\Controllers\Admin\MapelController;
+use App\Http\Controllers\Admin\SiswaController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,7 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
     Route::view('/profil', 'profil')->name('profil');
 
     /* =============================== ADMIN =============================== */
-    Route::middleware('role:admin')->group(function () use ($stub) {
+    Route::middleware('role:admin')->group(function () {
         Route::view('/admin', 'admin.dashboard')->name('admin.dashboard');
 
         Route::view('/admin/guru', 'admin.guru.index')->name('master.guru.index');
@@ -38,9 +45,20 @@ Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
         Route::view('/admin/jam-pelajaran/edit', 'admin.jam-pelajaran.edit')->name('master.jam-pelajaran.edit');
         Route::view('/admin/jadwal-piket', 'admin.jadwal-piket.index')->name('master.jadwal-piket.index');
 
-        // Stub tulis admin (semua metode) sampai controller CRUD dibuat.
-        Route::post('/admin/{resource}', $stub)->name('master.store');
-        Route::any('/admin-aksi', $stub)->name('admin.stub');
+        /* Tulis master data (tambah/ubah = save, hapus = destroy) */
+        Route::post('/admin/guru', [GuruController::class, 'save'])->name('master.guru.save');
+        Route::delete('/admin/guru/{guru}', [GuruController::class, 'destroy'])->name('master.guru.destroy');
+        Route::post('/admin/kelas', [KelasController::class, 'save'])->name('master.kelas.save');
+        Route::delete('/admin/kelas/{kelas}', [KelasController::class, 'destroy'])->name('master.kelas.destroy');
+        Route::post('/admin/siswa', [SiswaController::class, 'save'])->name('master.siswa.save');
+        Route::delete('/admin/siswa/{siswa}', [SiswaController::class, 'destroy'])->name('master.siswa.destroy');
+        Route::post('/admin/mapel', [MapelController::class, 'save'])->name('master.mapel.save');
+        Route::delete('/admin/mapel/{mapel}', [MapelController::class, 'destroy'])->name('master.mapel.destroy');
+        Route::post('/admin/jadwal-pelajaran', [JadwalController::class, 'save'])->name('master.jadwal-pelajaran.save');
+        Route::delete('/admin/jadwal-pelajaran/{jadwal}', [JadwalController::class, 'destroy'])->name('master.jadwal-pelajaran.destroy');
+        Route::post('/admin/jadwal-piket', [JadwalPiketController::class, 'save'])->name('master.jadwal-piket.save');
+        Route::delete('/admin/jadwal-piket/{jadwalPiket}', [JadwalPiketController::class, 'destroy'])->name('master.jadwal-piket.destroy');
+        Route::post('/admin/jam-pelajaran', [JamPelajaranController::class, 'save'])->name('master.jam-pelajaran.save');
     });
 
     /* =============================== GURU =============================== */

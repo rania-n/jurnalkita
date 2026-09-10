@@ -29,7 +29,7 @@
                             edit-title="Ubah Mata Pelajaran"
                             :edit-id="$m->id"
                             :edit-fill="['kode' => $m->kode, 'nama' => $m->nama]"
-                            :delete-action="route('admin.stub')"
+                            :delete-action="route('master.mapel.destroy', $m)"
                             delete-confirm="Hapus {{ $m->nama }}?"
                         />
                     </td>
@@ -39,7 +39,7 @@
     @endif
 
     <x-admin.modal id="modal-mapel" title="Tambah Mata Pelajaran">
-        <form method="POST" action="{{ route('master.store', 'mapel') }}" class="flex flex-col gap-4">
+        <form method="POST" action="{{ route('master.mapel.save') }}" class="flex flex-col gap-4">
             @csrf
             <x-ui.input label="Kode" name="kode" placeholder="Contoh: MAT" />
             <x-ui.input label="Nama Mata Pelajaran" name="nama" placeholder="Contoh: Matematika" />
