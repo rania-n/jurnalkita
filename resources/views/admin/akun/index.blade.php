@@ -89,7 +89,7 @@
                 <option value="waka">Waka Kesiswaan</option>
             </x-ui.select>
 
-            <x-ui.select label="Ambil dari data" name="sumber" id="akun-sumber" data-grup="guru siswa">
+            <x-ui.select label="Ambil dari data" name="sumber" id="akun-sumber" data-grup="sumber">
                 <option value="baru">➕ Buat data baru</option>
                 <optgroup label="Guru belum punya akun" data-role="guru">
                     @foreach ($guruTanpaAkun as $g)
@@ -158,7 +158,10 @@
                     const r = role.value;
                     const pakaiData = r === 'guru' || r === 'siswa';
 
-                    sumber.querySelectorAll('optgroup').forEach((g) => (g.hidden = g.dataset.role !== r));
+                    sumber.querySelectorAll('optgroup').forEach((g) => {
+                        const off = g.dataset.role !== r;
+                        g.hidden = g.disabled = off;
+                    });
                     setGrup(sumberWrap, pakaiData);
                     if (!pakaiData || sumber.selectedOptions[0]?.parentElement?.hidden) sumber.value = 'baru';
 

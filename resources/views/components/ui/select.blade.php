@@ -3,9 +3,19 @@
     'name' => null,
 ])
 
-@php $id = $attributes->get('id', $name); @endphp
+@php
+    $id = $attributes->get('id', $name);
 
-<div class="flex flex-col gap-1.5">
+    // class / hidden / data-* -> wrapper. Sisanya -> <select>.
+    $wrapKeys = collect($attributes->getAttributes())
+        ->keys()
+        ->filter(fn ($k) => $k === 'class' || $k === 'hidden' || str_starts_with($k, 'data-'))
+        ->all();
+    $wrap = $attributes->only($wrapKeys);
+    $select = $attributes->except([...$wrapKeys, 'id']);
+@endphp
+
+<div {{ $wrap->class('flex flex-col gap-1.5') }}>
     @if ($label)
         <x-ui.label :for="$id">{{ $label }}</x-ui.label>
     @endif
@@ -14,7 +24,7 @@
         <select
             @if ($name) name="{{ $name }}" @endif
             id="{{ $id }}"
-            {{ $attributes->except('id')->class('h-[52px] w-full cursor-pointer appearance-none rounded-xl border border-surface-alt bg-card px-4 pr-11 text-[15px] text-ink outline-none transition-colors focus:border-navy') }}
+            {{ $select->class('h-[52px] w-full cursor-pointer appearance-none rounded-xl border border-surface-alt bg-card px-4 pr-11 text-[15px] text-ink outline-none transition-colors focus:border-navy') }}
         >
             {{ $slot }}
         </select>

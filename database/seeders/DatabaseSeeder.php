@@ -108,9 +108,12 @@ class DatabaseSeeder extends Seeder
         $kelas->each(function (Kelas $k, $ki) {
             for ($n = 1; $n <= 8; $n++) {
                 $isPengurus = $n === 1;
+                // Kelas ke-0 & 1: pengurus punya akun. Sisanya: pengurus tanpa akun
+                // (biar bisa dites "Buat Akun dari data" di menu Manajemen Akun).
+                $pengurusPunyaAkun = $isPengurus && $ki < 2;
                 $jk = fake()->randomElement(['L', 'P']);
 
-                $user = $isPengurus ? User::create([
+                $user = $pengurusPunyaAkun ? User::create([
                     'name' => 'Pengurus '.$k->nama,
                     'email' => 'kelas'.($ki + 1).'@jurnalkita.test',
                     'email_verified_at' => now(), 'password' => Hash::make('password'),
