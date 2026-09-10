@@ -59,6 +59,7 @@
             rows.addEventListener('click', (e) => {
                 if (!e.target.closest('[data-jp-remove]')) return;
                 if (rows.querySelectorAll('[data-jp-row]').length <= 1) return;
+                if (!confirm('Hapus baris jam pelajaran ini?')) return;
                 e.target.closest('[data-jp-row]').remove();
                 renumber();
             });

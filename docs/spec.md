@@ -78,3 +78,19 @@ Aturan bisnis detail. Prioritas & pembagian modul: `docs/roadmap.md`.
 **Lanjut / backlog (`docs/scope.md`):**
 - Integrasi WhatsApp (link approve, kirim surat).
 - Surat dispensasi PDF + QR rotating + halaman scan satpam.
+
+---
+
+## E. Tahun Ajaran / Kenaikan Kelas (backlog, penting)
+
+- Perlu **setting tahun ajaran aktif** (mis. "2026/2027").
+- Saat naik tahun: semua kelas naik tingkat (X→XI→XII), XII lulus, data tahun lama
+  **diarsipkan** (tetap bisa dilihat, tidak ikut daftar aktif).
+- Kemungkinan: kolom `tahun_ajaran` di kelas/siswa/jadwal + scope "aktif" + halaman arsip.
+- Belum dikerjakan — cukup dicatat dulu.
+
+## F. Jam Pelajaran — kategori dinamis
+
+- Sekarang kategori tetap: Senin–Kamis / Jumat / Khusus.
+- Nanti bisa **tambah kategori sendiri** (mis. "Ramadhan", "Ujian"). Butuh tabel kategori
+  terpisah. Backlog.

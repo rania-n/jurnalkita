@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Mapel utama guru (single). guru_mapel = mapel tambahan yang diajar.
+        Schema::table('gurus', function (Blueprint $table) {
+            $table->foreignId('mapel_utama_id')->nullable()->after('nama')->constrained('mapels')->nullOnDelete();
+        });
+
         Schema::create('guru_mapel', function (Blueprint $table) {
             $table->id();
             $table->foreignId('guru_id')->constrained('gurus')->cascadeOnDelete();
@@ -20,5 +25,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('guru_mapel');
+        Schema::table('gurus', fn (Blueprint $table) => $table->dropConstrainedForeignId('mapel_utama_id'));
     }
 };

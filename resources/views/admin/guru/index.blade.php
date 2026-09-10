@@ -2,9 +2,9 @@
     $q = request('cari');
     $mapelId = request('mapel');
 
-    $rows = \App\Models\Guru::with('mapels', 'user')
+    $rows = \App\Models\Guru::with('mapelUtama', 'mapels', 'user')
         ->when($q, fn ($b) => $b->where(fn ($w) => $w->where('nama', 'like', "%{$q}%")->orWhere('nip', 'like', "%{$q}%")))
-        ->when($mapelId, fn ($b) => $b->whereHas('mapels', fn ($m) => $m->where('mapels.id', $mapelId)))
+        ->when($mapelId, fn ($b) => $b->where(fn ($w) => $w->where('mapel_utama_id', $mapelId)->orWhereHas('mapels', fn ($m) => $m->where('mapels.id', $mapelId))))
         ->orderBy('nama')
         ->get();
 
@@ -26,11 +26,12 @@
     @if ($rows->isEmpty())
         <x-ui.empty title="Tidak ada guru yang cocok" />
     @else
-        <x-admin.table :head="['Nama', 'NIP', 'Mata Pelajaran', 'Akun', '']">
+        <x-admin.table :head="['Nama', 'NIP', 'Mapel Utama', 'Mapel Tambahan', 'Akun', '']">
             @foreach ($rows as $g)
                 <tr class="hover:bg-surface/60">
                     <td class="px-4 py-3 font-semibold text-ink">{{ $g->nama }}</td>
                     <td class="px-4 py-3 text-muted">{{ $g->nip ?: '—' }}</td>
+                    <td class="px-4 py-3 text-muted">{{ $g->mapelUtama?->nama ?: '—' }}</td>
                     <td class="px-4 py-3 text-muted">{{ $g->mapels->pluck('nama')->join(', ') ?: '—' }}</td>
                     <td class="px-4 py-3">
                         <x-ui.status-badge :status="$g->user_id ? 'disetujui' : 'menunggu'">{{ $g->user_id ? 'Ada' : 'Belum' }}</x-ui.status-badge>
@@ -40,7 +41,13 @@
                             edit-modal="modal-guru"
                             edit-title="Ubah Guru"
                             :edit-id="$g->id"
-                            :edit-fill="['nama' => $g->nama, 'nip' => $g->nip, 'no_hp' => $g->no_hp]"
+                            :edit-fill="[
+                                'nama' => $g->nama,
+                                'nip' => $g->nip,
+                                'no_hp' => $g->no_hp,
+                                'mapel_utama_id' => $g->mapel_utama_id,
+                                'mapel_tambahan' => $g->mapels->pluck('id'),
+                            ]"
                             :delete-action="route('master.guru.destroy', $g)"
                             delete-confirm="Yakin hapus data guru {{ $g->nama }}?"
                         />
@@ -57,12 +64,25 @@
             <x-ui.input label="Nama Lengkap" name="nama" />
             <x-ui.input label="NIP (opsional)" name="nip" />
             <x-ui.input label="No. Telepon" name="no_hp" inputmode="numeric" />
-            <x-ui.select label="Mata Pelajaran" name="mapel_id">
-                <option value="" disabled selected hidden>Pilih mata pelajaran</option>
+
+            <x-ui.select label="Mapel Utama" name="mapel_utama_id">
+                <option value="">— belum ditentukan —</option>
                 @foreach ($mapelList as $m)
                     <option value="{{ $m->id }}">{{ $m->nama }}</option>
                 @endforeach
             </x-ui.select>
+
+            <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-ink">Mapel Tambahan <span class="font-normal text-muted-2">(jika mengajar lebih dari 1)</span></span>
+                <select name="mapel_tambahan[]" multiple size="4"
+                    class="rounded-xl border border-surface-alt bg-card px-3 py-2 text-sm text-ink outline-none focus:border-navy">
+                    @foreach ($mapelList as $m)
+                        <option value="{{ $m->id }}">{{ $m->nama }}</option>
+                    @endforeach
+                </select>
+                <span class="text-xs text-muted-2">Tahan Ctrl / Cmd untuk pilih beberapa.</span>
+            </label>
+
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save">Simpan</x-ui.button>
                 <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>

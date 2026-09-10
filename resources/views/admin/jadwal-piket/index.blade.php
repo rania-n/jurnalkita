@@ -1,14 +1,17 @@
 @php
-    $hari = request('hari', 'senin');
+    $hari = request('hari', 'semua');
     $q = request('cari');
-    $hariLabel = ['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat'];
+    $hariLabel = config('akademik.hari');
+    $tabs = ['semua' => 'Semua'] + $hariLabel;
 
     $rows = \App\Models\JadwalPiket::with('guru')
-        ->where('hari', $hari)
+        ->when($hari !== 'semua', fn ($b) => $b->where('hari', $hari))
         ->when($q, fn ($b) => $b->whereHas('guru', fn ($g) => $g->where('nama', 'like', "%{$q}%")))
+        ->orderByRaw("field(hari,'senin','selasa','rabu','kamis','jumat')")
         ->get();
 
     $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);
+    $semua = $hari === 'semua';
 @endphp
 
 <x-layouts.admin title="Jadwal Piket" heading="Jadwal Piket">
@@ -18,10 +21,10 @@
         </x-slot:action>
     </x-admin.page>
 
-    <div class="mb-4 flex gap-1 rounded-xl border border-surface-alt bg-card p-1">
-        @foreach ($hariLabel as $key => $label)
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
+        @foreach ($tabs as $key => $label)
             <a href="{{ route('master.jadwal-piket.index', ['hari' => $key, 'cari' => $q]) }}"
-               @class(['flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold transition-colors', 'bg-navy text-card' => $hari === $key, 'text-muted-2 hover:text-ink' => $hari !== $key])>
+               @class(['flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-center text-sm font-semibold transition-colors', 'bg-navy text-card' => $hari === $key, 'text-muted-2 hover:text-ink' => $hari !== $key])>
                 {{ $label }}
             </a>
         @endforeach
@@ -33,12 +36,15 @@
     </x-admin.filters>
 
     @if ($rows->isEmpty())
-        <x-ui.empty title="Belum ada guru piket untuk {{ $hariLabel[$hari] ?? $hari }}" />
+        <x-ui.empty title="Belum ada jadwal piket" />
     @else
-        <x-admin.table :head="['Guru', 'Jam', 'Keterangan', '']">
+        <x-admin.table :head="$semua ? ['Hari', 'Guru', 'Jam', 'Keterangan', ''] : ['Guru', 'Jam', 'Keterangan', '']">
             @foreach ($rows as $p)
                 <tr class="hover:bg-surface/60">
-                    <td class="px-4 py-3 font-semibold text-ink">{{ $p->guru?->nama }}</td>
+                    @if ($semua)
+                        <td class="px-4 py-3 font-semibold text-ink">{{ $hariLabel[$p->hari] ?? $p->hari }}</td>
+                    @endif
+                    <td class="px-4 py-3 {{ $semua ? 'text-muted' : 'font-semibold text-ink' }}">{{ $p->guru?->nama }}</td>
                     <td class="px-4 py-3 text-muted">{{ $p->mulai?->format('H:i') ?? '—' }} – {{ $p->selesai?->format('H:i') ?? '—' }}</td>
                     <td class="px-4 py-3 text-muted">{{ $p->keterangan ?: '—' }}</td>
                     <td class="px-4 py-3">

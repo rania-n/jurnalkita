@@ -93,8 +93,19 @@ function initModals() {
                     try {
                         const data = JSON.parse(opener.dataset.modalFill);
                         Object.entries(data).forEach(([k, v]) => {
-                            const field = form.elements[k];
-                            if (field) field.value = v ?? '';
+                            const field = form.elements[k] || form.elements[k + '[]'];
+                            if (!field) return;
+
+                            if (typeof field.forEach === 'function' && !(field instanceof HTMLSelectElement)) {
+                                // grup checkbox / radio
+                                const arr = (Array.isArray(v) ? v : [v]).map(String);
+                                field.forEach((el) => { el.checked = arr.includes(el.value); });
+                            } else if (field.multiple) {
+                                const arr = (Array.isArray(v) ? v : [v]).map(String);
+                                Array.from(field.options).forEach((o) => { o.selected = arr.includes(o.value); });
+                            } else {
+                                field.value = v ?? '';
+                            }
                         });
                     } catch (_) { /* abaikan */ }
                 }

@@ -65,8 +65,8 @@ class DatabaseSeeder extends Seeder
                 'nip' => fake()->numerify('19#########'),
                 'nama' => $g['nama'],
                 'no_hp' => '08'.fake()->numerify('##########'),
+                'mapel_utama_id' => $mapels->firstWhere('kode', $g['mapel'])->id,
             ]);
-            $guru->mapels()->attach($mapels->firstWhere('kode', $g['mapel']));
 
             if ($g['piket']) {
                 JadwalPiket::create([
@@ -94,11 +94,15 @@ class DatabaseSeeder extends Seeder
 
         // ----------------------------------------------------------------- Kelas
         $kelas = collect([
-            ['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL'],
-            ['nama' => 'X RPL 2', 'tingkat' => 'X', 'jurusan' => 'RPL'],
-            ['nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL'],
-            ['nama' => 'XI TKJ 1', 'tingkat' => 'XI', 'jurusan' => 'TKJ'],
-        ])->map(fn ($k, $i) => Kelas::create([...$k, 'wali_id' => $gurus[$i % $gurus->count()]->id]));
+            ['tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 1],
+            ['tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 2],
+            ['tingkat' => 'XI', 'jurusan' => 'RPL', 'nomor' => 1],
+            ['tingkat' => 'XI', 'jurusan' => 'TKJ', 'nomor' => 1],
+        ])->map(fn ($k, $i) => Kelas::create([
+            ...$k,
+            'nama' => "{$k['tingkat']} {$k['jurusan']} {$k['nomor']}",
+            'wali_id' => $gurus[$i % $gurus->count()]->id,
+        ]));
 
         // ----------------------------------------------------------------- Siswa
         $kelas->each(function (Kelas $k, $ki) {
@@ -133,7 +137,7 @@ class DatabaseSeeder extends Seeder
                     'kelas_id' => $k->id,
                     'mapel_id' => $mapels[$hi % $mapels->count()]->id,
                     'guru_id' => $gurus[$hi % $gurus->count()]->id,
-                    'ruang' => 'R'.fake()->numberBetween(10, 40),
+                    'ruang' => fake()->randomElement(config('akademik.ruangan')),
                     'hari' => $hari,
                     'jam_ke_mulai' => 1,
                     'jam_ke_selesai' => 2,

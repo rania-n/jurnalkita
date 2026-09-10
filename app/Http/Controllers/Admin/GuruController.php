@@ -17,18 +17,26 @@ class GuruController extends Controller
             'nama' => ['required', 'string', 'max:255'],
             'nip' => ['nullable', 'string', 'max:30'],
             'no_hp' => ['nullable', 'string', 'max:20'],
-            'mapel_id' => ['nullable', 'exists:mapels,id'],
+            'mapel_utama_id' => ['nullable', 'exists:mapels,id'],
+            'mapel_tambahan' => ['nullable', 'array'],
+            'mapel_tambahan.*' => ['exists:mapels,id'],
         ]);
 
         $guru = $request->filled('id') ? Guru::findOrFail($data['id']) : new Guru;
         $baru = ! $guru->exists;
 
-        $guru->fill(['nama' => $data['nama'], 'nip' => $data['nip'] ?? null, 'no_hp' => $data['no_hp'] ?? null]);
-        $guru->save();
+        $guru->fill([
+            'nama' => $data['nama'],
+            'nip' => $data['nip'] ?? null,
+            'no_hp' => $data['no_hp'] ?? null,
+            'mapel_utama_id' => $data['mapel_utama_id'] ?? null,
+        ])->save();
 
-        if ($request->filled('mapel_id')) {
-            $guru->mapels()->syncWithoutDetaching([$data['mapel_id']]);
-        }
+        // Mapel tambahan = pilihan multi, minus mapel utama.
+        $tambahan = collect($data['mapel_tambahan'] ?? [])
+            ->reject(fn ($id) => $id == $guru->mapel_utama_id)
+            ->all();
+        $guru->mapels()->sync($tambahan);
 
         AuditLog::catat($baru ? 'guru.tambah' : 'guru.ubah', "Data guru: {$guru->nama}", $guru);
 

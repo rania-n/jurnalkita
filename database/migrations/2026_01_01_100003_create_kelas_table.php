@@ -12,7 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->enum('tingkat', ['X', 'XI', 'XII']);
-            $table->string('jurusan')->nullable();
+            $table->string('jurusan')->nullable();          // kode: RPL, TKJ, ...
+            $table->unsignedTinyInteger('nomor')->nullable();
             $table->foreignId('wali_id')->nullable()->constrained('gurus')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();

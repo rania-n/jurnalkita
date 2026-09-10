@@ -13,13 +13,19 @@ class Guru extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['user_id', 'nip', 'nama', 'no_hp'];
+    protected $fillable = ['user_id', 'nip', 'nama', 'no_hp', 'mapel_utama_id'];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    public function mapelUtama(): BelongsTo
+    {
+        return $this->belongsTo(Mapel::class, 'mapel_utama_id');
+    }
+
+    /** Mapel tambahan yang juga diajar guru ini. */
     public function mapels(): BelongsToMany
     {
         return $this->belongsToMany(Mapel::class, 'guru_mapel')->withTimestamps();

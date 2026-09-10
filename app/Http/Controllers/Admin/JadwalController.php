@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Jadwal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class JadwalController extends Controller
 {
@@ -20,7 +21,7 @@ class JadwalController extends Controller
             'hari' => ['required', 'in:senin,selasa,rabu,kamis,jumat'],
             'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:15'],
             'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
-            'ruang' => ['nullable', 'string', 'max:50'],
+            'ruang' => ['nullable', 'string', 'max:50', Rule::in(config('akademik.ruangan'))],
         ]);
 
         $jadwal = $request->filled('id') ? Jadwal::findOrFail($data['id']) : new Jadwal;

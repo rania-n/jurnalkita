@@ -38,22 +38,35 @@ class MasterCrudTest extends TestCase
     public function test_validation_blocks_bad_input(): void
     {
         $this->actingAs($this->admin())
-            ->post('/admin/kelas', ['nama' => '', 'tingkat' => 'ZZ'])
-            ->assertSessionHasErrors(['nama', 'tingkat']);
+            ->post('/admin/kelas', ['tingkat' => 'ZZ', 'jurusan' => ''])
+            ->assertSessionHasErrors(['tingkat', 'jurusan']);
 
         $this->assertDatabaseCount('kelas', 0);
     }
 
-    public function test_guru_create_attaches_mapel_and_writes_audit_log(): void
+    public function test_kelas_name_is_generated(): void
     {
-        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $this->actingAs($this->admin())->post('/admin/kelas', [
+            'tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 2,
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('kelas', ['nama' => 'X RPL 2', 'jurusan' => 'RPL', 'nomor' => 2]);
+    }
+
+    public function test_guru_utama_and_tambahan_mapel(): void
+    {
+        $utama = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $tambahan = Mapel::create(['kode' => 'FIS', 'nama' => 'Fisika']);
 
         $this->actingAs($this->admin())->post('/admin/guru', [
-            'nama' => 'Bu Test', 'mapel_id' => $mapel->id,
+            'nama' => 'Bu Test',
+            'mapel_utama_id' => $utama->id,
+            'mapel_tambahan' => [$tambahan->id, $utama->id],
         ])->assertRedirect();
 
         $guru = Guru::first();
-        $this->assertTrue($guru->mapels->contains($mapel));
+        $this->assertSame($utama->id, $guru->mapel_utama_id);
+        $this->assertEqualsCanonicalizing([$tambahan->id], $guru->mapels->pluck('id')->all());
         $this->assertDatabaseHas('audit_logs', ['aksi' => 'guru.tambah']);
     }
 

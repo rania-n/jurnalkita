@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Kelas;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class KelasController extends Controller
 {
@@ -14,21 +15,19 @@ class KelasController extends Controller
     {
         $data = $request->validate([
             'id' => ['nullable', 'exists:kelas,id'],
-            'nama' => ['required', 'string', 'max:100'],
-            'tingkat' => ['required', 'in:X,XI,XII'],
-            'jurusan' => ['nullable', 'string', 'max:50'],
+            'tingkat' => ['required', Rule::in(config('akademik.tingkat'))],
+            'jurusan' => ['required', Rule::in(array_keys(config('akademik.jurusan')))],
+            'nomor' => ['nullable', 'integer', 'min:1', 'max:20'],
             'wali_id' => ['nullable', 'exists:gurus,id'],
         ]);
+
+        // Nama kelas dibuat otomatis: "X RPL 1"
+        $data['nama'] = trim("{$data['tingkat']} {$data['jurusan']} ".($data['nomor'] ?? ''));
 
         $kelas = $request->filled('id') ? Kelas::findOrFail($data['id']) : new Kelas;
         $baru = ! $kelas->exists;
 
-        $kelas->fill([
-            'nama' => $data['nama'],
-            'tingkat' => $data['tingkat'],
-            'jurusan' => $data['jurusan'] ?? null,
-            'wali_id' => $data['wali_id'] ?? null,
-        ])->save();
+        $kelas->fill($data)->save();
 
         AuditLog::catat($baru ? 'kelas.tambah' : 'kelas.ubah', "Kelas: {$kelas->nama}", $kelas);
 

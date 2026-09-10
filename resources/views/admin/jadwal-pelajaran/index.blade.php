@@ -82,7 +82,12 @@
                 <x-ui.input label="Jam ke- (mulai)" name="jam_ke_mulai" type="number" min="1" class="flex-1" />
                 <x-ui.input label="Jam ke- (selesai)" name="jam_ke_selesai" type="number" min="1" class="flex-1" />
             </div>
-            <x-ui.input label="Ruang" name="ruang" placeholder="Contoh: Lab RPL" />
+            <x-ui.select label="Ruang" name="ruang">
+                <option value="">— belum ditentukan —</option>
+                @foreach (config('akademik.ruangan') as $r)
+                    <option value="{{ $r }}">{{ $r }}</option>
+                @endforeach
+            </x-ui.select>
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save">Simpan</x-ui.button>
                 <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>

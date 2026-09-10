@@ -14,7 +14,12 @@ class Kelas extends Model
 
     protected $table = 'kelas';
 
-    protected $fillable = ['nama', 'tingkat', 'jurusan', 'wali_id'];
+    protected $fillable = ['nama', 'tingkat', 'jurusan', 'nomor', 'wali_id'];
+
+    public function jurusanNama(): string
+    {
+        return config("akademik.jurusan.{$this->jurusan}", $this->jurusan ?? '—');
+    }
 
     public function wali(): BelongsTo
     {
