@@ -69,11 +69,73 @@ function initConfirm() {
     });
 }
 
+/* Modal <dialog>.
+ *   <button data-modal-open="id-modal">Tambah</button>
+ *   <button data-modal-open="id-modal"
+ *           data-modal-title="Ubah Kelas"
+ *           data-modal-fill='{"nama":"X RPL 1","tingkat":"X"}'>Ubah</button>
+ * Field diisi berdasarkan atribut name di dalam <dialog>.
+ */
+function initModals() {
+    document.addEventListener('click', (e) => {
+        const opener = e.target.closest('[data-modal-open]');
+        if (opener) {
+            const dlg = document.getElementById(opener.dataset.modalOpen);
+            if (!dlg) return;
+
+            const titleEl = dlg.querySelector('[data-modal-title]');
+            if (titleEl && opener.dataset.modalTitle) titleEl.textContent = opener.dataset.modalTitle;
+
+            const form = dlg.querySelector('form');
+            if (form) {
+                form.reset();
+                if (opener.dataset.modalFill) {
+                    try {
+                        const data = JSON.parse(opener.dataset.modalFill);
+                        Object.entries(data).forEach(([k, v]) => {
+                            const field = form.elements[k];
+                            if (field) field.value = v ?? '';
+                        });
+                    } catch (_) { /* abaikan */ }
+                }
+                // Kirim id record (kalau ada) untuk mode ubah.
+                let idInput = form.querySelector('input[name="id"]');
+                if (opener.dataset.modalId) {
+                    if (!idInput) {
+                        idInput = document.createElement('input');
+                        idInput.type = 'hidden';
+                        idInput.name = 'id';
+                        form.appendChild(idInput);
+                    }
+                    idInput.value = opener.dataset.modalId;
+                } else if (idInput) {
+                    idInput.value = '';
+                }
+            }
+
+            dlg.showModal();
+            return;
+        }
+
+        if (e.target.closest('[data-modal-close]')) {
+            e.target.closest('dialog')?.close();
+        }
+    });
+
+    // Klik di area backdrop (di luar isi) -> tutup.
+    document.querySelectorAll('dialog').forEach((dlg) => {
+        dlg.addEventListener('click', (e) => {
+            if (e.target === dlg) dlg.close();
+        });
+    });
+}
+
 function init() {
     initPasswordToggles();
     initSegmented();
     initUploadPreview();
     initConfirm();
+    initModals();
 }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -7,12 +7,14 @@
         ->when($tingkat, fn ($b) => $b->where('tingkat', $tingkat))
         ->orderBy('tingkat')->orderBy('nama')
         ->get();
+
+    $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);
 @endphp
 
 <x-layouts.admin title="Data Kelas" heading="Data Kelas">
     <x-admin.page title="Data Kelas" subtitle="{{ $rows->count() }} kelas">
         <x-slot:action>
-            <x-ui.button :href="route('master.kelas.create')" icon="add">Tambah Kelas</x-ui.button>
+            <x-ui.button type="button" icon="add" data-modal-open="modal-kelas" data-modal-title="Tambah Kelas">Tambah Kelas</x-ui.button>
         </x-slot:action>
     </x-admin.page>
 
@@ -33,10 +35,41 @@
                     <td class="px-4 py-3 text-muted">{{ $k->siswas_count }}</td>
                     <td class="px-4 py-3 text-muted">{{ $k->wali?->nama ?: '—' }}</td>
                     <td class="px-4 py-3">
-                        <x-admin.row-actions :edit="route('master.kelas.create')" :delete-action="route('admin.stub')" delete-confirm="Yakin hapus kelas {{ $k->nama }}?" />
+                        <x-admin.row-actions
+                            edit-modal="modal-kelas"
+                            edit-title="Ubah Kelas"
+                            :edit-id="$k->id"
+                            :edit-fill="['nama' => $k->nama, 'tingkat' => $k->tingkat, 'jurusan' => $k->jurusan, 'wali_id' => $k->wali_id]"
+                            :delete-action="route('admin.stub')"
+                            delete-confirm="Yakin hapus kelas {{ $k->nama }}?"
+                        />
                     </td>
                 </tr>
             @endforeach
         </x-admin.table>
     @endif
+
+    <x-admin.modal id="modal-kelas" title="Tambah Kelas">
+        <form method="POST" action="{{ route('master.store', 'kelas') }}" class="flex flex-col gap-4">
+            @csrf
+            <x-ui.input label="Nama Kelas" name="nama" placeholder="Contoh: X RPL 1" />
+            <x-ui.select label="Tingkat" name="tingkat">
+                <option value="" disabled selected hidden>Pilih tingkat</option>
+                <option value="X">X</option>
+                <option value="XI">XI</option>
+                <option value="XII">XII</option>
+            </x-ui.select>
+            <x-ui.input label="Jurusan" name="jurusan" placeholder="Contoh: RPL" />
+            <x-ui.select label="Wali Kelas" name="wali_id">
+                <option value="">— tanpa wali —</option>
+                @foreach ($guruList as $g)
+                    <option value="{{ $g->id }}">{{ $g->nama }}</option>
+                @endforeach
+            </x-ui.select>
+            <div class="mt-1 flex gap-2">
+                <x-ui.button type="submit" icon="save">Simpan</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+            </div>
+        </form>
+    </x-admin.modal>
 </x-layouts.admin>

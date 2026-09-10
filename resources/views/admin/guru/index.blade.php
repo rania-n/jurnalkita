@@ -8,19 +8,19 @@
         ->orderBy('nama')
         ->get();
 
-    $mapelOptions = \App\Models\Mapel::orderBy('nama')->pluck('nama', 'id');
+    $mapelList = \App\Models\Mapel::orderBy('nama')->get(['id', 'nama']);
 @endphp
 
 <x-layouts.admin title="Data Guru" heading="Data Guru">
     <x-admin.page title="Data Guru" subtitle="{{ $rows->count() }} guru">
         <x-slot:action>
-            <x-ui.button :href="route('master.guru.create')" icon="add">Tambah Guru</x-ui.button>
+            <x-ui.button type="button" icon="add" data-modal-open="modal-guru" data-modal-title="Tambah Guru">Tambah Guru</x-ui.button>
         </x-slot:action>
     </x-admin.page>
 
     <x-admin.filters :action="route('master.guru.index')">
         <x-admin.f-search placeholder="Nama atau NIP..." />
-        <x-admin.f-select name="mapel" label="Mata Pelajaran" :options="$mapelOptions" all="Semua Mapel" />
+        <x-admin.f-select name="mapel" label="Mata Pelajaran" :options="$mapelList->pluck('nama', 'id')" all="Semua Mapel" />
     </x-admin.filters>
 
     @if ($rows->isEmpty())
@@ -36,10 +36,37 @@
                         <x-ui.status-badge :status="$g->user_id ? 'disetujui' : 'menunggu'">{{ $g->user_id ? 'Ada' : 'Belum' }}</x-ui.status-badge>
                     </td>
                     <td class="px-4 py-3">
-                        <x-admin.row-actions :edit="route('master.guru.create')" :delete-action="route('admin.stub')" delete-confirm="Yakin hapus data guru {{ $g->nama }}?" />
+                        <x-admin.row-actions
+                            edit-modal="modal-guru"
+                            edit-title="Ubah Guru"
+                            :edit-id="$g->id"
+                            :edit-fill="['nama' => $g->nama, 'nip' => $g->nip, 'no_hp' => $g->no_hp]"
+                            :delete-action="route('admin.stub')"
+                            delete-confirm="Yakin hapus data guru {{ $g->nama }}?"
+                        />
                     </td>
                 </tr>
             @endforeach
         </x-admin.table>
     @endif
+
+    <x-admin.modal id="modal-guru" title="Tambah Guru">
+        <form method="POST" action="{{ route('master.store', 'guru') }}" class="flex flex-col gap-4">
+            @csrf
+            <p class="text-xs text-muted-2">Data guru saja. Akun login dibuat lewat menu "Buat Akun".</p>
+            <x-ui.input label="Nama Lengkap" name="nama" />
+            <x-ui.input label="NIP (opsional)" name="nip" />
+            <x-ui.input label="No. Telepon" name="no_hp" inputmode="numeric" />
+            <x-ui.select label="Mata Pelajaran" name="mapel_id">
+                <option value="" disabled selected hidden>Pilih mata pelajaran</option>
+                @foreach ($mapelList as $m)
+                    <option value="{{ $m->id }}">{{ $m->nama }}</option>
+                @endforeach
+            </x-ui.select>
+            <div class="mt-1 flex gap-2">
+                <x-ui.button type="submit" icon="save">Simpan</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+            </div>
+        </form>
+    </x-admin.modal>
 </x-layouts.admin>

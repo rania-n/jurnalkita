@@ -30,19 +30,13 @@ Route::middleware(['auth', 'verified'])->group(function () use ($stub) {
         Route::view('/admin', 'admin.dashboard')->name('admin.dashboard');
 
         Route::view('/admin/guru', 'admin.guru.index')->name('master.guru.index');
-        Route::view('/admin/guru/tambah', 'admin.guru.create')->name('master.guru.create');
         Route::view('/admin/kelas', 'admin.kelas.index')->name('master.kelas.index');
-        Route::view('/admin/kelas/tambah', 'admin.kelas.create')->name('master.kelas.create');
         Route::view('/admin/siswa', 'admin.siswa.index')->name('master.siswa.index');
-        Route::view('/admin/siswa/tambah', 'admin.siswa.create')->name('master.siswa.create');
         Route::view('/admin/mapel', 'admin.mapel.index')->name('master.mapel.index');
-        Route::view('/admin/mapel/tambah', 'admin.mapel.create')->name('master.mapel.create');
         Route::view('/admin/jadwal-pelajaran', 'admin.jadwal-pelajaran.index')->name('master.jadwal-pelajaran.index');
-        Route::view('/admin/jadwal-pelajaran/tambah', 'admin.jadwal-pelajaran.create')->name('master.jadwal-pelajaran.create');
         Route::view('/admin/jam-pelajaran', 'admin.jam-pelajaran.index')->name('master.jam-pelajaran.index');
         Route::view('/admin/jam-pelajaran/edit', 'admin.jam-pelajaran.edit')->name('master.jam-pelajaran.edit');
         Route::view('/admin/jadwal-piket', 'admin.jadwal-piket.index')->name('master.jadwal-piket.index');
-        Route::view('/admin/jadwal-piket/tambah', 'admin.jadwal-piket.create')->name('master.jadwal-piket.create');
 
         // Stub tulis admin (semua metode) sampai controller CRUD dibuat.
         Route::post('/admin/{resource}', $stub)->name('master.store');
