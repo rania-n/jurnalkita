@@ -1,111 +1,83 @@
 <?php
 
-use App\Http\Controllers\KelasController;
-use App\Http\Controllers\SiswaController;
-use App\Http\Controllers\MapelController;
-use App\Http\Controllers\JadwalController;
+use Illuminate\Support\Facades\Route;
 
-Route::resource('kelas', KelasController::class);
-Route::resource('siswa', SiswaController::class);
-Route::resource('mapel', MapelController::class);
-Route::resource('jadwal', JadwalController::class);
+/*
+|--------------------------------------------------------------------------
+| Web Routes — jurnalkita (FE MVP)
+|--------------------------------------------------------------------------
+| Tahap ini masih frontend: route menampilkan view dengan data contoh.
+| Controller + auth + middleware role ditambahkan saat backend (lihat docs/scope.md).
+|
+| Form yang butuh POST diarahkan ke $stub: mengembalikan pesan "belum aktif"
+| supaya tombol tidak menghasilkan error 405 selama FE dikembangkan.
+*/
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+$stub = fn () => redirect()->back()->with('info', 'Fitur ini akan aktif setelah backend siap.');
 
-Route::get('/pilih_peran', function () {
-    return view('auth.pilih_peran');
-})->name('pilih_peran');
+Route::redirect('/', '/login');
 
-Route::get('/register_guru', function () {
-    return view('auth.register_guru');
-})->name('register_guru');
+/* ---------------------------------------------------------------- Auth / umum */
+Route::view('/login', 'auth.login')->name('login');
+Route::view('/lupa-sandi', 'auth.lupa_sandi')->name('lupa_sandi');
+Route::view('/pilih-peran', 'auth.pilih_peran')->name('pilih_peran');
+Route::view('/daftar/guru', 'auth.register_guru')->name('register_guru');
+Route::view('/daftar/pengurus-kelas', 'auth.register_pengurus_kelas')->name('register_pengurus_kelas');
 
-Route::get('/register_pengurus_kelas', function () {
-    return view('auth.register_pengurus_kelas');
-})->name('register_pengurus_kelas');
+Route::post('/login', $stub);
+Route::post('/lupa-sandi', $stub);
+Route::post('/daftar/guru', $stub);
+Route::post('/daftar/pengurus-kelas', $stub);
 
-Route::get('/lupa_sandi', function () {
-    return view('auth.lupa_sandi');
-})->name('lupa_sandi');
+/* ------------------------------------------------------------------- Beranda */
+Route::view('/beranda', 'beranda')->name('beranda');
+Route::view('/profil', 'profil')->name('profil');
 
-Route::get('/tambah_data_kelas', function () {
-    return view('auth.tambah_data_kelas');
-})->name('tambah_data_kelas');
+/* -------------------------------------------------------------------- Jurnal */
+Route::prefix('jurnal')->name('jurnal.')->group(function () {
+    Route::view('/tambah', 'jurnal.create')->name('create');
+    Route::view('/presensi', 'jurnal.presensi')->name('presensi');
+});
+Route::post('jurnal/presensi', $stub)->name('jurnal.store');
 
-Route::get('/data_kelas', function () {
-    return view('auth.data_kelas');
-})->name('data_kelas');
+/* ---------------------------------------------------------------- Dispensasi */
+Route::prefix('dispensasi')->name('dispensasi.')->group(function () {
+    Route::view('/', 'dispensasi.index')->name('index');
+    Route::view('/ajukan', 'dispensasi.create')->name('create');
+    Route::view('/detail', 'dispensasi.show')->name('show');
+});
+Route::post('dispensasi', $stub)->name('dispensasi.store');
 
-Route::get('/tambah_data_siswa', function () {
-    return view('auth.tambah_data_siswa');
-})->name('tambah_data_siswa');
+/* ------------------------------------------------------------------- Piket */
+Route::prefix('piket')->name('piket.')->group(function () {
+    Route::view('/jadwal', 'piket.jadwal.index')->name('jadwal.index');
+    Route::view('/jadwal/tambah', 'piket.jadwal.create')->name('jadwal.create');
+    Route::view('/guru', 'piket.guru.index')->name('guru.index');
+    Route::view('/guru/tambah', 'piket.guru.create')->name('guru.create');
+});
+Route::post('piket/jadwal', $stub)->name('piket.jadwal.store');
+Route::post('piket/guru', $stub)->name('piket.guru.store');
 
-Route::get('/data_siswa', function () {
-    return view('auth.data_siswa');
-})->name('data_siswa');
+/* --------------------------------------------------------- Master data (admin) */
+Route::prefix('master')->name('master.')->group(function () {
+    Route::view('/', 'master.index')->name('index');
 
-Route::get('/tambah_data_mata_pelajaran', function () {
-    return view('auth.tambah_data_mata_pelajaran');
-})->name('tambah_data_mata_pelajaran');
+    Route::view('/kelas', 'master.kelas.index')->name('kelas.index');
+    Route::view('/kelas/tambah', 'master.kelas.create')->name('kelas.create');
 
-Route::get('/data_mata_pelajaran', function () {
-    return view('auth.data_mata_pelajaran');
-})->name('data_mata_pelajaran');
+    Route::view('/siswa', 'master.siswa.index')->name('siswa.index');
+    Route::view('/siswa/tambah', 'master.siswa.create')->name('siswa.create');
 
-Route::get('/tambah_data_jadwal_pelajaran', function () {
-    return view('auth.tambah_data_jadwal_pelajaran');
-})->name('tambah_data_jadwal_pelajaran');
+    Route::view('/mapel', 'master.mapel.index')->name('mapel.index');
+    Route::view('/mapel/tambah', 'master.mapel.create')->name('mapel.create');
 
-Route::get('/data_jadwal_pelajaran', function () {
-    return view('auth.data_jadwal_pelajaran');
-})->name('data_jadwal_pelajaran');
+    Route::view('/jadwal-pelajaran', 'master.jadwal-pelajaran.index')->name('jadwal-pelajaran.index');
+    Route::view('/jadwal-pelajaran/tambah', 'master.jadwal-pelajaran.create')->name('jadwal-pelajaran.create');
 
-Route::get('/tambah_data_dispen', function () {
-    return view('auth.tambah_data_dispen');
-})->name('tambah_data_dispen');
+    Route::view('/jam-pelajaran', 'master.jam-pelajaran.index')->name('jam-pelajaran.index');
+    Route::view('/jam-pelajaran/edit', 'master.jam-pelajaran.edit')->name('jam-pelajaran.edit');
+});
 
-Route::get('/data_dispen', function () {
-    return view('auth.data_dispen');
-})->name('data_dispen');
-
-Route::get('/detail_dispen', function () {
-    return view('auth.detail_dispen');
-})->name('detail_dispen');
-
-Route::get('/tambah_isi_jurnal', function () {
-    return view('auth.tambah_isi_jurnal');
-})->name('tambah_isi_jurnal');
-
-Route::get('/data_jam_pelajaran', function () {
-    return view('auth.data_jam_pelajaran');
-})->name('data_jam_pelajaran');
-
-Route::get('/edit_jam_pelajaran', function () {
-    return view('auth.edit_jam_pelajaran');
-})->name('edit_jam_pelajaran');
-
-Route::get('/tambah_jadwal_piket', function () {
-    return view('auth.tambah_jadwal_piket');
-})->name('tambah_jadwal_piket');
-
-Route::get('/data_jadwal_piket', function () {
-    return view('auth.data_jadwal_piket');
-})->name('data_jadwal_piket');
-
-Route::get('/input_absensi_siswa', function () {
-    return view('auth.input_absensi_siswa');
-})->name('input_absensi_siswa');
-
-Route::get('/master_data', function () {
-    return view('auth.master_data');
-})->name('master_data');
-
-Route::get('/tambah_guru', function () {
-    return view('auth.tambah_guru');
-})->name('tambah_guru');
-
-Route::get('/data_guru', function () {
-    return view('auth.data_guru');
-})->name('data_guru');
+Route::post('master/{resource}', $stub)
+    ->whereIn('resource', ['kelas', 'siswa', 'mapel', 'jadwal-pelajaran', 'jam-pelajaran'])
+    ->name('master.store');
