@@ -31,11 +31,11 @@ class RoleAccessTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_role_middleware_blocks_other_roles(): void
+    public function test_role_middleware_redirects_wrong_role_to_own_dashboard(): void
     {
         $guru = User::factory()->role('guru')->create();
 
-        $this->actingAs($guru)->get('/admin/kelas')->assertForbidden();
+        $this->actingAs($guru)->get('/admin/kelas')->assertRedirect(route('guru.dashboard'));
         $this->actingAs($guru)->get('/guru')->assertOk();
     }
 

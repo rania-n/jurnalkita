@@ -19,7 +19,15 @@ class EnsureRole
     {
         $user = $request->user();
 
-        abort_unless($user && in_array($user->role, $roles, true), 403);
+        if (! $user) {
+            return redirect()->guest(route('login'));
+        }
+
+        if (! in_array($user->role, $roles, true)) {
+            // Bukan haknya — lempar ke beranda peran sendiri, jangan 403 mentah.
+            return redirect()->route($user->homeRoute())
+                ->with('info', 'Halaman itu bukan untuk peran Anda.');
+        }
 
         return $next($request);
     }
