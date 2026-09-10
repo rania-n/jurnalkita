@@ -1,5 +1,7 @@
 @php
-    $rows = \App\Models\Mapel::orderBy('nama')->get();
+    $q = request('cari');
+    $rows = \App\Models\Mapel::when($q, fn ($b) => $b->where(fn ($w) => $w->where('nama', 'like', "%{$q}%")->orWhere('kode', 'like', "%{$q}%")))
+        ->orderBy('nama')->get();
 @endphp
 
 <x-layouts.admin title="Mata Pelajaran" heading="Mata Pelajaran">
@@ -9,8 +11,12 @@
         </x-slot:action>
     </x-admin.page>
 
+    <x-admin.filters :action="route('master.mapel.index')">
+        <x-admin.f-search placeholder="Kode atau nama..." />
+    </x-admin.filters>
+
     @if ($rows->isEmpty())
-        <x-ui.empty title="Belum ada mata pelajaran" />
+        <x-ui.empty title="Tidak ada mata pelajaran yang cocok" />
     @else
         <x-admin.table :head="['Kode', 'Nama', '']">
             @foreach ($rows as $m)

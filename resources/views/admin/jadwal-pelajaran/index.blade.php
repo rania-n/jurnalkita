@@ -1,7 +1,19 @@
 @php
+    $hari = request('hari');
+    $kelasId = request('kelas');
+    $guruId = request('guru');
+
     $rows = \App\Models\Jadwal::with('kelas', 'mapel', 'guru')
-        ->orderBy('hari')->orderBy('jam_ke_mulai')->get();
+        ->when($hari, fn ($b) => $b->where('hari', $hari))
+        ->when($kelasId, fn ($b) => $b->where('kelas_id', $kelasId))
+        ->when($guruId, fn ($b) => $b->where('guru_id', $guruId))
+        ->orderByRaw("field(hari,'senin','selasa','rabu','kamis','jumat')")
+        ->orderBy('jam_ke_mulai')
+        ->get();
+
     $hariLabel = ['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat'];
+    $kelasOptions = \App\Models\Kelas::orderBy('nama')->pluck('nama', 'id');
+    $guruOptions = \App\Models\Guru::orderBy('nama')->pluck('nama', 'id');
 @endphp
 
 <x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran">
@@ -11,8 +23,14 @@
         </x-slot:action>
     </x-admin.page>
 
+    <x-admin.filters :action="route('master.jadwal-pelajaran.index')">
+        <x-admin.f-select name="hari" label="Hari" :options="$hariLabel" all="Semua Hari" />
+        <x-admin.f-select name="kelas" label="Kelas" :options="$kelasOptions" all="Semua Kelas" />
+        <x-admin.f-select name="guru" label="Guru" :options="$guruOptions" all="Semua Guru" />
+    </x-admin.filters>
+
     @if ($rows->isEmpty())
-        <x-ui.empty title="Belum ada jadwal pelajaran" />
+        <x-ui.empty title="Tidak ada jadwal yang cocok" />
     @else
         <x-admin.table :head="['Hari', 'Kelas', 'Mata Pelajaran', 'Guru', 'JP', 'Ruang', '']">
             @foreach ($rows as $j)
