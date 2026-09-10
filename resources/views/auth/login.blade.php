@@ -1,9 +1,9 @@
 <x-layouts.guest title="Masuk">
-    <div class="flex flex-col items-center gap-2 pt-10 pb-9 text-center">
-        <div class="mb-2 flex h-[72px] w-[72px] items-center justify-center rounded-[20px] bg-navy text-card">
-            <x-icon name="menu_book" :size="34" fill />
+    <div class="flex flex-col items-center gap-2 pb-6 text-center">
+        <div class="mb-1 flex h-16 w-16 items-center justify-center rounded-[18px] bg-navy text-card">
+            <x-icon name="menu_book" :size="30" fill />
         </div>
-        <h1 class="text-[28px] font-extrabold leading-tight text-navy">jurnalkita</h1>
+        <h1 class="text-2xl font-extrabold leading-tight text-navy">jurnalkita</h1>
         <p class="text-[13px] font-medium text-muted-2">Sistem Jurnal &amp; Absensi Guru SMKN 1 Boyolangu</p>
     </div>
 
@@ -24,19 +24,17 @@
 
         <div class="flex items-center justify-between">
             <label class="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" name="remember" class="h-5 w-5 rounded accent-navy">
-                <span class="text-[13px] text-muted-2">Tetap masuk selama 30 hari</span>
+                <input type="checkbox" name="remember" class="h-4 w-4 rounded accent-navy">
+                <span class="text-[13px] text-muted-2">Tetap masuk</span>
             </label>
             <a href="{{ route('password.request') }}" class="text-[13px] font-bold text-navy">Lupa Sandi?</a>
         </div>
 
-        <x-ui.button type="submit" block class="mt-2">Masuk</x-ui.button>
-
-        <x-ui.button href="#" variant="success" block icon="headset_mic">Hubungi Pusat Bantuan</x-ui.button>
+        <x-ui.button type="submit" block class="mt-1">Masuk</x-ui.button>
     </form>
 
-    <p class="mt-10 text-center text-sm text-muted-2">
+    <p class="mt-6 text-center text-sm text-muted-2">
         Belum punya akun?
-        <a href="{{ route('pilih_peran') }}" class="ml-1 font-bold text-navy">Daftar Akun Baru</a>
+        <a href="{{ route('pilih_peran') }}" class="font-bold text-navy">Daftar Akun Baru</a>
     </p>
 </x-layouts.guest>

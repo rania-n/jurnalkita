@@ -22,5 +22,7 @@
         Perubahan data akun dilakukan oleh Admin. Halaman ini masih sementara.
     </x-alert>
 
-    <x-ui.button href="{{ route('login') }}" variant="danger" block icon="logout" class="mt-6">Keluar</x-ui.button>
+    <div class="mt-6">
+        <x-logout-button variant="full" />
+    </div>
 </x-layouts.app>

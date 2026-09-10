@@ -19,7 +19,7 @@
         </a>
 
         @if ($items->isNotEmpty())
-            <nav class="mt-8 flex flex-col gap-1" aria-label="Navigasi utama">
+            <nav class="mt-8 flex flex-1 flex-col gap-1" aria-label="Navigasi utama">
                 @foreach ($items as $item)
                     <a
                         href="{{ $item['url'] }}"
@@ -35,6 +35,8 @@
                     </a>
                 @endforeach
             </nav>
+
+            <x-logout-button variant="nav" />
         @endif
     </div>
 </aside>

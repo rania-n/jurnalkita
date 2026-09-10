@@ -1,16 +1,12 @@
-@props(['menu' => 'default'])
-
 @php
-    // TODO(auth): ambil dari auth()->user() setelah modul Auth selesai.
     $user = auth()->user();
-    $nama = $user->name ?? 'Winartin, S.Pd';
-    $role = $user->role ?? 'guru';
+    $nama = $user?->name ?? 'Pengguna';
     $roleLabel = [
         'admin' => 'Admin',
         'guru' => 'Guru',
         'siswa' => 'Pengurus Kelas',
         'waka' => 'Waka Kesiswaan',
-    ][$role] ?? ucfirst($role);
+    ][$user?->role] ?? '';
     $inisial = collect(explode(' ', $nama))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
 @endphp
 
@@ -27,9 +23,12 @@
     </p>
 
     <div class="flex items-center gap-2">
-        <span class="rounded-md bg-surface-alt px-2 py-1 text-[11px] font-bold text-ink">{{ $roleLabel }}</span>
+        @if ($roleLabel)
+            <span class="rounded-md bg-surface-alt px-2 py-1 text-[11px] font-bold text-ink">{{ $roleLabel }}</span>
+        @endif
         <a href="{{ route('profil') }}" class="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-xs font-bold text-card" aria-label="Profil">
             {{ $inisial }}
         </a>
+        <x-logout-button />
     </div>
 </header>

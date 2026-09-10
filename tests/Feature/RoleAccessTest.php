@@ -35,7 +35,7 @@ class RoleAccessTest extends TestCase
     {
         $guru = User::factory()->role('guru')->create();
 
-        $this->actingAs($guru)->get('/master')->assertForbidden();
+        $this->actingAs($guru)->get('/admin/kelas')->assertForbidden();
         $this->actingAs($guru)->get('/guru')->assertOk();
     }
 

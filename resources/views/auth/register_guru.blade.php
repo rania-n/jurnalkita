@@ -1,15 +1,15 @@
-<x-layouts.guest title="Registrasi Guru" :center="false">
+<x-layouts.guest title="Registrasi Guru">
     <x-page-header
         title="Registrasi Guru"
         subtitle="Lengkapi biodata pengajar Anda"
         :back="route('pilih_peran')"
     />
 
-    <x-alert type="warning" bleed class="mb-6">
+    <x-alert type="warning" class="mb-6">
         Akun Anda akan diverifikasi oleh Admin sebelum dapat digunakan.
     </x-alert>
 
-    <form method="POST" action="{{ route('register.guru') }}" class="flex flex-col gap-4 pb-28">
+    <form method="POST" action="{{ route('register.guru') }}" class="flex flex-col gap-4">
         @csrf
 
         <x-ui.input label="Nama Lengkap" name="nama" placeholder="Masukkan nama lengkap guru" :value="old('nama')" />
@@ -29,8 +29,6 @@
             </button>
         </x-ui.input>
 
-        <x-ui.sticky-bar :above-nav="false">
-            <x-ui.button type="submit" block>Daftar Akun Guru</x-ui.button>
-        </x-ui.sticky-bar>
+        <x-ui.button type="submit" block>Daftar Akun Guru</x-ui.button>
     </form>
 </x-layouts.guest>

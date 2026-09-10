@@ -1,15 +1,15 @@
-<x-layouts.guest title="Registrasi Pengurus Kelas" :center="false">
+<x-layouts.guest title="Registrasi Pengurus Kelas">
     <x-page-header
         title="Registrasi Pengurus Kelas"
         subtitle="Akses jurnal mandiri perwakilan kelas"
         :back="route('pilih_peran')"
     />
 
-    <x-alert type="warning" bleed class="mb-6">
+    <x-alert type="warning" class="mb-6">
         Akun Anda akan diverifikasi oleh Admin sebelum dapat digunakan.
     </x-alert>
 
-    <form method="POST" action="{{ route('register.kelas') }}" class="flex flex-col gap-4 pb-28">
+    <form method="POST" action="{{ route('register.kelas') }}" class="flex flex-col gap-4">
         @csrf
 
         <x-ui.select label="Kelas" name="kelas_id">
@@ -36,8 +36,6 @@
             </button>
         </x-ui.input>
 
-        <x-ui.sticky-bar :above-nav="false">
-            <x-ui.button type="submit" block>Daftar Akun Siswa</x-ui.button>
-        </x-ui.sticky-bar>
+        <x-ui.button type="submit" block>Daftar Akun Siswa</x-ui.button>
     </form>
 </x-layouts.guest>
