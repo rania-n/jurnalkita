@@ -34,11 +34,12 @@
     },
     "scripts": {
         "setup": [
-            "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
-            "npm install --ignore-scripts",
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "@php -r \"preg_match('/^APP_KEY=.+/m', file_get_contents('.env')) || passthru('php artisan key:generate --ansi');\"",
+            "@php artisan migrate:fresh --seed --force --ansi",
+            "@php artisan storage:link --ansi",
+            "npm install",
             "npm run build"
         ],
         "dev": [
