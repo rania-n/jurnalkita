@@ -70,7 +70,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /* =============================== GURU =============================== */
     Route::middleware('role:guru')->group(function () {
-        Route::view('/guru', 'dashboards.guru')->name('guru.dashboard');
+        Route::view('/guru/jadwal', 'dashboards.guru')->name('guru.dashboard');
+        Route::get('/jadwal', [JurnalController::class, 'jadwal'])->name('guru.jadwal.index');
         Route::view('/guru/piket', 'guru.piket')->name('piket.index');
 
         Route::get('/guru/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');

@@ -15,6 +15,27 @@
 <x-layouts.app title="Beranda Guru" width="wide">
     <x-page-header title="Beranda" :subtitle="'Selamat mengajar, ' . auth()->user()->name" />
 
+@if(isset($isPiketHariIni) && $isPiketHariIni)
+    <div class="mb-6 p-4 bg-indigo-50 border border-indigo-200 rounded-lg shadow-sm">
+        <h3 class="text-lg font-semibold text-indigo-900 mb-2">
+            📌 Anda Bertugas Piket Hari Ini
+        </h3>
+        <p class="text-sm text-indigo-700 mb-4">
+            Akses menu khusus petugas piket untuk memantau presensi dan pengajuan dispensasi.
+        </p>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ route('piket.index') }}" 
+               class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md shadow">
+                Piket Hari Ini
+            </a>
+            <a href="{{ route('dispensasi.create') }}" 
+               class="inline-flex items-center px-4 py-2 bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-100 text-sm font-medium rounded-md shadow-sm">
+                Ajukan Dispensasi
+            </a>
+        </div>
+    </div>
+@endif
+
     @if ($piketHariIni)
         <x-alert type="info" class="mb-4">Anda bertugas <strong>piket</strong> hari ini.</x-alert>
     @endif

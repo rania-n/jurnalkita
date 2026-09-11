@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Dispensasi;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
+use App\Models\Piket;
 use App\Support\Waktu;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -220,5 +221,63 @@ class JurnalController extends Controller
                 ->orWhere(fn ($q2) => $q2->where('jam_ke_mulai', '<=', $jamSelesai)
                     ->where('jam_ke_selesai', '>=', $jamMulai)))
             ->pluck('siswa_id');
+   
+    }
+
+    public function dashboard(): View
+    {
+        $guru = $this->guru();
+
+        $hariMap = [
+            1 => 'senin',
+            2 => 'selasa',
+            3 => 'rabu',
+            4 => 'kamis',
+            5 => 'jumat',
+            6 => 'sabtu',
+            7 => 'minggu',
+        ];
+        $hariIni = $hariMap[now()->dayOfWeekIso] ?? null;
+
+        // Z1: Cek apakah guru bertugas piket hari ini
+        $isPiketHariIni = Piket::where('guru_id', $guru->id)
+            ->where('hari', $hariIni)
+            ->exists();
+
+        return view('dashboards.guru', compact('guru', 'isPiketHariIni'));
+    }
+
+    /* ----------------------------------------------------- Z2: Jadwal Seminggu */
+    public function jadwal(): View
+    {
+        $guru = $this->guru();
+        $urutanHari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
+
+        $semuaJadwal = $guru->jadwals()
+            ->with(['kelas', 'mapel'])
+            ->orderBy('jam_ke_mulai')
+            ->get();
+
+        // Z2: Pengelompokan jadwal per hari (Senin -> Jumat)
+        $jadwalPerHari = collect($urutanHari)->mapWithKeys(function ($hari) use ($semuaJadwal) {
+            return [
+                $hari => $semuaJadwal->filter(fn ($j) => strtolower($j->hari) === $hari)
+            ];
+        });
+
+        $hariMap = [
+            1 => 'senin',
+            2 => 'selasa',
+            3 => 'rabu',
+            4 => 'kamis',
+            5 => 'jumat',
+            6 => 'sabtu',
+            7 => 'minggu',
+        ];
+        $hariIni = $hariMap[now()->dayOfWeekIso] ?? 'senin';
+
+        return view('guru.jadwal.index', compact('jadwalPerHari', 'hariIni'));
     }
 }
+
+
