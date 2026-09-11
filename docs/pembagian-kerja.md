@@ -1,13 +1,14 @@
 # Pembagian Kerja — Halaman Tambahan
 
-Buat 3 orang. **Satu orang pegang satu area** biar nggak tabrakan pas merge.
+Buat Zahwa, Vara, dan Dude. **Satu orang pegang satu area** biar nggak tabrakan pas merge.
+Kode tugas (Z1, V2, dst) dipakai buat ngobrol di grup — "udah kelar Z1?"
 Daftar halaman lengkap ada di `docs/halaman.md`.
 
-| Orang | Area | Folder yang disentuh |
+| Siapa | Area | Folder yang disentuh |
 |---|---|---|
-| **A** | Guru | `resources/views/guru/`, `dashboards/guru.blade.php`, `Controllers/Guru/` |
-| **B** | Pengurus Kelas | `resources/views/sekretaris/`, `dashboards/sekretaris.blade.php`, `Controllers/Sekretaris/` |
-| **C** | Waka + halaman error | `dashboards/waka.blade.php`, `resources/views/errors/` |
+| **Zahwa** | Guru | `resources/views/guru/`, `dashboards/guru.blade.php`, `Controllers/Guru/` |
+| **Vara** | Pengurus Kelas | `resources/views/sekretaris/`, `dashboards/sekretaris.blade.php`, `Controllers/Sekretaris/` |
+| **Dude** | Waka + halaman error | `dashboards/waka.blade.php`, `resources/views/errors/` |
 
 ---
 
@@ -15,7 +16,9 @@ Daftar halaman lengkap ada di `docs/halaman.md`.
 
 ```bash
 git pull
-git checkout -b fitur/<nama-branchmu>
+git checkout -b fitur/<areamu>       # zahwa: fitur/guru-jadwal
+                                     # vara : fitur/kelas-pengurus
+                                     # dude : fitur/waka-error
 
 composer install
 npm install
@@ -53,9 +56,9 @@ npm run build
 
 ---
 
-## 📦 Paket A — Guru
+## 📦 Zahwa — Guru
 
-### A1. Kartu shortcut di beranda guru
+### Z1. Kartu shortcut di beranda guru
 
 Kalau guru lagi kena jadwal piket hari ini, munculkan 2 kartu tombol:
 **"Piket Hari Ini"** dan **"Ajukan Dispensasi"**.
@@ -73,7 +76,7 @@ Kalau guru lagi kena jadwal piket hari ini, munculkan 2 kartu tombol:
 
 ---
 
-### A2. Halaman "Jadwal Mengajar Saya"
+### Z2. Halaman "Jadwal Mengajar Saya"
 
 Sekarang guru cuma bisa lihat jadwal **hari ini** di beranda. Bikin halaman
 jadwal **seminggu**, dikelompokkan per hari (Senin → Jumat).
@@ -118,9 +121,9 @@ kehadiran siswa itu (hadir/sakit/izin/alpha).
 
 ---
 
-## 📦 Paket B — Pengurus Kelas
+## 📦 Vara — Pengurus Kelas
 
-### B1. Daftar Siswa Sekelas
+### V1. Daftar Siswa Sekelas
 
 Halaman tabel **read-only** (tidak ada tambah/ubah/hapus) berisi teman sekelas.
 Kolom: **No. Absen · Nama · NIS · Jabatan**.
@@ -149,7 +152,7 @@ $siswas = $kelas->siswas()->orderBy('no_absen')->get();
 
 ---
 
-### B2. Jadwal Pelajaran Kelas
+### V2. Jadwal Pelajaran Kelas
 
 Jadwal pelajaran kelasnya sendiri, **seminggu**, dikelompokkan per hari.
 Tampilkan: jam ke-, mata pelajaran, guru, ruang.
@@ -178,9 +181,9 @@ $jadwalPerHari = $kelas->jadwals()
 
 ---
 
-## 📦 Paket C — Waka + Halaman Error
+## 📦 Dude — Waka + Halaman Error
 
-### C1. Halaman error custom
+### D1. Halaman error custom
 
 Sekarang kalau salah ketik URL munculnya halaman putih polos bawaan Laravel.
 Bikin versi yang sesuai desain aplikasi.
@@ -212,7 +215,7 @@ tombol "Kembali ke Beranda".
 
 ---
 
-### C2. Dashboard Waka
+### D2. Dashboard Waka
 
 Sekarang isinya cuma 1 kartu, kosong banget. Tambahkan **statistik dispensasi
 bulan ini** + **5 pengajuan terbaru**.
