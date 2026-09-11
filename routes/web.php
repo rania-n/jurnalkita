@@ -122,5 +122,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:guru,waka')->prefix('piket/monitor')->name('piket.monitor.')->group(function () {
         Route::get('/', [PiketController::class, 'index'])->name('index');
         Route::get('/ekspor', [PiketController::class, 'ekspor'])->name('ekspor');
+        Route::get('/ekspor/{tipe}/{id}', [PiketController::class, 'eksporDetail'])->name('ekspor.detail');
     });
 });

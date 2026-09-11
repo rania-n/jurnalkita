@@ -8,7 +8,17 @@
 
 return [
 
+    // Guru yang TIDAK pernah kebagian piket — menu Piket/Dispensasi disembunyikan
+    // total, bukan cuma kosong, biar nggak nyasar ke halaman yang buat mereka
+    // permanen kosong. Guru yang isPiket() pakai 'guru-piket' di bawah.
     'guru' => [
+        ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
+        ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
+        ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
+    ],
+
+    'guru-piket' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
         ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],

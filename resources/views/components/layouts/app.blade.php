@@ -6,10 +6,13 @@
 
 @php
     // Menu navigasi menyesuaikan peran user (fallback: 'default').
+    // Guru yang isPiket() dapat menu 'guru-piket' (tambahan Piket & Dispensasi) —
+    // guru yang nggak pernah kebagian piket nggak usah lihat menu yang isinya
+    // bakal kosong selamanya buat dia.
     $role = auth()->user()->role ?? null;
     $menu ??= match ($role) {
         'admin' => 'admin',
-        'guru' => 'guru',
+        'guru' => auth()->user()->isPiket() ? 'guru-piket' : 'guru',
         'siswa' => 'sekretaris',
         'waka' => 'waka',
         default => 'default',
