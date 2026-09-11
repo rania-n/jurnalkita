@@ -35,7 +35,7 @@ class JamPelajaranController extends Controller
             }
         });
 
-        AuditLog::catat('jam_pelajaran.ubah', "Ubah jam pelajaran kategori {$data['kategori']}");
+        AuditLog::catat('Ubah Jam Pelajaran', "Ubah jam pelajaran kategori {$data['kategori']}");
 
         return redirect()->route('master.jam-pelajaran.index', ['set' => $data['kategori']])
             ->with('success', 'Jam pelajaran disimpan.');

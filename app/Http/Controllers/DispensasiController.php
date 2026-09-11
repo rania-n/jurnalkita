@@ -75,7 +75,7 @@ class DispensasiController extends Controller
         ]);
         $dispensasi->segarkanStatusAkhir();
 
-        AuditLog::catat('dispensasi.ajukan', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);
+        AuditLog::catat('Ajukan Dispensasi', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);
 
         return redirect()->route('dispensasi.index')
             ->with('success', 'Dispensasi diajukan. Menunggu persetujuan Waka Kesiswaan.');
@@ -113,7 +113,7 @@ class DispensasiController extends Controller
         ]);
         $dispensasi->segarkanStatusAkhir();
 
-        AuditLog::catat('dispensasi.waka', "Waka {$data['keputusan']} dispensasi #{$dispensasi->id}", $dispensasi);
+        AuditLog::catat('Keputusan Waka Dispensasi', "Waka {$data['keputusan']} dispensasi #{$dispensasi->id}", $dispensasi);
 
         return redirect()->route('dispensasi.index')->with(
             'success',

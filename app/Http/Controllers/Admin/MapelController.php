@@ -24,7 +24,7 @@ class MapelController extends Controller
 
         $mapel->fill(['kode' => $data['kode'], 'nama' => $data['nama']])->save();
 
-        AuditLog::catat($baru ? 'mapel.tambah' : 'mapel.ubah', "Mapel: {$mapel->nama}", $mapel);
+        AuditLog::catat($baru ? 'Tambah Mapel' : 'Ubah Mapel', "Mapel: {$mapel->nama}", $mapel);
 
         return back()->with('success', $baru ? 'Mata pelajaran ditambahkan.' : 'Mata pelajaran diperbarui.');
     }
@@ -34,7 +34,7 @@ class MapelController extends Controller
         $nama = $mapel->nama;
         $mapel->delete();
 
-        AuditLog::catat('mapel.hapus', "Hapus mapel: {$nama}", $mapel);
+        AuditLog::catat('Hapus Mapel', "Hapus mapel: {$nama}", $mapel);
 
         return back()->with('success', 'Mata pelajaran dihapus.');
     }

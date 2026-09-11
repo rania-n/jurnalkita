@@ -12,6 +12,10 @@ class AuditLog extends Model
 
     protected $fillable = ['user_id', 'aksi', 'deskripsi', 'subject_type', 'subject_id', 'ip'];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
     protected static function booted(): void
     {
         static::creating(function (AuditLog $log) {

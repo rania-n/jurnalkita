@@ -26,7 +26,7 @@ class JadwalPiketController extends Controller
 
         $piket->fill($data)->save();
 
-        AuditLog::catat($baru ? 'piket.tambah' : 'piket.ubah', "Jadwal piket {$piket->hari}", $piket);
+        AuditLog::catat($baru ? 'Tambah Jadwal Piket' : 'Ubah Jadwal Piket', "Jadwal piket {$piket->hari}", $piket);
 
         return back()->with('success', $baru ? 'Jadwal piket ditambahkan.' : 'Jadwal piket diperbarui.');
     }
@@ -35,7 +35,7 @@ class JadwalPiketController extends Controller
     {
         $jadwalPiket->delete();
 
-        AuditLog::catat('piket.hapus', "Hapus jadwal piket #{$jadwalPiket->id}", $jadwalPiket);
+        AuditLog::catat('Hapus Jadwal Piket', "Hapus jadwal piket #{$jadwalPiket->id}", $jadwalPiket);
 
         return back()->with('success', 'Jadwal piket dihapus.');
     }

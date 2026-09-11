@@ -15,6 +15,7 @@
         ['label' => 'Jadwal Pelajaran', 'icon' => 'calendar_month', 'route' => 'master.jadwal-pelajaran.index'],
         ['label' => 'Jam Pelajaran', 'icon' => 'schedule', 'route' => 'master.jam-pelajaran.index'],
         ['label' => 'Jadwal Piket', 'icon' => 'event_available', 'route' => 'master.jadwal-piket.index'],
+        ['label' => 'Audit Log', 'icon' => 'history', 'route' => 'master.audit-log.index'],
     ];
 @endphp
 

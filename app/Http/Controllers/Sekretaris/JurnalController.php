@@ -72,7 +72,7 @@ class JurnalController extends Controller
         ]);
 
         AuditLog::catat(
-            $data['keputusan'] === 'terima' ? 'jurnal.verifikasi' : 'jurnal.minta_revisi',
+            $data['keputusan'] === 'terima' ? 'Verifikasi Jurnal' : 'Minta Revisi Jurnal',
             "Jurnal #{$jurnal->id} — ".($data['keputusan'] === 'terima' ? 'terverifikasi' : 'minta revisi'),
             $jurnal
         );
@@ -135,7 +135,7 @@ class JurnalController extends Controller
             return $jurnal;
         });
 
-        AuditLog::catat('jurnal.pengganti', "Pengurus kelas mengisi jurnal pengganti #{$jurnal->id}", $jurnal);
+        AuditLog::catat('Jurnal Pengganti', "Pengurus kelas mengisi jurnal pengganti #{$jurnal->id}", $jurnal);
 
         return redirect()->route('sekretaris.jurnal.show', $jurnal)
             ->with('success', 'Jurnal pengganti tersimpan. Guru akan melihatnya di riwayat.');
