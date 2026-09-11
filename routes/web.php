@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/akun/{user}/setujui', [AkunController::class, 'approve'])->name('master.akun.approve');
         Route::post('/admin/akun/{user}/tolak', [AkunController::class, 'reject'])->name('master.akun.reject');
         Route::post('/admin/akun/{user}/kirim-reset', [AkunController::class, 'sendResetLink'])->name('master.akun.reset');
+        Route::delete('/admin/akun/{user}', [AkunController::class, 'destroy'])->name('master.akun.destroy');
 
         /* Tulis master data (tambah/ubah = save, hapus = destroy) */
         Route::post('/admin/guru', [GuruController::class, 'save'])->name('master.guru.save');
@@ -78,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/guru/jurnal', [JurnalController::class, 'store'])->name('jurnal.store');
         Route::get('/guru/jurnal/{jurnal}', [JurnalController::class, 'show'])->name('jurnal.show');
         Route::post('/guru/jurnal/{jurnal}', [JurnalController::class, 'update'])->name('jurnal.update');
+        Route::delete('/guru/jurnal/{jurnal}', [JurnalController::class, 'destroy'])->name('jurnal.destroy');
         Route::get('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensi'])->name('jurnal.presensi');
         Route::post('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensiSave'])->name('jurnal.presensi.save');
     });
@@ -106,6 +108,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:guru')->group(function () {
         Route::get('/dispensasi-ajukan/baru', [DispensasiController::class, 'create'])->name('dispensasi.create');
         Route::post('/dispensasi', [DispensasiController::class, 'store'])->name('dispensasi.store');
+        Route::delete('/dispensasi/{dispensasi}', [DispensasiController::class, 'destroy'])->name('dispensasi.destroy');
     });
     Route::middleware('role:waka')->group(function () {
         Route::post('/dispensasi/{dispensasi}/waka', [DispensasiController::class, 'approveWaka'])->name('dispensasi.waka');

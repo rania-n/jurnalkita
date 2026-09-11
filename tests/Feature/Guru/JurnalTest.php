@@ -149,4 +149,45 @@ class JurnalTest extends TestCase
             'jam_ke_selesai' => 3, 'status_guru' => 'hadir', 'materi' => 'diubah',
         ])->assertForbidden();
     }
+
+    public function test_guru_bisa_hapus_jurnal_yang_belum_diverifikasi(): void
+    {
+        $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'salah kelas',
+        ]);
+        $jurnal = Jurnal::firstOrFail();
+
+        $this->actingAs($this->user)->delete("/guru/jurnal/{$jurnal->id}")
+            ->assertRedirect('/guru/jurnal');
+
+        $this->assertSoftDeleted('jurnals', ['id' => $jurnal->id]);
+    }
+
+    public function test_jurnal_yang_sudah_diverifikasi_tidak_bisa_dihapus(): void
+    {
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $this->jadwal->id, 'guru_id' => $this->guru->id,
+            'tanggal' => today(), 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'x', 'status_verifikasi' => 'terverifikasi',
+        ]);
+
+        $this->actingAs($this->user)->delete("/guru/jurnal/{$jurnal->id}")->assertForbidden();
+        $this->assertNotSoftDeleted('jurnals', ['id' => $jurnal->id]);
+    }
+
+    public function test_guru_lain_tidak_bisa_hapus_jurnal_orang(): void
+    {
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $this->jadwal->id, 'guru_id' => $this->guru->id,
+            'tanggal' => today(), 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'x',
+        ]);
+
+        $lain = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $lain->id, 'nama' => 'Guru Lain']);
+
+        $this->actingAs($lain)->delete("/guru/jurnal/{$jurnal->id}")->assertForbidden();
+        $this->assertNotSoftDeleted('jurnals', ['id' => $jurnal->id]);
+    }
 }

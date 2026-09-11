@@ -71,6 +71,17 @@
                                     </button>
                                 </form>
                             @endif
+
+                            {{-- Hapus akun: tidak untuk admin & tidak untuk diri sendiri --}}
+                            @if ($u->role !== 'admin' && $u->id !== auth()->id())
+                                <form method="POST" action="{{ route('master.akun.destroy', $u) }}" class="contents"
+                                      data-confirm="Hapus akun {{ $u->name }} ({{ $u->email }})? Data guru/siswa-nya tetap ada, hanya akun loginnya yang dihapus.">
+                                    @csrf @method('DELETE')
+                                    <button class="flex h-8 items-center gap-1 rounded-lg bg-alpha-soft px-2.5 text-xs font-bold text-alpha hover:bg-[#fecdd3]">
+                                        <x-icon name="delete" :size="14" /> Hapus
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

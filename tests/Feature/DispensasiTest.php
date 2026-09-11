@@ -163,4 +163,51 @@ class DispensasiTest extends TestCase
 
         $this->assertSame('pending', $d->fresh()->status_waka);
     }
+
+    public function test_pengaju_bisa_membatalkan_selama_waka_belum_memutuskan(): void
+    {
+        $this->actingAs($this->piket)->post('/dispensasi', [
+            'siswa_id' => $this->siswa->id,
+            'tanggal' => today()->toDateString(),
+            'alasan' => 'salah pilih siswa',
+        ]);
+        $d = Dispensasi::firstOrFail();
+
+        $this->actingAs($this->piket)->delete("/dispensasi/{$d->id}")
+            ->assertRedirect('/dispensasi');
+
+        $this->assertSoftDeleted('dispensasis', ['id' => $d->id]);
+    }
+
+    public function test_tidak_bisa_dibatalkan_setelah_waka_memutuskan(): void
+    {
+        $this->actingAs($this->piket)->post('/dispensasi', [
+            'siswa_id' => $this->siswa->id,
+            'tanggal' => today()->toDateString(),
+            'alasan' => 'Lomba',
+        ]);
+        $d = Dispensasi::firstOrFail();
+
+        $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
+
+        $this->actingAs($this->piket)->delete("/dispensasi/{$d->id}")->assertForbidden();
+        $this->assertNotSoftDeleted('dispensasis', ['id' => $d->id]);
+    }
+
+    public function test_piket_lain_tidak_bisa_membatalkan_pengajuan_orang(): void
+    {
+        $this->actingAs($this->piket)->post('/dispensasi', [
+            'siswa_id' => $this->siswa->id,
+            'tanggal' => today()->toDateString(),
+            'alasan' => 'Lomba',
+        ]);
+        $d = Dispensasi::firstOrFail();
+
+        $piketLain = User::factory()->role('guru')->create();
+        $guruLain = Guru::create(['user_id' => $piketLain->id, 'nama' => 'Piket Lain']);
+        JadwalPiket::create(['guru_id' => $guruLain->id, 'hari' => 'selasa']);
+
+        $this->actingAs($piketLain)->delete("/dispensasi/{$d->id}")->assertForbidden();
+        $this->assertNotSoftDeleted('dispensasis', ['id' => $d->id]);
+    }
 }

@@ -16,6 +16,11 @@ Data Guru · Data Kelas · Data Siswa · Mata Pelajaran · Jadwal Pelajaran ·
 Jam Pelajaran · Jadwal Piket
 → tambah/ubah = modal, hapus = konfirmasi. **Belum:** Audit Log (dikerjakan teman).
 
+> **Hapus/batal** sudah tersedia dan dibatasi: jurnal hanya bisa dihapus guru
+> pemiliknya selama belum diverifikasi; dispensasi hanya bisa dibatalkan guru piket
+> yang mengajukan selama Waka belum memutuskan; akun bisa dihapus admin kapan saja
+> (email otomatis dilepas supaya bisa dipakai lagi). Semuanya *soft delete*.
+
 ### Guru (layout mobile)
 Beranda (jadwal hari ini + badge piket) · Riwayat Jurnal · Form Jurnal ·
 Presensi Siswa · Detail Jurnal (+ edit selama pending/revisi) ·

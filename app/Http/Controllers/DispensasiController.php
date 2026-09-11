@@ -93,7 +93,35 @@ class DispensasiController extends Controller
         return view('dispensasi.show', [
             'dispensasi' => $dispensasi,
             'bisaWaka' => $user->role === 'waka' && $dispensasi->status_waka === 'pending',
+            'bisaBatal' => $dispensasi->diajukan_oleh_id === $user->id
+                && $dispensasi->status_waka === 'pending',
         ]);
+    }
+
+    /**
+     * Batalkan pengajuan (soft delete).
+     * Hanya oleh guru piket yang mengajukan, dan selama Waka belum memutuskan.
+     */
+    public function destroy(Dispensasi $dispensasi): RedirectResponse
+    {
+        $this->pastikanPiket();
+        abort_unless(
+            $dispensasi->diajukan_oleh_id === auth()->id(),
+            403,
+            'Hanya guru piket yang mengajukan yang bisa membatalkan.'
+        );
+        abort_unless(
+            $dispensasi->status_waka === 'pending',
+            403,
+            'Sudah diputuskan Waka Kesiswaan, tidak bisa dibatalkan.'
+        );
+
+        $nama = $dispensasi->siswa->nama;
+        $dispensasi->delete();
+
+        AuditLog::catat('dispensasi.batal', "Batalkan dispensasi {$nama}", $dispensasi);
+
+        return redirect()->route('dispensasi.index')->with('success', 'Pengajuan dispensasi dibatalkan.');
     }
 
     public function approveWaka(Dispensasi $dispensasi, Request $request): RedirectResponse

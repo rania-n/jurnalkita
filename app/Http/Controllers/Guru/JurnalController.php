@@ -195,6 +195,20 @@ class JurnalController extends Controller
         return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal diperbarui.');
     }
 
+    /** Hapus jurnal (soft delete). Hanya selama belum diverifikasi pengurus kelas. */
+    public function destroy(Jurnal $jurnal): RedirectResponse
+    {
+        $this->milikSendiri($jurnal);
+        abort_unless($jurnal->bisaDiubah(), 403, 'Jurnal sudah diverifikasi, tidak bisa dihapus.');
+
+        $label = $jurnal->jadwal->mapel->nama.' — '.$jurnal->jadwal->kelas->nama;
+        $jurnal->delete();
+
+        AuditLog::catat('jurnal.hapus', "Hapus jurnal #{$jurnal->id} ({$label})", $jurnal);
+
+        return redirect()->route('jurnal.index')->with('success', 'Jurnal dihapus.');
+    }
+
     /** Setelah guru merevisi, jurnal kembali antre untuk diperiksa pengurus kelas. */
     private function kembalikanKePending(Jurnal $jurnal): void
     {

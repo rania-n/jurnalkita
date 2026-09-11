@@ -28,6 +28,7 @@
 
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,28rem)_1fr] xl:gap-10">
         {{-- Kolom kiri: isi jurnal --}}
+        <div>
         <form method="POST" action="{{ route('jurnal.update', $jurnal) }}" class="flex flex-col gap-4">
             @csrf
 
@@ -73,6 +74,16 @@
                 </div>
             @endif
         </form>
+
+            {{-- Hapus jurnal — hanya selama belum diverifikasi pengurus kelas --}}
+            @if ($bisaUbah)
+                <form method="POST" action="{{ route('jurnal.destroy', $jurnal) }}" class="mt-4"
+                      data-confirm="Hapus jurnal ini beserta presensinya? Tindakan ini tidak bisa dibatalkan lewat aplikasi.">
+                    @csrf @method('DELETE')
+                    <x-ui.button type="submit" variant="danger" icon="delete">Hapus Jurnal</x-ui.button>
+                </form>
+            @endif
+        </div>
 
         {{-- Kolom kanan: presensi --}}
         <div>

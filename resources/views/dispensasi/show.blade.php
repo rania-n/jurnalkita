@@ -66,4 +66,13 @@
             </div>
         </form>
     @endif
+
+    {{-- Batalkan pengajuan — hanya pengaju, selama Waka belum memutuskan --}}
+    @if ($bisaBatal)
+        <form method="POST" action="{{ route('dispensasi.destroy', $dispensasi) }}" class="mt-5"
+              data-confirm="Batalkan pengajuan dispensasi ini?">
+            @csrf @method('DELETE')
+            <x-ui.button type="submit" variant="danger" icon="delete">Batalkan Pengajuan</x-ui.button>
+        </form>
+    @endif
 </x-layouts.app>

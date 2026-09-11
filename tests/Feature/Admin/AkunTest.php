@@ -99,4 +99,43 @@ class AkunTest extends TestCase
             ->post('/admin/akun', $this->akunPayload(['role' => 'waka', 'email' => 'dobel@s.test']))
             ->assertSessionHasErrors('email');
     }
+
+    public function test_hapus_akun_melepas_kaitan_ke_data_guru(): void
+    {
+        $guru = Guru::create(['nama' => 'Bu Sarah']);
+        $this->actingAs($this->admin())->post('/admin/akun', $this->akunPayload([
+            'sumber' => "guru:{$guru->id}", 'nama' => 'Bu Sarah', 'email' => 'sarah@sekolah.test',
+        ]));
+        $user = User::where('name', 'Bu Sarah')->firstOrFail();
+
+        $this->actingAs($this->admin())->delete("/admin/akun/{$user->id}")->assertRedirect();
+
+        $this->assertSoftDeleted('users', ['id' => $user->id]);
+        $this->assertNull($guru->fresh()->user_id, 'guru harus lepas dari akun yang dihapus');
+    }
+
+    public function test_email_bisa_dipakai_lagi_setelah_akun_dihapus(): void
+    {
+        $admin = $this->admin();
+        $this->actingAs($admin)->post('/admin/akun', $this->akunPayload(['email' => 'pakai-ulang@sekolah.test']));
+        $user = User::where('email', 'pakai-ulang@sekolah.test')->firstOrFail();
+
+        $this->actingAs($admin)->delete("/admin/akun/{$user->id}");
+
+        // Email lama harus bebas — tanpa "melepas" email, insert berikutnya kena
+        // duplicate key karena users.email unik di level database.
+        $this->actingAs($admin)->post('/admin/akun', $this->akunPayload([
+            'nama' => 'Orang Baru', 'email' => 'pakai-ulang@sekolah.test',
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('users', ['email' => 'pakai-ulang@sekolah.test', 'name' => 'Orang Baru']);
+    }
+
+    public function test_admin_tidak_bisa_menghapus_akun_sendiri(): void
+    {
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->delete("/admin/akun/{$admin->id}")->assertForbidden();
+        $this->assertNotSoftDeleted('users', ['id' => $admin->id]);
+    }
 }

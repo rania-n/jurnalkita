@@ -9,8 +9,10 @@ use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
@@ -89,6 +91,33 @@ class AkunController extends Controller
         AuditLog::catat('akun.tolak', "Tolak akun: {$user->email}", $user);
 
         return back()->with('success', "Akun {$user->name} ditolak.");
+    }
+
+    /**
+     * Hapus akun (soft delete — baris tetap tersimpan untuk jejak audit).
+     *
+     * Kolom users.email unik di level database, jadi baris yang terhapus tetap
+     * "memegang" email aslinya. Email diberi awalan dulu supaya bisa dipakai lagi.
+     */
+    public function destroy(User $user): RedirectResponse
+    {
+        abort_if($user->id === auth()->id(), 403, 'Tidak bisa menghapus akun sendiri.');
+
+        $email = $user->email;
+        $nama = $user->name;
+
+        DB::transaction(function () use ($user, $email) {
+            // Lepas kaitan ke data guru/siswa supaya bisa dibuatkan akun baru.
+            $user->guru?->update(['user_id' => null]);
+            $user->siswa?->update(['user_id' => null]);
+
+            $user->update(['email' => Str::limit("dihapus-{$user->id}-{$email}", 255, '')]);
+            $user->delete();
+        });
+
+        AuditLog::catat('akun.hapus', "Hapus akun: {$email}", $user);
+
+        return back()->with('success', "Akun {$nama} dihapus. Email {$email} bisa dipakai lagi.");
     }
 
     /** Kirim email tautan reset password ke user (admin tidak menyentuh password). */
