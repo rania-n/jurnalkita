@@ -14,7 +14,7 @@ Aturan alur detail: `docs/spec.md`.
 - Surat dispensasi PDF + QR rotating + halaman scan satpam
 - Guru pengganti & tukar jam
 - Ekspor laporan piket (Excel/PDF)
-- Notifikasi
+- Notifikasi (siapa dapat apa — sudah dirancang, lihat `spec.md` §G)
 - Rekap wali kelas
 - Geolokasi + deteksi telat pada jurnal
 - SMTP produksi

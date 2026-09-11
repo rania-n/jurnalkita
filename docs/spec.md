@@ -26,6 +26,19 @@ Aturan bisnis detail. Prioritas & pembagian modul: `docs/roadmap.md`.
   menghitung ulang & cek status approve.
 - Perlu halaman/peran **satpam** (scan). WA = integrasi API (Fonnte/Wablas/dsb).
 
+**Opsi hemat biaya (tanpa API WA berbayar) — didiskusikan, belum dikerjakan:**
+- Approve tanpa API: link `wa.me/?text=...` yang piket tinggal tekan Kirim (pesan
+  sudah terisi otomatis, termasuk tautan approve). Waka buka tautan di HP →
+  langsung ada tombol Setujui/Tolak **tanpa login** (signed URL, kedaluwarsa).
+  Kalau nanti mau otomatis terkirim tanpa ditekan, baru ganti ke API berbayar —
+  alur & signed URL-nya tidak berubah.
+- Surat dispensasi sebagai **halaman web** (bukan file PDF) — lebih ringan, bisa
+  langsung dibuka dari tautan WA. Halaman memuat ulang sendiri tiap ±10 detik
+  untuk QR baru (tanpa JavaScript custom — cukup `<meta http-equiv="refresh">`).
+- Satpam scan pakai **kamera HP biasa** (browser bawaan baca QR ke URL), bukan
+  aplikasi khusus. Hasil scan → halaman besar: nama siswa + kelas + jam kalau
+  valid, atau "tidak berlaku" kalau kedaluwarsa/sudah dipakai.
+
 ---
 
 ## B. Jurnal Guru
@@ -94,3 +107,17 @@ Aturan bisnis detail. Prioritas & pembagian modul: `docs/roadmap.md`.
 - Sekarang kategori tetap: Senin–Kamis / Jumat / Khusus.
 - Nanti bisa **tambah kategori sendiri** (mis. "Ramadhan", "Ujian"). Butuh tabel kategori
   terpisah. Backlog.
+
+## G. Notifikasi (backlog)
+
+Belum ada sama sekali di kode (tidak ada tabel, tidak ada lonceng). Kalau
+dikerjakan, pakai notifikasi bawaan Laravel (tabel `notifications`, tanpa
+paket/JS tambahan) — lonceng di topbar + angka belum-dibaca + halaman daftar.
+
+| Siapa | Dapat notifikasi saat |
+|---|---|
+| Waka | ada pengajuan dispensasi baru |
+| Guru piket (pengaju) | pengajuannya disetujui / ditolak |
+| Guru mapel terkait | ada siswanya yang dispensasi di jam dia mengajar |
+| Guru | jurnalnya diminta revisi pengurus kelas |
+| Pengurus kelas | ada jurnal baru / jurnal hasil revisi yang perlu diperiksa |

@@ -28,11 +28,11 @@
             @endforeach
         </div>
 
-        <p class="text-xs text-muted-2">Semua siswa awalnya <strong>Hadir</strong>. Ketuk status siswa yang berhalangan, lalu simpan.</p>
+        <p class="text-xs text-muted-2">Semua siswa awalnya <strong>Hadir</strong> — siswa dengan dispensasi disetujui pada jam ini otomatis <strong>Dispensasi</strong>. Ketuk status buat ubah manual bila perlu, lalu simpan.</p>
 
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
             @foreach ($jurnal->absensis->sortBy('siswa.no_absen') as $a)
-                @php $terkunciDispen = $a->status === 'dispensasi' && str_starts_with((string) $a->catatan, 'Dispensasi'); @endphp
+                @php $dariDispensasiOtomatis = $a->status === 'dispensasi' && str_starts_with((string) $a->catatan, 'Dispensasi'); @endphp
                 <div class="flex flex-col gap-3 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]">
                     <div class="flex items-center gap-2.5">
                         <x-ui.avatar :label="$a->siswa->no_absen ?? '–'" :gender="$a->siswa->jenis_kelamin" />
@@ -42,27 +42,25 @@
                         </div>
                     </div>
 
-                    @if ($terkunciDispen)
-                        <input type="hidden" name="presensi[{{ $a->id }}][status]" value="dispensasi">
-                        <input type="hidden" name="presensi[{{ $a->id }}][catatan]" value="{{ $a->catatan }}">
-                        <div class="flex items-center gap-2 rounded-lg bg-dispen-soft px-3 py-2 text-[13px] font-semibold text-dispen">
-                            <x-icon name="verified" :size="16" />
-                            <span>Dispensasi disetujui — {{ $a->catatan }}</span>
+                    @if ($dariDispensasiOtomatis)
+                        <div class="flex items-center gap-1.5 text-[11px] font-semibold text-dispen">
+                            <x-icon name="verified" :size="14" />
+                            <span>Dispensasi disetujui untuk jam ini — bisa diubah bila perlu</span>
                         </div>
-                    @else
-                        <x-ui.choice
-                            :name="'presensi[' . $a->id . '][status]'"
-                            :options="$statuses"
-                            :tones="$tones"
-                            :value="$a->status"
-                            size="sm"
-                        />
-                        <x-ui.input
-                            :name="'presensi[' . $a->id . '][catatan]'"
-                            placeholder="Catatan (opsional)"
-                            :value="$a->catatan"
-                        />
                     @endif
+
+                    <x-ui.choice
+                        :name="'presensi[' . $a->id . '][status]'"
+                        :options="$statuses"
+                        :tones="$tones"
+                        :value="$a->status"
+                        size="sm"
+                    />
+                    <x-ui.input
+                        :name="'presensi[' . $a->id . '][catatan]'"
+                        placeholder="Catatan (opsional)"
+                        :value="$a->catatan"
+                    />
                 </div>
             @endforeach
         </div>
