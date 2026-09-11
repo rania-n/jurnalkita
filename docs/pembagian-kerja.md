@@ -58,6 +58,11 @@ npm run build
 
 ## 📦 Zahwa — Guru
 
+> ✅ **Z1 dan Z2 sudah selesai** (dikerjakan langsung, bukan Zahwa — dia sempat coba tapi
+> masih kesulitan). Nggak perlu dikerjakan lagi. Kalau Zahwa masih mau bantu, kasih dia
+> tugas dari paket lain yang belum sempat, atau minta dia bantu **testing manual**:
+> login sebagai `guru1@jurnalkita.test`, coba tiap alur, laporkan kalau ada yang aneh.
+
 ### Z1. Kartu shortcut di beranda guru
 
 Kalau guru lagi kena jadwal piket hari ini, munculkan 2 kartu tombol:

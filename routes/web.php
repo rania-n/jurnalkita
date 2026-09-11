@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MapelController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\DispensasiController;
+use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
 use App\Http\Controllers\Sekretaris\JurnalController as VerifikasiJurnalController;
 use Illuminate\Support\Facades\Route;
@@ -72,6 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     /* =============================== GURU =============================== */
     Route::middleware('role:guru')->group(function () {
         Route::view('/guru', 'dashboards.guru')->name('guru.dashboard');
+        Route::get('/guru/jadwal', [GuruJadwalController::class, 'index'])->name('guru.jadwal.index');
         Route::view('/guru/piket', 'guru.piket')->name('piket.index');
 
         Route::get('/guru/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
