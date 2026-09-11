@@ -61,7 +61,6 @@ Sudah tercatat di `docs/scope.md`.
 | B2 | **Surat dispensasi** (halaman/PDF + QR berputar 10 dtk) | Perlu desain surat + logika HMAC QR. |
 | B3 | **Peran Satpam + halaman scan QR** | Peran baru, alur scan, validasi token. |
 | B4 | **Integrasi WhatsApp** | API pihak ketiga (Fonnte/Wablas) + biaya. Link approve Waka, kirim surat. |
-| B5 | **Ekspor laporan piket** (Excel/PDF per hari/guru/kelas) | Perlu library ekspor + definisi "kejadian piket". |
 | B6 | **Rekap wali kelas** (dashboard khusus) | Wali kelas belum jadi peran/menu. Rekap kehadiran per siswa. |
 | B7 | **Tahun ajaran & kenaikan kelas** | Kolom `tahun_ajaran`, scope aktif, proses naik kelas, arsip. Lihat `spec.md` §E. |
 | B8 | **Guru pengganti & tukar jam** | Alur persetujuan antar guru. |

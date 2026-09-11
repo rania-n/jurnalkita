@@ -105,6 +105,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     /* ===================== DISPENSASI (guru piket + waka) ===================== */
     Route::middleware('role:guru,waka')->group(function () {
         Route::get('/dispensasi', [DispensasiController::class, 'index'])->name('dispensasi.index');
+        Route::get('/dispensasi/ekspor', [DispensasiController::class, 'ekspor'])->name('dispensasi.ekspor');
         Route::get('/dispensasi/{dispensasi}', [DispensasiController::class, 'show'])->name('dispensasi.show');
     });
     Route::middleware('role:guru')->group(function () {

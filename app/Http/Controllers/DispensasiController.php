@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\Dispensasi;
 use App\Models\Kelas;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\View\View;
 
 class DispensasiController extends Controller
@@ -16,7 +18,11 @@ class DispensasiController extends Controller
         abort_unless(auth()->user()->isPiket(), 403, 'Hanya guru piket yang dapat mengakses ini.');
     }
 
-    public function index(Request $request): View
+    /**
+     * Query dasar dispensasi sesuai peran + filter dari request.
+     * Dipakai bersama oleh index() (dipaginasi) dan ekspor() (diambil semua).
+     */
+    private function terfilter(Request $request)
     {
         $user = $request->user();
         $tab = $request->get('tab', 'semua');
@@ -33,13 +39,66 @@ class DispensasiController extends Controller
 
         $query->when($tab === 'menunggu', fn ($q) => $q->where('status_akhir', 'pending'))
             ->when($tab === 'disetujui', fn ($q) => $q->where('status_akhir', 'approved'))
-            ->when($tab === 'ditolak', fn ($q) => $q->where('status_akhir', 'rejected'));
+            ->when($tab === 'ditolak', fn ($q) => $q->where('status_akhir', 'rejected'))
+            ->when($request->filled('dari'), fn ($q) => $q->whereDate('tanggal', '>=', $request->date('dari')))
+            ->when($request->filled('sampai'), fn ($q) => $q->whereDate('tanggal', '<=', $request->date('sampai')))
+            ->when($request->filled('guru_id'), fn ($q) => $q->where('diajukan_oleh_id', $request->integer('guru_id')))
+            ->when($request->filled('kelas_id'), fn ($q) => $q->whereHas(
+                'siswa', fn ($q2) => $q2->where('kelas_id', $request->integer('kelas_id'))
+            ));
+
+        return $query;
+    }
+
+    public function index(Request $request): View
+    {
+        $user = $request->user();
 
         return view('dispensasi.index', [
-            'items' => $query->paginate(15),
-            'tab' => $tab,
+            'items' => $this->terfilter($request)->paginate(15)->withQueryString(),
+            'tab' => $request->get('tab', 'semua'),
             'bolehAjukan' => $user->isPiket(),
+            'bolehEkspor' => $user->role === 'waka' || $user->isPiket(),
+            // Filter guru piket cuma relevan buat waka (guru piket cuma lihat punyanya sendiri).
+            'guruPiketList' => $user->role === 'waka'
+                ? User::where('role', 'guru')->whereHas('guru.jadwalPikets')->orderBy('name')->get()
+                : collect(),
+            'kelasList' => Kelas::orderBy('nama')->get(),
         ]);
+    }
+
+    /** Ekspor laporan dispensasi (kegiatan piket) sebagai CSV, ikut filter yang sedang aktif. */
+    public function ekspor(Request $request)
+    {
+        abort_unless($request->user()->role === 'waka' || $request->user()->isPiket(), 403);
+
+        $rows = $this->terfilter($request)->get();
+
+        $namaFile = 'laporan-piket-'.now()->format('Y-m-d_His').'.csv';
+
+        AuditLog::catat('dispensasi.ekspor', "Ekspor laporan piket ({$rows->count()} baris)");
+
+        return Response::streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Tanggal', 'Nama Siswa', 'Kelas', 'Jam', 'Alasan', 'Diajukan Oleh (Piket)', 'Status Piket', 'Status Waka', 'Status Akhir', 'Catatan Waka']);
+
+            foreach ($rows as $d) {
+                fputcsv($out, [
+                    $d->tanggal->format('Y-m-d'),
+                    $d->siswa->nama,
+                    $d->siswa->kelas?->nama ?? '-',
+                    $d->jam_ke_mulai ? "JP {$d->jam_ke_mulai}-{$d->jam_ke_selesai}" : 'Sehari penuh',
+                    $d->alasan,
+                    $d->pengaju->name,
+                    $d->status_piket,
+                    $d->status_waka,
+                    $d->status_akhir,
+                    $d->catatan_waka ?? '-',
+                ]);
+            }
+
+            fclose($out);
+        }, $namaFile, ['Content-Type' => 'text/csv']);
     }
 
     public function create(): View
