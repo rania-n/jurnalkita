@@ -38,7 +38,9 @@ database-nya, lalu `php artisan migrate:fresh --seed`.
 | Email | Peran |
 |---|---|
 | `admin@jurnalkita.test` | Admin |
-| `guru1@jurnalkita.test` | Guru |
+| `guru1@jurnalkita.test` | Guru (juga piket, hari tetap "senin") |
+| `guru.biasa@jurnalkita.test` | Guru **tanpa** piket sama sekali |
+| `guru.piket@jurnalkita.test` | Guru **dengan** piket — piketnya dipasang ke hari saat `--seed` dijalankan, jadi kartu "Piket Hari Ini" & Monitor Piket selalu ada isinya |
 | `kelas1@jurnalkita.test` | Pengurus kelas |
 | `waka@jurnalkita.test` | Waka |
 

@@ -68,7 +68,7 @@ class JadwalTest extends TestCase
 
         $this->actingAs($piket)->get('/guru')
             ->assertOk()
-            ->assertSee('Piket Hari Ini')
+            ->assertSee('Monitor Piket')
             ->assertSee('Ajukan Dispensasi');
 
         $bukanPiket = User::factory()->role('guru')->create();
@@ -76,6 +76,6 @@ class JadwalTest extends TestCase
 
         $this->actingAs($bukanPiket)->get('/guru')
             ->assertOk()
-            ->assertDontSee('Piket Hari Ini');
+            ->assertDontSee('Monitor Piket');
     }
 }

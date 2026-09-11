@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DispensasiController extends Controller
@@ -74,13 +75,13 @@ class DispensasiController extends Controller
 
         $rows = $this->terfilter($request)->get();
 
-        $namaFile = 'laporan-piket-'.now()->format('Y-m-d_His').'.csv';
+        $namaFile = 'laporan-dispensasi-'.now()->format('Y-m-d_His').'.csv';
 
-        AuditLog::catat('dispensasi.ekspor', "Ekspor laporan piket ({$rows->count()} baris)");
+        AuditLog::catat('dispensasi.ekspor', "Ekspor laporan dispensasi ({$rows->count()} baris)");
 
         return Response::streamDownload(function () use ($rows) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['Tanggal', 'Nama Siswa', 'Kelas', 'Jam', 'Alasan', 'Diajukan Oleh (Piket)', 'Status Piket', 'Status Waka', 'Status Akhir', 'Catatan Waka']);
+            fputcsv($out, ['Tanggal', 'Nama Siswa', 'Kelas', 'Jam', 'Alasan', 'Diajukan Oleh (Piket)', 'Status Piket', 'Status Waka', 'Status Akhir', 'Catatan Waka', 'Bukti']);
 
             foreach ($rows as $d) {
                 fputcsv($out, [
@@ -94,6 +95,7 @@ class DispensasiController extends Controller
                     $d->status_waka,
                     $d->status_akhir,
                     $d->catatan_waka ?? '-',
+                    $d->surat_path ? url(Storage::url($d->surat_path)) : 'Tidak ada',
                 ]);
             }
 

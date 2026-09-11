@@ -23,15 +23,24 @@ Jam Pelajaran · Jadwal Piket
 
 ### Guru (layout mobile)
 Beranda (jadwal hari ini + badge piket) · Riwayat Jurnal · Form Jurnal ·
-Presensi Siswa · Detail Jurnal (+ edit selama pending/revisi) ·
-Jadwal Piket Saya · Dispensasi (daftar + ajukan + detail) · Profil
+Presensi Siswa · Detail Jurnal (+ edit selama pending/revisi, bisa hapus) ·
+Jadwal Mengajar Saya (seminggu) · Jadwal Piket Saya · Dispensasi (daftar + ajukan
++ detail, bisa batal) · **Monitor Piket** (khusus guru piket) · Profil
 
 ### Pengurus Kelas (layout mobile)
 Beranda · Verifikasi Jurnal (daftar) · Periksa Jurnal (verifikasi / minta revisi) ·
 Isi Jurnal Pengganti · Profil
 
 ### Waka (layout mobile)
-Beranda · Antrean Dispensasi (daftar + detail + setujui/tolak) · Profil
+Beranda · Antrean Dispensasi (daftar + detail + setujui/tolak) ·
+**Monitor Piket** · Profil
+
+> **Monitor Piket** — bukan jadwal piket pribadi, tapi pantauan lintas-guru: buat
+> guru piket & Waka, per hari, semua jadwal di semua kelas ditampilkan lengkap
+> dengan status jurnalnya (Hadir / Tugas Luar / Tidak Hadir / **Belum Diisi** —
+> jurnal yang belum diisi sama sekali ditandai jelas). Ada filter tanggal/kelas/guru
+> + ekspor CSV. Ini yang dimaksud "laporan piket", beda dari ekspor riwayat
+> dispensasi (yang juga ada, terpisah).
 
 ---
 

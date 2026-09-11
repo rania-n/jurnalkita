@@ -26,6 +26,7 @@ return [
     'waka' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'waka.dashboard'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
+        ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 

@@ -169,6 +169,55 @@ class DatabaseSeeder extends Seeder
             ]));
         });
 
+        // ---------------------------- Akun demo: guru tanpa piket vs guru piket hari ini
+        // Dipisah jelas biar gampang dites/didemokan. Piket & jadwalnya dipasang ke HARI
+        // SAAT SEEDING (bukan hari tetap), jadi kartu "Piket Hari Ini" dan halaman Monitor
+        // Piket selalu ada isinya — mau di-seed hari apa pun.
+        $hariIni = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][now()->dayOfWeek - 1] ?? 'senin';
+
+        $guruBiasaUser = User::create([
+            'name' => 'Fajar Nugroho, S.Pd', 'email' => 'guru.biasa@jurnalkita.test',
+            'email_verified_at' => now(), 'password' => Hash::make('password'),
+            'role' => 'guru', 'status' => 'approved',
+        ]);
+        $guruBiasa = Guru::create([
+            'user_id' => $guruBiasaUser->id, 'nip' => fake()->numerify('19#########'),
+            'nama' => 'Fajar Nugroho, S.Pd', 'no_hp' => '08'.fake()->numerify('##########'),
+            'mapel_utama_id' => $mapels->first()->id,
+        ]);
+        Jadwal::create([
+            'kelas_id' => $kelas[1]->id, 'mapel_id' => $mapels->first()->id, 'guru_id' => $guruBiasa->id,
+            'ruang' => fake()->randomElement(config('akademik.ruangan')),
+            'hari' => $hariIni, 'jam_ke_mulai' => 3, 'jam_ke_selesai' => 4,
+        ]);
+        // Sengaja TIDAK dibuatkan jurnal -> contoh kelas "belum diisi" di Monitor Piket.
+
+        $guruPiketUser = User::create([
+            'name' => 'Siti Rahayu, S.Pd', 'email' => 'guru.piket@jurnalkita.test',
+            'email_verified_at' => now(), 'password' => Hash::make('password'),
+            'role' => 'guru', 'status' => 'approved',
+        ]);
+        $guruPiket = Guru::create([
+            'user_id' => $guruPiketUser->id, 'nip' => fake()->numerify('19#########'),
+            'nama' => 'Siti Rahayu, S.Pd', 'no_hp' => '08'.fake()->numerify('##########'),
+            'mapel_utama_id' => $mapels->last()->id,
+        ]);
+        JadwalPiket::create(['guru_id' => $guruPiket->id, 'hari' => $hariIni, 'mulai' => '07:00', 'selesai' => '12:00']);
+        $jadwalPiketHariIni = Jadwal::create([
+            'kelas_id' => $kelas[0]->id, 'mapel_id' => $mapels->last()->id, 'guru_id' => $guruPiket->id,
+            'ruang' => fake()->randomElement(config('akademik.ruangan')),
+            'hari' => $hariIni, 'jam_ke_mulai' => 5, 'jam_ke_selesai' => 6,
+        ]);
+        $jurnalHariIni = Jurnal::create([
+            'jadwal_id' => $jadwalPiketHariIni->id, 'guru_id' => $guruPiket->id,
+            'tanggal' => now(), 'jam_ke_mulai' => 5, 'jam_ke_selesai' => 6,
+            'status_guru' => 'hadir', 'materi' => 'Contoh materi yang sudah diisi hari ini.',
+            'status_verifikasi' => 'pending',
+        ]);
+        $kelas[0]->siswas->each(fn (Siswa $s) => Absensi::create([
+            'jurnal_id' => $jurnalHariIni->id, 'siswa_id' => $s->id, 'status' => 'hadir',
+        ]));
+
         // ------------------------------------------------------- Contoh dispensasi
         // Dispensasi selalu diajukan guru piket (tahap piket otomatis lolos),
         // lalu menunggu keputusan Waka Kesiswaan.

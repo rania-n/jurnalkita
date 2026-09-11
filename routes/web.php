@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\DispensasiController;
 use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
+use App\Http\Controllers\PiketController;
 use App\Http\Controllers\Sekretaris\JurnalController as VerifikasiJurnalController;
 use Illuminate\Support\Facades\Route;
 
@@ -115,5 +116,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
     Route::middleware('role:waka')->group(function () {
         Route::post('/dispensasi/{dispensasi}/waka', [DispensasiController::class, 'approveWaka'])->name('dispensasi.waka');
+    });
+
+    /* ============ MONITOR PIKET (pantauan kehadiran guru — piket + waka) ============ */
+    Route::middleware('role:guru,waka')->prefix('piket/monitor')->name('piket.monitor.')->group(function () {
+        Route::get('/', [PiketController::class, 'index'])->name('index');
+        Route::get('/ekspor', [PiketController::class, 'ekspor'])->name('ekspor');
     });
 });

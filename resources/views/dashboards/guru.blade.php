@@ -19,13 +19,13 @@
         <x-alert type="info" class="mb-4">Anda bertugas <strong>piket</strong> hari ini.</x-alert>
 
         <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <a href="{{ route('piket.index') }}" class="press flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+            <a href="{{ route('piket.monitor.index') }}" class="press flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
                 <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
-                    <x-icon name="event_available" :size="24" />
+                    <x-icon name="monitoring" :size="24" />
                 </span>
                 <div class="flex-1">
-                    <p class="text-sm font-bold text-ink">Piket Hari Ini</p>
-                    <p class="text-xs text-muted">Lihat jadwal piket Anda</p>
+                    <p class="text-sm font-bold text-ink">Monitor Piket</p>
+                    <p class="text-xs text-muted">Pantau kehadiran guru & kelas yang belum diisi jurnalnya</p>
                 </div>
                 <x-icon name="chevron_right" :size="20" class="text-muted" />
             </a>

@@ -5,7 +5,8 @@
 Auth + approval akun · Master data (admin) · Buat akun dari data ·
 Jurnal + absensi + foto · Verifikasi jurnal oleh sekretaris ·
 Dispensasi 2 tahap (piket → waka) · Dashboard per peran · Audit log ·
-**Ekspor laporan piket (CSV, filter tanggal/guru/kelas)**.
+Ekspor laporan dispensasi (CSV) · **Monitor Piket** (pantauan kehadiran guru per
+hari, semua kelas, status jurnal per jadwal + ekspor CSV).
 
 Aturan alur detail: `docs/spec.md`.
 
