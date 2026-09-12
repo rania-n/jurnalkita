@@ -7,6 +7,7 @@ use App\Models\Dispensasi;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\JadwalPiket;
+use App\Models\JadwalWaka;
 use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
@@ -14,6 +15,7 @@ use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Models\User;
+use App\Support\HariSekolah;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -36,6 +38,22 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(), 'password' => Hash::make('password'),
             'role' => 'waka', 'status' => 'approved', 'no_hp' => '085648830046',
         ]);
+
+        // Waka juga gantian shift kayak guru piket -- dua akun contoh, shift-nya
+        // dipasang biar $waka (dipakai di banyak tempat lain) kebagian giliran HARI
+        // SAAT SEEDING, jadi langsung kelihatan jalan mau di-seed hari apa pun.
+        $waka2 = User::create([
+            'name' => 'Retno Wulandari, S.Pd', 'email' => 'waka2@jurnalkita.test',
+            'email_verified_at' => now(), 'password' => Hash::make('password'),
+            'role' => 'waka', 'status' => 'approved', 'no_hp' => '081211119999',
+        ]);
+        $hariIni = HariSekolah::hariIni() ?? 'senin';
+        $hariLain = collect(['senin', 'selasa', 'rabu', 'kamis', 'jumat'])->reject(fn ($h) => $h === $hariIni)->values();
+        JadwalWaka::create(['user_id' => $waka->id, 'hari' => $hariIni]);
+        JadwalWaka::create(['user_id' => $waka->id, 'hari' => $hariLain[0]]);
+        JadwalWaka::create(['user_id' => $waka2->id, 'hari' => $hariLain[1]]);
+        JadwalWaka::create(['user_id' => $waka2->id, 'hari' => $hariLain[2]]);
+        JadwalWaka::create(['user_id' => $waka2->id, 'hari' => $hariLain[3]]);
 
         $satpam = User::create([
             'name' => 'Slamet Riyadi', 'email' => 'satpam@jurnalkita.test',

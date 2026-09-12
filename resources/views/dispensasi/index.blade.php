@@ -1,6 +1,5 @@
 @php
-    $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'ditolak' => 'Ditolak'];
-    $badgeAkhir = ['pending' => 'menunggu', 'approved' => 'disetujui', 'rejected' => 'ditolak'];
+    $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'kadaluarsa' => 'Kadaluarsa', 'ditolak' => 'Ditolak'];
     $adaFilter = request()->filled('dari') || request()->filled('sampai') || request()->filled('guru_id') || request()->filled('kelas_id');
 @endphp
 
@@ -80,9 +79,13 @@
                     ]"
                 >
                     <x-slot:badge>
-                        <x-ui.status-badge :status="$badgeAkhir[$d->status_akhir]">
-                            {{ ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$d->status_akhir] }}
-                        </x-ui.status-badge>
+                        @if ($d->sudahKadaluarsa())
+                            <x-ui.status-badge status="kadaluarsa">Kadaluarsa</x-ui.status-badge>
+                        @else
+                            <x-ui.status-badge :status="['pending' => 'menunggu', 'approved' => 'disetujui', 'rejected' => 'ditolak'][$d->status_akhir]">
+                                {{ ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$d->status_akhir] }}
+                            </x-ui.status-badge>
+                        @endif
                     </x-slot:badge>
                     <x-slot:actions>
                         <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.show', $d)" />

@@ -135,9 +135,10 @@ class DispensasiTest extends TestCase
             ->assertRedirect(route('sekretaris.dashboard'));
     }
 
-    public function test_guru_piket_hanya_lihat_pengajuan_sendiri(): void
+    public function test_dispensasi_bersifat_global_semua_guru_bisa_lihat_punya_siapa_saja(): void
     {
-        // Pengajuan oleh piket lain
+        // Pengajuan oleh piket lain -- dispensasi bukan "milik" guru yang mengajukan,
+        // jadi guru piket lain (bahkan guru yang bukan piket sekalipun) tetap boleh lihat.
         $piketLain = User::factory()->role('guru')->create();
         $guruLain = Guru::create(['user_id' => $piketLain->id, 'nama' => 'Piket Lain']);
         JadwalPiket::create(['guru_id' => $guruLain->id, 'hari' => 'selasa']);
@@ -146,8 +147,11 @@ class DispensasiTest extends TestCase
             'tanggal' => today(), 'alasan' => 'X', 'status_piket' => 'approved',
         ]);
 
-        $this->actingAs($this->piket)->get("/dispensasi/{$milikOrang->id}")->assertForbidden();
-        $this->actingAs($this->piket)->get('/dispensasi')->assertOk()->assertDontSee('Piket Lain');
+        $this->actingAs($this->piket)->get("/dispensasi/{$milikOrang->id}")->assertOk();
+        $this->actingAs($this->piket)->get('/dispensasi')->assertOk()->assertSee('Budi');
+
+        $guruBukanPiket = User::factory()->role('guru')->create();
+        $this->actingAs($guruBukanPiket)->get("/dispensasi/{$milikOrang->id}")->assertOk();
     }
 
     public function test_guru_bukan_waka_tidak_bisa_approve_waka(): void
@@ -313,5 +317,38 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
 
         $absensiHari->each(fn (Absensi $a) => $this->assertSame('dispensasi', $a->fresh()->status));
+    }
+
+    public function test_dispensasi_disetujui_yang_lewat_tanggal_dikategorikan_kadaluarsa(): void
+    {
+        $aktif = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'alasan' => 'Lomba', 'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
+        ]);
+        $lewat = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today()->subDays(3), 'alasan' => 'Sakit minggu lalu',
+            'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
+        ]);
+
+        $this->assertFalse($aktif->sudahKadaluarsa());
+        $this->assertTrue($lewat->sudahKadaluarsa());
+
+        $this->actingAs($this->waka)->get('/dispensasi?tab=disetujui')
+            ->assertOk()->assertSee('Lomba')->assertDontSee('Sakit minggu lalu');
+
+        $this->actingAs($this->waka)->get('/dispensasi?tab=kadaluarsa')
+            ->assertOk()->assertSee('Sakit minggu lalu')->assertDontSee('Lomba');
+    }
+
+    public function test_dispensasi_multihari_baru_kadaluarsa_setelah_tanggal_selesai_lewat(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today()->subDay(), 'tanggal_selesai' => today()->addDay(),
+            'alasan' => 'Sakit 3 hari', 'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
+        ]);
+
+        $this->assertFalse($d->sudahKadaluarsa());
     }
 }

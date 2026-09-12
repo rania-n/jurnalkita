@@ -65,6 +65,20 @@ class NavigasiGuruPiketTest extends TestCase
         $this->actingAs($guru)->get('/guru')->assertOk()->assertDontSee('Dispensasi');
     }
 
+    public function test_chip_header_bilang_guru_piket_pas_hari_piketnya(): void
+    {
+        $this->travelTo(Carbon::parse('next monday 08:00'));
+
+        $guru = User::factory()->role('guru')->create();
+        $g = Guru::create(['user_id' => $guru->id, 'nama' => 'Guru Piket']);
+        JadwalPiket::create(['guru_id' => $g->id, 'hari' => 'senin']);
+
+        $this->actingAs($guru)->get('/guru')->assertOk()->assertSee('Guru Piket');
+
+        JadwalPiket::query()->update(['hari' => 'rabu']); // pindah, bukan hari ini lagi
+        $this->actingAs($guru)->get('/guru')->assertOk()->assertDontSee('Guru Piket');
+    }
+
     public function test_akses_fitur_dispensasi_tetap_kebuka_walau_bukan_hari_piketnya(): void
     {
         $this->travelTo(Carbon::parse('next monday 08:00'));

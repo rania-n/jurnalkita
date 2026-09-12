@@ -1,13 +1,21 @@
 @php
     $user = auth()->user();
     $nama = $user?->name ?? 'Pengguna';
-    $roleLabel = [
+
+    // Label chip role -- beberapa peran nyesuain konteks HARI INI, bukan cuma nilai
+    // role di database (guru piket hari ini, waka yang lagi gilirannya, pengurus
+    // kelas nampilin kelasnya). Chip ini satu-satunya identitas yang kelihatan di
+    // mobile (nama & sapaan di bawah sengaja disembunyikan di layar sempit), jadi
+    // taruh info yang paling penting di sini, bukan cuma di sapaan desktop.
+    $roleLabel = match ($user?->role) {
         'admin' => 'Admin',
-        'guru' => 'Guru',
-        'siswa' => 'Pengurus Kelas',
+        'guru' => $user->piketHariIni() ? 'Guru Piket' : 'Guru',
+        'siswa' => $user->kelasSekretaris() ? 'Pengurus '.$user->kelasSekretaris()->nama : 'Pengurus Kelas',
         'waka' => 'Waka Kesiswaan',
         'satpam' => 'Satpam',
-    ][$user?->role] ?? '';
+        default => '',
+    };
+
     $inisial = collect(explode(' ', $nama))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
 @endphp
 

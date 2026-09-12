@@ -1,6 +1,6 @@
 @php
     $guru = auth()->user()->guru;
-    $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][now()->dayOfWeek - 1] ?? null;
+    $hari = \App\Support\HariSekolah::hariIni();
     $jadwalHariIni = $hari && $guru
         ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hari)->orderBy('jam_ke_mulai')->get()
         : collect();

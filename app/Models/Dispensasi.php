@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -63,6 +64,34 @@ class Dispensasi extends Model
             (bool) $this->jam_ke_selesai => "JP {$this->jam_ke_mulai}–{$this->jam_ke_selesai}",
             default => "JP {$this->jam_ke_mulai} sampai selesai",
         };
+    }
+
+    /**
+     * true kalau sudah disetujui TAPI batas akhir tanggalnya sudah lewat -- beda dari
+     * berlakuPada() yang juga false buat dispensasi yang tanggalnya BELUM mulai
+     * (mis. diajukan buat besok). Ini murni "tanggal akhirnya sudah lewat".
+     */
+    public function sudahKadaluarsa(): bool
+    {
+        if ($this->status_akhir !== 'approved') {
+            return false;
+        }
+
+        return ($this->tanggal_selesai ?? $this->tanggal)->copy()->endOfDay()->isPast();
+    }
+
+    /** Scope: dispensasi approved yang batas akhirnya sudah lewat -- tab "Kadaluarsa". */
+    public function scopeKadaluarsa(Builder $query): Builder
+    {
+        return $query->where('status_akhir', 'approved')
+            ->whereRaw('coalesce(tanggal_selesai, tanggal) < ?', [today()->toDateString()]);
+    }
+
+    /** Scope: dispensasi approved yang masih berlaku hari ini/akan datang -- tab "Disetujui". */
+    public function scopeMasihBerlaku(Builder $query): Builder
+    {
+        return $query->where('status_akhir', 'approved')
+            ->whereRaw('coalesce(tanggal_selesai, tanggal) >= ?', [today()->toDateString()]);
     }
 
     public function siswa(): BelongsTo

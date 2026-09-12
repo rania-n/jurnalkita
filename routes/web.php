@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AkunController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\JadwalPiketController;
+use App\Http\Controllers\Admin\JadwalWakaController;
 use App\Http\Controllers\Admin\JamPelajaranController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MapelController;
@@ -59,6 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin/jadwal-pelajaran', 'admin.jadwal-pelajaran.index')->name('master.jadwal-pelajaran.index');
         Route::view('/admin/jam-pelajaran', 'admin.jam-pelajaran.index')->name('master.jam-pelajaran.index');
         Route::view('/admin/jadwal-piket', 'admin.jadwal-piket.index')->name('master.jadwal-piket.index');
+        Route::view('/admin/jadwal-waka', 'admin.jadwal-waka.index')->name('master.jadwal-waka.index');
         Route::view('/admin/akun', 'admin.akun.index')->name('master.akun.index');
         Route::view('/admin/audit-log', 'admin.audit-log.index')->name('master.audit-log.index');
         Route::view('/admin/tahun-ajaran', 'admin.tahun-ajaran.index')->name('master.tahun-ajaran.index');
@@ -83,6 +85,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/admin/jadwal-pelajaran/{jadwal}', [JadwalController::class, 'destroy'])->name('master.jadwal-pelajaran.destroy');
         Route::post('/admin/jadwal-piket', [JadwalPiketController::class, 'save'])->name('master.jadwal-piket.save');
         Route::delete('/admin/jadwal-piket/{jadwalPiket}', [JadwalPiketController::class, 'destroy'])->name('master.jadwal-piket.destroy');
+        Route::post('/admin/jadwal-waka', [JadwalWakaController::class, 'save'])->name('master.jadwal-waka.save');
+        Route::delete('/admin/jadwal-waka/{jadwalWaka}', [JadwalWakaController::class, 'destroy'])->name('master.jadwal-waka.destroy');
         Route::post('/admin/jam-pelajaran', [JamPelajaranController::class, 'save'])->name('master.jam-pelajaran.save');
         Route::post('/admin/tahun-ajaran/naik-kelas', [TahunAjaranController::class, 'naikKelas'])->name('master.tahun-ajaran.naik-kelas');
     });

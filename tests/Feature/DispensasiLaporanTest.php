@@ -87,14 +87,15 @@ class DispensasiLaporanTest extends TestCase
             ->assertOk()->assertSee('Budi')->assertDontSee('Sinta');
     }
 
-    public function test_guru_piket_hanya_lihat_dan_ekspor_pengajuan_sendiri(): void
+    public function test_guru_piket_bisa_lihat_dan_ekspor_semua_pengajuan_bukan_cuma_punya_sendiri(): void
     {
+        // Dispensasi sifatnya global -- bukan "milik" guru yang mengajukan.
         $response = $this->actingAs($this->piket)->get('/dispensasi');
-        $response->assertOk()->assertSee('Budi')->assertDontSee('Sinta');
+        $response->assertOk()->assertSee('Budi')->assertSee('Sinta');
 
         $csv = $this->streamedCsv($this->piket);
         $this->assertStringContainsString('Budi', $csv);
-        $this->assertStringNotContainsString('Sinta', $csv);
+        $this->assertStringContainsString('Sinta', $csv);
     }
 
     public function test_waka_ekspor_berisi_semua_baris_sesuai_filter(): void

@@ -50,7 +50,12 @@
     <div class="mt-5 flex max-w-xl items-start gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
         <x-icon :name="$waIcon" :size="22" class="{{ $waColor }}" />
         <div>
-            <p class="text-sm font-bold text-ink">Waka Kesiswaan: {{ $waText }}</p>
+            <p class="text-sm font-bold text-ink">
+                Waka Kesiswaan: {{ $waText }}
+                @if ($dispensasi->sudahKadaluarsa())
+                    <x-ui.status-badge status="kadaluarsa" class="ml-1 align-middle">Kadaluarsa</x-ui.status-badge>
+                @endif
+            </p>
             @if ($dispensasi->waka)<p class="text-xs text-muted">Oleh {{ $dispensasi->waka->name }}</p>@endif
             @if ($dispensasi->catatan_waka)<p class="mt-0.5 text-xs text-muted">"{{ $dispensasi->catatan_waka }}"</p>@endif
         </div>

@@ -125,4 +125,12 @@ class KelasTest extends TestCase
 
         $this->actingAs($tanpaSiswa)->get('/sekretaris/kelas')->assertForbidden();
     }
+
+    public function test_header_menampilkan_kelas_yang_diampu_bukan_cuma_nama_sendiri(): void
+    {
+        // Header topbar cuma nampilin chip role di mobile -- buat pengurus kelas,
+        // chip-nya sengaja disi nama kelasnya (bukan cuma "Pengurus Kelas" generik),
+        // biar kelihatan kelas siapa tanpa buka menu lain.
+        $this->actingAs($this->sekretaris)->get('/sekretaris')->assertOk()->assertSee('Pengurus X RPL 1');
+    }
 }

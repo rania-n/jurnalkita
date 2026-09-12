@@ -21,26 +21,22 @@ class DispensasiController extends Controller
     }
 
     /**
-     * Query dasar dispensasi sesuai peran + filter dari request.
+     * Query dasar dispensasi + filter dari request. Sifatnya GLOBAL -- dispensasi bukan
+     * "milik" guru yang mengajukan, semua guru/waka/admin boleh lihat semuanya (buat
+     * mengajukan/membatalkan tetap dibatasi kepemilikan, itu diatur terpisah).
      * Dipakai bersama oleh index() (dipaginasi) dan ekspor() (diambil semua).
      */
     private function terfilter(Request $request)
     {
-        $user = $request->user();
         $tab = $request->get('tab', 'semua');
 
-        $query = Dispensasi::with('siswa.kelas', 'pengaju')->latest('tanggal')->latest('id');
-
-        if ($user->role === 'waka' || $user->role === 'admin') {
-            // Waka & admin (oversight): semua yang sudah lolos piket, lintas guru.
-            $query->where('status_piket', 'approved');
-        } else {
-            // Guru: hanya pengajuan yang ia buat sendiri (sebagai piket).
-            $query->where('diajukan_oleh_id', $user->id);
-        }
+        $query = Dispensasi::with('siswa.kelas', 'pengaju')
+            ->where('status_piket', 'approved')
+            ->latest('tanggal')->latest('id');
 
         $query->when($tab === 'menunggu', fn ($q) => $q->where('status_akhir', 'pending'))
-            ->when($tab === 'disetujui', fn ($q) => $q->where('status_akhir', 'approved'))
+            ->when($tab === 'disetujui', fn ($q) => $q->masihBerlaku())
+            ->when($tab === 'kadaluarsa', fn ($q) => $q->kadaluarsa())
             ->when($tab === 'ditolak', fn ($q) => $q->where('status_akhir', 'rejected'))
             ->when($request->filled('dari'), fn ($q) => $q->whereDate('tanggal', '>=', $request->date('dari')))
             ->when($request->filled('sampai'), fn ($q) => $q->whereDate('tanggal', '<=', $request->date('sampai')))
@@ -61,10 +57,7 @@ class DispensasiController extends Controller
             'tab' => $request->get('tab', 'semua'),
             'bolehAjukan' => $user->isPiket(),
             'bolehEkspor' => in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
-            // Filter guru piket cuma relevan buat yang lihat lintas guru (guru piket cuma lihat punyanya sendiri).
-            'guruPiketList' => in_array($user->role, ['waka', 'admin'], true)
-                ? User::where('role', 'guru')->whereHas('guru.jadwalPikets')->orderBy('name')->get()
-                : collect(),
+            'guruPiketList' => User::where('role', 'guru')->whereHas('guru.jadwalPikets')->orderBy('name')->get(),
             'kelasList' => Kelas::orderBy('nama')->get(),
         ]);
     }
@@ -155,15 +148,15 @@ class DispensasiController extends Controller
     {
         $user = auth()->user();
 
-        // Guru piket hanya boleh melihat pengajuannya sendiri; waka & admin boleh semua (oversight).
-        abort_unless(
-            in_array($user->role, ['waka', 'admin'], true) || $dispensasi->diajukan_oleh_id === $user->id,
-            403
-        );
+        // Dispensasi sifatnya global (bukan "milik" guru yang mengajukan) -- semua guru,
+        // waka, & admin boleh lihat detailnya. Middleware role:guru,waka,admin di route
+        // sudah membatasi siapa yang bisa sampai ke sini sama sekali.
 
         $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
 
-        $waka = User::where('role', 'waka')->whereNotNull('no_hp')->first();
+        // Waka juga gantian shift per hari (kayak guru piket) -- link WA diarahkan ke
+        // yang beneran bertugas hari ini, bukan asal Waka pertama di database.
+        $waka = User::wakaUntukHariIni();
         $waLinkWaka = null;
         if ($dispensasi->status_waka === 'pending' && $waka) {
             $tautan = SuratDispensasiController::tautanPersetujuan($dispensasi, $waka);
