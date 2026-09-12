@@ -19,10 +19,11 @@ return [
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
+    // Hari giliran piket: nav-nya cuma yang berhubungan sama piket. Jurnal/Jadwal
+    // sengaja TIDAK ikut di sini -- hari itu dia ditugaskan piket, bukan ngajar
+    // (guru piket memang nggak dijadwalkan mengajar saat shift piketnya).
     'guru-piket' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
-        ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
-        ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Piket', 'icon' => 'event_available', 'route' => 'piket.index'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
