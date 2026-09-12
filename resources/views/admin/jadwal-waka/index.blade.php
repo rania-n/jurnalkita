@@ -1,12 +1,18 @@
 @php
+    $hari = request('hari', 'semua');
+    $q = request('cari');
     $hariLabel = config('akademik.hari');
+    $tabs = ['semua' => 'Semua'] + $hariLabel;
 
     $rows = \App\Models\JadwalWaka::with('user')
+        ->when($hari !== 'semua', fn ($b) => $b->where('hari', $hari))
+        ->when($q, fn ($b) => $b->whereHas('user', fn ($u) => $u->where('name', 'like', "%{$q}%")))
         ->orderByRaw(\App\Support\Db::hariOrder())
         ->get();
 
     $wakaList = \App\Models\User::where('role', 'waka')->orderBy('name')->get(['id', 'name']);
-    $adaJadwal = $rows->isNotEmpty();
+    $adaJadwal = \App\Models\JadwalWaka::exists();
+    $semua = $hari === 'semua';
 @endphp
 
 <x-layouts.admin title="Jadwal Waka" heading="Jadwal Waka">
@@ -25,14 +31,30 @@
         @endif
     </x-alert>
 
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
+        @foreach ($tabs as $key => $label)
+            <a href="{{ route('master.jadwal-waka.index', ['hari' => $key, 'cari' => $q]) }}"
+               @class(['flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-center text-sm font-semibold transition-colors', 'bg-navy text-card' => $hari === $key, 'text-muted-2 hover:text-ink' => $hari !== $key])>
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
+    <x-admin.filters :action="route('master.jadwal-waka.index')">
+        <input type="hidden" name="hari" value="{{ $hari }}">
+        <x-admin.f-search placeholder="Cari nama waka..." />
+    </x-admin.filters>
+
     @if ($rows->isEmpty())
         <x-ui.empty title="Belum ada jadwal shift Waka" />
     @else
-        <x-admin.table :head="['Hari', 'Waka Bertugas', '']">
+        <x-admin.table :head="$semua ? ['Hari', 'Waka Bertugas', ''] : ['Waka Bertugas', '']">
             @foreach ($rows as $j)
                 <tr class="hover:bg-surface/60">
-                    <td class="px-4 py-3 font-semibold text-ink">{{ $hariLabel[$j->hari] ?? $j->hari }}</td>
-                    <td class="px-4 py-3 text-muted">{{ $j->user?->name }}</td>
+                    @if ($semua)
+                        <td class="px-4 py-3 font-semibold text-ink">{{ $hariLabel[$j->hari] ?? $j->hari }}</td>
+                    @endif
+                    <td class="px-4 py-3 {{ $semua ? 'text-muted' : 'font-semibold text-ink' }}">{{ $j->user?->name }}</td>
                     <td class="px-4 py-3">
                         <x-admin.row-actions
                             edit-modal="modal-waka"

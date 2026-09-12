@@ -49,7 +49,10 @@
         </div>
     </div>
 
-    <x-bottom-nav :menu="$menu" />
+    {{-- Sidebar lengkap (x-side-nav) cuma nongol di desktop, jadi bottom-nav mobile
+         admin sengaja dikasih daftar RINGKAS sendiri (bukan 15 item admin lengkap,
+         kepanjangan buat 1 baris HP) -- lihat 'admin-mobile' di config/navigation.php. --}}
+    <x-bottom-nav :menu="$menu === 'admin' ? 'admin-mobile' : $menu" />
 
     @stack('scripts')
 </body>

@@ -19,7 +19,7 @@ class AdminPagesRenderTest extends TestCase
             '/admin', '/admin/akun', '/admin/akun?tab=pending',
             '/admin/guru', '/admin/kelas', '/admin/siswa', '/admin/mapel',
             '/admin/jadwal-pelajaran', '/admin/jadwal-piket', '/admin/jadwal-piket?hari=semua',
-            '/admin/jam-pelajaran', '/admin/tahun-ajaran',
+            '/admin/jam-pelajaran', '/admin/jadwal-waka', '/admin/tahun-ajaran',
         ];
 
         foreach ($paths as $path) {
