@@ -4,9 +4,12 @@
         'rejected' => ['cancel', 'text-alpha', 'Ditolak'],
         default => ['schedule', 'text-sakit', 'Menunggu keputusan'],
     };
+    // Sama kayak dispensasi/index.blade.php -- admin pakai shell admin biar konsisten
+    // sama sidebar & topbar-nya, bukan shell mobile.
+    $admin = auth()->user()->role === 'admin';
 @endphp
 
-<x-layouts.app title="Detail Dispensasi">
+<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Detail Dispensasi" heading="Detail Dispensasi">
     @if ($autoKirimWa)
         {{-- Baru diajukan -> langsung dibukakan WhatsApp ke Waka, biar piket nggak perlu
              tap tombol "Kirim Link" lagi. Tetap harus tap "Kirim" di dalam WhatsApp-nya
@@ -108,4 +111,4 @@
             <x-ui.button type="submit" variant="danger" icon="delete">Batalkan Pengajuan</x-ui.button>
         </form>
     @endif
-</x-layouts.app>
+</x-dynamic-component>

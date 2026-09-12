@@ -1,9 +1,13 @@
 @php
     $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'kadaluarsa' => 'Kadaluarsa', 'ditolak' => 'Ditolak'];
     $adaFilter = request()->filled('dari') || request()->filled('sampai') || request()->filled('guru_id') || request()->filled('kelas_id');
+    // Admin lihat halaman ini lewat sidebar admin -- pakai shell admin (topbar,
+    // sidebar) yang sama biar nggak berasa pindah ke "app lain". Guru piket & waka
+    // tetap pakai shell mobile mereka sendiri.
+    $admin = auth()->user()->role === 'admin';
 @endphp
 
-<x-layouts.app title="Dispensasi" width="wide">
+<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Dispensasi" heading="Dispensasi Siswa" width="wide">
     <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
         <div class="flex gap-2">
             @if ($bolehEkspor)
@@ -95,4 +99,4 @@
         </x-ui.card-list>
         <div class="mt-4">{{ $items->links() }}</div>
     @endif
-</x-layouts.app>
+</x-dynamic-component>

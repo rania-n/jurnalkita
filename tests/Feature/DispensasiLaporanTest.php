@@ -64,6 +64,20 @@ class DispensasiLaporanTest extends TestCase
             ->assertDontSee('name="keputusan" value="approved"', false);
     }
 
+    public function test_admin_lihat_oversight_pakai_shell_admin_bukan_shell_mobile(): void
+    {
+        // Sidebar & topbar admin harus konsisten di halaman oversight ini juga --
+        // bukan "sidebar sparse" ala x-layouts.app (lihat perbaikan konsistensi).
+        $admin = User::factory()->role('admin')->create();
+
+        $this->actingAs($admin)->get('/dispensasi')->assertOk()
+            ->assertSee('Manajemen Akun')->assertSee('Jadwal Waka');
+        $this->actingAs($admin)->get('/piket/monitor')->assertOk()
+            ->assertSee('Manajemen Akun');
+        $this->actingAs($admin)->get('/rekap/siswa')->assertOk()
+            ->assertSee('Manajemen Akun');
+    }
+
     public function test_waka_bisa_filter_berdasarkan_tanggal(): void
     {
         $this->actingAs($this->waka)

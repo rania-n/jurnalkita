@@ -6,9 +6,10 @@
         'belum_diisi' => 'bg-sakit-soft text-sakit',
     ];
     $hariLabel = config('akademik.hari')[['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? ''] ?? null;
+    $admin = auth()->user()->role === 'admin';
 @endphp
 
-<x-layouts.app title="Monitor Piket" width="wide">
+<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Monitor Piket" heading="Monitor Piket" width="wide">
     <x-page-header title="Monitor Piket" :subtitle="$hariLabel ? $hariLabel . ', ' . $tanggal->translatedFormat('d M Y') : $tanggal->translatedFormat('d M Y') . ' — akhir pekan, tidak ada jadwal pelajaran'">
         <x-ui.button :href="route('piket.monitor.ekspor', ['tanggal' => $tanggal->toDateString()])" variant="secondary" icon="download">Ekspor Ringkasan</x-ui.button>
     </x-page-header>
@@ -109,4 +110,4 @@
             @endforeach
         </div>
     @endif
-</x-layouts.app>
+</x-dynamic-component>

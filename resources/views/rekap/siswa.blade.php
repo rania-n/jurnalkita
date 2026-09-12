@@ -1,8 +1,9 @@
 @php
     $totalAlphaTinggi = $siswas->filter(fn ($s) => ($rekap[$s->id]['alpha'] ?? 0) >= $ambangAlpha)->count();
+    $admin = auth()->user()->role === 'admin';
 @endphp
 
-<x-layouts.app title="Rekap Kehadiran Siswa" width="wide">
+<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Rekap Kehadiran Siswa" heading="Rekap Kehadiran Siswa" width="wide">
     <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan">
         <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
     </x-page-header>
@@ -46,4 +47,4 @@
         </x-admin.table>
         <p class="mt-3 text-xs text-muted-2">Baris merah muda = alpha {{ $ambangAlpha }}x atau lebih pada rentang tanggal ini.</p>
     @endif
-</x-layouts.app>
+</x-dynamic-component>
