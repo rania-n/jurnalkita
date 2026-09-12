@@ -39,6 +39,14 @@ return [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'waka.dashboard'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
+        ['label' => 'Rekap', 'icon' => 'bar_chart', 'route' => 'rekap.siswa.index', 'match' => 'rekap.*'],
+        ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
+    ],
+
+    // Admin cuma lewat sini kalau ngintip halaman oversight (dispensasi/monitor/rekap)
+    // yang layout-nya mobile, bukan layout admin. Sekadar jalan balik, bukan menu utama.
+    'admin' => [
+        ['label' => 'Beranda Admin', 'icon' => 'home', 'route' => 'admin.dashboard'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 

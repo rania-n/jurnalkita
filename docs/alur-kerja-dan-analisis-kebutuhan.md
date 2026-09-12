@@ -92,7 +92,7 @@ flowchart TD
 | Setujui/tolak dispensasi | ✅ |
 | Lihat Monitor Piket (kondisi hari itu, semua kelas) | ✅ |
 | Ekspor laporan dispensasi | ✅ |
-| **Rekap kedisiplinan PER SISWA lintas waktu** (siapa yang bulan ini sudah 5x alpha, dst — buat rapat evaluasi / panggil ortu) | 🆕 **paling kerasa bolongnya** — datanya sudah ada (di tabel absensi), tinggal dibikin laporannya |
+| Rekap kedisiplinan per siswa lintas waktu, lintas kelas (siapa yang alpha berkali-kali) | ✅ `/rekap/siswa` — ada tanda peringatan otomatis kalau alpha ≥3x |
 | **No. HP Waka buat kirim link WA** | 🔨 belum ada kolomnya di akun |
 | Surat Peringatan (SP1/SP2/SP3), panggil orang tua | 🚫 proses BK, belum diminta dijadikan fitur |
 
@@ -174,7 +174,7 @@ Dari 6 alur di atas, ada **3 kebutuhan nyata yang belum pernah tercatat sebelumn
 
 | # | Temuan | Kenapa kerasa penting | Perkiraan effort |
 |---|---|---|---|
-| N1 | ✅ **selesai** — Rekap kehadiran per siswa (pengurus kelas: kelasnya sendiri) | Datanya **sudah ada** (tabel `absensis`), yang belum cuma laporannya | Selesai — `/sekretaris/rekap` |
+| N1 | ✅ **selesai** — Rekap kehadiran per siswa (Waka: lintas kelas · Pengurus Kelas: kelasnya sendiri) | Datanya **sudah ada** (tabel `absensis`), yang belum cuma laporannya | Selesai — `/rekap/siswa` (Waka+Admin) & `/sekretaris/rekap` |
 | N2 | **Rekap jurnal per guru** (portofolio mengajar per semester) | Guru sering diminta bukti mengajar. Bukan buat sidang minggu ini, tapi murah kalau mau ditambah | Kecil, ±2-3 jam |
 | N3 | **"Buku piket" ketertiban** (siswa telat gerbang pagi, dll) | **Beda konsep** dari absensi per jam pelajaran yang sudah ada — ini soal siswa telat *masuk sekolah*, bukan telat di kelas. Perlu tabel baru | Sedang — butuh keputusan dulu: mau digabung ke sistem ini atau bukan? |
 
@@ -197,3 +197,17 @@ permintaan eksplisit, jangan dikerjakan — ini gampang jadi lubang scope creep.
 Dispensasi + QR + Satpam, WhatsApp (versi link), Tahun Ajaran/Kenaikan Kelas — tiga ini
 tetap yang **wajib** menurut guru pembimbingmu, N1–N3 cuma tambahan temuan dari analisis
 ini, bukan pengganti.
+
+---
+
+## Update — koreksi & tambahan dari guru pembimbing (setelah analisis ini ditulis)
+
+1. **Guru piket TIDAK mengajar selama shift-nya, dan piket dibagi per shift** (bukan
+   sehari penuh). Sudah diperbaiki: admin sekarang **ditolak** kalau mencoba menjadwalkan
+   guru mengajar di jam yang bentrok sama shift piketnya. Monitor Piket juga menampilkan
+   roster "Petugas Piket Hari Ini" (nama + jam shift).
+2. **Ide Fitra**: admin dapat visibilitas ke dunia Waka (dispensasi, Monitor Piket, rekap
+   siswa) — **sudah dikerjakan**. Admin bisa **lihat** ketiganya (plus 3 kartu ringkasan
+   di dashboard admin), tapi **tidak bisa approve/tolak** — itu tetap wewenang piket/Waka.
+   Ini masuk akal: admin butuh gambaran umum buat troubleshooting/pengawasan, bukan buat
+   menjalankan tugas kesiswaan sehari-hari.

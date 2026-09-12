@@ -114,6 +114,13 @@ class PiketMonitorTest extends TestCase
             ->assertOk()->assertSee('Tidak ada jadwal pelajaran');
     }
 
+    public function test_admin_bisa_akses_oversight(): void
+    {
+        $admin = User::factory()->role('admin')->create();
+
+        $this->actingAs($admin)->get('/piket/monitor')->assertOk()->assertSee('X RPL 1');
+    }
+
     public function test_guru_biasa_bukan_piket_tidak_bisa_akses(): void
     {
         $guruBiasa = User::factory()->role('guru')->create();

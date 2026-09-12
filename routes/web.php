@@ -12,6 +12,7 @@ use App\Http\Controllers\DispensasiController;
 use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
 use App\Http\Controllers\PiketController;
+use App\Http\Controllers\RekapController;
 use App\Http\Controllers\Sekretaris\JurnalController as VerifikasiJurnalController;
 use App\Http\Controllers\Sekretaris\KelasController as SekretarisKelasController;
 use Illuminate\Support\Facades\Route;
@@ -109,8 +110,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/waka', 'dashboards.waka')->name('waka.dashboard');
     });
 
-    /* ===================== DISPENSASI (guru piket + waka) ===================== */
-    Route::middleware('role:guru,waka')->group(function () {
+    /* ============ DISPENSASI (guru piket + waka; admin cuma lihat/oversight) ============ */
+    Route::middleware('role:guru,waka,admin')->group(function () {
         Route::get('/dispensasi', [DispensasiController::class, 'index'])->name('dispensasi.index');
         Route::get('/dispensasi/ekspor', [DispensasiController::class, 'ekspor'])->name('dispensasi.ekspor');
         Route::get('/dispensasi/{dispensasi}', [DispensasiController::class, 'show'])->name('dispensasi.show');
@@ -124,10 +125,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/dispensasi/{dispensasi}/waka', [DispensasiController::class, 'approveWaka'])->name('dispensasi.waka');
     });
 
-    /* ============ MONITOR PIKET (pantauan kehadiran guru — piket + waka) ============ */
-    Route::middleware('role:guru,waka')->prefix('piket/monitor')->name('piket.monitor.')->group(function () {
+    /* ===== MONITOR PIKET (pantauan kehadiran guru — piket, waka, admin oversight) ===== */
+    Route::middleware('role:guru,waka,admin')->prefix('piket/monitor')->name('piket.monitor.')->group(function () {
         Route::get('/', [PiketController::class, 'index'])->name('index');
         Route::get('/ekspor', [PiketController::class, 'ekspor'])->name('ekspor');
         Route::get('/ekspor/{tipe}/{id}', [PiketController::class, 'eksporDetail'])->name('ekspor.detail');
+    });
+
+    /* ===== REKAP KEHADIRAN SISWA (lintas kelas — waka + admin) ===== */
+    Route::middleware('role:waka,admin')->prefix('rekap')->name('rekap.')->group(function () {
+        Route::get('/siswa', [RekapController::class, 'siswa'])->name('siswa.index');
+        Route::get('/siswa/ekspor', [RekapController::class, 'eksporSiswa'])->name('siswa.ekspor');
     });
 });

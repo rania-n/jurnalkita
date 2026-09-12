@@ -54,6 +54,16 @@ class DispensasiLaporanTest extends TestCase
         ]);
     }
 
+    public function test_admin_bisa_lihat_oversight_tanpa_bisa_approve(): void
+    {
+        $admin = User::factory()->role('admin')->create();
+        $d = Dispensasi::first();
+
+        $this->actingAs($admin)->get('/dispensasi')->assertOk()->assertSee('Budi');
+        $this->actingAs($admin)->get("/dispensasi/{$d->id}")->assertOk()
+            ->assertDontSee('name="keputusan" value="approved"', false);
+    }
+
     public function test_waka_bisa_filter_berdasarkan_tanggal(): void
     {
         $this->actingAs($this->waka)

@@ -30,8 +30,8 @@ class DispensasiController extends Controller
 
         $query = Dispensasi::with('siswa.kelas', 'pengaju')->latest('tanggal')->latest('id');
 
-        if ($user->role === 'waka') {
-            // Waka: hanya yang sudah lolos piket
+        if ($user->role === 'waka' || $user->role === 'admin') {
+            // Waka & admin (oversight): semua yang sudah lolos piket, lintas guru.
             $query->where('status_piket', 'approved');
         } else {
             // Guru: hanya pengajuan yang ia buat sendiri (sebagai piket).
@@ -59,9 +59,9 @@ class DispensasiController extends Controller
             'items' => $this->terfilter($request)->paginate(15)->withQueryString(),
             'tab' => $request->get('tab', 'semua'),
             'bolehAjukan' => $user->isPiket(),
-            'bolehEkspor' => $user->role === 'waka' || $user->isPiket(),
-            // Filter guru piket cuma relevan buat waka (guru piket cuma lihat punyanya sendiri).
-            'guruPiketList' => $user->role === 'waka'
+            'bolehEkspor' => in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
+            // Filter guru piket cuma relevan buat yang lihat lintas guru (guru piket cuma lihat punyanya sendiri).
+            'guruPiketList' => in_array($user->role, ['waka', 'admin'], true)
                 ? User::where('role', 'guru')->whereHas('guru.jadwalPikets')->orderBy('name')->get()
                 : collect(),
             'kelasList' => Kelas::orderBy('nama')->get(),
@@ -71,7 +71,7 @@ class DispensasiController extends Controller
     /** Ekspor laporan dispensasi (kegiatan piket) sebagai CSV, ikut filter yang sedang aktif. */
     public function ekspor(Request $request)
     {
-        abort_unless($request->user()->role === 'waka' || $request->user()->isPiket(), 403);
+        abort_unless(in_array($request->user()->role, ['waka', 'admin'], true) || $request->user()->isPiket(), 403);
 
         $rows = $this->terfilter($request)->get();
 
@@ -146,8 +146,11 @@ class DispensasiController extends Controller
     {
         $user = auth()->user();
 
-        // Guru piket hanya boleh melihat pengajuannya sendiri; waka boleh semua.
-        abort_unless($user->role === 'waka' || $dispensasi->diajukan_oleh_id === $user->id, 403);
+        // Guru piket hanya boleh melihat pengajuannya sendiri; waka & admin boleh semua (oversight).
+        abort_unless(
+            in_array($user->role, ['waka', 'admin'], true) || $dispensasi->diajukan_oleh_id === $user->id,
+            403
+        );
 
         $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
 

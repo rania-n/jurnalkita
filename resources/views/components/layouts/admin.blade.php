@@ -16,6 +16,10 @@
         ['label' => 'Jam Pelajaran', 'icon' => 'schedule', 'route' => 'master.jam-pelajaran.index'],
         ['label' => 'Jadwal Piket', 'icon' => 'event_available', 'route' => 'master.jadwal-piket.index'],
         ['label' => 'Audit Log', 'icon' => 'history', 'route' => 'master.audit-log.index'],
+        // Oversight kesiswaan — lihat saja, aksi (approve/tolak) tetap milik piket/waka.
+        ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index'],
+        ['label' => 'Monitor Piket', 'icon' => 'monitoring', 'route' => 'piket.monitor.index'],
+        ['label' => 'Rekap Siswa', 'icon' => 'bar_chart', 'route' => 'rekap.siswa.index'],
     ];
 @endphp
 

@@ -26,7 +26,11 @@ class PiketController extends Controller
     private function pastikanBolehLihat(): void
     {
         $user = auth()->user();
-        abort_unless($user->role === 'waka' || $user->isPiket(), 403, 'Hanya guru piket yang dapat mengakses ini.');
+        abort_unless(
+            in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
+            403,
+            'Hanya guru piket yang dapat mengakses ini.'
+        );
     }
 
     public function index(Request $request): View

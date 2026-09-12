@@ -8,6 +8,14 @@
         ['label' => 'Jadwal Piket', 'value' => \App\Models\JadwalPiket::count(), 'icon' => 'event_available', 'route' => 'master.jadwal-piket.index'],
     ];
     $pendingAkun = \App\Models\User::where('status', 'pending')->count();
+
+    // Oversight kesiswaan — sekadar ringkasan, aksinya (approve/tolak) tetap punya piket/waka.
+    $dispensasiMenunggu = \App\Models\Dispensasi::where('status_piket', 'approved')
+        ->where('status_waka', 'pending')->count();
+
+    $siswaAlphaTinggi = \App\Models\Absensi::where('status', 'alpha')
+        ->whereHas('jurnal', fn ($q) => $q->whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year))
+        ->get()->countBy('siswa_id')->filter(fn ($n) => $n >= 3)->count();
 @endphp
 
 <x-layouts.admin title="Beranda" heading="Beranda">
@@ -29,5 +37,32 @@
                 <span class="text-sm text-muted">{{ $s['label'] }}</span>
             </a>
         @endforeach
+    </div>
+
+    <h2 class="mb-3 mt-8 text-sm font-bold text-ink">Kesiswaan Hari Ini</h2>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <a href="{{ route('dispensasi.index') }}" class="press flex flex-col gap-3 rounded-xl border border-surface-alt bg-card p-5 hover:border-navy">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                <x-icon name="fact_check" :size="22" />
+            </span>
+            <span class="text-3xl font-bold text-ink">{{ $dispensasiMenunggu }}</span>
+            <span class="text-sm text-muted">Dispensasi menunggu Waka</span>
+        </a>
+
+        <a href="{{ route('piket.monitor.index') }}" class="press flex flex-col gap-3 rounded-xl border border-surface-alt bg-card p-5 hover:border-navy">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                <x-icon name="monitoring" :size="22" />
+            </span>
+            <span class="text-3xl font-bold text-ink">→</span>
+            <span class="text-sm text-muted">Monitor Piket hari ini</span>
+        </a>
+
+        <a href="{{ route('rekap.siswa.index') }}" class="press flex flex-col gap-3 rounded-xl border border-surface-alt bg-card p-5 hover:border-navy">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                <x-icon name="bar_chart" :size="22" />
+            </span>
+            <span class="text-3xl font-bold text-ink">{{ $siswaAlphaTinggi }}</span>
+            <span class="text-sm text-muted">Siswa alpha ≥3x bulan ini</span>
+        </a>
     </div>
 </x-layouts.admin>
