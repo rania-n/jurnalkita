@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Guru;
+use App\Models\JamPelajaran;
 use App\Models\Mapel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,6 +34,31 @@ class MasterCrudTest extends TestCase
 
         $this->actingAs($admin)->delete("/admin/mapel/{$mapel->id}")->assertRedirect();
         $this->assertSoftDeleted('mapels', ['id' => $mapel->id]);
+    }
+
+    public function test_kode_mapel_dibuat_otomatis_kalau_dikosongkan(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/mapel', ['nama' => 'Matematika'])->assertRedirect();
+        $this->assertDatabaseHas('mapels', ['nama' => 'Matematika', 'kode' => 'MAT']);
+
+        $this->actingAs($this->admin())->post('/admin/mapel', ['nama' => 'Bahasa Indonesia'])->assertRedirect();
+        $this->assertDatabaseHas('mapels', ['nama' => 'Bahasa Indonesia', 'kode' => 'BI']);
+    }
+
+    public function test_kode_mapel_otomatis_tetap_boleh_diketik_manual(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/mapel', ['nama' => 'Matematika', 'kode' => 'MTK'])->assertRedirect();
+        $this->assertDatabaseHas('mapels', ['nama' => 'Matematika', 'kode' => 'MTK']);
+    }
+
+    public function test_kode_mapel_otomatis_tidak_bentrok_kalau_sudah_dipakai(): void
+    {
+        Mapel::create(['kode' => 'MAT', 'nama' => 'Matematika']);
+
+        // "Matriks" -> 3 huruf depan "MAT" juga, sama kayak yang sudah ada -> harus digeser.
+        $this->actingAs($this->admin())->post('/admin/mapel', ['nama' => 'Matriks'])->assertRedirect();
+
+        $this->assertDatabaseHas('mapels', ['nama' => 'Matriks', 'kode' => 'MAT2']);
     }
 
     public function test_validation_blocks_bad_input(): void
@@ -89,5 +115,30 @@ class MasterCrudTest extends TestCase
 
         $this->assertDatabaseCount('jam_pelajarans', 2);
         $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'jumat', 'jam_ke' => 1]);
+    }
+
+    public function test_admin_bisa_tambah_kategori_jam_pelajaran_baru(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
+            'kategori_baru' => 'Bulan Ramadhan',
+            'mulai' => ['07:30'], 'selesai' => ['08:00'],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'bulan_ramadhan', 'jam_ke' => 1]);
+
+        $this->actingAs($this->admin())->get('/admin/jam-pelajaran?set=bulan_ramadhan')
+            ->assertOk()->assertSee('Bulan Ramadhan');
+    }
+
+    public function test_admin_bisa_hapus_kategori_custom(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
+            'kategori_baru' => 'Ujian',
+            'mulai' => ['07:30'], 'selesai' => ['08:00'],
+        ]);
+
+        $this->actingAs($this->admin())->delete('/admin/jam-pelajaran/ujian')->assertRedirect();
+
+        $this->assertSame(0, JamPelajaran::where('kategori', 'ujian')->count());
     }
 }

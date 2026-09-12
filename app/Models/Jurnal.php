@@ -16,6 +16,7 @@ class Jurnal extends Model
         'jadwal_id', 'guru_id', 'tanggal', 'jam_ke_mulai', 'jam_ke_selesai',
         'status_guru', 'materi', 'metode', 'tugas_tambahan', 'foto_bukti',
         'diisi_oleh_pengurus', 'status_verifikasi', 'verifikator_id', 'catatan_verifikasi',
+        'lat', 'lng', 'jarak_meter', 'terlambat',
     ];
 
     protected function casts(): array
@@ -23,6 +24,9 @@ class Jurnal extends Model
         return [
             'tanggal' => 'date',
             'diisi_oleh_pengurus' => 'boolean',
+            'terlambat' => 'boolean',
+            'lat' => 'float',
+            'lng' => 'float',
         ];
     }
 
@@ -55,5 +59,15 @@ class Jurnal extends Model
     public function bisaDiubah(): bool
     {
         return in_array($this->status_verifikasi, ['pending', 'revisi'], true);
+    }
+
+    /** null = belum bisa dinilai (lokasi sekolah belum diatur / guru tidak kirim lokasi). */
+    public function dalamRadiusSekolah(): ?bool
+    {
+        if ($this->jarak_meter === null) {
+            return null;
+        }
+
+        return $this->jarak_meter <= PengaturanKehadiran::current()->radius_meter;
     }
 }

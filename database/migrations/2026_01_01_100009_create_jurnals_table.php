@@ -21,6 +21,13 @@ return new class extends Migration
             $table->text('tugas_tambahan')->nullable();
             $table->string('foto_bukti')->nullable();
             $table->boolean('diisi_oleh_pengurus')->default(false);
+            // Geolokasi (opsional, dari browser guru saat isi jurnal) + deteksi telat.
+            // Sengaja cuma DICATAT, tidak dijadikan alasan menolak jurnal -- GPS HP
+            // kadang meleset/gagal, jangan sampai guru jujur malah keblokir.
+            $table->decimal('lat', 10, 7)->nullable();
+            $table->decimal('lng', 10, 7)->nullable();
+            $table->unsignedInteger('jarak_meter')->nullable();
+            $table->boolean('terlambat')->default(false);
             $table->enum('status_verifikasi', ['pending', 'terverifikasi', 'revisi'])->default('pending');
             $table->foreignId('verifikator_id')->nullable()->constrained('siswas')->nullOnDelete();
             $table->text('catatan_verifikasi')->nullable();

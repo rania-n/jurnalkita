@@ -175,7 +175,7 @@ Dari 6 alur di atas, ada **3 kebutuhan nyata yang belum pernah tercatat sebelumn
 |---|---|---|---|
 | N1 | ✅ **selesai** — Rekap kehadiran per siswa (Waka: lintas kelas · Pengurus Kelas: kelasnya sendiri) | Datanya **sudah ada** (tabel `absensis`), yang belum cuma laporannya | Selesai — `/rekap/siswa` (Waka+Admin) & `/sekretaris/rekap` |
 | N2 | **Rekap jurnal per guru** (portofolio mengajar per semester) | Guru sering diminta bukti mengajar. Bukan buat sidang minggu ini, tapi murah kalau mau ditambah | Kecil, ±2-3 jam |
-| N3 | **"Buku piket" ketertiban** (siswa telat gerbang pagi, dll) | **Beda konsep** dari absensi per jam pelajaran yang sudah ada — ini soal siswa telat *masuk sekolah*, bukan telat di kelas. Perlu tabel baru | Sedang — butuh keputusan dulu: mau digabung ke sistem ini atau bukan? |
+| N3 | ✅ **selesai** — "Buku piket" ketertiban (siswa telat gerbang pagi) | **Beda konsep** dari absensi per jam pelajaran — ini soal siswa telat *masuk sekolah*. Tabel baru `catatan_terlambats`, dicatat satpam | Selesai — form di dashboard Satpam, ikut muncul di Rekap Siswa & rekap Wali Kelas |
 
 ## Rekomendasi keputusan
 
@@ -187,10 +187,8 @@ yang sudah jalan).
 
 **N2 (rekap per guru)** — boleh nanti, dampaknya kecil buat sidang minggu ini.
 
-**N3 (buku piket ketertiban)** — ini **butuh kamu putuskan dulu**, bukan aku yang
-nentuin: apakah guru pembimbing benar-benar minta ini masuk jurnalkita, atau itu memang
-urusan lain (misal sudah ada sistem/buku manual terpisah di sekolah)? Kalau bukan
-permintaan eksplisit, jangan dikerjakan — ini gampang jadi lubang scope creep.
+**N3 (buku piket ketertiban)** — sudah diputuskan tim: masuk jurnalkita, dicatat
+satpam (lihat `docs/scope.md`).
 
 **Yang sudah disepakati sebelumnya tetap prioritas** (dari `docs/scope.md`): Surat
 Dispensasi + QR + Satpam, WhatsApp (versi link), Tahun Ajaran/Kenaikan Kelas — tiga ini

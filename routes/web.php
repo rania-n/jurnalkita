@@ -89,6 +89,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/jadwal-waka', [JadwalWakaController::class, 'save'])->name('master.jadwal-waka.save');
         Route::delete('/admin/jadwal-waka/{jadwalWaka}', [JadwalWakaController::class, 'destroy'])->name('master.jadwal-waka.destroy');
         Route::post('/admin/jam-pelajaran', [JamPelajaranController::class, 'save'])->name('master.jam-pelajaran.save');
+        Route::delete('/admin/jam-pelajaran/{kategori}', [JamPelajaranController::class, 'destroyKategori'])->name('master.jam-pelajaran.destroy-kategori');
         Route::post('/admin/tahun-ajaran/naik-kelas', [TahunAjaranController::class, 'naikKelas'])->name('master.tahun-ajaran.naik-kelas');
     });
 

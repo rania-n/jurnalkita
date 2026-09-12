@@ -13,7 +13,9 @@ return new class extends Migration
             $table->unsignedTinyInteger('jam_ke');
             $table->time('mulai');
             $table->time('selesai');
-            $table->enum('kategori', ['senin_kamis', 'jumat', 'khusus'])->default('senin_kamis');
+            // String bebas (bukan enum lagi) -- admin boleh bikin kategori baru sendiri
+            // (mis. "Ramadhan", "Ujian"), bukan cuma 3 bawaan (senin_kamis/jumat/khusus).
+            $table->string('kategori')->default('senin_kamis');
             $table->string('keterangan')->nullable();
             $table->timestamps();
             $table->softDeletes();

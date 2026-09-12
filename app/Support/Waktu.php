@@ -33,4 +33,12 @@ class Waktu
                 ->value('jam_ke')
             ?? $default;
     }
+
+    /** Jam mulai (hari ini, sebagai Carbon lengkap) buat JP tertentu. Null kalau JP-nya tidak ada. */
+    public static function mulaiJpHariIni(int $jamKe): ?Carbon
+    {
+        $mulai = JamPelajaran::where('kategori', self::kategori())->where('jam_ke', $jamKe)->value('mulai');
+
+        return $mulai ? now()->copy()->setTimeFromTimeString($mulai) : null;
+    }
 }
