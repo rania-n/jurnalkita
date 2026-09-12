@@ -61,6 +61,16 @@ class AkunTest extends TestCase
         $this->assertTrue(\Hash::check('rahasia-kuat-123', $user->password));
     }
 
+    public function test_buat_akun_satpam_dengan_no_hp(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/akun', $this->akunPayload([
+            'role' => 'satpam', 'sumber' => 'baru', 'nama' => 'Pak Satpam',
+            'email' => 'satpam@sekolah.test', 'no_hp' => '081234567890',
+        ]))->assertRedirect();
+
+        $this->assertDatabaseHas('users', ['email' => 'satpam@sekolah.test', 'role' => 'satpam', 'no_hp' => '081234567890']);
+    }
+
     public function test_buat_akun_siswa_baru_wajib_kelas_dan_nis(): void
     {
         $this->actingAs($this->admin())

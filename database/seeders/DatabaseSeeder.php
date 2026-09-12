@@ -30,7 +30,13 @@ class DatabaseSeeder extends Seeder
         $waka = User::create([
             'name' => 'Hariyadi, M.Pd', 'email' => 'waka@jurnalkita.test',
             'email_verified_at' => now(), 'password' => Hash::make('password'),
-            'role' => 'waka', 'status' => 'approved',
+            'role' => 'waka', 'status' => 'approved', 'no_hp' => '081234567890',
+        ]);
+
+        $satpam = User::create([
+            'name' => 'Slamet Riyadi', 'email' => 'satpam@jurnalkita.test',
+            'email_verified_at' => now(), 'password' => Hash::make('password'),
+            'role' => 'satpam', 'status' => 'approved', 'no_hp' => '081298765432',
         ]);
 
         // ----------------------------------------------------------------- Mapel

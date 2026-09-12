@@ -13,7 +13,7 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'status'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'status', 'no_hp'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -66,6 +66,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'admin' => 'admin.dashboard',
             'waka' => 'waka.dashboard',
             'siswa' => 'sekretaris.dashboard',
+            'satpam' => 'satpam.dashboard',
             default => 'guru.dashboard',
         };
     }

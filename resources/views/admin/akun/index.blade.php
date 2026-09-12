@@ -12,7 +12,7 @@
     $guruTanpaAkun = \App\Models\Guru::whereNull('user_id')->orderBy('nama')->get(['id', 'nama', 'nip']);
     $siswaTanpaAkun = \App\Models\Siswa::whereNull('user_id')->where('jabatan', 'pengurus')->with('kelas')->orderBy('nama')->get();
     $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
-    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka'];
+    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka', 'satpam' => 'Satpam'];
 @endphp
 
 <x-layouts.admin title="Manajemen Akun" heading="Manajemen Akun">
@@ -98,6 +98,7 @@
                 <option value="guru">Guru</option>
                 <option value="siswa">Pengurus Kelas</option>
                 <option value="waka">Waka Kesiswaan</option>
+                <option value="satpam">Satpam</option>
             </x-ui.select>
 
             <x-ui.select label="Ambil dari data" name="sumber" id="akun-sumber" data-grup="sumber">
@@ -119,6 +120,9 @@
 
             {{-- khusus data guru baru --}}
             <x-ui.input label="NIP (opsional)" name="nip" data-grup="guru-baru" />
+
+            {{-- khusus waka & satpam: no HP buat kirim link WhatsApp --}}
+            <x-ui.input label="No. WhatsApp" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" data-grup="waka-satpam" hint="Dipakai buat kirim link persetujuan/notifikasi lewat WhatsApp." />
 
             {{-- khusus data pengurus kelas baru --}}
             <div data-grup="siswa-baru" class="flex flex-col gap-4">
@@ -159,6 +163,7 @@
                 const sumberWrap = sumber.closest('[data-grup]');
                 const grupGuruBaru = form.querySelector('[data-grup="guru-baru"]');
                 const grupSiswaBaru = form.querySelector('[data-grup="siswa-baru"]');
+                const grupWakaSatpam = form.querySelector('[data-grup="waka-satpam"]');
 
                 const setGrup = (el, on) => {
                     el.hidden = !on;
@@ -179,6 +184,7 @@
                     const baru = sumber.value === 'baru';
                     setGrup(grupGuruBaru, r === 'guru' && baru);
                     setGrup(grupSiswaBaru, r === 'siswa' && baru);
+                    setGrup(grupWakaSatpam, r === 'waka' || r === 'satpam');
 
                     const opt = sumber.selectedOptions[0];
                     if (!baru && opt?.dataset.nama) { nama.value = opt.dataset.nama; nama.readOnly = true; }

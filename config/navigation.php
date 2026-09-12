@@ -43,6 +43,11 @@ return [
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
+    'satpam' => [
+        ['label' => 'Beranda', 'icon' => 'home', 'route' => 'satpam.dashboard'],
+        ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
+    ],
+
     // Admin cuma lewat sini kalau ngintip halaman oversight (dispensasi/monitor/rekap)
     // yang layout-nya mobile, bukan layout admin. Sekadar jalan balik, bukan menu utama.
     'admin' => [

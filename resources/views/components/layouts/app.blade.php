@@ -15,6 +15,7 @@
         'guru' => auth()->user()->isPiket() ? 'guru-piket' : 'guru',
         'siswa' => 'sekretaris',
         'waka' => 'waka',
+        'satpam' => 'satpam',
         default => 'default',
     };
 @endphp

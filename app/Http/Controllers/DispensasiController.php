@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Dispensasi;
 use App\Models\Kelas;
 use App\Models\User;
+use App\Support\WaLink;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -154,11 +155,31 @@ class DispensasiController extends Controller
 
         $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
 
+        $waka = User::where('role', 'waka')->whereNotNull('no_hp')->first();
+        $waLinkWaka = null;
+        if ($dispensasi->status_waka === 'pending' && $waka) {
+            $tautan = SuratDispensasiController::tautanPersetujuan($dispensasi, $waka);
+            $waLinkWaka = WaLink::url($waka->no_hp, "Permohonan dispensasi siswa:\n\n"
+                ."Nama: {$dispensasi->siswa->nama}\n"
+                ."Kelas: {$dispensasi->siswa->kelas?->nama}\n"
+                ."Alasan: {$dispensasi->alasan}\n\n"
+                ."Setujui/tolak lewat tautan ini:\n{$tautan}");
+        }
+
+        $waLinkSiswa = null;
+        if ($dispensasi->status_akhir === 'approved' && $dispensasi->no_hp) {
+            $tautanSurat = SuratDispensasiController::tautanSurat($dispensasi);
+            $waLinkSiswa = WaLink::url($dispensasi->no_hp, "Dispensasi kamu sudah *disetujui*.\n\n"
+                ."Tunjukkan surat ini ke satpam saat keluar sekolah:\n{$tautanSurat}");
+        }
+
         return view('dispensasi.show', [
             'dispensasi' => $dispensasi,
             'bisaWaka' => $user->role === 'waka' && $dispensasi->status_waka === 'pending',
             'bisaBatal' => $dispensasi->diajukan_oleh_id === $user->id
                 && $dispensasi->status_waka === 'pending',
+            'waLinkWaka' => $waLinkWaka,
+            'waLinkSiswa' => $waLinkSiswa,
         ]);
     }
 

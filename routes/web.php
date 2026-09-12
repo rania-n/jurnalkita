@@ -13,8 +13,10 @@ use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
 use App\Http\Controllers\PiketController;
 use App\Http\Controllers\RekapController;
+use App\Http\Controllers\SatpamController;
 use App\Http\Controllers\Sekretaris\JurnalController as VerifikasiJurnalController;
 use App\Http\Controllers\Sekretaris\KelasController as SekretarisKelasController;
+use App\Http\Controllers\SuratDispensasiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,6 +33,14 @@ Route::get('/', fn () => auth()->check()
     : redirect()->route('login'));
 
 require __DIR__.'/auth.php';
+
+/* Surat & persetujuan dispensasi lewat link WA — bertanda-tangan, TANPA login.
+   Sengaja di luar grup auth. Surat juga bisa dibuka piket/waka/admin yang sudah login. */
+Route::get('/surat/dispensasi/{dispensasi}', [SuratDispensasiController::class, 'show'])
+    ->name('dispensasi.surat');
+Route::get('/dispensasi/{dispensasi}/persetujuan', [SuratDispensasiController::class, 'persetujuan'])
+    ->name('dispensasi.persetujuan');
+Route::post('/dispensasi/{dispensasi}/persetujuan', [SuratDispensasiController::class, 'prosesPersetujuan']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -136,5 +146,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:waka,admin')->prefix('rekap')->name('rekap.')->group(function () {
         Route::get('/siswa', [RekapController::class, 'siswa'])->name('siswa.index');
         Route::get('/siswa/ekspor', [RekapController::class, 'eksporSiswa'])->name('siswa.ekspor');
+    });
+
+    /* =============================== SATPAM =============================== */
+    Route::middleware('role:satpam')->prefix('satpam')->name('satpam.')->group(function () {
+        Route::get('/', [SatpamController::class, 'dashboard'])->name('dashboard');
+        Route::get('/scan', [SatpamController::class, 'scan'])->name('scan');
     });
 });

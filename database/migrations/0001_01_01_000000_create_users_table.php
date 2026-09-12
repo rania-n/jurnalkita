@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'guru', 'siswa', 'waka'])->default('guru');
+            $table->enum('role', ['admin', 'guru', 'siswa', 'waka', 'satpam'])->default('guru');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->string('no_hp')->nullable(); // dipakai buat kirim link WA (khususnya Waka)
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

@@ -6,6 +6,7 @@
         'guru' => 'Guru',
         'siswa' => 'Pengurus Kelas',
         'waka' => 'Waka Kesiswaan',
+        'satpam' => 'Satpam',
     ][$user?->role] ?? '';
     $inisial = collect(explode(' ', $nama))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
 @endphp

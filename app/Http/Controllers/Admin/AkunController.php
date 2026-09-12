@@ -26,11 +26,12 @@ class AkunController extends Controller
     public function save(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'role' => ['required', 'in:guru,siswa,waka'],
+            'role' => ['required', 'in:guru,siswa,waka,satpam'],
             'sumber' => ['nullable', 'string'],
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'lowercase', Rule::unique('users', 'email')->withoutTrashed()],
             'password' => ['required', 'confirmed', PasswordRule::defaults()],
+            'no_hp' => ['nullable', 'string', 'max:20'],
             'nip' => ['nullable', 'string', 'max:30'],
             'nis' => ['nullable', 'string', 'max:20'],
             'kelas_id' => ['nullable', 'exists:kelas,id'],
@@ -44,6 +45,7 @@ class AkunController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
+            'no_hp' => $data['no_hp'] ?? null,
             'status' => 'approved',
             'email_verified_at' => now(),
         ]);
