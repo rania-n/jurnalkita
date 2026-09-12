@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('role', ['admin', 'guru', 'siswa', 'waka', 'satpam'])->default('guru');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->string('no_hp')->nullable(); // dipakai buat kirim link WA (khususnya Waka)
+            $table->string('nip')->nullable(); // buat waka/satpam -- guru/siswa punya NIP/NIS sendiri di tabel masing-masing
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

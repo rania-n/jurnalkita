@@ -73,6 +73,67 @@ class AkunTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'satpam@sekolah.test', 'role' => 'satpam', 'no_hp' => '081234567890']);
     }
 
+    public function test_buat_akun_waka_dengan_nip(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/akun', $this->akunPayload([
+            'role' => 'waka', 'sumber' => 'baru', 'nama' => 'Bu Waka',
+            'email' => 'waka-nip@sekolah.test', 'nip' => '198501012020',
+        ]))->assertRedirect();
+
+        $this->assertDatabaseHas('users', ['email' => 'waka-nip@sekolah.test', 'role' => 'waka', 'nip' => '198501012020']);
+    }
+
+    public function test_buat_akun_guru_baru_bisa_isi_no_hp(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/akun', $this->akunPayload([
+            'role' => 'guru', 'sumber' => 'baru', 'nama' => 'Pak Guru',
+            'email' => 'guru-hp@sekolah.test', 'no_hp' => '081211112222',
+        ]))->assertRedirect();
+
+        $this->assertDatabaseHas('users', ['email' => 'guru-hp@sekolah.test', 'no_hp' => '081211112222']);
+        $this->assertDatabaseHas('gurus', ['nama' => 'Pak Guru', 'no_hp' => '081211112222']);
+    }
+
+    public function test_buat_akun_pengurus_kelas_bisa_isi_no_hp(): void
+    {
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+
+        $this->actingAs($this->admin())->post('/admin/akun', $this->akunPayload([
+            'role' => 'siswa', 'sumber' => 'baru', 'nama' => 'Ketua Kelas',
+            'email' => 'ketua-hp@sekolah.test', 'kelas_id' => $kelas->id, 'nis' => '001', 'no_hp' => '081233334444',
+        ]))->assertRedirect();
+
+        $this->assertDatabaseHas('siswas', ['nama' => 'Ketua Kelas', 'no_hp' => '081233334444']);
+    }
+
+    public function test_admin_bisa_ubah_akun_yang_sudah_ada_termasuk_password(): void
+    {
+        $guru = User::factory()->role('guru')->create(['email' => 'lama@s.test']);
+
+        $this->actingAs($this->admin())->post('/admin/akun-ubah', [
+            'id' => $guru->id, 'nama' => 'Nama Baru', 'email' => 'baru@s.test',
+            'no_hp' => '081200001111', 'password' => 'sandi-baru-123', 'password_confirmation' => 'sandi-baru-123',
+        ])->assertRedirect();
+
+        $guru->refresh();
+        $this->assertSame('Nama Baru', $guru->name);
+        $this->assertSame('baru@s.test', $guru->email);
+        $this->assertSame('081200001111', $guru->no_hp);
+        $this->assertTrue(\Hash::check('sandi-baru-123', $guru->password));
+    }
+
+    public function test_ubah_akun_tanpa_isi_password_tidak_mengubah_password_lama(): void
+    {
+        $guru = User::factory()->role('guru')->create();
+        $passwordLama = $guru->password;
+
+        $this->actingAs($this->admin())->post('/admin/akun-ubah', [
+            'id' => $guru->id, 'nama' => $guru->name, 'email' => $guru->email,
+        ])->assertRedirect();
+
+        $this->assertSame($passwordLama, $guru->fresh()->password);
+    }
+
     public function test_buat_akun_siswa_baru_wajib_kelas_dan_nis(): void
     {
         $this->actingAs($this->admin())

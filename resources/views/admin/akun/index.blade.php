@@ -41,6 +41,7 @@
     @else
         <x-admin.table :head="['Nama', 'Email', 'Peran', 'Terhubung ke', 'Status', 'Aksi']">
             @foreach ($users as $u)
+                @php $ubahFill = ['nama' => $u->name, 'email' => $u->email, 'no_hp' => $u->no_hp, 'nip' => $u->nip]; @endphp
                 <tr class="hover:bg-surface/60">
                     <td class="px-4 py-3 font-semibold text-ink">{{ $u->name }}</td>
                     <td class="px-4 py-3 text-muted">{{ $u->email }}</td>
@@ -65,6 +66,14 @@
                                     <button class="flex h-8 items-center gap-1 rounded-lg bg-alpha-soft px-2.5 text-xs font-bold text-alpha hover:bg-[#fecdd3]">Tolak</button>
                                 </form>
                             @elseif ($u->role !== 'admin')
+                                <button type="button"
+                                    data-modal-open="modal-akun-ubah"
+                                    data-modal-title="Ubah Akun — {{ $u->name }}"
+                                    data-modal-id="{{ $u->id }}"
+                                    data-modal-fill='@json($ubahFill)'
+                                    class="flex h-8 items-center gap-1 rounded-lg bg-izin-soft px-2.5 text-xs font-bold text-izin hover:bg-[#bae6fd]">
+                                    <x-icon name="edit" :size="14" /> Ubah
+                                </button>
                                 <form method="POST" action="{{ route('master.akun.reset', $u) }}" class="contents" data-confirm="Kirim email tautan reset sandi ke {{ $u->email }}?">@csrf
                                     <button class="flex h-8 items-center gap-1 rounded-lg bg-surface-alt px-2.5 text-xs font-bold text-ink hover:bg-[#cbd5e1]">
                                         <x-icon name="mail" :size="14" /> Kirim Reset
@@ -118,11 +127,11 @@
             <x-ui.input label="Nama Lengkap" name="nama" id="akun-nama" />
             <x-ui.input label="Email" name="email" type="email" placeholder="email@sekolah.sch.id" />
 
-            {{-- khusus data guru baru --}}
-            <x-ui.input label="NIP (opsional)" name="nip" data-grup="guru-baru" />
+            {{-- guru baru & waka: NIP (siswa punya NIS sendiri di bawah, satpam tidak perlu) --}}
+            <x-ui.input label="NIP (opsional)" name="nip" data-grup="nip" />
 
-            {{-- khusus waka & satpam: no HP buat kirim link WhatsApp --}}
-            <x-ui.input label="No. WhatsApp" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" data-grup="waka-satpam" hint="Dipakai buat kirim link persetujuan/notifikasi lewat WhatsApp." />
+            {{-- semua peran: no. WhatsApp, dipakai kirim link/notifikasi lewat WA --}}
+            <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" hint="Dipakai buat kirim link persetujuan/surat lewat WhatsApp." />
 
             {{-- khusus data pengurus kelas baru --}}
             <div data-grup="siswa-baru" class="flex flex-col gap-4">
@@ -153,6 +162,29 @@
         </form>
     </x-admin.modal>
 
+    {{-- ------------------------------------------------------------- Modal ubah akun --}}
+    <x-admin.modal id="modal-akun-ubah" title="Ubah Akun">
+        <form method="POST" action="{{ route('master.akun.update') }}" class="flex flex-col gap-4">
+            @csrf
+            <x-ui.input label="Nama Lengkap" name="nama" />
+            <x-ui.input label="Email" name="email" type="email" />
+            <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" />
+            <x-ui.input label="NIP (opsional, khusus Waka)" name="nip" />
+
+            <x-ui.input label="Password Baru (opsional)" name="password" type="password" id="akun-ubah-password" placeholder="Kosongkan kalau tidak diganti">
+                <button type="button" data-toggle-password="#akun-ubah-password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan">
+                    <x-icon name="visibility" :size="18" />
+                </button>
+            </x-ui.input>
+            <x-ui.input label="Konfirmasi Password Baru" name="password_confirmation" type="password" placeholder="Ulangi kalau ganti password" />
+
+            <div class="mt-1 flex gap-2">
+                <x-ui.button type="submit" icon="save">Simpan Perubahan</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+            </div>
+        </form>
+    </x-admin.modal>
+
     @push('scripts')
         <script>
             (function () {
@@ -163,7 +195,7 @@
                 const sumberWrap = sumber.closest('[data-grup]');
                 const grupGuruBaru = form.querySelector('[data-grup="guru-baru"]');
                 const grupSiswaBaru = form.querySelector('[data-grup="siswa-baru"]');
-                const grupWakaSatpam = form.querySelector('[data-grup="waka-satpam"]');
+                const grupNip = form.querySelector('[data-grup="nip"]');
 
                 const setGrup = (el, on) => {
                     el.hidden = !on;
@@ -184,7 +216,7 @@
                     const baru = sumber.value === 'baru';
                     setGrup(grupGuruBaru, r === 'guru' && baru);
                     setGrup(grupSiswaBaru, r === 'siswa' && baru);
-                    setGrup(grupWakaSatpam, r === 'waka' || r === 'satpam');
+                    setGrup(grupNip, r === 'waka' || (r === 'guru' && baru));
 
                     const opt = sumber.selectedOptions[0];
                     if (!baru && opt?.dataset.nama) { nama.value = opt.dataset.nama; nama.readOnly = true; }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama');
             $table->enum('jenis_kelamin', ['L', 'P']);
             $table->unsignedSmallInteger('no_absen')->nullable();
+            $table->string('no_hp')->nullable(); // dipakai kalau pengurus kelas kirim WA
             $table->enum('jabatan', ['anggota', 'pengurus'])->default('anggota');
             $table->enum('status', ['aktif', 'lulus', 'pindah'])->default('aktif');
             $table->timestamps();

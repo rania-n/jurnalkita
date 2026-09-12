@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         /* Manajemen akun */
         Route::post('/admin/akun', [AkunController::class, 'save'])->name('master.akun.save');
+        Route::post('/admin/akun-ubah', [AkunController::class, 'update'])->name('master.akun.update');
         Route::post('/admin/akun/{user}/setujui', [AkunController::class, 'approve'])->name('master.akun.approve');
         Route::post('/admin/akun/{user}/tolak', [AkunController::class, 'reject'])->name('master.akun.reject');
         Route::post('/admin/akun/{user}/kirim-reset', [AkunController::class, 'sendResetLink'])->name('master.akun.reset');

@@ -46,13 +46,16 @@ class AkunController extends Controller
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
             'no_hp' => $data['no_hp'] ?? null,
+            // NIP di sini cuma dipakai buat waka/satpam -- guru punya NIP sendiri di
+            // tabel gurus (diisi di bawah), siswa punya NIS.
+            'nip' => in_array($data['role'], ['waka', 'satpam'], true) ? ($data['nip'] ?? null) : null,
             'status' => 'approved',
             'email_verified_at' => now(),
         ]);
 
         if ($data['role'] === 'guru') {
             $guru = $sumberId ? Guru::findOrFail($sumberId) : new Guru([
-                'nama' => $data['nama'], 'nip' => $data['nip'] ?? null,
+                'nama' => $data['nama'], 'nip' => $data['nip'] ?? null, 'no_hp' => $data['no_hp'] ?? null,
             ]);
             $guru->user_id = $user->id;
             $guru->save();
@@ -77,6 +80,7 @@ class AkunController extends Controller
                 'nis' => $data['nis'],
                 'kelas_id' => $data['kelas_id'],
                 'jenis_kelamin' => $data['jenis_kelamin'] ?? 'L',
+                'no_hp' => $data['no_hp'] ?? null,
                 'jabatan' => 'pengurus',
             ]);
             $siswa->user_id = $user->id;
@@ -86,6 +90,38 @@ class AkunController extends Controller
         AuditLog::catat('Buat Akun', "Buat akun {$data['role']}: {$data['email']}", $user);
 
         return back()->with('success', "Akun {$user->name} berhasil dibuat.");
+    }
+
+    /**
+     * Ubah akun yang sudah ada -- nama, email, no. HP/NIP, dan (opsional) password
+     * langsung. Admin bisa apa saja, jadi nggak perlu muter lewat email "kirim reset"
+     * cuma buat ganti password sendiri; "kirim reset" tetap ada di bawah buat kasus
+     * pemilik akun mau ganti sendiri tanpa admin tahu passwordnya.
+     */
+    public function update(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'id' => ['required', 'exists:users,id'],
+            'nama' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'lowercase', Rule::unique('users', 'email')->ignore($request->integer('id'))->withoutTrashed()],
+            'no_hp' => ['nullable', 'string', 'max:20'],
+            'nip' => ['nullable', 'string', 'max:30'],
+            'password' => ['nullable', 'confirmed', PasswordRule::defaults()],
+        ]);
+
+        $user = User::findOrFail($data['id']);
+
+        $user->update([
+            'name' => $data['nama'],
+            'email' => $data['email'],
+            'no_hp' => $data['no_hp'] ?? null,
+            'nip' => in_array($user->role, ['waka', 'satpam'], true) ? ($data['nip'] ?? null) : $user->nip,
+            ...(filled($data['password'] ?? null) ? ['password' => Hash::make($data['password'])] : []),
+        ]);
+
+        AuditLog::catat('Ubah Akun', "Ubah akun: {$user->email}", $user);
+
+        return back()->with('success', "Akun {$user->name} diperbarui.");
     }
 
     public function approve(User $user): RedirectResponse
