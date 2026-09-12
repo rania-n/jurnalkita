@@ -24,3 +24,11 @@ Aturan alur detail: `docs/spec.md`.
 
 - Detail akun waka
 - Boleh > 1 pengurus per kelas?
+- N3 di `docs/alur-kerja-dan-analisis-kebutuhan.md` — "buku piket" ketertiban
+  (siswa telat gerbang pagi) — masuk jurnalkita atau urusan terpisah?
+
+## Analisis alur kerja per peran
+
+Lihat `docs/alur-kerja-dan-analisis-kebutuhan.md` — alur kerja nyata tiap peran
+(guru, piket, waka, pengurus kelas, satpam, admin) dicocokkan sama fitur yang ada,
+plus 3 temuan baru (rekap kehadiran siswa, rekap jurnal guru, buku piket ketertiban).
