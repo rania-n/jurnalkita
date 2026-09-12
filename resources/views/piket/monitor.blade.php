@@ -20,6 +20,22 @@
         <x-ui.button type="submit" icon="search">Tampilkan</x-ui.button>
     </form>
 
+    {{-- Roster shift piket hari itu — guru piket TIDAK mengajar selama shiftnya --}}
+    @if ($shiftPiket->isNotEmpty())
+        <div class="mb-4 rounded-xl border border-surface-alt bg-card p-4">
+            <p class="mb-2 text-sm font-bold text-ink">Petugas Piket Hari Ini</p>
+            <div class="flex flex-wrap gap-2">
+                @foreach ($shiftPiket as $p)
+                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-3 py-1.5 text-xs font-semibold text-ink">
+                        <x-icon name="badge" :size="14" class="text-navy" />
+                        {{ $p->guru->nama }}
+                        <span class="text-muted-2">· {{ $p->mulai?->format('H:i') ?? '00:00' }}–{{ $p->selesai?->format('H:i') ?? '23:59' }}</span>
+                    </span>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- Rekap total hari itu --}}
     <div class="mb-4 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
         <x-ui.stat label="Hadir" tone="hadir" :value="$rekapTotal['hadir'] ?? 0" />

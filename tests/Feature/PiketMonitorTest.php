@@ -84,6 +84,14 @@ class PiketMonitorTest extends TestCase
             ->assertSee('X TKJ 1')->assertSee('Belum Diisi');
     }
 
+    public function test_roster_shift_piket_tampil_di_atas_monitor(): void
+    {
+        JadwalPiket::create(['guru_id' => $this->guruA->id, 'hari' => 'senin', 'mulai' => '07:00', 'selesai' => '09:30']);
+
+        $this->actingAs($this->waka)->get('/piket/monitor')
+            ->assertOk()->assertSee('Petugas Piket Hari Ini')->assertSee('07:00')->assertSee('09:30');
+    }
+
     public function test_mode_per_kelas_memisahkan_grup_per_kelas(): void
     {
         $this->actingAs($this->waka)
