@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\AuditLog;
+use App\Models\CatatanTerlambat;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use Carbon\Carbon;
@@ -22,11 +23,12 @@ class RekapController extends Controller
 
     public function siswa(Request $request): View
     {
-        [$dari, $sampai, $siswas, $rekap] = $this->data($request);
+        [$dari, $sampai, $siswas, $rekap, $terlambat] = $this->data($request);
 
         return view('rekap.siswa', [
             'siswas' => $siswas,
             'rekap' => $rekap,
+            'terlambat' => $terlambat,
             'dari' => $dari,
             'sampai' => $sampai,
             'kelasList' => Kelas::orderBy('nama')->get(),
@@ -36,19 +38,20 @@ class RekapController extends Controller
 
     public function eksporSiswa(Request $request)
     {
-        [$dari, $sampai, $siswas, $rekap] = $this->data($request);
+        [$dari, $sampai, $siswas, $rekap, $terlambat] = $this->data($request);
 
         AuditLog::catat('Ekspor Rekap Siswa', "Ekspor rekap kehadiran siswa {$dari->toDateString()} s/d {$sampai->toDateString()}");
 
-        return Response::streamDownload(function () use ($siswas, $rekap) {
+        return Response::streamDownload(function () use ($siswas, $rekap, $terlambat) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['Kelas', 'No. Absen', 'Nama', 'NIS', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi']);
+            fputcsv($out, ['Kelas', 'No. Absen', 'Nama', 'NIS', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi', 'Terlambat']);
 
             foreach ($siswas as $s) {
                 $r = $rekap[$s->id] ?? collect();
                 fputcsv($out, [
                     $s->kelas?->nama ?? '-', $s->no_absen ?? '-', $s->nama, $s->nis,
                     $r['hadir'] ?? 0, $r['sakit'] ?? 0, $r['izin'] ?? 0, $r['alpha'] ?? 0, $r['dispensasi'] ?? 0,
+                    $terlambat[$s->id] ?? 0,
                 ]);
             }
 
@@ -56,7 +59,7 @@ class RekapController extends Controller
         }, 'rekap-kehadiran-siswa-'.$dari->toDateString().'-sd-'.$sampai->toDateString().'.csv', ['Content-Type' => 'text/csv']);
     }
 
-    /** @return array{0: Carbon, 1: Carbon, 2: Collection, 3: Collection} */
+    /** @return array{0: Carbon, 1: Carbon, 2: Collection, 3: Collection, 4: Collection} */
     private function data(Request $request): array
     {
         $dari = $request->filled('dari') ? Carbon::parse($request->date('dari')) : now()->startOfMonth();
@@ -75,6 +78,12 @@ class RekapController extends Controller
             ->groupBy('siswa_id')
             ->map(fn ($rows) => $rows->countBy('status'));
 
-        return [$dari, $sampai, $siswas, $rekap];
+        $terlambat = CatatanTerlambat::whereIn('siswa_id', $siswas->pluck('id'))
+            ->whereDate('tanggal', '>=', $dari->toDateString())
+            ->whereDate('tanggal', '<=', $sampai->toDateString())
+            ->get()
+            ->countBy('siswa_id');
+
+        return [$dari, $sampai, $siswas, $rekap, $terlambat];
     }
 }

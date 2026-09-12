@@ -163,5 +163,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:satpam')->prefix('satpam')->name('satpam.')->group(function () {
         Route::get('/', [SatpamController::class, 'dashboard'])->name('dashboard');
         Route::get('/scan', [SatpamController::class, 'scan'])->name('scan');
+        Route::get('/terlambat', [SatpamController::class, 'terlambatCreate'])->name('terlambat.create');
+        Route::post('/terlambat', [SatpamController::class, 'terlambatStore'])->name('terlambat.store');
     });
 });

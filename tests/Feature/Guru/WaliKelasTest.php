@@ -3,6 +3,7 @@
 namespace Tests\Feature\Guru;
 
 use App\Models\Absensi;
+use App\Models\CatatanTerlambat;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
@@ -70,5 +71,21 @@ class WaliKelasTest extends TestCase
 
         $this->actingAs($wali)->get('/guru/wali-kelas')->assertOk()
             ->assertSee('X RPL 1')->assertSee('XI RPL 1');
+    }
+
+    public function test_rekap_wali_kelas_ikut_hitung_catatan_terlambat(): void
+    {
+        $wali = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $wali->id, 'nama' => 'Wali Kelas']);
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guru->id]);
+        $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L']);
+
+        $satpam = User::factory()->role('satpam')->create();
+        CatatanTerlambat::create([
+            'siswa_id' => $siswa->id, 'tanggal' => today(), 'jam_datang' => '07:15', 'dicatat_oleh_id' => $satpam->id,
+        ]);
+
+        $this->actingAs($wali)->get('/guru/wali-kelas')
+            ->assertOk()->assertSee('text-navy">1</td>', false);
     }
 }

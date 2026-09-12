@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\CatatanTerlambat;
 use App\Models\Kelas;
 use Illuminate\View\View;
 
@@ -40,8 +41,13 @@ class WaliKelasController extends Controller
             ->groupBy('siswa_id')
             ->map(fn ($rows) => $rows->countBy('status'));
 
+        $terlambat = CatatanTerlambat::whereIn('siswa_id', $siswas->pluck('id'))
+            ->whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year)
+            ->get()
+            ->countBy('siswa_id');
+
         $adaKelasLain = auth()->user()->kelasWaliList()->count() > 1;
 
-        return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'adaKelasLain'));
+        return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'terlambat', 'adaKelasLain'));
     }
 }

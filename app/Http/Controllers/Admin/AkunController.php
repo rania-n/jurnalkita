@@ -59,7 +59,16 @@ class AkunController extends Controller
         } elseif ($data['role'] === 'siswa') {
             if (! $sumberId) {
                 $request->validate([
-                    'kelas_id' => ['required', 'exists:kelas,id'],
+                    'kelas_id' => [
+                        'required', 'exists:kelas,id',
+                        // Data baru dari sini otomatis jadi pengurus kelas (akun kelas) --
+                        // tapi cuma boleh 1 pengurus per kelas.
+                        function ($attribute, $value, $fail) {
+                            if (Siswa::where('kelas_id', $value)->where('jabatan', 'pengurus')->exists()) {
+                                $fail('Kelas ini sudah punya pengurus kelas. Ubah pengurus lama jadi "Anggota" dulu lewat menu Data Siswa.');
+                            }
+                        },
+                    ],
                     'nis' => ['required', 'string', 'max:20'],
                 ]);
             }

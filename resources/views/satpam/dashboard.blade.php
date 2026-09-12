@@ -1,18 +1,29 @@
 <x-layouts.app title="Beranda Satpam">
-    <x-page-header title="Beranda Satpam" subtitle="Scan QR surat dispensasi siswa" />
+    <x-page-header title="Beranda Satpam" subtitle="Scan QR dispensasi & catat siswa terlambat" />
 
     <x-alert type="info" class="mb-4">
         Nggak perlu buka kamera di sini — scan QR pakai <strong>kamera bawaan HP</strong>
         seperti biasa. Hasilnya langsung kebuka di halaman ini.
     </x-alert>
 
+    <a href="{{ route('satpam.terlambat.create') }}" class="press mb-6 flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
+            <x-icon name="schedule" :size="24" />
+        </span>
+        <div class="flex-1">
+            <p class="text-sm font-bold text-ink">Catat Siswa Terlambat</p>
+            <p class="text-xs text-muted">Siswa telat masuk gerbang pagi</p>
+        </div>
+        <x-icon name="chevron_right" :size="20" class="text-muted" />
+    </a>
+
     <h2 class="mb-2 text-sm font-bold text-ink">Riwayat Scan Hari Ini</h2>
 
-    @if ($riwayatHariIni->isEmpty())
+    @if ($riwayatScan->isEmpty())
         <x-ui.empty icon="qr_code_scanner" title="Belum ada scan hari ini" />
     @else
-        <x-ui.card-list>
-            @foreach ($riwayatHariIni as $log)
+        <x-ui.card-list class="mb-6">
+            @foreach ($riwayatScan as $log)
                 <x-ui.list-card
                     :title="$log->deskripsi"
                     :meta="[$log->created_at->format('H:i:s')]"
@@ -23,6 +34,21 @@
                         </x-ui.status-badge>
                     </x-slot:badge>
                 </x-ui.list-card>
+            @endforeach
+        </x-ui.card-list>
+    @endif
+
+    <h2 class="mb-2 mt-6 text-sm font-bold text-ink">Siswa Terlambat Hari Ini</h2>
+
+    @if ($riwayatTerlambat->isEmpty())
+        <x-ui.empty icon="schedule" title="Belum ada catatan keterlambatan hari ini" />
+    @else
+        <x-ui.card-list>
+            @foreach ($riwayatTerlambat as $c)
+                <x-ui.list-card
+                    :title="$c->siswa->nama"
+                    :meta="[$c->siswa->kelas?->nama . ' · Jam ' . $c->jam_datang->format('H:i'), $c->catatan ?: 'Tanpa catatan']"
+                />
             @endforeach
         </x-ui.card-list>
     @endif

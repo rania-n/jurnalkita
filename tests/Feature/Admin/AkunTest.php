@@ -3,6 +3,8 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Guru;
+use App\Models\Kelas;
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -76,6 +78,21 @@ class AkunTest extends TestCase
         $this->actingAs($this->admin())
             ->post('/admin/akun', $this->akunPayload(['role' => 'siswa', 'email' => 'x@s.test']))
             ->assertSessionHasErrors(['kelas_id', 'nis']);
+    }
+
+    public function test_kelas_yang_sudah_punya_pengurus_tidak_bisa_dibuatkan_akun_pengurus_lagi(): void
+    {
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+        Siswa::create([
+            'kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Ketua Lama',
+            'jenis_kelamin' => 'L', 'jabatan' => 'pengurus',
+        ]);
+
+        $this->actingAs($this->admin())
+            ->post('/admin/akun', $this->akunPayload([
+                'role' => 'siswa', 'email' => 'ketua-baru@s.test', 'kelas_id' => $kelas->id, 'nis' => '002',
+            ]))
+            ->assertSessionHasErrors('kelas_id');
     }
 
     public function test_approve_dan_reject_pendaftaran(): void

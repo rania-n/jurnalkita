@@ -28,7 +28,7 @@
     @if ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa" />
     @else
-        <x-admin.table :head="['Kelas', 'No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi']">
+        <x-admin.table :head="['Kelas', 'No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi', 'Terlambat']">
             @foreach ($siswas as $s)
                 @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
                 <tr @class(['bg-alpha-soft/30' => $alphaTinggi])>
@@ -40,6 +40,7 @@
                     <td class="px-4 py-2.5 text-izin">{{ $r['izin'] ?? 0 }}</td>
                     <td class="px-4 py-2.5 font-bold {{ $alphaTinggi ? 'text-alpha' : 'text-alpha/70' }}">{{ $r['alpha'] ?? 0 }}</td>
                     <td class="px-4 py-2.5 text-dispen">{{ $r['dispensasi'] ?? 0 }}</td>
+                    <td class="px-4 py-2.5 font-semibold text-navy">{{ $terlambat[$s->id] ?? 0 }}</td>
                 </tr>
             @endforeach
         </x-admin.table>
