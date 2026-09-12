@@ -89,7 +89,7 @@ class DispensasiLaporanTest extends TestCase
 
     public function test_guru_piket_bisa_lihat_dan_ekspor_semua_pengajuan_bukan_cuma_punya_sendiri(): void
     {
-        // Dispensasi sifatnya global -- bukan "milik" guru yang mengajukan.
+        // Dispensasi bukan "milik" guru yang mengajukan -- semua guru PIKET boleh lihat semuanya.
         $response = $this->actingAs($this->piket)->get('/dispensasi');
         $response->assertOk()->assertSee('Budi')->assertSee('Sinta');
 

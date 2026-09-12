@@ -19,6 +19,16 @@ return [
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
+    // Guru yang JUGA wali kelas (kelas.wali_id) -- tambahan menu rekap kelasnya.
+    // Cuma dipakai kalau bukan hari piket (piket tetap prioritas, lihat 'guru-piket').
+    'guru-wali' => [
+        ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
+        ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
+        ['label' => 'Wali Kelas', 'icon' => 'groups', 'route' => 'guru.wali-kelas.index', 'match' => 'guru.wali-kelas.*'],
+        ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
+    ],
+
     // Hari giliran piket: nav-nya cuma yang berhubungan sama piket. Jurnal/Jadwal
     // sengaja TIDAK ikut di sini -- hari itu dia ditugaskan piket, bukan ngajar
     // (guru piket memang nggak dijadwalkan mengajar saat shift piketnya).

@@ -135,10 +135,10 @@ class DispensasiTest extends TestCase
             ->assertRedirect(route('sekretaris.dashboard'));
     }
 
-    public function test_dispensasi_bersifat_global_semua_guru_bisa_lihat_punya_siapa_saja(): void
+    public function test_semua_guru_piket_bisa_lihat_dispensasi_guru_piket_lain(): void
     {
         // Pengajuan oleh piket lain -- dispensasi bukan "milik" guru yang mengajukan,
-        // jadi guru piket lain (bahkan guru yang bukan piket sekalipun) tetap boleh lihat.
+        // tapi ranahnya guru PIKET + Waka (bukan buat semua guru).
         $piketLain = User::factory()->role('guru')->create();
         $guruLain = Guru::create(['user_id' => $piketLain->id, 'nama' => 'Piket Lain']);
         JadwalPiket::create(['guru_id' => $guruLain->id, 'hari' => 'selasa']);
@@ -149,9 +149,18 @@ class DispensasiTest extends TestCase
 
         $this->actingAs($this->piket)->get("/dispensasi/{$milikOrang->id}")->assertOk();
         $this->actingAs($this->piket)->get('/dispensasi')->assertOk()->assertSee('Budi');
+    }
+
+    public function test_guru_yang_bukan_piket_tidak_relevan_tidak_bisa_lihat_dispensasi(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'alasan' => 'X', 'status_piket' => 'approved',
+        ]);
 
         $guruBukanPiket = User::factory()->role('guru')->create();
-        $this->actingAs($guruBukanPiket)->get("/dispensasi/{$milikOrang->id}")->assertOk();
+        $this->actingAs($guruBukanPiket)->get("/dispensasi/{$d->id}")->assertForbidden();
+        $this->actingAs($guruBukanPiket)->get('/dispensasi')->assertForbidden();
     }
 
     public function test_guru_bukan_waka_tidak_bisa_approve_waka(): void

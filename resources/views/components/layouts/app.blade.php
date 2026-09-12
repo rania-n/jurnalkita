@@ -12,12 +12,14 @@
     // lagi murni ngajar. Akses fitur (ajukan/lihat dispensasi dll) tetap kebuka
     // kapan saja lewat isPiket(), cuma tampilan navnya yang menyesuaikan hari ini.
     $role = auth()->user()->role ?? null;
-    $menu ??= match ($role) {
-        'admin' => 'admin',
-        'guru' => auth()->user()->piketHariIni() ? 'guru-piket' : 'guru',
-        'siswa' => 'sekretaris',
-        'waka' => 'waka',
-        'satpam' => 'satpam',
+    $menu ??= match (true) {
+        $role === 'admin' => 'admin',
+        $role === 'guru' && auth()->user()->piketHariIni() => 'guru-piket',
+        $role === 'guru' && auth()->user()->isWali() => 'guru-wali',
+        $role === 'guru' => 'guru',
+        $role === 'siswa' => 'sekretaris',
+        $role === 'waka' => 'waka',
+        $role === 'satpam' => 'satpam',
         default => 'default',
     };
 @endphp

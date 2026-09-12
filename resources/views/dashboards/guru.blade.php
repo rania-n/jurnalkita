@@ -5,6 +5,7 @@
         ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hari)->orderBy('jam_ke_mulai')->get()
         : collect();
     $piketHariIni = $guru && $guru->jadwalPikets()->where('hari', $hari)->exists();
+    $isWali = auth()->user()->isWali();
 
     // Jadwal yang jurnalnya sudah diisi hari ini
     $sudahDiisi = $guru
@@ -41,6 +42,19 @@
                 <x-icon name="chevron_right" :size="20" class="text-muted" />
             </a>
         </div>
+    @endif
+
+    @if ($isWali && ! $piketHariIni)
+        <a href="{{ route('guru.wali-kelas.index') }}" class="press mb-6 flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                <x-icon name="groups" :size="24" />
+            </span>
+            <div class="flex-1">
+                <p class="text-sm font-bold text-ink">Wali Kelas</p>
+                <p class="text-xs text-muted">Lihat rekap kehadiran kelas yang Anda ampu</p>
+            </div>
+            <x-icon name="chevron_right" :size="20" class="text-muted" />
+        </a>
     @endif
 
     {{-- Hari piket: guru nggak dijadwalkan mengajar (lihat catatan di atas), jadi

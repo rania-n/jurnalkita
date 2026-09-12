@@ -21,10 +21,23 @@ class DispensasiController extends Controller
     }
 
     /**
-     * Query dasar dispensasi + filter dari request. Sifatnya GLOBAL -- dispensasi bukan
-     * "milik" guru yang mengajukan, semua guru/waka/admin boleh lihat semuanya (buat
-     * mengajukan/membatalkan tetap dibatasi kepemilikan, itu diatur terpisah).
-     * Dipakai bersama oleh index() (dipaginasi) dan ekspor() (diambil semua).
+     * Dispensasi itu ranahnya guru PIKET + Waka (+ admin buat oversight) -- bukan
+     * "milik" guru yang mengajukan doang, tapi juga BUKAN buat semua guru. Guru yang
+     * nggak pernah kebagian piket sama sekali tidak relevan lihat ini.
+     */
+    private function pastikanBolehLihat(): void
+    {
+        $user = auth()->user();
+        abort_unless(
+            in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
+            403,
+            'Hanya guru piket, Waka Kesiswaan, dan admin yang bisa melihat dispensasi.'
+        );
+    }
+
+    /**
+     * Query dasar dispensasi + filter dari request. Dipakai bersama oleh index()
+     * (dipaginasi) dan ekspor() (diambil semua).
      */
     private function terfilter(Request $request)
     {
@@ -50,6 +63,7 @@ class DispensasiController extends Controller
 
     public function index(Request $request): View
     {
+        $this->pastikanBolehLihat();
         $user = $request->user();
 
         return view('dispensasi.index', [
@@ -65,7 +79,7 @@ class DispensasiController extends Controller
     /** Ekspor laporan dispensasi (kegiatan piket) sebagai CSV, ikut filter yang sedang aktif. */
     public function ekspor(Request $request)
     {
-        abort_unless(in_array($request->user()->role, ['waka', 'admin'], true) || $request->user()->isPiket(), 403);
+        $this->pastikanBolehLihat();
 
         $rows = $this->terfilter($request)->get();
 
@@ -146,11 +160,11 @@ class DispensasiController extends Controller
 
     public function show(Request $request, Dispensasi $dispensasi): View
     {
+        $this->pastikanBolehLihat();
         $user = auth()->user();
 
-        // Dispensasi sifatnya global (bukan "milik" guru yang mengajukan) -- semua guru,
-        // waka, & admin boleh lihat detailnya. Middleware role:guru,waka,admin di route
-        // sudah membatasi siapa yang bisa sampai ke sini sama sekali.
+        // Bukan lagi dibatasi kepemilikan (siapa yang mengajukan) -- tapi tetap
+        // dibatasi ranahnya piket+waka+admin lewat pastikanBolehLihat() di atas.
 
         $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
 

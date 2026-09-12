@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\DispensasiController;
 use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
+use App\Http\Controllers\Guru\WaliKelasController;
 use App\Http\Controllers\PiketController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\SatpamController;
@@ -96,6 +97,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/guru', 'dashboards.guru')->name('guru.dashboard');
         Route::get('/guru/jadwal', [GuruJadwalController::class, 'index'])->name('guru.jadwal.index');
         Route::view('/guru/piket', 'guru.piket')->name('piket.index');
+
+        Route::get('/guru/wali-kelas', [WaliKelasController::class, 'index'])->name('guru.wali-kelas.index');
+        Route::get('/guru/wali-kelas/{kelas}', [WaliKelasController::class, 'rekap'])->name('guru.wali-kelas.rekap');
 
         Route::get('/guru/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
         Route::get('/guru/jurnal/tambah', [JurnalController::class, 'create'])->name('jurnal.create');
