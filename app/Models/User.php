@@ -40,11 +40,24 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->status === 'approved';
     }
 
-    /** Guru yang sedang menjabat sebagai staff piket (punya jadwal piket). */
+    /** Guru yang menjabat sebagai staff piket (punya jadwal piket) — permanen, dipakai buat akses fitur. */
     public function isPiket(): bool
     {
         return $this->role === 'guru'
             && $this->guru?->jadwalPikets()->exists();
+    }
+
+    /**
+     * Guru piket yang KEBAGIAN JADWAL HARI INI (bukan cuma "pernah dapat piket") —
+     * dipakai buat nav, biar menu Piket/Dispensasi cuma nongol di hari dia
+     * beneran bertugas. Beda dari isPiket() yang tetap dipakai buat akses fitur
+     * (boleh ajukan/lihat dispensasi kapan saja, bukan cuma pas hari piketnya).
+     */
+    public function piketHariIni(): bool
+    {
+        $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][now()->dayOfWeek - 1] ?? null;
+
+        return $hari && $this->isPiket() && $this->guru->jadwalPikets()->where('hari', $hari)->exists();
     }
 
     /** Siswa pengurus kelas (akun kelas / "sekretaris"). */

@@ -6,13 +6,15 @@
 
 @php
     // Menu navigasi menyesuaikan peran user (fallback: 'default').
-    // Guru yang isPiket() dapat menu 'guru-piket' (tambahan Piket & Dispensasi) —
-    // guru yang nggak pernah kebagian piket nggak usah lihat menu yang isinya
-    // bakal kosong selamanya buat dia.
+    // Guru piket cuma dapat menu 'guru-piket' (tambahan Piket & Dispensasi) pas
+    // HARI dia beneran kebagian jadwal piket (piketHariIni()) — bukan permanen
+    // selama isPiket(), biar navbar-nya nggak keliatan rancu/nyampur pas dia
+    // lagi murni ngajar. Akses fitur (ajukan/lihat dispensasi dll) tetap kebuka
+    // kapan saja lewat isPiket(), cuma tampilan navnya yang menyesuaikan hari ini.
     $role = auth()->user()->role ?? null;
     $menu ??= match ($role) {
         'admin' => 'admin',
-        'guru' => auth()->user()->isPiket() ? 'guru-piket' : 'guru',
+        'guru' => auth()->user()->piketHariIni() ? 'guru-piket' : 'guru',
         'siswa' => 'sekretaris',
         'waka' => 'waka',
         'satpam' => 'satpam',

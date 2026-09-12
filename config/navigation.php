@@ -8,9 +8,10 @@
 
 return [
 
-    // Guru yang TIDAK pernah kebagian piket — menu Piket/Dispensasi disembunyikan
-    // total, bukan cuma kosong, biar nggak nyasar ke halaman yang buat mereka
-    // permanen kosong. Guru yang isPiket() pakai 'guru-piket' di bawah.
+    // Guru yang HARI INI bukan giliran piket — menu Piket/Dispensasi disembunyikan
+    // biar nav-nya nggak rancu pas lagi murni ngajar. Guru yang piketHariIni()
+    // pakai 'guru-piket' di bawah (lihat User::piketHariIni() vs isPiket() —
+    // akses fitur dispensasi/piket tetap kebuka kapan saja, ini cuma soal nav).
     'guru' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
         ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
