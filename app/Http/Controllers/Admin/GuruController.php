@@ -38,7 +38,7 @@ class GuruController extends Controller
             ->all();
         $guru->mapels()->sync($tambahan);
 
-        AuditLog::catat($baru ? 'guru.tambah' : 'guru.ubah', "Data guru: {$guru->nama}", $guru);
+        AuditLog::catat($baru ? 'Tambah Guru' : 'Ubah Guru', "Data guru: {$guru->nama}", $guru);
 
         return back()->with('success', $baru ? 'Guru ditambahkan.' : 'Data guru diperbarui.');
     }
@@ -48,7 +48,7 @@ class GuruController extends Controller
         $nama = $guru->nama;
         $guru->delete();
 
-        AuditLog::catat('guru.hapus', "Hapus data guru: {$nama}", $guru);
+        AuditLog::catat('Hapus Guru', "Hapus data guru: {$nama}", $guru);
 
         return back()->with('success', 'Data guru dihapus.');
     }

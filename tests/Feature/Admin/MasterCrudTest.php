@@ -67,7 +67,7 @@ class MasterCrudTest extends TestCase
         $guru = Guru::first();
         $this->assertSame($utama->id, $guru->mapel_utama_id);
         $this->assertEqualsCanonicalizing([$tambahan->id], $guru->mapels->pluck('id')->all());
-        $this->assertDatabaseHas('audit_logs', ['aksi' => 'guru.tambah']);
+        $this->assertDatabaseHas('audit_logs', ['aksi' => 'Tambah Guru']);
     }
 
     public function test_non_admin_cannot_write(): void

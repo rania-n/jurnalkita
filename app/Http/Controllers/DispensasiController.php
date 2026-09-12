@@ -77,7 +77,7 @@ class DispensasiController extends Controller
 
         $namaFile = 'laporan-dispensasi-'.now()->format('Y-m-d_His').'.csv';
 
-        AuditLog::catat('dispensasi.ekspor', "Ekspor laporan dispensasi ({$rows->count()} baris)");
+        AuditLog::catat('Ekspor Laporan Dispensasi', "Ekspor laporan dispensasi ({$rows->count()} baris)");
 
         return Response::streamDownload(function () use ($rows) {
             $out = fopen('php://output', 'w');
@@ -136,7 +136,7 @@ class DispensasiController extends Controller
         ]);
         $dispensasi->segarkanStatusAkhir();
 
-        AuditLog::catat('dispensasi.ajukan', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);
+        AuditLog::catat('Ajukan Dispensasi', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);
 
         return redirect()->route('dispensasi.index')
             ->with('success', 'Dispensasi diajukan. Menunggu persetujuan Waka Kesiswaan.');
@@ -180,7 +180,7 @@ class DispensasiController extends Controller
         $nama = $dispensasi->siswa->nama;
         $dispensasi->delete();
 
-        AuditLog::catat('dispensasi.batal', "Batalkan dispensasi {$nama}", $dispensasi);
+        AuditLog::catat('Batalkan Dispensasi', "Batalkan dispensasi {$nama}", $dispensasi);
 
         return redirect()->route('dispensasi.index')->with('success', 'Pengajuan dispensasi dibatalkan.');
     }
@@ -202,7 +202,7 @@ class DispensasiController extends Controller
         ]);
         $dispensasi->segarkanStatusAkhir();
 
-        AuditLog::catat('dispensasi.waka', "Waka {$data['keputusan']} dispensasi #{$dispensasi->id}", $dispensasi);
+        AuditLog::catat('Keputusan Waka Dispensasi', "Waka {$data['keputusan']} dispensasi #{$dispensasi->id}", $dispensasi);
 
         return redirect()->route('dispensasi.index')->with(
             'success',

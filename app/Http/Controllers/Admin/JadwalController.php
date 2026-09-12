@@ -29,7 +29,7 @@ class JadwalController extends Controller
 
         $jadwal->fill($data)->save();
 
-        AuditLog::catat($baru ? 'jadwal.tambah' : 'jadwal.ubah', "Jadwal {$jadwal->hari} kelas #{$jadwal->kelas_id}", $jadwal);
+        AuditLog::catat($baru ? 'Tambah Jadwal' : 'Ubah Jadwal', "Jadwal {$jadwal->hari} kelas #{$jadwal->kelas_id}", $jadwal);
 
         return back()->with('success', $baru ? 'Jadwal ditambahkan.' : 'Jadwal diperbarui.');
     }
@@ -38,7 +38,7 @@ class JadwalController extends Controller
     {
         $jadwal->delete();
 
-        AuditLog::catat('jadwal.hapus', "Hapus jadwal #{$jadwal->id}", $jadwal);
+        AuditLog::catat('Hapus Jadwal', "Hapus jadwal #{$jadwal->id}", $jadwal);
 
         return back()->with('success', 'Jadwal dihapus.');
     }

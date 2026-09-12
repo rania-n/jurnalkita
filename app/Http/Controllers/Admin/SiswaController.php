@@ -28,7 +28,7 @@ class SiswaController extends Controller
 
         $siswa->fill($data)->save();
 
-        AuditLog::catat($baru ? 'siswa.tambah' : 'siswa.ubah', "Siswa: {$siswa->nama}", $siswa);
+        AuditLog::catat($baru ? 'Tambah Siswa' : 'Ubah Siswa', "Siswa: {$siswa->nama}", $siswa);
 
         return back()->with('success', $baru ? 'Siswa ditambahkan.' : 'Siswa diperbarui.');
     }
@@ -38,7 +38,7 @@ class SiswaController extends Controller
         $nama = $siswa->nama;
         $siswa->delete();
 
-        AuditLog::catat('siswa.hapus', "Hapus siswa: {$nama}", $siswa);
+        AuditLog::catat('Hapus Siswa', "Hapus siswa: {$nama}", $siswa);
 
         return back()->with('success', 'Siswa dihapus.');
     }

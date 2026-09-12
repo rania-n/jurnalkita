@@ -116,7 +116,7 @@ class JurnalController extends Controller
             return $jurnal;
         });
 
-        AuditLog::catat('jurnal.tambah', "Jurnal {$jadwal->mapel->nama} — {$jadwal->kelas->nama}", $jurnal);
+        AuditLog::catat('Tambah Jurnal', "Jurnal {$jadwal->mapel->nama} — {$jadwal->kelas->nama}", $jurnal);
 
         return redirect()->route('jurnal.presensi', $jurnal)
             ->with('success', 'Jurnal tersimpan. Sesuaikan presensi siswa bila perlu.');
@@ -158,7 +158,7 @@ class JurnalController extends Controller
             $this->kembalikanKePending($jurnal);
         });
 
-        AuditLog::catat('jurnal.presensi', "Simpan presensi jurnal #{$jurnal->id}", $jurnal);
+        AuditLog::catat('Simpan Presensi', "Simpan presensi jurnal #{$jurnal->id}", $jurnal);
 
         return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal & absensi tersimpan.');
     }
@@ -190,7 +190,7 @@ class JurnalController extends Controller
 
         $jurnal->update($data);
         $this->kembalikanKePending($jurnal);
-        AuditLog::catat('jurnal.ubah', "Ubah jurnal #{$jurnal->id}", $jurnal);
+        AuditLog::catat('Ubah Jurnal', "Ubah jurnal #{$jurnal->id}", $jurnal);
 
         return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal diperbarui.');
     }
@@ -204,7 +204,7 @@ class JurnalController extends Controller
         $label = $jurnal->jadwal->mapel->nama.' — '.$jurnal->jadwal->kelas->nama;
         $jurnal->delete();
 
-        AuditLog::catat('jurnal.hapus', "Hapus jurnal #{$jurnal->id} ({$label})", $jurnal);
+        AuditLog::catat('Hapus Jurnal', "Hapus jurnal #{$jurnal->id} ({$label})", $jurnal);
 
         return redirect()->route('jurnal.index')->with('success', 'Jurnal dihapus.');
     }

@@ -29,7 +29,7 @@ class KelasController extends Controller
 
         $kelas->fill($data)->save();
 
-        AuditLog::catat($baru ? 'kelas.tambah' : 'kelas.ubah', "Kelas: {$kelas->nama}", $kelas);
+        AuditLog::catat($baru ? 'Tambah Kelas' : 'Ubah Kelas', "Kelas: {$kelas->nama}", $kelas);
 
         return back()->with('success', $baru ? 'Kelas ditambahkan.' : 'Kelas diperbarui.');
     }
@@ -39,7 +39,7 @@ class KelasController extends Controller
         $nama = $kelas->nama;
         $kelas->delete();
 
-        AuditLog::catat('kelas.hapus', "Hapus kelas: {$nama}", $kelas);
+        AuditLog::catat('Hapus Kelas', "Hapus kelas: {$nama}", $kelas);
 
         return back()->with('success', 'Kelas dihapus.');
     }

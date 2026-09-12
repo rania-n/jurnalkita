@@ -9,13 +9,13 @@
 | 3 | Master Data (admin) | ✅ selesai | CRUD guru, kelas (nama otomatis), siswa, mapel, jadwal pelajaran, jadwal piket, jam pelajaran + validasi + audit log |
 | 4 | Manajemen Akun | ✅ selesai | Buat akun (dari data / baru), setujui/tolak pendaftaran, kirim reset sandi via email |
 | 5 | Jurnal & Absensi (guru) | ✅ selesai | Isi jurnal (auto tanggal + jam), absensi otomatis (default hadir / dispensasi), editor presensi + foto, riwayat + edit selama pending |
-| 2 | Approval & Verifikasi | 🔨 hampir | 2b & 2c selesai, 2a dikerjakan teman |
+| 2 | Approval & Verifikasi | ✅ selesai | 2a, 2b, 2c semua selesai |
 
 ## Modul 2 — 3 bagian
 
 | Bagian | Status | Isi |
 |---|---|---|
-| 2a. Audit Log (halaman) | 🔨 dikerjakan teman | Halaman `/admin/audit-log` read-only + filter |
+| 2a. Audit Log (halaman) | ✅ selesai | Halaman `/admin/audit-log` read-only, filter cari/user/tanggal (kerja fitra, digabung) |
 | 2b. Verifikasi Jurnal | ✅ selesai | Pengurus kelas (`/sekretaris/jurnal`) lihat jurnal kelasnya → setujui / minta revisi. Guru bisa memperbaiki jurnal saat diminta revisi (balik ke antre). Bisa isi jurnal pengganti (tugas luar / tidak hadir), auto terverifikasi |
 | 2c. Dispensasi | ✅ selesai | Guru piket ajukan (tahap piket otomatis lolos karena pengaju = piket) → Waka setujui / tolak → status akhir. Saat disetujui, absensi siswa di jam terkait otomatis jadi "dispensasi" + catatan |
 

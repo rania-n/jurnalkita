@@ -109,7 +109,7 @@ class DispensasiLaporanTest extends TestCase
     {
         $this->streamedCsv($this->waka);
 
-        $this->assertDatabaseHas('audit_logs', ['aksi' => 'dispensasi.ekspor']);
+        $this->assertDatabaseHas('audit_logs', ['aksi' => 'Ekspor Laporan Dispensasi']);
     }
 
     /** Ambil isi CSV dari StreamedResponse (testResponse tidak bisa getContent() langsung). */

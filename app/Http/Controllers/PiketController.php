@@ -67,7 +67,7 @@ class PiketController extends Controller
         $tanggal = $this->tanggal($request);
         $baris = $this->baris($tanggal);
 
-        AuditLog::catat('piket.ekspor', "Ekspor ringkas monitor piket {$tanggal->toDateString()} ({$baris->count()} baris)");
+        AuditLog::catat('Ekspor Ringkasan Piket', "Ekspor ringkas monitor piket {$tanggal->toDateString()} ({$baris->count()} baris)");
 
         return Response::streamDownload(function () use ($baris) {
             $out = fopen('php://output', 'w');
@@ -104,7 +104,7 @@ class PiketController extends Controller
         $label = $tipe === 'guru' ? $baris->first()['jadwal']->guru->nama : $baris->first()['jadwal']->kelas->nama;
         $kolomLawan = $tipe === 'guru' ? 'Kelas' : 'Guru';
 
-        AuditLog::catat('piket.ekspor_detail', "Ekspor detail monitor piket — {$tipe} {$label}, {$tanggal->toDateString()}");
+        AuditLog::catat('Ekspor Detail Piket', "Ekspor detail monitor piket — {$tipe} {$label}, {$tanggal->toDateString()}");
 
         return Response::streamDownload(function () use ($baris, $tipe) {
             $out = fopen('php://output', 'w');

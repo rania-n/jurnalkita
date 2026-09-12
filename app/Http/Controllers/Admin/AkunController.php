@@ -72,7 +72,7 @@ class AkunController extends Controller
             $siswa->save();
         }
 
-        AuditLog::catat('akun.buat', "Buat akun {$data['role']}: {$data['email']}", $user);
+        AuditLog::catat('Buat Akun', "Buat akun {$data['role']}: {$data['email']}", $user);
 
         return back()->with('success', "Akun {$user->name} berhasil dibuat.");
     }
@@ -80,7 +80,7 @@ class AkunController extends Controller
     public function approve(User $user): RedirectResponse
     {
         $user->update(['status' => 'approved']);
-        AuditLog::catat('akun.setujui', "Setujui akun: {$user->email}", $user);
+        AuditLog::catat('Setujui Akun', "Setujui akun: {$user->email}", $user);
 
         return back()->with('success', "Akun {$user->name} disetujui.");
     }
@@ -88,7 +88,7 @@ class AkunController extends Controller
     public function reject(User $user): RedirectResponse
     {
         $user->update(['status' => 'rejected']);
-        AuditLog::catat('akun.tolak', "Tolak akun: {$user->email}", $user);
+        AuditLog::catat('Tolak Akun', "Tolak akun: {$user->email}", $user);
 
         return back()->with('success', "Akun {$user->name} ditolak.");
     }
@@ -115,7 +115,7 @@ class AkunController extends Controller
             $user->delete();
         });
 
-        AuditLog::catat('akun.hapus', "Hapus akun: {$email}", $user);
+        AuditLog::catat('Hapus Akun', "Hapus akun: {$email}", $user);
 
         return back()->with('success', "Akun {$nama} dihapus. Email {$email} bisa dipakai lagi.");
     }
@@ -125,7 +125,7 @@ class AkunController extends Controller
     {
         $status = Password::sendResetLink(['email' => $user->email]);
 
-        AuditLog::catat('akun.kirim_reset', "Kirim tautan reset sandi: {$user->email}", $user);
+        AuditLog::catat('Kirim Reset Password', "Kirim tautan reset sandi: {$user->email}", $user);
 
         return back()->with(
             $status === Password::RESET_LINK_SENT ? 'success' : 'error',
