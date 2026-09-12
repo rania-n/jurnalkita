@@ -6,14 +6,17 @@ Auth + approval akun · Master data (admin) · Buat akun dari data ·
 Jurnal + absensi + foto · Verifikasi jurnal oleh sekretaris ·
 Dispensasi 2 tahap (piket → waka) · Dashboard per peran · Audit log ·
 Ekspor laporan dispensasi (CSV) · **Monitor Piket** (pantauan kehadiran guru per
-hari, semua kelas, status jurnal per jadwal + ekspor CSV).
+hari, semua kelas, status jurnal per jadwal + ekspor CSV) · **Surat dispensasi +
+QR berputar + role satpam** (surat & persetujuan lewat tautan bertanda tangan
+tanpa login, QR HMAC berputar tiap 10 detik, satpam scan pakai kamera HP bawaan
+tanpa library JS) · **Link WhatsApp gratis** (`wa.me`, tanpa API berbayar — kirim
+link persetujuan ke Waka & surat ke siswa).
 
 Aturan alur detail: `docs/spec.md`.
 
 ## Backlog (NANTI, jangan sekarang)
 
-- Integrasi WhatsApp (link approve Waka, kirim surat ke siswa)
-- Surat dispensasi PDF + QR rotating + halaman scan satpam
+- Tahun ajaran & kenaikan kelas
 - Guru pengganti & tukar jam
 - Notifikasi (siapa dapat apa — sudah dirancang, lihat `spec.md` §G)
 - Rekap wali kelas

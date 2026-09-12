@@ -69,8 +69,8 @@ flowchart TD
 | Batalkan pengajuan salah input | ✅ |
 | Ekspor rekap hari itu (ringkas & lengkap per kelas/guru) | ✅ |
 | **Kabar status dispensasi otomatis (disetujui/ditolak)** | 🔨 (notifikasi) |
-| **Kirim link approval ke Waka lewat WA (Waka jarang buka web)** | 🔨 (link `wa.me`, sudah dirancang) |
-| **Cetak/tunjukkan bukti izin ke satpam saat siswa keluar gerbang** | 🔨 (surat + QR — kamu bilang **wajib**) |
+| **Kirim link approval ke Waka lewat WA (Waka jarang buka web)** | ✅ tombol "Kirim Link Persetujuan ke Waka (WA)" di detail dispensasi — link `wa.me` gratis |
+| **Cetak/tunjukkan bukti izin ke satpam saat siswa keluar gerbang** | ✅ surat dispensasi (tautan tanpa login) + QR berputar, satpam scan pakai kamera HP |
 | Catatan siswa telat masuk sekolah pagi (bukan soal jam pelajaran) | 🆕 lihat catatan di bagian bawah — **beda konsep** dari absensi per-jurnal |
 | BK / poin pelanggaran berat | 🚫 biasanya sistem BK terpisah |
 
@@ -93,7 +93,7 @@ flowchart TD
 | Lihat Monitor Piket (kondisi hari itu, semua kelas) | ✅ |
 | Ekspor laporan dispensasi | ✅ |
 | Rekap kedisiplinan per siswa lintas waktu, lintas kelas (siapa yang alpha berkali-kali) | ✅ `/rekap/siswa` — ada tanda peringatan otomatis kalau alpha ≥3x |
-| **No. HP Waka buat kirim link WA** | 🔨 belum ada kolomnya di akun |
+| **No. HP Waka buat kirim link WA** | ✅ kolom `no_hp` di akun (admin isi lewat form akun) |
 | Surat Peringatan (SP1/SP2/SP3), panggil orang tua | 🚫 proses BK, belum diminta dijadikan fitur |
 
 ---
@@ -135,13 +135,12 @@ flowchart TD
 
 | Langkah nyata | Status jurnalkita |
 |---|---|
-| Verifikasi siswa yang izin keluar | 🔨 **belum ada peran ini sama sekali** — kamu bilang **wajib** |
-| Scan QR dari surat dispensasi | 🔨 sama, satu paket sama surat dispensasi |
-| Catat siapa keluar-masuk & jam berapa | 🔨 otomatis kebentuk dari hasil scan |
+| Verifikasi siswa yang izin keluar | ✅ role **satpam** baru — dashboard + halaman scan |
+| Scan QR dari surat dispensasi | ✅ buka kamera bawaan HP → arahkan ke QR → langsung ketahuan "DISETUJUI"/"TIDAK BERLAKU", tanpa library JS pemindai |
+| Catat siapa keluar-masuk & jam berapa | ✅ tiap scan otomatis tercatat di Audit Log + riwayat hari itu di dashboard satpam |
 | Tamu / kendaraan keluar-masuk | 🚫 di luar scope dispensasi siswa |
 
-> Ini satu-satunya peran yang **betul-betul kosong** dari nol — bukan salah desain,
-> memang belum pernah dibangun. Wajar kerasa "kurang".
+> Peran ini sudah dibangun dari nol — akun contoh: `satpam@jurnalkita.test`.
 
 ---
 
@@ -195,8 +194,9 @@ permintaan eksplisit, jangan dikerjakan — ini gampang jadi lubang scope creep.
 
 **Yang sudah disepakati sebelumnya tetap prioritas** (dari `docs/scope.md`): Surat
 Dispensasi + QR + Satpam, WhatsApp (versi link), Tahun Ajaran/Kenaikan Kelas — tiga ini
-tetap yang **wajib** menurut guru pembimbingmu, N1–N3 cuma tambahan temuan dari analisis
-ini, bukan pengganti.
+yang **wajib** menurut guru pembimbingmu. **Dua yang pertama sudah selesai** (Surat +
+QR + Satpam, dan WhatsApp versi link `wa.me`); tinggal Tahun Ajaran/Kenaikan Kelas.
+N1–N3 cuma tambahan temuan dari analisis ini, bukan pengganti.
 
 ---
 

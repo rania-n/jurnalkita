@@ -10,6 +10,7 @@
 | 4 | Manajemen Akun | ✅ selesai | Buat akun (dari data / baru), setujui/tolak pendaftaran, kirim reset sandi via email |
 | 5 | Jurnal & Absensi (guru) | ✅ selesai | Isi jurnal (auto tanggal + jam), absensi otomatis (default hadir / dispensasi), editor presensi + foto, riwayat + edit selama pending |
 | 2 | Approval & Verifikasi | ✅ selesai | 2a, 2b, 2c semua selesai |
+| 6 | Surat Dispensasi + QR + Satpam + WhatsApp | ✅ selesai | Surat & persetujuan Waka lewat tautan tanda tangan tanpa login, QR HMAC berputar 10 detik, role satpam scan pakai kamera HP, link `wa.me` gratis ke Waka/siswa |
 
 ## Modul 2 — 3 bagian
 
@@ -36,8 +37,9 @@ Modul 2b & 2c sudah bisa dikerjakan sekarang (Modul 5 selesai).
 
 ## Setelah Modul 2 = MVP backend selesai
 
-Sisanya masuk **backlog** (`docs/scope.md`): integrasi WhatsApp, surat dispensasi PDF + QR,
-peran satpam, ekspor laporan piket, tahun ajaran / kenaikan kelas, notifikasi.
+Modul 6 (WhatsApp + surat dispensasi + QR + satpam) sudah menyusul selesai juga.
+Sisanya masuk **backlog** (`docs/scope.md`): tahun ajaran / kenaikan kelas, ekspor
+laporan piket, notifikasi.
 
 ## Aturan main
 
@@ -49,4 +51,4 @@ peran satpam, ekspor laporan piket, tahun ajaran / kenaikan kelas, notifikasi.
 
 ## Akun demo (password: `password`)
 
-`admin@jurnalkita.test` · `guru1@jurnalkita.test` · `kelas1@jurnalkita.test` · `waka@jurnalkita.test`
+`admin@jurnalkita.test` · `guru1@jurnalkita.test` · `kelas1@jurnalkita.test` · `waka@jurnalkita.test` · `satpam@jurnalkita.test`
