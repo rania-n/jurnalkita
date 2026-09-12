@@ -115,9 +115,9 @@ flowchart TD
 |---|---|
 | Lihat jurnal kelasnya, verifikasi / minta revisi | ✅ |
 | Isi jurnal pengganti (guru titip tugas) | ✅ |
-| **Lihat daftar siswa sekelas** | 🔨 sedang dikerjakan (paket Vara — V1) |
-| **Lihat jadwal pelajaran kelas seminggu** | 🔨 sedang dikerjakan (paket Vara — V2) |
-| **Rekap kehadiran kelasnya sendiri** (buat lapor ke wali kelas) | 🆕 sama kayak poin Waka di atas, cuma versi 1 kelas |
+| Lihat daftar siswa sekelas | ✅ (V1) |
+| Lihat jadwal pelajaran kelas seminggu | ✅ (V2) |
+| Rekap kehadiran kelasnya sendiri (buat lapor ke wali kelas) | ✅ `/sekretaris/rekap` |
 | Piket kebersihan kelas | 🚫 tidak relevan ke sistem ini |
 
 ---
@@ -174,7 +174,7 @@ Dari 6 alur di atas, ada **3 kebutuhan nyata yang belum pernah tercatat sebelumn
 
 | # | Temuan | Kenapa kerasa penting | Perkiraan effort |
 |---|---|---|---|
-| N1 | **Rekap kehadiran per siswa, lintas waktu** — buat Waka (semua kelas) & pengurus kelas (kelasnya sendiri) | Datanya **sudah ada** (tabel `absensis`), yang belum cuma laporannya. Ini yang bikin Waka/wali kelas ngerasa "nggak kelihatan gambaran besarnya" padahal datanya lengkap | Kecil — mirip Monitor Piket yang sudah ada, ±3-4 jam |
+| N1 | ✅ **selesai** — Rekap kehadiran per siswa (pengurus kelas: kelasnya sendiri) | Datanya **sudah ada** (tabel `absensis`), yang belum cuma laporannya | Selesai — `/sekretaris/rekap` |
 | N2 | **Rekap jurnal per guru** (portofolio mengajar per semester) | Guru sering diminta bukti mengajar. Bukan buat sidang minggu ini, tapi murah kalau mau ditambah | Kecil, ±2-3 jam |
 | N3 | **"Buku piket" ketertiban** (siswa telat gerbang pagi, dll) | **Beda konsep** dari absensi per jam pelajaran yang sudah ada — ini soal siswa telat *masuk sekolah*, bukan telat di kelas. Perlu tabel baru | Sedang — butuh keputusan dulu: mau digabung ke sistem ini atau bukan? |
 

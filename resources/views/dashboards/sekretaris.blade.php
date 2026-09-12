@@ -37,6 +37,17 @@
                 </div>
                 <x-icon name="chevron_right" :size="20" class="text-muted" />
             </a>
+
+            <a href="{{ route('sekretaris.kelas.rekap') }}" class="press flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                    <x-icon name="bar_chart" :size="24" />
+                </span>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-ink">Rekap Kehadiran</p>
+                    <p class="text-xs text-muted">Kehadiran siswa sekelas bulan ini</p>
+                </div>
+                <x-icon name="chevron_right" :size="20" class="text-muted" />
+            </a>
         </div>
     @endunless
 </x-layouts.app>

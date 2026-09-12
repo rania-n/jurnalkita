@@ -30,6 +30,8 @@ return [
     'sekretaris' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'sekretaris.dashboard'],
         ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'sekretaris.jurnal.index', 'match' => 'sekretaris.jurnal.*'],
+        ['label' => 'Kelas', 'icon' => 'school', 'route' => 'sekretaris.kelas.siswa'],
+        ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'sekretaris.kelas.jadwal'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 

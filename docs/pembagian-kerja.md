@@ -128,6 +128,11 @@ kehadiran siswa itu (hadir/sakit/izin/alpha).
 
 ## 📦 Vara — Pengurus Kelas
 
+> ✅ **V1 dan V2 sudah selesai** (dikerjakan langsung — laptop Vara error). Bonus rekap
+> kehadiran kelas juga ikut dibuat sekalian. Nggak perlu dikerjakan lagi. Kalau Vara
+> udah bisa pakai laptop lagi, kasih dia paket lain atau minta bantu testing manual:
+> login sebagai `kelas1@jurnalkita.test`, coba tiap alur, laporkan kalau ada yang aneh.
+
 ### V1. Daftar Siswa Sekelas
 
 Halaman tabel **read-only** (tidak ada tambah/ubah/hapus) berisi teman sekelas.

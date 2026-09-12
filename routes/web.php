@@ -13,6 +13,7 @@ use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
 use App\Http\Controllers\PiketController;
 use App\Http\Controllers\Sekretaris\JurnalController as VerifikasiJurnalController;
+use App\Http\Controllers\Sekretaris\KelasController as SekretarisKelasController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -91,6 +92,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     /* ==================== SEKRETARIS (pengurus kelas) ==================== */
     Route::middleware('role:siswa')->prefix('sekretaris')->name('sekretaris.')->group(function () {
         Route::view('/', 'dashboards.sekretaris')->name('dashboard');
+
+        Route::get('/kelas', [SekretarisKelasController::class, 'siswa'])->name('kelas.siswa');
+        Route::get('/jadwal', [SekretarisKelasController::class, 'jadwal'])->name('kelas.jadwal');
+        Route::get('/rekap', [SekretarisKelasController::class, 'rekap'])->name('kelas.rekap');
 
         Route::get('/jurnal', [VerifikasiJurnalController::class, 'index'])->name('jurnal.index');
         Route::get('/jurnal/pengganti', [VerifikasiJurnalController::class, 'createPengganti'])->name('jurnal.pengganti');
