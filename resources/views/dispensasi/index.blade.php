@@ -74,8 +74,8 @@
                 <x-ui.list-card
                     :title="$d->siswa->nama"
                     :meta="[
-                        $d->siswa->kelas?->nama . ' · ' . $d->tanggal->translatedFormat('d M Y'),
-                        ($d->jam_ke_mulai ? 'JP ' . $d->jam_ke_mulai . '–' . $d->jam_ke_selesai : 'Sehari penuh') . ' · ' . str($d->alasan)->limit(40),
+                        $d->siswa->kelas?->nama . ' · ' . $d->labelTanggal(),
+                        $d->labelJam() . ' · ' . str($d->alasan)->limit(40),
                         $d->surat_path ? '📎 Ada bukti terlampir' : 'Tanpa bukti',
                     ]"
                 >

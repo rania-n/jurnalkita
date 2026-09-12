@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
             $table->foreignId('diajukan_oleh_id')->constrained('users')->cascadeOnDelete();
             $table->date('tanggal');
+            $table->date('tanggal_selesai')->nullable(); // isi kalau dispensasi lebih dari 1 hari
             $table->unsignedTinyInteger('jam_ke_mulai')->nullable();
             $table->unsignedTinyInteger('jam_ke_selesai')->nullable();
             $table->text('alasan');

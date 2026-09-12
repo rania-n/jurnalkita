@@ -30,7 +30,7 @@ class SuratDispensasiController extends Controller
         $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
 
         $qrUrl = null;
-        if ($dispensasi->status_akhir === 'approved') {
+        if ($dispensasi->status_akhir === 'approved' && $dispensasi->berlakuPada()) {
             $token = QrDispensasi::token($dispensasi->id);
             $tujuan = route('satpam.scan', ['id' => $dispensasi->id, 'token' => $token]);
             $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='.urlencode($tujuan);

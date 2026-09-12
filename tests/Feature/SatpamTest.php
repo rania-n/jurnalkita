@@ -92,4 +92,38 @@ class SatpamTest extends TestCase
         $this->actingAs($guru)->get("/satpam/scan?id={$this->disetujui->id}&token={$token}")
             ->assertRedirect(route('guru.dashboard'));
     }
+
+    public function test_dispensasi_disetujui_tapi_sudah_lewat_tanggalnya_tidak_berlaku(): void
+    {
+        $kelas = Kelas::first();
+        $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '003', 'nama' => 'Rian', 'jenis_kelamin' => 'L']);
+        $piket = User::factory()->role('guru')->create();
+        $kadaluwarsa = Dispensasi::create([
+            'siswa_id' => $siswa->id, 'diajukan_oleh_id' => $piket->id, 'piket_id' => $piket->id,
+            'tanggal' => today()->subDays(3), 'alasan' => 'Lomba minggu lalu',
+            'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
+        ]);
+        $token = QrDispensasi::token($kadaluwarsa->id);
+
+        $this->actingAs($this->satpam)
+            ->get("/satpam/scan?id={$kadaluwarsa->id}&token={$token}")
+            ->assertOk()->assertSee('TIDAK BERLAKU');
+    }
+
+    public function test_dispensasi_beberapa_hari_masih_berlaku_di_hari_kedua(): void
+    {
+        $kelas = Kelas::first();
+        $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '004', 'nama' => 'Wati', 'jenis_kelamin' => 'P']);
+        $piket = User::factory()->role('guru')->create();
+        $multiHari = Dispensasi::create([
+            'siswa_id' => $siswa->id, 'diajukan_oleh_id' => $piket->id, 'piket_id' => $piket->id,
+            'tanggal' => today()->subDay(), 'tanggal_selesai' => today()->addDay(), 'alasan' => 'Sakit 3 hari',
+            'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
+        ]);
+        $token = QrDispensasi::token($multiHari->id);
+
+        $this->actingAs($this->satpam)
+            ->get("/satpam/scan?id={$multiHari->id}&token={$token}")
+            ->assertOk()->assertSee('DISETUJUI');
+    }
 }

@@ -25,13 +25,15 @@ class DispensasiTest extends TestCase
 
     private Siswa $siswa;
 
+    private Guru $guru;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->piket = User::factory()->role('guru')->create();
-        $guru = Guru::create(['user_id' => $this->piket->id, 'nama' => 'Guru Piket']);
-        JadwalPiket::create(['guru_id' => $guru->id, 'hari' => 'senin']);
+        $this->guru = Guru::create(['user_id' => $this->piket->id, 'nama' => 'Guru Piket']);
+        JadwalPiket::create(['guru_id' => $this->guru->id, 'hari' => 'senin']);
 
         $this->waka = User::factory()->role('waka')->create();
 
@@ -69,7 +71,7 @@ class DispensasiTest extends TestCase
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
             'alasan' => 'Lomba LKS tingkat kabupaten',
-        ])->assertRedirect('/dispensasi');
+        ])->assertRedirect();
 
         $d = Dispensasi::first();
         $this->assertSame('approved', $d->status_piket);
@@ -209,5 +211,107 @@ class DispensasiTest extends TestCase
 
         $this->actingAs($piketLain)->delete("/dispensasi/{$d->id}")->assertForbidden();
         $this->assertNotSoftDeleted('dispensasis', ['id' => $d->id]);
+    }
+
+    public function test_setelah_ajukan_langsung_diarahkan_buka_wa_ke_waka(): void
+    {
+        $this->waka->update(['no_hp' => '081234567890']);
+
+        $response = $this->actingAs($this->piket)->post('/dispensasi', [
+            'siswa_id' => $this->siswa->id,
+            'tanggal' => today()->toDateString(),
+            'alasan' => 'Lomba',
+        ]);
+        $d = Dispensasi::firstOrFail();
+        $response->assertRedirect("/dispensasi/{$d->id}?kirim=1");
+
+        // Halaman detailnya langsung nampilkan meta-refresh ke wa.me, bukan nunggu tap tombol.
+        $this->followRedirects($response)->assertSee('wa.me', false);
+    }
+
+    public function test_jam_mulai_saja_boleh_tanpa_jam_selesai(): void
+    {
+        $this->actingAs($this->piket)->post('/dispensasi', [
+            'siswa_id' => $this->siswa->id,
+            'tanggal' => today()->toDateString(),
+            'jam_ke_mulai' => 4,
+            'alasan' => 'Ambil rapor lomba',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('dispensasis', ['jam_ke_mulai' => 4, 'jam_ke_selesai' => null]);
+    }
+
+    public function test_jam_selesai_tanpa_jam_mulai_ditolak(): void
+    {
+        $this->actingAs($this->piket)->post('/dispensasi', [
+            'siswa_id' => $this->siswa->id,
+            'tanggal' => today()->toDateString(),
+            'jam_ke_selesai' => 4,
+            'alasan' => 'x',
+        ])->assertSessionHasErrors('jam_ke_mulai');
+    }
+
+    public function test_dispensasi_jam_mulai_saja_menerapkan_ke_absensi_sampai_akhir_hari(): void
+    {
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $kelas = $this->siswa->kelas;
+        $jadwalPagi = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $this->guru->id,
+            'ruang' => 'R1', 'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jadwalSore = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $jadwalPagi->guru_id,
+            'ruang' => 'R1', 'hari' => 'senin', 'jam_ke_mulai' => 5, 'jam_ke_selesai' => 6,
+        ]);
+        $jurnalPagi = Jurnal::create([
+            'jadwal_id' => $jadwalPagi->id, 'guru_id' => $jadwalPagi->guru_id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'x',
+        ]);
+        $jurnalSore = Jurnal::create([
+            'jadwal_id' => $jadwalSore->id, 'guru_id' => $jadwalSore->guru_id, 'tanggal' => today(),
+            'jam_ke_mulai' => 5, 'jam_ke_selesai' => 6, 'status_guru' => 'hadir', 'materi' => 'x',
+        ]);
+        $absensiPagi = Absensi::create(['jurnal_id' => $jurnalPagi->id, 'siswa_id' => $this->siswa->id, 'status' => 'hadir']);
+        $absensiSore = Absensi::create(['jurnal_id' => $jurnalSore->id, 'siswa_id' => $this->siswa->id, 'status' => 'hadir']);
+
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'jam_ke_mulai' => 4, 'alasan' => 'Pulang lebih awal',
+            'status_piket' => 'approved',
+        ]);
+        $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
+
+        // Jam 1-2 (sebelum jam mulai dispensasi) tetap hadir, jam 5-6 (setelah) jadi dispensasi.
+        $this->assertSame('hadir', $absensiPagi->fresh()->status);
+        $this->assertSame('dispensasi', $absensiSore->fresh()->status);
+    }
+
+    public function test_dispensasi_beberapa_hari_menerapkan_ke_absensi_tiap_hari(): void
+    {
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $kelas = $this->siswa->kelas;
+
+        $jadwal = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $this->guru->id,
+            'ruang' => 'R1', 'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+
+        $absensiHari = collect(range(0, 2))->map(function ($i) use ($jadwal) {
+            $jurnal = Jurnal::create([
+                'jadwal_id' => $jadwal->id, 'guru_id' => $jadwal->guru_id, 'tanggal' => today()->addDays($i),
+                'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'x',
+            ]);
+
+            return Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $this->siswa->id, 'status' => 'hadir']);
+        });
+
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'tanggal_selesai' => today()->addDays(2),
+            'alasan' => 'Sakit 3 hari', 'status_piket' => 'approved',
+        ]);
+        $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
+
+        $absensiHari->each(fn (Absensi $a) => $this->assertSame('dispensasi', $a->fresh()->status));
     }
 }

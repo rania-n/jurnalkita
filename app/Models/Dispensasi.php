@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Dispensasi extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'siswa_id', 'diajukan_oleh_id', 'tanggal', 'jam_ke_mulai', 'jam_ke_selesai',
+        'siswa_id', 'diajukan_oleh_id', 'tanggal', 'tanggal_selesai', 'jam_ke_mulai', 'jam_ke_selesai',
         'alasan', 'surat_path', 'no_hp',
         'status_piket', 'piket_id', 'catatan_piket',
         'status_waka', 'waka_id', 'catatan_waka',
@@ -21,7 +23,46 @@ class Dispensasi extends Model
 
     protected function casts(): array
     {
-        return ['tanggal' => 'date'];
+        return ['tanggal' => 'date', 'tanggal_selesai' => 'date'];
+    }
+
+    /** true kalau dispensasinya lebih dari 1 hari. */
+    public function multiHari(): bool
+    {
+        return $this->tanggal_selesai && ! $this->tanggal_selesai->isSameDay($this->tanggal);
+    }
+
+    /** Semua tanggal yang tercakup (1 hari kalau tanggal_selesai kosong). */
+    public function rentangTanggal(): CarbonPeriod
+    {
+        return CarbonPeriod::create($this->tanggal, $this->tanggal_selesai ?? $this->tanggal);
+    }
+
+    /** true kalau tanggal ini (default hari ini) masih dalam rentang berlaku dispensasi. */
+    public function berlakuPada(?Carbon $tanggal = null): bool
+    {
+        $tanggal ??= now();
+        $akhir = $this->tanggal_selesai ?? $this->tanggal;
+
+        return $tanggal->isBetween($this->tanggal->startOfDay(), $akhir->copy()->endOfDay());
+    }
+
+    /** Label tanggal buat ditampilkan — rentang kalau multi hari. */
+    public function labelTanggal(): string
+    {
+        return $this->multiHari()
+            ? $this->tanggal->translatedFormat('d M Y').' – '.$this->tanggal_selesai->translatedFormat('d M Y')
+            : $this->tanggal->translatedFormat('d M Y');
+    }
+
+    /** Label jam buat ditampilkan — "sampai selesai hari itu" kalau jam_ke_selesai kosong. */
+    public function labelJam(): string
+    {
+        return match (true) {
+            ! $this->jam_ke_mulai => 'Sehari penuh',
+            (bool) $this->jam_ke_selesai => "JP {$this->jam_ke_mulai}–{$this->jam_ke_selesai}",
+            default => "JP {$this->jam_ke_mulai} sampai selesai",
+        };
     }
 
     public function siswa(): BelongsTo
@@ -62,14 +103,19 @@ class Dispensasi extends Model
     /** Set absensi siswa jadi "dispensasi" untuk jurnal di tanggal & jam yang sesuai. */
     public function terapkanKeAbsensi(): void
     {
-        Absensi::where('siswa_id', $this->siswa_id)
-            ->whereHas('jurnal', function ($q) {
-                $q->whereDate('tanggal', $this->tanggal);
-                if ($this->jam_ke_mulai) {
-                    $q->where('jam_ke_mulai', '<=', $this->jam_ke_selesai ?? $this->jam_ke_mulai)
-                        ->where('jam_ke_selesai', '>=', $this->jam_ke_mulai);
-                }
-            })
-            ->update(['status' => 'dispensasi', 'catatan' => 'Dispensasi (disetujui)']);
+        foreach ($this->rentangTanggal() as $tanggal) {
+            Absensi::where('siswa_id', $this->siswa_id)
+                ->whereHas('jurnal', function ($q) use ($tanggal) {
+                    $q->whereDate('tanggal', $tanggal);
+                    if ($this->jam_ke_mulai) {
+                        // jam_ke_selesai kosong = berlaku sampai akhir hari (tidak dibatasi jam terakhir).
+                        $q->where('jam_ke_selesai', '>=', $this->jam_ke_mulai);
+                        if ($this->jam_ke_selesai) {
+                            $q->where('jam_ke_mulai', '<=', $this->jam_ke_selesai);
+                        }
+                    }
+                })
+                ->update(['status' => 'dispensasi', 'catatan' => 'Dispensasi (disetujui)']);
+        }
     }
 }

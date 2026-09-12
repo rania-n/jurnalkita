@@ -1,5 +1,6 @@
 @php
     $labelAkhir = ['pending' => 'Menunggu Persetujuan', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$dispensasi->status_akhir];
+    $sudahLewat = $dispensasi->status_akhir === 'approved' && ! $dispensasi->berlakuPada();
 @endphp
 
 <x-layouts.guest title="Surat Dispensasi" :center="false">
@@ -29,13 +30,11 @@
         </div>
         <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
             <span class="text-muted">Tanggal</span>
-            <span class="font-semibold text-ink">{{ $dispensasi->tanggal->translatedFormat('d M Y') }}</span>
+            <span class="font-semibold text-ink">{{ $dispensasi->labelTanggal() }}</span>
         </div>
         <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
             <span class="text-muted">Jam</span>
-            <span class="font-semibold text-ink">
-                {{ $dispensasi->jam_ke_mulai ? "JP {$dispensasi->jam_ke_mulai}–{$dispensasi->jam_ke_selesai}" : 'Sehari penuh' }}
-            </span>
+            <span class="font-semibold text-ink">{{ $dispensasi->labelJam() }}</span>
         </div>
         <div class="border-b border-surface-alt pb-2">
             <span class="text-muted">Alasan</span>
@@ -55,5 +54,7 @@
         <x-alert type="info" class="mt-5">Belum bisa dipakai keluar — masih menunggu persetujuan Waka Kesiswaan.</x-alert>
     @elseif ($dispensasi->status_akhir === 'rejected')
         <x-alert type="error" class="mt-5">Pengajuan ini ditolak, tidak berlaku buat keluar sekolah.</x-alert>
+    @elseif ($sudahLewat)
+        <x-alert type="warning" class="mt-5">Masa berlaku dispensasi ini sudah lewat, QR tidak ditampilkan lagi.</x-alert>
     @endif
 </x-layouts.guest>

@@ -34,6 +34,7 @@ class SatpamController extends Controller
 
         $valid = $dispensasi
             && $dispensasi->status_akhir === 'approved'
+            && $dispensasi->berlakuPada()
             && QrDispensasi::valid($id, $token);
 
         AuditLog::catat(

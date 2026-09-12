@@ -19,8 +19,7 @@
         <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
             <span class="text-muted">Tanggal / Jam</span>
             <span class="font-semibold text-ink text-right">
-                {{ $dispensasi->tanggal->translatedFormat('d M Y') }}
-                — {{ $dispensasi->jam_ke_mulai ? "JP {$dispensasi->jam_ke_mulai}–{$dispensasi->jam_ke_selesai}" : 'Sehari penuh' }}
+                {{ $dispensasi->labelTanggal() }} — {{ $dispensasi->labelJam() }}
             </span>
         </div>
         <div class="border-b border-surface-alt pb-2">

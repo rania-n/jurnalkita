@@ -7,16 +7,22 @@
 @endphp
 
 <x-layouts.app title="Detail Dispensasi">
+    @if ($autoKirimWa)
+        {{-- Baru diajukan -> langsung dibukakan WhatsApp ke Waka, biar piket nggak perlu
+             tap tombol "Kirim Link" lagi. Tetap harus tap "Kirim" di dalam WhatsApp-nya
+             sendiri (batasan wa.me, bukan bug). --}}
+        <meta http-equiv="refresh" content="0;url={{ $waLinkWaka }}">
+        <x-alert type="info" class="mb-4">Membuka WhatsApp untuk mengirim ke Waka…</x-alert>
+    @endif
+
     <x-page-header
         :title="$dispensasi->siswa->nama"
-        :subtitle="$dispensasi->siswa->kelas?->nama . ' · ' . $dispensasi->tanggal->translatedFormat('d M Y')"
+        :subtitle="$dispensasi->siswa->kelas?->nama . ' · ' . $dispensasi->labelTanggal()"
         :back="route('dispensasi.index')"
     />
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <x-ui.field-static label="Jam">
-            {{ $dispensasi->jam_ke_mulai ? "JP {$dispensasi->jam_ke_mulai}–{$dispensasi->jam_ke_selesai}" : 'Sehari penuh' }}
-        </x-ui.field-static>
+        <x-ui.field-static label="Jam">{{ $dispensasi->labelJam() }}</x-ui.field-static>
         <x-ui.field-static label="Diajukan oleh (guru piket)">{{ $dispensasi->pengaju->name }}</x-ui.field-static>
         <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $dispensasi->alasan }}</x-ui.field-static>
         @if ($dispensasi->no_hp)

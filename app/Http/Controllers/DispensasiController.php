@@ -86,10 +86,10 @@ class DispensasiController extends Controller
 
             foreach ($rows as $d) {
                 fputcsv($out, [
-                    $d->tanggal->format('Y-m-d'),
+                    $d->tanggal->format('Y-m-d').($d->multiHari() ? ' s/d '.$d->tanggal_selesai->format('Y-m-d') : ''),
                     $d->siswa->nama,
                     $d->siswa->kelas?->nama ?? '-',
-                    $d->jam_ke_mulai ? "JP {$d->jam_ke_mulai}-{$d->jam_ke_selesai}" : 'Sehari penuh',
+                    $d->labelJam(),
                     $d->alasan,
                     $d->pengaju->name,
                     $d->status_piket,
@@ -122,8 +122,12 @@ class DispensasiController extends Controller
         $data = $request->validate([
             'siswa_id' => ['required', 'exists:siswas,id'],
             'tanggal' => ['required', 'date'],
+            // Kosong = 1 hari saja. Diisi = dispensasi berlaku beberapa hari sekaligus.
+            'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal'],
+            // jam_ke_mulai wajib ADA kalau jam_ke_selesai diisi, tapi mulai boleh sendirian
+            // (artinya "dari jam segini sampai selesai hari itu").
             'jam_ke_mulai' => ['nullable', 'required_with:jam_ke_selesai', 'integer', 'min:1', 'max:15'],
-            'jam_ke_selesai' => ['nullable', 'required_with:jam_ke_mulai', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
+            'jam_ke_selesai' => ['nullable', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
             'alasan' => ['required', 'string'],
             'no_hp' => ['nullable', 'string', 'max:20'],
             'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
@@ -141,11 +145,13 @@ class DispensasiController extends Controller
 
         AuditLog::catat('Ajukan Dispensasi', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);
 
-        return redirect()->route('dispensasi.index')
+        // Langsung ke halaman detail dengan tanda "kirim=1" -> otomatis kebuka WhatsApp
+        // (lihat show()), jadi piket nggak perlu tap tombol "Kirim Link" secara terpisah.
+        return redirect()->route('dispensasi.show', [$dispensasi, 'kirim' => 1])
             ->with('success', 'Dispensasi diajukan. Menunggu persetujuan Waka Kesiswaan.');
     }
 
-    public function show(Dispensasi $dispensasi): View
+    public function show(Request $request, Dispensasi $dispensasi): View
     {
         $user = auth()->user();
 
@@ -182,6 +188,11 @@ class DispensasiController extends Controller
                 && $dispensasi->status_waka === 'pending',
             'waLinkWaka' => $waLinkWaka,
             'waLinkSiswa' => $waLinkSiswa,
+            // Baru saja diajukan (?kirim=1) -> langsung dibukakan WhatsApp-nya, piket
+            // nggak perlu tap tombol "Kirim Link" lagi. Tetap harus tap "Kirim" di
+            // dalam WhatsApp sendiri -- itu batasan wa.me, tidak bisa dikirim otomatis
+            // tanpa API berbayar.
+            'autoKirimWa' => $request->boolean('kirim') && $waLinkWaka,
         ]);
     }
 

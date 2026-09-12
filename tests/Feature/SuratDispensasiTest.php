@@ -62,6 +62,24 @@ class SuratDispensasiTest extends TestCase
         $this->get("/surat/dispensasi/{$this->disetujui->id}")->assertForbidden();
     }
 
+    public function test_surat_yang_sudah_lewat_tanggalnya_tidak_tampilkan_qr(): void
+    {
+        $this->disetujui->update(['tanggal' => today()->subDays(5)]);
+        $tautan = SuratDispensasiController::tautanSurat($this->disetujui);
+
+        $this->get($tautan)->assertOk()->assertDontSee('qrserver.com', false)->assertSee('sudah lewat');
+    }
+
+    public function test_surat_dispensasi_beberapa_hari_tampilkan_rentang_tanggal(): void
+    {
+        $this->disetujui->update(['tanggal_selesai' => $this->disetujui->tanggal->copy()->addDays(2)]);
+        $tautan = SuratDispensasiController::tautanSurat($this->disetujui);
+
+        $this->get($tautan)->assertOk()->assertSee('qrserver.com', false)
+            ->assertSee($this->disetujui->tanggal->translatedFormat('d M Y'))
+            ->assertSee($this->disetujui->tanggal_selesai->translatedFormat('d M Y'));
+    }
+
     public function test_surat_menampilkan_qr_hanya_kalau_disetujui(): void
     {
         $tautanDisetujui = SuratDispensasiController::tautanSurat($this->disetujui);

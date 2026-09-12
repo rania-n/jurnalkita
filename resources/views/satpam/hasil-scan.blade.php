@@ -8,10 +8,7 @@
             <div class="mt-2 w-full rounded-xl bg-surface p-4 text-left text-sm">
                 <p class="text-lg font-bold text-ink">{{ $dispensasi->siswa->nama }}</p>
                 <p class="text-muted">{{ $dispensasi->siswa->kelas?->nama ?? '—' }}</p>
-                <p class="mt-2 text-muted">
-                    {{ $dispensasi->jam_ke_mulai ? "JP {$dispensasi->jam_ke_mulai}–{$dispensasi->jam_ke_selesai}" : 'Sehari penuh' }}
-                    · {{ $dispensasi->tanggal->translatedFormat('d M Y') }}
-                </p>
+                <p class="mt-2 text-muted">{{ $dispensasi->labelJam() }} · {{ $dispensasi->labelTanggal() }}</p>
                 <p class="mt-1 text-muted">{{ $dispensasi->alasan }}</p>
             </div>
         @else
