@@ -21,6 +21,7 @@ class SiswaController extends Controller
             'no_absen' => ['nullable', 'integer', 'min:1', 'max:99'],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'jabatan' => ['required', 'in:anggota,pengurus'],
+            'status' => ['nullable', 'in:aktif,lulus,pindah'],
         ]);
 
         $siswa = $request->filled('id') ? Siswa::findOrFail($data['id']) : new Siswa;

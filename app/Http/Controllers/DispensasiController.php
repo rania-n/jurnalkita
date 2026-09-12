@@ -109,7 +109,9 @@ class DispensasiController extends Controller
         $this->pastikanPiket();
 
         return view('dispensasi.create', [
-            'kelasList' => Kelas::with('siswas:id,kelas_id,nama,nis')->orderBy('nama')->get(),
+            'kelasList' => Kelas::aktif()
+                ->with(['siswas' => fn ($q) => $q->where('status', 'aktif')->select('id', 'kelas_id', 'nama', 'nis')])
+                ->orderBy('nama')->get(),
         ]);
     }
 

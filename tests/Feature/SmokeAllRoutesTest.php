@@ -34,7 +34,7 @@ class SmokeAllRoutesTest extends TestCase
         foreach ([
             '/admin', '/admin/guru', '/admin/kelas', '/admin/siswa', '/admin/mapel',
             '/admin/jadwal-pelajaran', '/admin/jam-pelajaran', '/admin/jadwal-piket', '/admin/akun',
-            '/profil',
+            '/admin/tahun-ajaran', '/profil',
         ] as $url) {
             $this->actingAs($admin)->get($url)->assertOk("GET {$url}");
         }

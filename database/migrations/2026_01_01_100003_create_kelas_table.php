@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('jurusan')->nullable();          // kode: RPL, TKJ, ...
             $table->unsignedTinyInteger('nomor')->nullable();
             $table->foreignId('wali_id')->nullable()->constrained('gurus')->nullOnDelete();
+            $table->foreignId('tahun_ajaran_id')->nullable()->constrained('tahun_ajarans')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -12,6 +12,7 @@ use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -20,6 +21,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // ------------------------------------------------------------ Tahun Ajaran
+        $tahunAjaran = TahunAjaran::create(['nama' => '2026/2027', 'aktif' => true]);
+
         // ---------------------------------------------------------------- Akun tetap
         $admin = User::create([
             'name' => 'Administrator', 'email' => 'admin@jurnalkita.test',
@@ -108,6 +112,7 @@ class DatabaseSeeder extends Seeder
             ...$k,
             'nama' => "{$k['tingkat']} {$k['jurusan']} {$k['nomor']}",
             'wali_id' => $gurus[$i % $gurus->count()]->id,
+            'tahun_ajaran_id' => $tahunAjaran->id,
         ]));
 
         // ----------------------------------------------------------------- Siswa

@@ -161,7 +161,7 @@ flowchart TD
 | CRUD semua data master | ✅ |
 | Approve/tolak akun, buat akun, reset sandi, **hapus akun** | ✅ |
 | Audit log (siapa ngapain) | ✅ **baru selesai digabung** |
-| **Tahun ajaran aktif + proses kenaikan kelas** | 🔨 kamu bilang **wajib** |
+| **Tahun ajaran aktif + proses kenaikan kelas** | ✅ halaman `/admin/tahun-ajaran` — naikkan kelas X→XI→XII, XII lulus, arsip otomatis |
 | Surat-menyurat resmi sekolah, kearsipan, SPP | 🚫 di luar scope |
 
 ---
@@ -194,8 +194,7 @@ permintaan eksplisit, jangan dikerjakan — ini gampang jadi lubang scope creep.
 
 **Yang sudah disepakati sebelumnya tetap prioritas** (dari `docs/scope.md`): Surat
 Dispensasi + QR + Satpam, WhatsApp (versi link), Tahun Ajaran/Kenaikan Kelas — tiga ini
-yang **wajib** menurut guru pembimbingmu. **Dua yang pertama sudah selesai** (Surat +
-QR + Satpam, dan WhatsApp versi link `wa.me`); tinggal Tahun Ajaran/Kenaikan Kelas.
+yang **wajib** menurut guru pembimbingmu. **Ketiganya sudah selesai semua.**
 N1–N3 cuma tambahan temuan dari analisis ini, bukan pengganti.
 
 ---

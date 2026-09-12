@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('jenis_kelamin', ['L', 'P']);
             $table->unsignedSmallInteger('no_absen')->nullable();
             $table->enum('jabatan', ['anggota', 'pengurus'])->default('anggota');
+            $table->enum('status', ['aktif', 'lulus', 'pindah'])->default('aktif');
             $table->timestamps();
             $table->softDeletes();
         });

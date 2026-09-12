@@ -94,13 +94,23 @@ Aturan bisnis detail. Prioritas & pembagian modul: `docs/roadmap.md`.
 
 ---
 
-## E. Tahun Ajaran / Kenaikan Kelas (backlog, penting)
+## E. Tahun Ajaran / Kenaikan Kelas — ✅ selesai
 
-- Perlu **setting tahun ajaran aktif** (mis. "2026/2027").
-- Saat naik tahun: semua kelas naik tingkat (X→XI→XII), XII lulus, data tahun lama
-  **diarsipkan** (tetap bisa dilihat, tidak ikut daftar aktif).
-- Kemungkinan: kolom `tahun_ajaran` di kelas/siswa/jadwal + scope "aktif" + halaman arsip.
-- Belum dikerjakan — cukup dicatat dulu.
+- Tabel `tahun_ajarans` (`nama`, `aktif`) — hanya satu yang `aktif` di satu waktu.
+- Kolom `tahun_ajaran_id` di `kelas` (nullable — data lama tanpa tahun ajaran tetap
+  dianggap "aktif" lewat `Kelas::aktif()` scope).
+- **Naik tahun** (`admin/tahun-ajaran`, tombol "Naikkan Kelas"):
+  - Kelas **X → XI**, **XI → XII**: kelas baru dibuat di tahun ajaran baru, siswa
+    berstatus `aktif` dipindah ke kelas barunya. Kelas & siswa tahun lama **tidak
+    diubah** (nama/tingkat tetap) — supaya jurnal/absensi/dispensasi lama tetap
+    menunjuk ke kelas yang benar secara historis.
+  - Kelas **XII**: siswa `aktif` ditandai `status = 'lulus'`, tidak ada kelas baru.
+  - Siswa berstatus `pindah` tidak ikut naik/lulus.
+  - Tercatat di Audit Log. Halaman menampilkan ringkasan per tingkat + riwayat
+    tahun ajaran (arsip).
+- Kolom `status` (`aktif`/`lulus`/`pindah`) di `siswas` — admin juga bisa set manual
+  lewat form Ubah Siswa (mis. siswa pindah sekolah di tengah tahun).
+- Lihat `App\Support\KenaikanKelas` untuk detail proses.
 
 ## F. Jam Pelajaran — kategori dinamis
 

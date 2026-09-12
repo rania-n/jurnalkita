@@ -13,7 +13,7 @@ class Siswa extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'kelas_id', 'nis', 'nama', 'jenis_kelamin', 'no_absen', 'jabatan',
+        'user_id', 'kelas_id', 'nis', 'nama', 'jenis_kelamin', 'no_absen', 'jabatan', 'status',
     ];
 
     public function user(): BelongsTo
@@ -39,5 +39,10 @@ class Siswa extends Model
     public function isPengurus(): bool
     {
         return $this->jabatan === 'pengurus';
+    }
+
+    public function isAktif(): bool
+    {
+        return $this->status === 'aktif';
     }
 }

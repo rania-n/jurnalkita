@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\JamPelajaranController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MapelController;
 use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\DispensasiController;
 use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
@@ -60,6 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin/jadwal-piket', 'admin.jadwal-piket.index')->name('master.jadwal-piket.index');
         Route::view('/admin/akun', 'admin.akun.index')->name('master.akun.index');
         Route::view('/admin/audit-log', 'admin.audit-log.index')->name('master.audit-log.index');
+        Route::view('/admin/tahun-ajaran', 'admin.tahun-ajaran.index')->name('master.tahun-ajaran.index');
 
         /* Manajemen akun */
         Route::post('/admin/akun', [AkunController::class, 'save'])->name('master.akun.save');
@@ -82,6 +84,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/jadwal-piket', [JadwalPiketController::class, 'save'])->name('master.jadwal-piket.save');
         Route::delete('/admin/jadwal-piket/{jadwalPiket}', [JadwalPiketController::class, 'destroy'])->name('master.jadwal-piket.destroy');
         Route::post('/admin/jam-pelajaran', [JamPelajaranController::class, 'save'])->name('master.jam-pelajaran.save');
+        Route::post('/admin/tahun-ajaran/naik-kelas', [TahunAjaranController::class, 'naikKelas'])->name('master.tahun-ajaran.naik-kelas');
     });
 
     /* =============================== GURU =============================== */

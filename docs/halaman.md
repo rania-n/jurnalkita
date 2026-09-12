@@ -64,14 +64,14 @@ Kecil, tidak butuh keputusan besar, bisa dikerjakan siapa saja sela-sela modul.
 Butuh keputusan guru pembimbing, effort besar, atau integrasi eksternal.
 Sudah tercatat di `docs/scope.md`.
 
+> B2, B3, B4, B7 (surat dispensasi + QR, satpam, WhatsApp, tahun ajaran/kenaikan
+> kelas) — **sudah selesai dikerjakan**, lebih cepat dari rencana awal. Detail:
+> `docs/spec.md` §A dan §E.
+
 | # | Fitur | Kenapa ditunda |
 |---|---|---|
 | B1 | **Notifikasi** (lonceng + halaman) | guru piket → status dispensasi; guru → jurnal diminta revisi. Perlu tabel + realtime/polling. |
-| B2 | **Surat dispensasi** (halaman/PDF + QR berputar 10 dtk) | Perlu desain surat + logika HMAC QR. |
-| B3 | **Peran Satpam + halaman scan QR** | Peran baru, alur scan, validasi token. |
-| B4 | **Integrasi WhatsApp** | API pihak ketiga (Fonnte/Wablas) + biaya. Link approve Waka, kirim surat. |
 | B6 | **Rekap wali kelas** (dashboard khusus) | Wali kelas belum jadi peran/menu. Rekap kehadiran per siswa. |
-| B7 | **Tahun ajaran & kenaikan kelas** | Kolom `tahun_ajaran`, scope aktif, proses naik kelas, arsip. Lihat `spec.md` §E. |
 | B8 | **Guru pengganti & tukar jam** | Alur persetujuan antar guru. |
 | B9 | **Kategori jam pelajaran dinamis** (Ramadhan, Ujian, dll) | Perlu tabel kategori terpisah. `spec.md` §F. |
 | B10 | **Geolokasi + deteksi telat** pada jurnal | Kolom lat/long/islate, izin lokasi browser. |
