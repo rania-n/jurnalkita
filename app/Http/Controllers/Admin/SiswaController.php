@@ -19,6 +19,7 @@ class SiswaController extends Controller
             'nis' => ['required', 'string', 'max:20', Rule::unique('siswas', 'nis')->ignore($request->id)->withoutTrashed()],
             'nama' => ['required', 'string', 'max:255'],
             'no_absen' => ['nullable', 'integer', 'min:1', 'max:99'],
+            'no_hp' => ['nullable', 'string', 'max:20'],
             'jenis_kelamin' => ['required', 'in:L,P'],
             // Cuma 1 pengurus kelas per kelas (akunnya boleh dipakai di banyak HP
             // sekaligus, itu bukan masalah -- yang dibatasi jumlah ORANGnya).
