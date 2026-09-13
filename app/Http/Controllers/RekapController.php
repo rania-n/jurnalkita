@@ -67,6 +67,10 @@ class RekapController extends Controller
 
         $siswas = Siswa::with('kelas')
             ->when($request->filled('kelas_id'), fn ($q) => $q->where('kelas_id', $request->integer('kelas_id')))
+            ->when($request->filled('cari'), fn ($q) => $q->where(fn ($w) => $w
+                ->where('nama', 'like', '%'.$request->string('cari').'%')
+                ->orWhere('nis', 'like', '%'.$request->string('cari').'%')
+            ))
             ->orderBy('kelas_id')->orderBy('no_absen')
             ->get();
 

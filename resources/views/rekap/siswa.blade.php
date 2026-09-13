@@ -17,9 +17,10 @@
     @endif
 
     <x-admin.filters :action="route('rekap.siswa.index')">
+        <x-admin.f-search placeholder="Nama atau NIS siswa..." />
+        <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua kelas" />
         <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" />
         <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" />
-        <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua kelas" />
     </x-admin.filters>
 
     @if ($totalAlphaTinggi > 0)

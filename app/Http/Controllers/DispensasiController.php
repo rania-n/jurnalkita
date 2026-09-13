@@ -56,6 +56,10 @@ class DispensasiController extends Controller
             ->when($request->filled('guru_id'), fn ($q) => $q->where('diajukan_oleh_id', $request->integer('guru_id')))
             ->when($request->filled('kelas_id'), fn ($q) => $q->whereHas(
                 'siswa', fn ($q2) => $q2->where('kelas_id', $request->integer('kelas_id'))
+            ))
+            ->when($request->filled('cari'), fn ($q) => $q->whereHas(
+                'siswa', fn ($q2) => $q2->where('nama', 'like', '%'.$request->string('cari').'%')
+                    ->orWhere('nis', 'like', '%'.$request->string('cari').'%')
             ));
 
         return $query;
@@ -71,7 +75,6 @@ class DispensasiController extends Controller
             'tab' => $request->get('tab', 'semua'),
             'bolehAjukan' => $user->isPiket(),
             'bolehEkspor' => in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
-            'guruPiketList' => User::where('role', 'guru')->whereHas('guru.jadwalPikets')->orderBy('name')->get(),
             'kelasList' => Kelas::orderBy('nama')->get(),
         ]);
     }

@@ -1,20 +1,30 @@
 @php
-    $hari = request('hari');
-    $kelasId = request('kelas');
-    $guruId = request('guru');
+    $hari = request()->query('hari', 'semua');
+    $kelasId = request()->query('kelas');
+    $guruId = request()->query('guru');
+    $mapelId = request()->query('mapel');
+    $ruang = request()->query('ruang');
+    $jp = request()->query('jp');
 
     $rows = \App\Models\Jadwal::with('kelas', 'mapel', 'guru')
-        ->when($hari, fn ($b) => $b->where('hari', $hari))
+        ->when($hari !== 'semua', fn ($b) => $b->where('hari', $hari))
         ->when($kelasId, fn ($b) => $b->where('kelas_id', $kelasId))
         ->when($guruId, fn ($b) => $b->where('guru_id', $guruId))
+        ->when($mapelId, fn ($b) => $b->where('mapel_id', $mapelId))
+        ->when($ruang, fn ($b) => $b->where('ruang', $ruang))
+        ->when($jp, fn ($b) => $b->where('jam_ke_mulai', '<=', $jp)->where('jam_ke_selesai', '>=', $jp))
         ->orderByRaw(\App\Support\Db::hariOrder())
         ->orderBy('jam_ke_mulai')
         ->get();
 
     $hariLabel = ['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat'];
+    $hariTabs = ['semua' => 'Semua'] + $hariLabel;
     $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
     $mapelList = \App\Models\Mapel::orderBy('nama')->get(['id', 'nama']);
     $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);
+    $ruangList = collect(config('akademik.ruangan'))->mapWithKeys(fn ($r) => [$r => $r]);
+    $jpList = collect(range(1, 13))->mapWithKeys(fn ($i) => [$i => "Jam ke-{$i}"]);
+    $queryTanpaHari = request()->except('page', 'hari');
 @endphp
 
 <x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran">
@@ -24,10 +34,24 @@
         </x-slot:action>
     </x-admin.page>
 
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
+        @foreach ($hariTabs as $key => $label)
+            <a href="{{ route('master.jadwal-pelajaran.index', array_merge($queryTanpaHari, $key === 'semua' ? [] : ['hari' => $key])) }}"
+               @class(['flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $hari === $key, 'text-muted-2 hover:text-ink' => $hari !== $key])>
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
     <x-admin.filters :action="route('master.jadwal-pelajaran.index')">
-        <x-admin.f-select name="hari" label="Hari" :options="$hariLabel" all="Semua Hari" />
+        @if ($hari !== 'semua')
+            <input type="hidden" name="hari" value="{{ $hari }}">
+        @endif
         <x-admin.f-select name="kelas" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua Kelas" />
         <x-admin.f-select name="guru" label="Guru" :options="$guruList->pluck('nama', 'id')" all="Semua Guru" />
+        <x-admin.f-select name="mapel" label="Mapel" :options="$mapelList->pluck('nama', 'id')" all="Semua Mapel" />
+        <x-admin.f-select name="ruang" label="Ruang" :options="$ruangList" all="Semua Ruang" />
+        <x-admin.f-select name="jp" label="JP" :options="$jpList" all="Semua JP" />
     </x-admin.filters>
 
     @if ($rows->isEmpty())

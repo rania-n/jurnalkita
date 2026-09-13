@@ -1,11 +1,17 @@
 @php
-    $q = request('cari');
-    $tingkat = request('tingkat');
+    $q = request()->query('cari');
+    $tingkat = request()->query('tingkat');
+    $jurusan = request()->query('jurusan');
     $jurusanList = config('akademik.jurusan');
 
     $rows = \App\Models\Kelas::with('wali')->withCount('siswas')
-        ->when($q, fn ($b) => $b->where(fn ($w) => $w->where('nama', 'like', "%{$q}%")->orWhere('jurusan', 'like', "%{$q}%")))
+        ->when($q, fn ($b) => $b->where(fn ($w) => $w
+            ->where('nama', 'like', "%{$q}%")
+            ->orWhere('jurusan', 'like', "%{$q}%")
+            ->orWhereHas('wali', fn ($g) => $g->where('nama', 'like', "%{$q}%"))
+        ))
         ->when($tingkat, fn ($b) => $b->where('tingkat', $tingkat))
+        ->when($jurusan, fn ($b) => $b->where('jurusan', $jurusan))
         ->orderBy('tingkat')->orderBy('jurusan')->orderBy('nomor')
         ->get();
 
@@ -20,8 +26,9 @@
     </x-admin.page>
 
     <x-admin.filters :action="route('master.kelas.index')">
-        <x-admin.f-search placeholder="Nama kelas / jurusan..." />
+        <x-admin.f-search placeholder="Nama kelas, jurusan, atau wali kelas..." />
         <x-admin.f-select name="tingkat" label="Tingkat" :options="['X' => 'X', 'XI' => 'XI', 'XII' => 'XII']" all="Semua Tingkat" />
+        <x-admin.f-select name="jurusan" label="Jurusan" :options="$jurusanList" all="Semua Jurusan" />
     </x-admin.filters>
 
     @if ($rows->isEmpty())

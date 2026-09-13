@@ -121,19 +121,6 @@ function initModals() {
     });
 }
 
-/* Auto-search: kolom pencarian langsung submit form-nya sendiri sambil ngetik
- * (di-debounce), jadi gak perlu klik tombol "Cari" tiap ganti kata kunci.
- * Pakai:  <input type="search" data-autosearch ...> */
-function initAutoSearch() {
-    let timer;
-    document.querySelectorAll('[data-autosearch]').forEach((input) => {
-        input.addEventListener('input', () => {
-            clearTimeout(timer);
-            timer = setTimeout(() => input.form?.requestSubmit(), 450);
-        });
-    });
-}
-
 /* Grup sidebar admin (<details data-nav-group="...">) diingat lewat
  * localStorage, biar grup yang sudah dibuka user TETAP kebuka pas pindah
  * halaman -- bukan cuma ngikut halaman aktif doang. */
@@ -162,7 +149,6 @@ function init() {
     initUploadPreview();
     initConfirm();
     initModals();
-    initAutoSearch();
     initNavGroups();
 }
 

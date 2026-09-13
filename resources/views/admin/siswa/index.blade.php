@@ -9,12 +9,18 @@
     $kelasId = request()->query('kelas');
     $jk = request()->query('jk');
     $status = request()->query('status');
+    $jabatan = request()->query('jabatan');
 
     $rows = \App\Models\Siswa::with('kelas')
-        ->when($q, fn ($b) => $b->where(fn ($w) => $w->where('nama', 'like', "%{$q}%")->orWhere('nis', 'like', "%{$q}%")))
+        ->when($q, fn ($b) => $b->where(fn ($w) => $w
+            ->where('nama', 'like', "%{$q}%")
+            ->orWhere('nis', 'like', "%{$q}%")
+            ->orWhereHas('kelas', fn ($k) => $k->where('nama', 'like', "%{$q}%"))
+        ))
         ->when($kelasId, fn ($b) => $b->where('kelas_id', $kelasId))
         ->when($jk, fn ($b) => $b->where('jenis_kelamin', $jk))
         ->when($status, fn ($b) => $b->where('status', $status))
+        ->when($jabatan, fn ($b) => $b->where('jabatan', $jabatan))
         ->orderBy('nama')
         ->paginate(20)->withQueryString();
 
@@ -34,8 +40,9 @@
     </x-admin.page>
 
     <x-admin.filters :action="route('master.siswa.index')">
-        <x-admin.f-search placeholder="Nama atau NIS..." />
+        <x-admin.f-search placeholder="Nama, NIS, atau kelas..." />
         <x-admin.f-select name="kelas" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua Kelas" />
+        <x-admin.f-select name="jabatan" label="Jabatan" :options="['anggota' => 'Anggota', 'pengurus' => 'Pengurus Kelas']" all="Semua Jabatan" />
         <x-admin.f-select name="jk" label="Jenis Kelamin" :options="['L' => 'Laki-laki', 'P' => 'Perempuan']" all="Semua" />
         <x-admin.f-select name="status" label="Status" :options="['aktif' => 'Aktif', 'lulus' => 'Lulus', 'pindah' => 'Pindah']" all="Semua Status" />
     </x-admin.filters>

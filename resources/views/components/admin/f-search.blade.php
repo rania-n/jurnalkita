@@ -4,7 +4,7 @@
     <span class="text-xs font-semibold text-muted-2">Cari</span>
     <span class="flex h-10 w-full items-center gap-2 rounded-lg border border-surface-alt bg-card px-3">
         <x-icon name="search" :size="16" class="shrink-0 text-muted" />
-        <input type="search" name="{{ $name }}" value="{{ request()->query($name) }}" placeholder="{{ $placeholder }}" data-autosearch
+        <input type="search" name="{{ $name }}" value="{{ request()->query($name) }}" placeholder="{{ $placeholder }}"
             class="w-full border-0 bg-transparent text-sm outline-none placeholder:text-placeholder">
     </span>
 </label>

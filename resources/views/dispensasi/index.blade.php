@@ -1,6 +1,5 @@
 @php
     $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'kadaluarsa' => 'Kadaluarsa', 'ditolak' => 'Ditolak'];
-    $adaFilter = request()->filled('dari') || request()->filled('sampai') || request()->filled('guru_id') || request()->filled('kelas_id');
     // Admin lihat halaman ini lewat sidebar admin -- pakai shell admin (topbar,
     // sidebar) yang sama biar nggak berasa pindah ke "app lain". Guru piket & waka
     // tetap pakai shell mobile mereka sendiri.
@@ -41,46 +40,13 @@
         @endforeach
     </div>
 
-    {{-- Filter — buat laporan piket (per hari/guru/kelas), tertutup secara default --}}
-    <details class="mb-4 rounded-xl border border-surface-alt bg-card" @if ($adaFilter) open @endif>
-        <summary class="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-ink">
-            <span class="inline-flex items-center gap-1.5">
-                <x-icon name="filter_alt" :size="18" class="text-muted" />
-                Filter laporan
-                @if ($adaFilter)<span class="rounded-full bg-navy px-1.5 py-0.5 text-[10px] text-card">aktif</span>@endif
-            </span>
-        </summary>
-
-        <form method="GET" class="grid grid-cols-1 gap-3 border-t border-surface-alt p-4 sm:grid-cols-2 lg:grid-cols-4">
-            <input type="hidden" name="tab" value="{{ $tab }}">
-
-            <x-ui.input label="Dari tanggal" name="dari" type="date" :value="request('dari')" />
-            <x-ui.input label="Sampai tanggal" name="sampai" type="date" :value="request('sampai')" />
-
-            @if ($guruPiketList->isNotEmpty())
-                <x-ui.select label="Guru piket" name="guru_id">
-                    <option value="">Semua guru piket</option>
-                    @foreach ($guruPiketList as $g)
-                        <option value="{{ $g->id }}" @selected(request('guru_id') == $g->id)>{{ $g->name }}</option>
-                    @endforeach
-                </x-ui.select>
-            @endif
-
-            <x-ui.select label="Kelas" name="kelas_id">
-                <option value="">Semua kelas</option>
-                @foreach ($kelasList as $k)
-                    <option value="{{ $k->id }}" @selected(request('kelas_id') == $k->id)>{{ $k->nama }}</option>
-                @endforeach
-            </x-ui.select>
-
-            <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
-                <x-ui.button type="submit" icon="filter_alt">Terapkan</x-ui.button>
-                @if ($adaFilter)
-                    <x-ui.button :href="route('dispensasi.index', ['tab' => $tab])" variant="secondary" icon="close">Bersihkan</x-ui.button>
-                @endif
-            </div>
-        </form>
-    </details>
+    <x-admin.filters :action="route('dispensasi.index')">
+        <input type="hidden" name="tab" value="{{ $tab }}">
+        <x-admin.f-search placeholder="Nama atau NIS siswa..." />
+        <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua Kelas" />
+        <x-admin.f-date name="dari" label="Dari tanggal" />
+        <x-admin.f-date name="sampai" label="Sampai tanggal" />
+    </x-admin.filters>
 
     @if ($items->isEmpty())
         <x-ui.empty icon="fact_check" title="Belum ada dispensasi" desc="Coba ubah filter kalau sedang mencari data tertentu." />
