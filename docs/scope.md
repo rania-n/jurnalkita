@@ -23,7 +23,11 @@ Aturan alur detail: `docs/spec.md`.
 - **Guru pengganti & tukar jam** — sengaja **paling akhir**, cuma dikerjakan kalau
   audit semua role (guru → pengurus kelas → waka → satpam) sudah selesai duluan
   dan masih ada sisa waktu. Urutan lengkap: `docs/halaman.md` §"Urutan saran".
-- Notifikasi (siapa dapat apa — sudah dirancang, lihat `spec.md` §G)
+- Notifikasi buat Pengurus Kelas/Waka/Satpam (siapa dapat apa — sudah
+  dirancang, lihat `spec.md` §G). **Versi Guru sudah jalan** (2026-09-13,
+  lebih cepat dari rencana atas permintaan langsung): jurnal diminta revisi →
+  notif ke guru; dispensasi diputuskan Waka → notif ke guru piket pengaju.
+  Lihat `docs/halaman.md` bagian Guru.
 - Rekap jurnal per guru (portofolio mengajar)
 - SMTP produksi
 

@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Dispensasi;
 use App\Models\Kelas;
 use App\Models\User;
+use App\Notifications\DispensasiDiputuskan;
 use App\Support\WaLink;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -250,6 +251,8 @@ class DispensasiController extends Controller
         $dispensasi->segarkanStatusAkhir();
 
         AuditLog::catat('Keputusan Waka Dispensasi', "Waka {$data['keputusan']} dispensasi #{$dispensasi->id}", $dispensasi);
+
+        $dispensasi->pengaju?->notify(new DispensasiDiputuskan($dispensasi));
 
         return redirect()->route('dispensasi.index')->with(
             'success',

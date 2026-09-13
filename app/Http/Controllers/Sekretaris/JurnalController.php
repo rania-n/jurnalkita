@@ -7,6 +7,7 @@ use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
+use App\Notifications\JurnalPerluRevisi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -76,6 +77,10 @@ class JurnalController extends Controller
             "Jurnal #{$jurnal->id} — ".($data['keputusan'] === 'terima' ? 'terverifikasi' : 'minta revisi'),
             $jurnal
         );
+
+        if ($data['keputusan'] === 'revisi' && $jurnal->guru->user) {
+            $jurnal->guru->user->notify(new JurnalPerluRevisi($jurnal));
+        }
 
         return redirect()->route('sekretaris.jurnal.index')
             ->with('success', $data['keputusan'] === 'terima' ? 'Jurnal diverifikasi.' : 'Permintaan revisi dikirim ke guru.');

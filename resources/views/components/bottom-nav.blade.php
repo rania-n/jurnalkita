@@ -42,10 +42,13 @@
         @if ($fab)
             <a
                 href="{{ $fab['url'] }}"
-                class="press absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-navy text-card shadow-lg shadow-navy/30 ring-4 ring-surface"
+                class="press absolute left-1/2 top-0 flex -translate-x-1/2 -translate-y-2 flex-col items-center gap-0.5"
                 aria-label="{{ $fab['label'] }}"
             >
-                <x-icon :name="$fab['icon']" :size="26" fill />
+                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-navy text-card shadow-lg shadow-navy/30 ring-4 ring-surface">
+                    <x-icon :name="$fab['icon']" :size="26" fill />
+                </span>
+                <span class="text-[10px] font-bold text-navy">{{ $fab['label'] }}</span>
             </a>
         @endif
     </nav>

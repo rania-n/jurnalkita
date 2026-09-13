@@ -17,6 +17,15 @@
     };
 
     $inisial = collect(explode(' ', $nama))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
+
+    // Hubungi Admin -- dulu cuma nongol di dasbor Guru, sekarang ditaruh di topbar
+    // biar bisa dijangkau dari halaman MANA PUN, bukan cuma pas kebetulan lagi di
+    // beranda. Guru rata-rata bapak/ibu yang kurang teknologi, jadi jalur bantuan
+    // harus selalu kelihatan, bukan disembunyikan.
+    $admin = $user?->role === 'guru' ? \App\Models\User::where('role', 'admin')->whereNotNull('no_hp')->first() : null;
+    $waLinkAdmin = $admin ? \App\Support\WaLink::url($admin->no_hp, "Halo Admin jurnalkita, saya {$nama}, mau tanya soal akun/jadwal.") : null;
+
+    $jumlahBelumDibaca = $user?->unreadNotifications->count() ?? 0;
 @endphp
 
 <header class="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-surface-alt bg-card/95 px-5 py-2.5 backdrop-blur sm:px-6 lg:px-10">
@@ -33,8 +42,24 @@
 
     <div class="flex items-center gap-2">
         @if ($roleLabel)
-            <span class="rounded-md bg-surface-alt px-2 py-1 text-[11px] font-bold text-ink">{{ $roleLabel }}</span>
+            <span class="hidden rounded-md bg-surface-alt px-2 py-1 text-[11px] font-bold text-ink sm:inline-block">{{ $roleLabel }}</span>
         @endif
+
+        @if ($waLinkAdmin)
+            <a href="{{ $waLinkAdmin }}" target="_blank" rel="noopener"
+               class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-muted transition-colors hover:text-navy"
+               aria-label="Hubungi Admin">
+                <x-icon name="support_agent" :size="20" />
+            </a>
+        @endif
+
+        <a href="{{ route('notifikasi.index') }}" class="relative flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-muted transition-colors hover:text-navy" aria-label="Notifikasi">
+            <x-icon name="notifications" :size="20" />
+            @if ($jumlahBelumDibaca > 0)
+                <span class="absolute right-1 top-1 flex h-2.5 w-2.5 rounded-full bg-alpha ring-2 ring-card"></span>
+            @endif
+        </a>
+
         <a href="{{ route('profil') }}" class="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-xs font-bold text-card" aria-label="Profil &amp; keluar">
             {{ $inisial }}
         </a>

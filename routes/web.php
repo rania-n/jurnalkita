@@ -15,6 +15,7 @@ use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
 use App\Http\Controllers\Guru\SiswaController as GuruSiswaController;
 use App\Http\Controllers\Guru\WaliKelasController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PiketController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\SatpamController;
@@ -50,6 +51,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', fn () => redirect()->route(auth()->user()->homeRoute()))->name('dashboard');
     Route::view('/profil', 'profil')->name('profil');
+
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::get('/notifikasi/{id}/buka', [NotifikasiController::class, 'buka'])->name('notifikasi.buka');
+    Route::post('/notifikasi/tandai-semua-dibaca', [NotifikasiController::class, 'tandaiSemuaDibaca'])->name('notifikasi.tandai-semua-dibaca');
 
     /* =============================== ADMIN =============================== */
     Route::middleware('role:admin')->group(function () {

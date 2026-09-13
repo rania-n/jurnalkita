@@ -14,7 +14,10 @@ return [
     // akses fitur dispensasi/piket tetap kebuka kapan saja, ini cuma soal nav).
     'guru' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
-        ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        // Label "Riwayat" (bukan "Jurnal") biar nggak ketuker sama tombol "Isi
+        // Jurnal" (fab) di sebelahnya -- guru banyak yang kurang teknologi, dua
+        // menu yang sama-sama kebaca "jurnal" bikin bingung mana yang mana.
+        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
         // 'fab' => tombol bulat lebih besar & beda warna di tengah bottom-nav mobile
         // (lihat components/bottom-nav.blade.php) -- biar aksi paling sering dipakai
         // (isi jurnal) langsung kelihatan, gak ketutup menu lain. Nggak dipakai
@@ -28,7 +31,7 @@ return [
     // Cuma dipakai kalau bukan hari piket (piket tetap prioritas, lihat 'guru-piket').
     'guru-wali' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
-        ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
         ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Wali Kelas', 'icon' => 'groups', 'route' => 'guru.wali-kelas.index', 'match' => 'guru.wali-kelas.*'],

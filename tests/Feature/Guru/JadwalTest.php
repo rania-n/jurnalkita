@@ -58,6 +58,32 @@ class JadwalTest extends TestCase
             ->assertOk()->assertSee('Belum ada jadwal');
     }
 
+    public function test_tab_hari_memfilter_jadwal_dan_piket(): void
+    {
+        $user = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $user->id, 'nama' => 'Bu Sarah']);
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+
+        Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        JadwalPiket::create(['guru_id' => $guru->id, 'hari' => 'rabu']);
+
+        // Hari dengan jadwal -> muncul, tanpa error (regresi: Collection::only()
+        // meledak kalau dipanggil di atas hasil groupBy(), lihat JadwalController).
+        $this->actingAs($user)->get('/guru/jadwal?hari=senin')
+            ->assertOk()->assertSee('Matematika')->assertDontSee('Piket Harian');
+
+        $this->actingAs($user)->get('/guru/jadwal?hari=rabu')
+            ->assertOk()->assertSee('Piket Harian')->assertDontSee('Matematika');
+
+        // Hari tanpa apa-apa -> empty state, bukan error 500
+        $this->actingAs($user)->get('/guru/jadwal?hari=selasa')
+            ->assertOk()->assertSee('Belum ada jadwal');
+    }
+
     public function test_kartu_shortcut_piket_muncul_hanya_saat_guru_piket_hari_ini(): void
     {
         $this->travelTo(now()->next(Carbon::MONDAY)); // pin ke Senin, hindari flaky di akhir pekan

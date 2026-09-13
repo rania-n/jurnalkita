@@ -8,7 +8,7 @@
     <x-page-header
         title="Presensi Siswa"
         :subtitle="$jurnal->jadwal->kelas->nama . ' · ' . $jurnal->jadwal->mapel->nama"
-        :back="url()->previous(route('jurnal.show', $jurnal))"
+        :back="route('jurnal.show', $jurnal)"
     />
 
     @if ($jurnal->status_verifikasi === 'revisi')
@@ -83,7 +83,7 @@
         />
 
         <x-ui.sticky-bar>
-            <x-ui.button type="submit" block icon="save">Simpan Jurnal &amp; Absensi</x-ui.button>
+            <x-ui.button type="submit" block icon="save">Simpan Presensi</x-ui.button>
         </x-ui.sticky-bar>
     </form>
 </x-layouts.app>

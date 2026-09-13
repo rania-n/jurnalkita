@@ -52,8 +52,38 @@ mapel — ini K4, selesai 2026-09-13) · Profil
 > ganti password sendiri (field lain tetap statis, dikelola admin). Bug
 > timezone (aplikasi jalan di UTC padahal sekolahnya WIB, bikin deteksi "jam
 > pelajaran sekarang" meleset) ikut diperbaiki di `config/app.php`.
-> Notifikasi (B1) **belum** dikerjakan — sesuai keputusan di bawah, itu
-> nunggu sampai semua role (Guru/Pengurus Kelas/Waka/Satpam) selesai.
+> **Revisi Guru selesai 2026-09-13** (giliran audit yang sama, batch ketiga —
+> user testing langsung nemu beberapa bug & minta beberapa penyesuaian UX):
+> tombol "Kembali" yang sempat nyasar/muter balik ke halaman itu sendiri
+> (bug `url()->previous()` yang ke-reset gara-gara siklus submit form →
+> redirect) diganti rute tujuan tetap di semua halaman guru; halaman Isi
+> Jurnal nggak ada lagi tombol Kembali; tombol "Simpan Presensi" dulunya
+> namanya "Simpan Jurnal & Absensi" (rancu, sekarang jelas presensi doang,
+> beda dari popup "Ubah Jurnal"); Jadwal Mengajar Saya dapat tab
+> Semua/Senin–Jumat (ada bug `Collection::only()` yang bikin 500 pas filter
+> dipakai, sudah diperbaiki + ditambah test regresi); halaman Profil dulu ada
+> ruang kosong lebar di layar desktop, sekarang 2 kolom; form ganti password
+> (butuh password lama) diganti tombol "Reset Kata Sandi" (kirim tautan
+> email) — lebih masuk akal buat yang lupa sandi lamanya; tombol "Keluar"
+> yang dobel kelihatan bareng di desktop (sidebar + halaman Profil) — punya
+> Profil sekarang cuma nongol di mobile; semua tombol Keluar sekarang minta
+> konfirmasi dulu (`data-confirm`) biar nggak kepencet nggak sengaja; ikon
+> lonceng notifikasi + ikon Hubungi Admin dipindah ke topbar (nongol di
+> SEMUA halaman, bukan cuma dasbor); bottom-nav mobile: tombol FAB "Isi
+> Jurnal" sekarang ada teks di bawah ikonnya (bukan cuma ikon polos), label
+> "Jurnal" diganti "Riwayat" biar nggak ketuker sama "Isi Jurnal"; guru yang
+> baru login disambut popup pilihan "Isi Jurnal Sekarang" / "Lihat Beranda
+> Dulu" (blur backdrop, sekali per sesi login).
+>
+> **Notifikasi (B1) — versi guru sudah jalan**, lebih cepat dari rencana
+> (awalnya ditunda sampai 4 role selesai, tapi user minta dikerjakan
+> sekarang): tabel `notifications` bawaan Laravel (`Notifiable` trait, sudah
+> ada di model User) + 2 notifikasi nyata — guru dapat notif saat jurnalnya
+> diminta revisi pengurus kelas, guru piket dapat notif saat dispensasinya
+> diputuskan Waka. Ikon lonceng di topbar (badge titik merah kalau ada yang
+> belum dibaca) → halaman `/notifikasi` (tandai satu / tandai semua dibaca).
+> Peran lain (Pengurus Kelas/Waka/Satpam) belum dapat notifikasi apa pun —
+> nyusul pas giliran audit masing-masing kalau relevan.
 
 ### Pengurus Kelas (layout mobile)
 Beranda · Verifikasi Jurnal (daftar) · Periksa Jurnal (verifikasi / minta revisi) ·

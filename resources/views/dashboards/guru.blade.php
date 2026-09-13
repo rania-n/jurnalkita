@@ -6,17 +6,43 @@
         : collect();
     $piketHariIni = auth()->user()->piketHariIni();
     $isWali = auth()->user()->isWali();
-    $admin = \App\Models\User::where('role', 'admin')->whereNotNull('no_hp')->first();
-    $waLinkAdmin = $admin ? \App\Support\WaLink::url($admin->no_hp, "Halo Admin jurnalkita, saya {$guru?->nama}, mau tanya soal akun/jadwal.") : null;
 
     // Jadwal yang jurnalnya sudah diisi hari ini
     $sudahDiisi = $guru
         ? $guru->jurnals()->whereDate('tanggal', today())->pluck('jadwal_id')->all()
         : [];
+
+    // Pilihan awal cuma ditampilkan SEKALI per login (bukan tiap kali buka
+    // dasbor) -- ditandai session (bukan localStorage) biar konsisten walau
+    // guru buka dari perangkat/browser berbeda tiap login.
+    $tampilkanPilihanAwal = ! session('pilihan_awal_guru_tampil');
+    session(['pilihan_awal_guru_tampil' => true]);
 @endphp
 
 <x-layouts.app title="Beranda Guru" width="wide">
     <x-page-header title="Beranda" :subtitle="'Selamat mengajar, ' . auth()->user()->name" />
+
+    @if ($tampilkanPilihanAwal)
+        <dialog id="modal-pilihan-awal"
+                class="fixed inset-0 m-auto w-[min(26rem,calc(100vw-2rem))] rounded-2xl border-0 bg-card p-0 text-ink shadow-2xl backdrop:bg-navy/30 backdrop:backdrop-blur-sm">
+            <div class="flex flex-col items-center gap-1 px-6 pb-2 pt-7 text-center">
+                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-surface-alt text-navy">
+                    <x-icon name="waving_hand" :size="28" />
+                </span>
+                <h3 class="mt-2 text-lg font-bold text-ink">Halo, {{ auth()->user()->name }}!</h3>
+                <p class="text-sm text-muted">Mau langsung isi jurnal, atau lihat-lihat beranda dulu?</p>
+            </div>
+
+            <div class="flex flex-col gap-2 p-6 pt-4">
+                <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="w-full">Isi Jurnal Sekarang</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="w-full">Lihat Beranda Dulu</x-ui.button>
+            </div>
+        </dialog>
+
+        @push('scripts')
+            <script>document.getElementById('modal-pilihan-awal')?.showModal();</script>
+        @endpush
+    @endif
 
     @if ($piketHariIni)
         <x-alert type="info" class="mb-4">Anda bertugas <strong>piket</strong> hari ini.</x-alert>
@@ -91,18 +117,4 @@
             </x-ui.card-list>
         @endif
     @endunless
-
-    @if ($waLinkAdmin)
-        <a href="{{ $waLinkAdmin }}" target="_blank" rel="noopener"
-           class="press mt-6 flex items-center gap-3 rounded-2xl border border-surface-alt bg-card p-4">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
-                <x-icon name="support_agent" :size="24" />
-            </span>
-            <div class="flex-1">
-                <p class="text-sm font-bold text-ink">Butuh bantuan? Hubungi Admin</p>
-                <p class="text-xs text-muted">{{ $admin->name }} · {{ $admin->no_hp }} (WhatsApp)</p>
-            </div>
-            <x-icon name="chevron_right" :size="20" class="text-muted" />
-        </a>
-    @endif
 </x-layouts.app>
