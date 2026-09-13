@@ -10,8 +10,8 @@ use Illuminate\View\View;
 
 /**
  * Detail satu siswa dari sisi guru -- dipicu dari klik nama siswa di tabel presensi
- * (lihat guru/jurnal/presensi.blade.php & guru/jurnal/show.blade.php). Cuma rekap
- * kehadiran (read-only), bukan CRUD -- sama semangatnya kayak WaliKelasController.
+ * (lihat guru/jurnal/_presensi-grid.blade.php & guru/jurnal/show.blade.php). Cuma
+ * rekap kehadiran (read-only), bukan CRUD -- sama semangatnya kayak WaliKelasController.
  */
 class SiswaController extends Controller
 {

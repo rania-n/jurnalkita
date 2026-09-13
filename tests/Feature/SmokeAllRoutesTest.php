@@ -50,7 +50,7 @@ class SmokeAllRoutesTest extends TestCase
         $jurnal = Jurnal::where('guru_id', $guru->guru->id)->first();
         if ($jurnal) {
             $this->actingAs($guru)->get("/guru/jurnal/{$jurnal->id}")->assertOk();
-            $this->actingAs($guru)->get("/guru/jurnal/{$jurnal->id}/presensi")->assertOk();
+            $this->actingAs($guru)->get("/guru/jurnal/{$jurnal->id}/ubah")->assertOk();
         }
     }
 

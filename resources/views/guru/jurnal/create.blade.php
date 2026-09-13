@@ -1,13 +1,13 @@
 <x-layouts.app title="Form Jurnal Mengajar">
     <x-page-header
         title="Form Jurnal Mengajar"
-        subtitle="Isi jurnal mengajar dan kehadiran siswa"
+        subtitle="Isi jurnal mengajar dan kehadiran siswa dalam satu langkah"
     />
 
     @if ($jadwals->isEmpty())
         <x-ui.empty icon="event_busy" title="Belum ada jadwal mengajar" desc="Hubungi admin untuk menambahkan jadwal Anda." />
     @else
-        <form method="POST" action="{{ route('jurnal.store') }}">
+        <form method="POST" action="{{ route('jurnal.store') }}" enctype="multipart/form-data">
             @csrf
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
@@ -26,6 +26,10 @@
                 $selesaiAwal = old('jam_ke_selesai', $jadwalTerpilih->jam_ke_selesai ?? $jpSekarang);
             @endphp
 
+            {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
+                 yang tepat ikut kerender dari server. Materi/dll yang sudah
+                 diketik sebelum ganti jadwal memang akan hilang -- wajar karena
+                 pindah kelas = konteks jurnalnya beda total. --}}
             <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2">
                 <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
                 @foreach ($jadwals as $j)
@@ -62,8 +66,23 @@
             <x-ui.textarea label="Tugas Tambahan (jika Anda tidak hadir)" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman...">{{ old('tugas_tambahan') }}</x-ui.textarea>
             </div>
 
+            @if ($jadwalTerpilih)
+                @include('guru.jurnal._presensi-grid')
+
+                <div class="mt-4 max-w-sm">
+                    <x-ui.upload
+                        label="Foto Suasana Kelas (opsional)"
+                        name="foto_bukti"
+                        title="Lampirkan Foto Suasana Kelas"
+                        hint="Bukti pembelajaran sedang berlangsung"
+                    />
+                </div>
+            @else
+                <x-alert type="info" class="mt-6">Pilih kelas & mata pelajaran dulu di atas untuk mengisi presensi siswa.</x-alert>
+            @endif
+
             <x-ui.sticky-bar>
-                <x-ui.button type="submit" block icon-after="arrow_forward">Simpan &amp; Lanjut Presensi</x-ui.button>
+                <x-ui.button type="submit" block icon="save">Simpan Jurnal &amp; Presensi</x-ui.button>
             </x-ui.sticky-bar>
         </form>
 
@@ -88,7 +107,12 @@
                         keterangan.textContent = 'Jam mulai otomatis ikut jadwal ini (Jam ke-' + mulai + '). Atur jam selesai kalau mengajarnya lebih lama.';
                     }
 
-                    jadwal.addEventListener('change', sync);
+                    // Ganti jadwal -> presensi kelas yang beda perlu dirender ulang
+                    // dari server, jadi muat ulang halaman dengan jadwal itu.
+                    jadwal.addEventListener('change', () => {
+                        if (!jadwal.value) return;
+                        window.location.href = '{{ route('jurnal.create') }}?jadwal=' + jadwal.value;
+                    });
 
                     // Browser bisa langsung memilih satu-satunya opsi jadwal saat halaman
                     // dimuat (placeholder "Pilih jadwal" disembunyikan) tanpa memicu event

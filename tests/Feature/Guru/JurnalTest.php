@@ -98,7 +98,37 @@ class JurnalTest extends TestCase
         $this->assertSame('dispensasi', Jurnal::first()->absensis()->where('siswa_id', $siswa->id)->value('status'));
     }
 
-    public function test_simpan_presensi_dan_foto(): void
+    public function test_form_jurnal_menampilkan_presensi_saat_jadwal_terpilih(): void
+    {
+        $this->actingAs($this->user)->get('/guru/jurnal/tambah?jadwal='.$this->jadwal->id)
+            ->assertOk()->assertSee('Presensi')->assertSee('A')->assertSee('B');
+    }
+
+    public function test_simpan_jurnal_dengan_presensi_manual_dalam_satu_form(): void
+    {
+        Storage::fake('public');
+        $siswaA = Siswa::where('nis', '001')->firstOrFail();
+        $siswaB = Siswa::where('nis', '002')->firstOrFail();
+
+        $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'presensi' => [
+                $siswaA->id => ['status' => 'sakit', 'catatan' => 'demam'],
+                $siswaB->id => ['status' => 'hadir'],
+            ],
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
+        ])->assertRedirect();
+
+        $jurnal = Jurnal::first();
+        $this->assertSame('sakit', $jurnal->absensis()->where('siswa_id', $siswaA->id)->value('status'));
+        $this->assertSame('demam', $jurnal->absensis()->where('siswa_id', $siswaA->id)->value('catatan'));
+        $this->assertNotNull($jurnal->foto_bukti);
+        Storage::disk('public')->assertExists($jurnal->foto_bukti);
+    }
+
+    public function test_ubah_jurnal_dan_presensi_dalam_satu_form(): void
     {
         Storage::fake('public');
 
@@ -107,20 +137,27 @@ class JurnalTest extends TestCase
             'status_guru' => 'hadir', 'materi' => 'x',
         ]);
         $jurnal = Jurnal::first();
-        $absen = $jurnal->absensis->first();
+        $siswaA = Siswa::where('nis', '001')->firstOrFail();
+        $siswaB = Siswa::where('nis', '002')->firstOrFail();
 
-        $this->actingAs($this->user)->post("/guru/jurnal/{$jurnal->id}/presensi", [
+        $this->actingAs($this->user)->get("/guru/jurnal/{$jurnal->id}/ubah")
+            ->assertOk()->assertSee('A')->assertSee('B');
+
+        $this->actingAs($this->user)->post("/guru/jurnal/{$jurnal->id}", [
+            'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'materi baru',
             'presensi' => [
-                $absen->id => ['status' => 'sakit', 'catatan' => 'demam'],
-                $jurnal->absensis->last()->id => ['status' => 'hadir'],
+                $siswaA->id => ['status' => 'sakit', 'catatan' => 'demam'],
+                $siswaB->id => ['status' => 'hadir'],
             ],
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect("/guru/jurnal/{$jurnal->id}");
 
-        $this->assertSame('sakit', $absen->fresh()->status);
-        $this->assertSame('demam', $absen->fresh()->catatan);
-        $this->assertNotNull($jurnal->fresh()->foto_bukti);
-        Storage::disk('public')->assertExists($jurnal->fresh()->foto_bukti);
+        $jurnal->refresh();
+        $this->assertSame('materi baru', $jurnal->materi);
+        $this->assertSame('sakit', $jurnal->absensis()->where('siswa_id', $siswaA->id)->value('status'));
+        $this->assertSame('demam', $jurnal->absensis()->where('siswa_id', $siswaA->id)->value('catatan'));
+        $this->assertNotNull($jurnal->foto_bukti);
+        Storage::disk('public')->assertExists($jurnal->foto_bukti);
     }
 
     public function test_guru_lain_tidak_bisa_akses_jurnal_orang(): void

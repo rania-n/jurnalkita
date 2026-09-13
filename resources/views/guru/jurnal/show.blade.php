@@ -46,13 +46,9 @@
         </div>
     @endif
 
-    {{-- Presensi --}}
-    <div class="mb-2 flex items-center justify-between">
-        <h2 class="text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</h2>
-        @if ($bisaUbah)
-            <x-ui.button :href="route('jurnal.presensi', $jurnal)" variant="secondary" icon="edit" class="!h-9 !px-3 !text-sm">Ubah Presensi</x-ui.button>
-        @endif
-    </div>
+    {{-- Presensi -- diubah bareng jurnal lewat tombol "Ubah Jurnal" di bawah,
+         satu halaman gabungan (bukan tombol terpisah lagi). --}}
+    <h2 class="mb-2 text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</h2>
 
     <div class="mb-3 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
         @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
@@ -76,42 +72,12 @@
     {{-- Aksi -- taruh paling bawah, setelah presensi, biar urutannya: lihat dulu semuanya, baru ubah/hapus kalau perlu --}}
     @if ($bisaUbah)
         <div class="mt-6 flex gap-2">
-            <x-ui.button type="button" icon="edit" data-modal-open="modal-ubah-jurnal" class="flex-1 sm:flex-none">Ubah Jurnal</x-ui.button>
+            <x-ui.button :href="route('jurnal.edit', $jurnal)" icon="edit" class="flex-1 sm:flex-none">Ubah Jurnal</x-ui.button>
             <form method="POST" action="{{ route('jurnal.destroy', $jurnal) }}" class="flex-1 sm:flex-none"
                   data-confirm="Hapus jurnal ini beserta presensinya? Tindakan ini tidak bisa dibatalkan lewat aplikasi.">
                 @csrf @method('DELETE')
                 <x-ui.button type="submit" variant="danger" icon="delete" class="w-full">Hapus Jurnal</x-ui.button>
             </form>
         </div>
-
-        {{-- Popup ubah jurnal --}}
-        <x-admin.modal id="modal-ubah-jurnal" title="Ubah Jurnal">
-            <form method="POST" action="{{ route('jurnal.update', $jurnal) }}" class="flex flex-col gap-4">
-                @csrf
-
-                <x-ui.field-static label="Jam ke- (mulai)" icon="lock_clock">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
-                <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai">
-                    @for ($i = $jurnal->jam_ke_mulai; $i <= 13; $i++)
-                        <option value="{{ $i }}" @selected($jurnal->jam_ke_selesai == $i)>Jam ke-{{ $i }}</option>
-                    @endfor
-                </x-ui.select>
-
-                <x-ui.choice
-                    label="Status Kehadiran Anda"
-                    name="status_guru"
-                    :options="$statusGuru"
-                    :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
-                    :value="$jurnal->status_guru"
-                />
-                <x-ui.textarea label="Materi" name="materi" :rows="3">{{ $jurnal->materi }}</x-ui.textarea>
-                <x-ui.textarea label="Metode Pembelajaran" name="metode" :rows="2">{{ $jurnal->metode }}</x-ui.textarea>
-                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2">{{ $jurnal->tugas_tambahan }}</x-ui.textarea>
-
-                <div class="mt-1 flex gap-2">
-                    <x-ui.button type="submit" icon="save" class="flex-1">Simpan Perubahan</x-ui.button>
-                    <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
-                </div>
-            </form>
-        </x-admin.modal>
     @endif
 </x-layouts.app>

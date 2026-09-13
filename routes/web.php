@@ -114,10 +114,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/guru/jurnal/tambah', [JurnalController::class, 'create'])->name('jurnal.create');
         Route::post('/guru/jurnal', [JurnalController::class, 'store'])->name('jurnal.store');
         Route::get('/guru/jurnal/{jurnal}', [JurnalController::class, 'show'])->name('jurnal.show');
+        Route::get('/guru/jurnal/{jurnal}/ubah', [JurnalController::class, 'edit'])->name('jurnal.edit');
         Route::post('/guru/jurnal/{jurnal}', [JurnalController::class, 'update'])->name('jurnal.update');
         Route::delete('/guru/jurnal/{jurnal}', [JurnalController::class, 'destroy'])->name('jurnal.destroy');
-        Route::get('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensi'])->name('jurnal.presensi');
-        Route::post('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensiSave'])->name('jurnal.presensi.save');
 
         Route::get('/guru/siswa/{siswa}', [GuruSiswaController::class, 'show'])->name('guru.siswa.show');
     });

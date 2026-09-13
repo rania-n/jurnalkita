@@ -53,15 +53,31 @@ class JurnalController extends Controller
         // Semua jadwal guru (fallback kalau tidak ada jadwal hari ini)
         $semuaJadwal = $guru->jadwals()->with('kelas', 'mapel')->orderBy('hari')->orderBy('jam_ke_mulai')->get();
 
+        $daftarJadwal = $jadwals->isNotEmpty() ? $jadwals : $semuaJadwal;
+
         $jadwalTerpilih = $request->filled('jadwal')
             ? $semuaJadwal->firstWhere('id', (int) $request->jadwal)
-            : null;
+            // Cuma ada 1 opsi -> browser otomatis milih itu (placeholder "Pilih
+            // jadwal" disembunyikan) walau URL nggak bawa ?jadwal=. Server ikut
+            // anggap terpilih dari awal, biar presensinya langsung kelihatan
+            // tanpa guru harus "milih ulang" jadwal yang sebenarnya cuma satu.
+            : ($daftarJadwal->count() === 1 ? $daftarJadwal->first() : null);
+
+        $siswas = collect();
+        $presensiAwal = [];
+        if ($jadwalTerpilih) {
+            $jadwalTerpilih->loadMissing('kelas.siswas');
+            $siswas = $jadwalTerpilih->kelas->siswas->sortBy('no_absen')->values();
+            $presensiAwal = $this->presensiDefault($jadwalTerpilih);
+        }
 
         return view('guru.jurnal.create', [
-            'jadwals' => $jadwals->isNotEmpty() ? $jadwals : $semuaJadwal,
+            'jadwals' => $daftarJadwal,
             'jadwalTerpilih' => $jadwalTerpilih,
             'jpSekarang' => Waktu::jpSekarang(),
             'jpMaks' => 13,
+            'siswas' => $siswas,
+            'presensiAwal' => $presensiAwal,
         ]);
     }
 
@@ -76,6 +92,10 @@ class JurnalController extends Controller
             'materi' => ['required', 'string'],
             'metode' => ['nullable', 'string', 'max:255'],
             'tugas_tambahan' => ['nullable', 'string'],
+            'presensi' => ['nullable', 'array'],
+            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
+            'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
+            'foto_bukti' => ['nullable', 'image', 'max:4096'],
         ]);
 
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
@@ -98,25 +118,38 @@ class JurnalController extends Controller
                 ->with('info', 'Jurnal untuk jadwal ini hari ini sudah dibuat.');
         }
 
+        $presensiSubmit = $data['presensi'] ?? [];
         $siswaDispensasi = $this->siswaDispensasiHariIni(
             $jadwal->kelas_id, now()->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
         );
+        $fotoPath = $request->file('foto_bukti')?->store('jurnal-bukti', 'public');
 
-        $jurnal = DB::transaction(function () use ($data, $jadwal, $guru, $siswaDispensasi) {
+        $jurnal = DB::transaction(function () use ($data, $jadwal, $guru, $presensiSubmit, $siswaDispensasi, $fotoPath) {
             $jurnal = Jurnal::create([
-                ...$data,
+                ...collect($data)->except(['presensi', 'foto_bukti'])->all(),
                 'guru_id' => $guru->id,
                 'tanggal' => now()->toDateString(),
+                'foto_bukti' => $fotoPath,
             ]);
 
-            // Absensi otomatis: default hadir, atau dispensasi bila ada dispensasi disetujui.
+            // Presensi ikut isi jurnal sendiri, bukan langkah terpisah lagi. Kalau
+            // guru nggak sempat sentuh grid presensinya (mis. kirim manual lewat
+            // API), tetap jatuh ke default lama: dispensasi disetujui otomatis
+            // "Dispensasi", sisanya "Hadir".
             foreach ($jadwal->kelas->siswas as $siswa) {
-                $dispen = $siswaDispensasi->contains($siswa->id);
+                if (isset($presensiSubmit[$siswa->id])) {
+                    $isi = $presensiSubmit[$siswa->id];
+                } elseif ($siswaDispensasi->contains($siswa->id)) {
+                    $isi = ['status' => 'dispensasi', 'catatan' => 'Dispensasi (otomatis dari sistem)'];
+                } else {
+                    $isi = ['status' => 'hadir', 'catatan' => null];
+                }
+
                 Absensi::create([
                     'jurnal_id' => $jurnal->id,
                     'siswa_id' => $siswa->id,
-                    'status' => $dispen ? 'dispensasi' : 'hadir',
-                    'catatan' => $dispen ? 'Dispensasi (otomatis dari sistem)' : null,
+                    'status' => $isi['status'],
+                    'catatan' => $isi['catatan'] ?? null,
                 ]);
             }
 
@@ -125,58 +158,24 @@ class JurnalController extends Controller
 
         AuditLog::catat('Tambah Jurnal', "Jurnal {$jadwal->mapel->nama} — {$jadwal->kelas->nama}", $jurnal);
 
-        return redirect()->route('jurnal.presensi', $jurnal)
-            ->with('success', 'Jurnal tersimpan. Sesuaikan presensi siswa bila perlu.');
+        return redirect()->route('jurnal.show', $jurnal)
+            ->with('success', 'Jurnal & presensi tersimpan.');
     }
 
-    /* -------------------------------------------------------- Editor presensi */
-    public function presensi(Jurnal $jurnal): View
-    {
-        $this->milikSendiri($jurnal);
-        $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'absensis.siswa');
-
-        return view('guru.jurnal.presensi', compact('jurnal'));
-    }
-
-    public function presensiSave(Jurnal $jurnal, Request $request): RedirectResponse
+    /* ------------------------------------------------------------- Ubah jurnal */
+    public function edit(Jurnal $jurnal): View
     {
         $this->milikSendiri($jurnal);
         abort_unless($jurnal->bisaDiubah(), 403, 'Jurnal sudah diverifikasi, tidak bisa diubah.');
 
-        $data = $request->validate([
-            'presensi' => ['required', 'array'],
-            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
-            'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
-            'foto_bukti' => ['nullable', 'image', 'max:4096'],
-        ]);
+        $jurnal->load('jadwal.kelas.siswas', 'jadwal.mapel', 'absensis');
 
-        DB::transaction(function () use ($jurnal, $data, $request) {
-            foreach ($data['presensi'] as $absensiId => $isi) {
-                $jurnal->absensis()->where('id', $absensiId)->update([
-                    'status' => $isi['status'],
-                    'catatan' => $isi['catatan'] ?? null,
-                ]);
-            }
+        $siswas = $jurnal->jadwal->kelas->siswas->sortBy('no_absen')->values();
+        $presensiAwal = $jurnal->absensis->mapWithKeys(fn ($a) => [
+            $a->siswa_id => ['status' => $a->status, 'catatan' => $a->catatan],
+        ])->all();
 
-            if ($request->hasFile('foto_bukti')) {
-                $jurnal->update(['foto_bukti' => $request->file('foto_bukti')->store('jurnal-bukti', 'public')]);
-            }
-
-            $this->kembalikanKePending($jurnal);
-        });
-
-        AuditLog::catat('Simpan Presensi', "Simpan presensi jurnal #{$jurnal->id}", $jurnal);
-
-        return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal & absensi tersimpan.');
-    }
-
-    /* ---------------------------------------------------------------- Detail */
-    public function show(Jurnal $jurnal): View
-    {
-        $this->milikSendiri($jurnal);
-        $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'absensis.siswa', 'verifikator');
-
-        return view('guru.jurnal.show', compact('jurnal'));
+        return view('guru.jurnal.edit', compact('jurnal', 'siswas', 'presensiAwal'));
     }
 
     public function update(Jurnal $jurnal, Request $request): RedirectResponse
@@ -193,13 +192,42 @@ class JurnalController extends Controller
             'materi' => ['required', 'string'],
             'metode' => ['nullable', 'string', 'max:255'],
             'tugas_tambahan' => ['nullable', 'string'],
+            'presensi' => ['nullable', 'array'],
+            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
+            'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
+            'foto_bukti' => ['nullable', 'image', 'max:4096'],
         ]);
 
-        $jurnal->update($data);
-        $this->kembalikanKePending($jurnal);
+        DB::transaction(function () use ($jurnal, $data, $request) {
+            $jurnal->update(collect($data)->except(['presensi', 'foto_bukti', 'jam_ke_mulai'])->all());
+
+            // Presensi yang nggak disentuh (mis. request minimal dari test/API)
+            // tetap dipertahankan seperti sebelumnya, bukan direset.
+            foreach ($jurnal->absensis as $absensi) {
+                $isi = $data['presensi'][$absensi->siswa_id]
+                    ?? ['status' => $absensi->status, 'catatan' => $absensi->catatan];
+                $absensi->update(['status' => $isi['status'], 'catatan' => $isi['catatan'] ?? null]);
+            }
+
+            if ($request->hasFile('foto_bukti')) {
+                $jurnal->update(['foto_bukti' => $request->file('foto_bukti')->store('jurnal-bukti', 'public')]);
+            }
+
+            $this->kembalikanKePending($jurnal);
+        });
+
         AuditLog::catat('Ubah Jurnal', "Ubah jurnal #{$jurnal->id}", $jurnal);
 
-        return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal diperbarui.');
+        return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal & presensi diperbarui.');
+    }
+
+    /* ---------------------------------------------------------------- Detail */
+    public function show(Jurnal $jurnal): View
+    {
+        $this->milikSendiri($jurnal);
+        $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'absensis.siswa', 'verifikator');
+
+        return view('guru.jurnal.show', compact('jurnal'));
     }
 
     /** Hapus jurnal (soft delete). Hanya selama belum diverifikasi pengurus kelas. */
@@ -226,6 +254,25 @@ class JurnalController extends Controller
                 'verifikator_id' => null,
             ]);
         }
+    }
+
+    /**
+     * Presensi bawaan buat pratinjau di Form Jurnal (sebelum jurnal ada): default
+     * hadir semua, atau dispensasi kalau siswa itu punya dispensasi disetujui pas
+     * jam segini. Dipakai render create() -- store() sendiri hitung ulang dari
+     * data final (jam_ke_selesai bisa diubah manual sebelum submit).
+     */
+    private function presensiDefault(Jadwal $jadwal): array
+    {
+        $siswaDispensasi = $this->siswaDispensasiHariIni(
+            $jadwal->kelas_id, now()->toDateString(), $jadwal->jam_ke_mulai, $jadwal->jam_ke_selesai
+        );
+
+        return $jadwal->kelas->siswas->mapWithKeys(fn ($s) => [
+            $s->id => $siswaDispensasi->contains($s->id)
+                ? ['status' => 'dispensasi', 'catatan' => 'Dispensasi (otomatis dari sistem)']
+                : ['status' => 'hadir', 'catatan' => null],
+        ])->all();
     }
 
     /**

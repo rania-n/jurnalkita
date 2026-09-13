@@ -68,7 +68,7 @@ class PagesRenderTest extends TestCase
         $jurnal->absensis()->create(['siswa_id' => Siswa::first()->id, 'status' => 'hadir']);
 
         $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}")->assertOk()->assertSee('Kurang lengkap');
-        $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}/presensi")->assertOk();
+        $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}/ubah")->assertOk();
     }
 
     public function test_guru_bisa_revisi_jurnal_lalu_kembali_pending(): void

@@ -24,14 +24,29 @@ penuh (2026-09-13) — lihat catatan bug di bawah.
 > (email otomatis dilepas supaya bisa dipakai lagi). Semuanya *soft delete*.
 
 ### Guru (layout mobile)
-Beranda (jadwal hari ini + badge piket) · Riwayat Jurnal · Form Jurnal ·
-Presensi Siswa · Detail Jurnal (+ edit selama pending/revisi, bisa hapus) ·
-Jadwal Mengajar Saya (seminggu) · Jadwal Piket Saya · Dispensasi (daftar + ajukan
-+ detail, bisa batal) · **Monitor Piket** (khusus guru piket) ·
-**Rekap Wali Kelas** (khusus guru yang jadi wali — sudah selesai, dulu tercatat
-B6 di bawah, ternyata sudah dikerjakan) · **Detail Siswa** (klik nama siswa di
-tabel presensi → riwayat hadir/sakit/izin/alpha/dispensasi siswa itu, lintas
-mapel — ini K4, selesai 2026-09-13) · Profil
+Beranda (jadwal hari ini + badge piket) · Riwayat Jurnal · **Form Jurnal**
+(isi materi + presensi siswa + foto dalam SATU halaman, langsung simpan sekali
+submit) · Detail Jurnal (+ **Ubah Jurnal** — materi & presensi digabung satu
+halaman edit juga, bisa hapus) · Jadwal Mengajar Saya (seminggu) · Jadwal Piket
+Saya · Dispensasi (daftar + ajukan + detail, bisa batal) · **Monitor Piket**
+(khusus guru piket) · **Rekap Wali Kelas** (khusus guru yang jadi wali — sudah
+selesai, dulu tercatat B6 di bawah, ternyata sudah dikerjakan) ·
+**Detail Siswa** (klik nama siswa di tabel presensi → riwayat
+hadir/sakit/izin/alpha/dispensasi siswa itu, lintas mapel — ini K4, selesai
+2026-09-13) · Profil
+
+> **Gabung Jurnal + Presensi jadi satu halaman (2026-09-13):** dulu isi jurnal
+> itu 2 langkah (isi materi → submit → baru diarahkan ke halaman presensi
+> terpisah), begitu juga ubahnya (popup materi + tombol "Ubah Presensi" ke
+> halaman lain). Sekarang keduanya satu form: pilih jadwal (kelas ketauan dari
+> situ) → materi & presensi & foto semuanya di satu halaman → sekali submit
+> selesai. Partial `guru/jurnal/_presensi-grid.blade.php` dipakai bareng oleh
+> Form Jurnal (create) & Ubah Jurnal (edit, sekarang halaman penuh — bukan
+> modal kecil lagi, karena grid presensinya nggak muat di modal). Rute lama
+> `jurnal.presensi` / `jurnal.presensi.save` dihapus, diganti `jurnal.edit`
+> (`GET /guru/jurnal/{id}/ubah`) yang POST ke `jurnal.update` yang sama dipakai
+> modal lama. Sama persis polanya sudah diterapkan juga di Isi Jurnal Pengganti
+> milik Pengurus Kelas (lihat bagian "Pengurus Kelas").
 
 > **Audit Guru selesai 2026-09-13**: fungsi CRUD (isi jurnal, ubah presensi, edit
 > jurnal, hapus jurnal, ajukan dispensasi) dites langsung di browser dan aman
