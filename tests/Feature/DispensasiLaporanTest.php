@@ -76,6 +76,8 @@ class DispensasiLaporanTest extends TestCase
             ->assertSee('Manajemen Akun');
         $this->actingAs($admin)->get('/rekap/siswa')->assertOk()
             ->assertSee('Manajemen Akun');
+        $this->actingAs($admin)->get('/profil')->assertOk()
+            ->assertSee('Manajemen Akun');
     }
 
     public function test_waka_bisa_filter_berdasarkan_tanggal(): void

@@ -13,9 +13,12 @@
 
     $nama = $guru->nama ?? $siswa->nama ?? $user->name;
     $inisial = collect(explode(' ', $nama))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
+    // Halaman ini dipakai SEMUA peran -- admin pakai shell admin biar konsisten
+    // sama sidebar & topbar-nya (lihat catatan yang sama di dispensasi/index dkk).
+    $admin = $user->role === 'admin';
 @endphp
 
-<x-layouts.app title="Profil">
+<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Profil" heading="Profil">
     <x-page-header title="Profil" subtitle="Data akun Anda" />
 
     <div class="max-w-2xl">
@@ -61,4 +64,4 @@
             <x-logout-button variant="full" />
         </div>
     </div>
-</x-layouts.app>
+</x-dynamic-component>
