@@ -9,7 +9,7 @@
     $current = request()->query($name);
 @endphp
 
-<label class="flex min-w-[9rem] flex-1 flex-col gap-1 sm:max-w-[14rem]">
+<label class="flex min-w-[9rem] flex-1 flex-col gap-1">
     <span class="text-xs font-semibold text-muted-2">{{ $label }}</span>
     <span class="relative">
         <select name="{{ $name }}" onchange="this.form.requestSubmit()"
