@@ -79,8 +79,14 @@
                 @foreach ($guruList as $g)<option value="{{ $g->id }}">{{ $g->nama }}</option>@endforeach
             </x-ui.select>
             <div class="flex gap-3">
-                <x-ui.input label="Jam ke- (mulai)" name="jam_ke_mulai" type="number" min="1" class="flex-1" />
-                <x-ui.input label="Jam ke- (selesai)" name="jam_ke_selesai" type="number" min="1" class="flex-1" />
+                <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai" class="flex-1">
+                    <option value="" disabled selected hidden>Pilih</option>
+                    @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
+                </x-ui.select>
+                <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" class="flex-1">
+                    <option value="" disabled selected hidden>Pilih</option>
+                    @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
+                </x-ui.select>
             </div>
             <x-ui.select label="Ruang" name="ruang">
                 <option value="">— belum ditentukan —</option>
@@ -89,8 +95,8 @@
                 @endforeach
             </x-ui.select>
             <div class="mt-1 flex gap-2">
-                <x-ui.button type="submit" icon="save">Simpan</x-ui.button>
-                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+                <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
             </div>
         </form>
     </x-admin.modal>

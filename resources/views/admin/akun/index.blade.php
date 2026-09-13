@@ -1,9 +1,11 @@
 @php
-    $tab = request('tab', 'semua');
+    // Manajemen Akun = akun yang SUDAH ada (approved/rejected) doang -- pendaftaran
+    // yang masih menunggu diputuskan ada di halaman terpisah "Persetujuan Akun"
+    // (master.akun.persetujuan), biar nggak campur aksi "putuskan" sama "kelola".
     $users = \App\Models\User::with('guru', 'siswa.kelas')
-        ->when($tab === 'pending', fn ($q) => $q->where('status', 'pending'))
+        ->where('status', '!=', 'pending')
         ->when(request('cari'), fn ($q, $c) => $q->where(fn ($w) => $w->where('name', 'like', "%{$c}%")->orWhere('email', 'like', "%{$c}%")))
-        ->orderByRaw(\App\Support\Db::orderByList('status', ['pending', 'approved', 'rejected']))
+        ->orderByRaw(\App\Support\Db::orderByList('status', ['approved', 'rejected']))
         ->orderBy('name')
         ->get();
 
@@ -16,23 +18,16 @@
 @endphp
 
 <x-layouts.admin title="Manajemen Akun" heading="Manajemen Akun">
-    <x-admin.page title="Manajemen Akun" subtitle="{{ $users->count() }} akun · {{ $pendingCount }} menunggu persetujuan">
+    <x-admin.page title="Manajemen Akun" subtitle="{{ $users->count() }} akun aktif/ditolak">
         <x-slot:action>
+            @if ($pendingCount > 0)
+                <x-ui.button :href="route('master.akun.persetujuan')" variant="secondary" icon="how_to_reg">Persetujuan ({{ $pendingCount }})</x-ui.button>
+            @endif
             <x-ui.button type="button" icon="person_add" data-modal-open="modal-akun">Buat Akun</x-ui.button>
         </x-slot:action>
     </x-admin.page>
 
-    <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
-        @foreach (['semua' => 'Semua', 'pending' => "Menunggu ({$pendingCount})"] as $key => $label)
-            <a href="{{ route('master.akun.index', ['tab' => $key]) }}"
-               @class(['shrink-0 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $tab === $key, 'text-muted-2 hover:text-ink' => $tab !== $key])>
-                {{ $label }}
-            </a>
-        @endforeach
-    </div>
-
     <x-admin.filters :action="route('master.akun.index')">
-        <input type="hidden" name="tab" value="{{ $tab }}">
         <x-admin.f-search placeholder="Cari nama / email..." />
     </x-admin.filters>
 
@@ -58,14 +53,7 @@
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex justify-end gap-1">
-                            @if ($u->status === 'pending')
-                                <form method="POST" action="{{ route('master.akun.approve', $u) }}" class="contents">@csrf
-                                    <button class="flex h-8 items-center gap-1 rounded-lg bg-hadir-soft px-2.5 text-xs font-bold text-hadir hover:bg-[#bef3ab]">Setujui</button>
-                                </form>
-                                <form method="POST" action="{{ route('master.akun.reject', $u) }}" class="contents" data-confirm="Tolak pendaftaran {{ $u->name }}?">@csrf
-                                    <button class="flex h-8 items-center gap-1 rounded-lg bg-alpha-soft px-2.5 text-xs font-bold text-alpha hover:bg-[#fecdd3]">Tolak</button>
-                                </form>
-                            @elseif ($u->role !== 'admin')
+                            @if ($u->role !== 'admin')
                                 <button type="button"
                                     data-modal-open="modal-akun-ubah"
                                     data-modal-title="Ubah Akun — {{ $u->name }}"
@@ -156,8 +144,8 @@
             <p class="rounded-lg bg-izin-soft px-3 py-2 text-xs text-izin">Beri password ini ke yang bersangkutan. Nanti dia bisa reset sendiri lewat "Lupa Sandi".</p>
 
             <div class="mt-1 flex gap-2">
-                <x-ui.button type="submit" icon="save">Buat Akun</x-ui.button>
-                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+                <x-ui.button type="submit" icon="save" class="flex-1">Buat Akun</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
             </div>
         </form>
     </x-admin.modal>
@@ -179,8 +167,8 @@
             <x-ui.input label="Konfirmasi Password Baru" name="password_confirmation" type="password" placeholder="Ulangi kalau ganti password" />
 
             <div class="mt-1 flex gap-2">
-                <x-ui.button type="submit" icon="save">Simpan Perubahan</x-ui.button>
-                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+                <x-ui.button type="submit" icon="save" class="flex-1">Simpan Perubahan</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
             </div>
         </form>
     </x-admin.modal>
@@ -193,7 +181,6 @@
                 const sumber = document.getElementById('akun-sumber');
                 const nama = document.getElementById('akun-nama');
                 const sumberWrap = sumber.closest('[data-grup]');
-                const grupGuruBaru = form.querySelector('[data-grup="guru-baru"]');
                 const grupSiswaBaru = form.querySelector('[data-grup="siswa-baru"]');
                 const grupNip = form.querySelector('[data-grup="nip"]');
 
@@ -214,7 +201,6 @@
                     if (!pakaiData || sumber.selectedOptions[0]?.parentElement?.hidden) sumber.value = 'baru';
 
                     const baru = sumber.value === 'baru';
-                    setGrup(grupGuruBaru, r === 'guru' && baru);
                     setGrup(grupSiswaBaru, r === 'siswa' && baru);
                     setGrup(grupNip, r === 'waka' || (r === 'guru' && baru));
 

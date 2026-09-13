@@ -63,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin/jadwal-piket', 'admin.jadwal-piket.index')->name('master.jadwal-piket.index');
         Route::view('/admin/jadwal-waka', 'admin.jadwal-waka.index')->name('master.jadwal-waka.index');
         Route::view('/admin/akun', 'admin.akun.index')->name('master.akun.index');
+        Route::view('/admin/akun-persetujuan', 'admin.akun.persetujuan')->name('master.akun.persetujuan');
         Route::view('/admin/audit-log', 'admin.audit-log.index')->name('master.audit-log.index');
         Route::view('/admin/tahun-ajaran', 'admin.tahun-ajaran.index')->name('master.tahun-ajaran.index');
 

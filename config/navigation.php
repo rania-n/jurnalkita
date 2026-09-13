@@ -67,6 +67,9 @@ return [
     'admin' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'admin.dashboard'],
         ['label' => 'Manajemen Akun', 'icon' => 'manage_accounts', 'route' => 'master.akun.index'],
+        // Sengaja halaman TERPISAH dari Manajemen Akun -- "putuskan pendaftaran baru"
+        // beda konteks dari "kelola akun yang sudah ada", jangan dicampur di 1 tabel.
+        ['label' => 'Persetujuan Akun', 'icon' => 'how_to_reg', 'route' => 'master.akun.persetujuan'],
         ['label' => 'Data Guru', 'icon' => 'groups', 'route' => 'master.guru.index'],
         ['label' => 'Data Kelas', 'icon' => 'meeting_room', 'route' => 'master.kelas.index'],
         ['label' => 'Data Siswa', 'icon' => 'school', 'route' => 'master.siswa.index'],

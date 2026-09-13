@@ -93,8 +93,8 @@
             </button>
 
             <div class="mt-4 flex gap-2">
-                <x-ui.button type="submit" icon="save">Simpan Perubahan</x-ui.button>
-                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+                <x-ui.button type="submit" icon="save" class="flex-1">Simpan Perubahan</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
             </div>
         </form>
     </x-admin.modal>
@@ -125,8 +125,8 @@
             </button>
 
             <div class="mt-4 flex gap-2">
-                <x-ui.button type="submit" icon="save">Simpan Kategori</x-ui.button>
-                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+                <x-ui.button type="submit" icon="save" class="flex-1">Simpan Kategori</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
             </div>
         </form>
     </x-admin.modal>

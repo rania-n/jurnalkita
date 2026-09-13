@@ -106,6 +106,34 @@ class AkunTest extends TestCase
         $this->assertDatabaseHas('siswas', ['nama' => 'Ketua Kelas', 'no_hp' => '081233334444']);
     }
 
+    public function test_halaman_manajemen_akun_tidak_menampilkan_akun_pending(): void
+    {
+        $ditolak = User::factory()->role('guru')->create(['name' => 'Ditolak Test', 'status' => 'rejected']);
+        $pending = User::factory()->role('guru')->pending()->create(['name' => 'Pending Test']);
+
+        $response = $this->actingAs($this->admin())->get('/admin/akun');
+
+        $response->assertOk()->assertSee('Ditolak Test')->assertDontSee('Pending Test');
+    }
+
+    public function test_halaman_persetujuan_akun_terpisah_cuma_isi_pending(): void
+    {
+        $ditolak = User::factory()->role('guru')->create(['name' => 'Ditolak Test', 'status' => 'rejected']);
+        $pending = User::factory()->role('guru')->pending()->create(['name' => 'Pending Test']);
+
+        $response = $this->actingAs($this->admin())->get('/admin/akun-persetujuan');
+
+        $response->assertOk()->assertSee('Pending Test')->assertDontSee('Ditolak Test');
+    }
+
+    public function test_setujui_tolak_akun_tetap_jalan_dari_halaman_persetujuan(): void
+    {
+        $pending = User::factory()->role('guru')->pending()->create();
+
+        $this->actingAs($this->admin())->post("/admin/akun/{$pending->id}/setujui")->assertRedirect();
+        $this->assertSame('approved', $pending->fresh()->status);
+    }
+
     public function test_admin_bisa_ubah_akun_yang_sudah_ada_termasuk_password(): void
     {
         $guru = User::factory()->role('guru')->create(['email' => 'lama@s.test']);

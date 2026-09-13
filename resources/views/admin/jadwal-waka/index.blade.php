@@ -82,8 +82,8 @@
                 @foreach ($wakaList as $w)<option value="{{ $w->id }}">{{ $w->name }}</option>@endforeach
             </x-ui.select>
             <div class="mt-1 flex gap-2">
-                <x-ui.button type="submit" icon="save">Simpan</x-ui.button>
-                <x-ui.button type="button" variant="secondary" data-modal-close>Batal</x-ui.button>
+                <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
             </div>
         </form>
     </x-admin.modal>
