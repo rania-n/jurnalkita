@@ -2,7 +2,7 @@
     <x-page-header
         title="Catat Siswa Terlambat"
         subtitle="Siswa telat masuk gerbang pagi"
-        :back="url()->previous(route('satpam.dashboard'))"
+        :back="route('satpam.dashboard')"
     />
 
     <form method="POST" action="{{ route('satpam.terlambat.store') }}">

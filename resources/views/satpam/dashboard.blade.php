@@ -48,7 +48,15 @@
                 <x-ui.list-card
                     :title="$c->siswa->nama"
                     :meta="[$c->siswa->kelas?->nama . ' · Jam ' . $c->jam_datang->format('H:i'), $c->catatan ?: 'Tanpa catatan']"
-                />
+                >
+                    <x-slot:actions>
+                        <form method="POST" action="{{ route('satpam.terlambat.destroy', $c) }}"
+                              data-confirm="Hapus catatan keterlambatan {{ $c->siswa->nama }}? Salah input bisa dihapus, tapi cuma untuk hari ini.">
+                            @csrf @method('DELETE')
+                            <x-ui.action-button type="submit" variant="danger" icon="delete" label="Hapus" />
+                        </form>
+                    </x-slot:actions>
+                </x-ui.list-card>
             @endforeach
         </x-ui.card-list>
     @endif

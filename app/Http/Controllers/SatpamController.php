@@ -64,6 +64,24 @@ class SatpamController extends Controller
     }
 
     /**
+     * Hapus catatan keterlambatan salah input. Dibatasi punya sendiri & hari ini
+     * saja -- catatan hari sebelumnya dibiarkan jadi jejak, nggak boleh dihapus
+     * lagi (sama semangatnya kayak jurnal yang sudah diverifikasi).
+     */
+    public function terlambatDestroy(CatatanTerlambat $catatan): RedirectResponse
+    {
+        abort_unless($catatan->dicatat_oleh_id === auth()->id(), 403);
+        abort_unless($catatan->tanggal->isToday(), 403, 'Catatan hari sebelumnya tidak bisa dihapus lagi.');
+
+        $nama = $catatan->siswa->nama;
+        $catatan->delete();
+
+        AuditLog::catat('Hapus Catatan Terlambat', "Hapus catatan terlambat {$nama}", $catatan);
+
+        return redirect()->route('satpam.dashboard')->with('success', 'Catatan keterlambatan dihapus.');
+    }
+
+    /**
      * Hasil scan QR dari surat dispensasi. Dibuka dari kamera HP satpam (aplikasi kamera
      * bawaan yang baca QR ke URL ini) -- bukan scanner di dalam web, jadi tidak perlu JS.
      */

@@ -64,6 +64,42 @@ class SatpamTerlambatTest extends TestCase
         ])->assertRedirect(route('guru.dashboard'));
     }
 
+    public function test_satpam_bisa_hapus_catatan_terlambat_sendiri_hari_ini(): void
+    {
+        $catatan = CatatanTerlambat::create([
+            'siswa_id' => $this->siswa->id, 'tanggal' => today(), 'jam_datang' => '07:15',
+            'dicatat_oleh_id' => $this->satpam->id,
+        ]);
+
+        $this->actingAs($this->satpam)->delete("/satpam/terlambat/{$catatan->id}")
+            ->assertRedirect(route('satpam.dashboard'));
+
+        $this->assertSoftDeleted('catatan_terlambats', ['id' => $catatan->id]);
+    }
+
+    public function test_satpam_tidak_bisa_hapus_catatan_satpam_lain(): void
+    {
+        $satpamLain = User::factory()->role('satpam')->create();
+        $catatan = CatatanTerlambat::create([
+            'siswa_id' => $this->siswa->id, 'tanggal' => today(), 'jam_datang' => '07:15',
+            'dicatat_oleh_id' => $satpamLain->id,
+        ]);
+
+        $this->actingAs($this->satpam)->delete("/satpam/terlambat/{$catatan->id}")->assertForbidden();
+        $this->assertNotSoftDeleted('catatan_terlambats', ['id' => $catatan->id]);
+    }
+
+    public function test_catatan_terlambat_hari_lalu_tidak_bisa_dihapus(): void
+    {
+        $catatan = CatatanTerlambat::create([
+            'siswa_id' => $this->siswa->id, 'tanggal' => today()->subDay(), 'jam_datang' => '07:15',
+            'dicatat_oleh_id' => $this->satpam->id,
+        ]);
+
+        $this->actingAs($this->satpam)->delete("/satpam/terlambat/{$catatan->id}")->assertForbidden();
+        $this->assertNotSoftDeleted('catatan_terlambats', ['id' => $catatan->id]);
+    }
+
     public function test_waka_dan_wali_kelas_lihat_jumlah_terlambat_di_rekap(): void
     {
         CatatanTerlambat::create([

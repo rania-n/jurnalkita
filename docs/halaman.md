@@ -150,6 +150,31 @@ Rekap Kehadiran Siswa · Profil
 > yang sudah dirapikan duluan) biar konsisten. Test baru:
 > `tests/Feature/Waka/DashboardTest.php`.
 
+### Satpam (layout mobile)
+Beranda (riwayat scan hari ini + riwayat terlambat hari ini + hapus) ·
+Catat Siswa Terlambat · **Hasil Scan QR** (halaman hasil, dibuka dari kamera
+bawaan HP — bukan scanner dalam web) · Profil
+
+> **Scan QR tanpa library JS** — satpam scan pakai kamera bawaan HP seperti
+> biasa (bukan buka kamera di dalam web app). QR-nya encode URL bertanda
+> tangan (`QrDispensasi`, berputar tiap 10 detik) ke `/satpam/scan?id=&token=`,
+> hasilnya langsung kebuka di halaman hasil (`x-layouts.guest`, tanpa
+> navbar/sidebar — sengaja minimalis buat sekali lihat lalu lanjut scan
+> berikutnya).
+
+> **Audit Satpam selesai 2026-09-13 — SEMUA 4 ROLE SEKARANG BERES** (Guru →
+> Pengurus Kelas → Waka → Satpam): fungsi inti (scan QR valid/kedaluwarsa/
+> multi-hari, catat siswa terlambat, audit log) ternyata sudah dites lengkap
+> sebelumnya (12 test di `SatpamTest.php` + `SatpamTerlambatTest.php`).
+> Yang diperbaiki sesi ini: bug tombol Kembali (`url()->previous()`) di
+> Catat Siswa Terlambat, sama seperti role lain. Ditemukan juga gap nyata:
+> `CatatanTerlambat` sudah pakai trait `SoftDeletes` dari awal, tapi rute
+> hapusnya belum pernah dibangun — jadi salah pencet siswa pas catat telat
+> nggak ada cara benerin. Ditambahkan `terlambat.destroy` (DELETE), dibatasi
+> punya sendiri + hari ini saja (catatan hari sebelumnya dibiarkan permanen
+> demi jejak audit, sama semangatnya kayak jurnal terverifikasi). 3 test baru
+> di `SatpamTerlambatTest.php`.
+
 ---
 
 ## 🟢 Fiks dikerjakan — sudah diputuskan, tinggal jadwal
@@ -203,9 +228,12 @@ audit menyeluruh per role dengan urutan ini — alasannya di kolom kanan:
 | 1 | ~~**Guru**~~ ✅ | Ini inti aplikasi ("Jurnal & Absensi **Guru**") — paling sering dipakai, paling penting buat dinilai. | K4 (Detail Siswa), K6 (shortcut piket/dispensasi di beranda) |
 | 2 | ~~**Pengurus Kelas**~~ ✅ (sekretaris) | Alur jurnal nggak selesai tanpa verifikasi mereka — langsung nyambung ke hasil kerja Guru di langkah 1. | K1 (Daftar siswa sekelas, ternyata sudah ada) |
 | 3 | ~~**Waka**~~ ✅ | Tahap kedua approval dispensasi — kurang kritis dibanding 1–2, tapi masih dipakai rutin. | K2 (Dashboard Waka diperkaya) |
-| 4 | **Satpam** ← *lanjut ke sini* | Alurnya paling sempit (scan QR + catat telat gerbang), paling kecil risikonya, aman di akhir. | — |
+| 4 | ~~**Satpam**~~ ✅ | Alurnya paling sempit (scan QR + catat telat gerbang), paling kecil risikonya, aman di akhir. | Rute hapus `CatatanTerlambat` (gap, model sudah `SoftDeletes` tapi belum ada UI-nya) |
 | — | Admin (susulan kecil) | Sisa printilan admin yang bukan bug (K3 Detail Kelas, tombol Detail, fitur backup) — diselipkan kapan senggang, bukan blocker. | K3, tombol Detail, fitur backup |
-| **Paling akhir** | **B8 — Guru pengganti & tukar jam** | Fitur besar & baru, cuma dikerjakan **kalau 1–4 di atas sudah beres semua** dan masih ada sisa waktu sebelum deadline/sidang. | — |
+| **Paling akhir** ← *lanjut ke sini kalau masih ada waktu* | **B8 — Guru pengganti & tukar jam** | Fitur besar & baru, cuma dikerjakan **kalau 1–4 di atas sudah beres semua** dan masih ada sisa waktu sebelum deadline/sidang. | — |
 
-B1 (Notifikasi) & B10 (Geolokasi) nunggu di belakang B8 — dibahas lagi nanti kalau
-waktunya benar-benar masih sisa, nggak usah dipikirin dulu.
+**Semua 4 role (Guru/Pengurus Kelas/Waka/Satpam) sudah selesai diaudit per
+2026-09-13.** Sisa kerjaan besar: B8 (kalau masih ada waktu), susulan kecil
+Admin (K3/tombol Detail/backup — kapan senggang), dan B1/B10 yang memang
+sengaja ditunda paling belakang (kecuali versi Guru dari B1/Notifikasi yang
+sudah jalan duluan, lihat bagian "Guru").

@@ -175,5 +175,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/scan', [SatpamController::class, 'scan'])->name('scan');
         Route::get('/terlambat', [SatpamController::class, 'terlambatCreate'])->name('terlambat.create');
         Route::post('/terlambat', [SatpamController::class, 'terlambatStore'])->name('terlambat.store');
+        Route::delete('/terlambat/{catatan}', [SatpamController::class, 'terlambatDestroy'])->name('terlambat.destroy');
     });
 });
