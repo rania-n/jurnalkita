@@ -10,16 +10,24 @@
 @endphp
 
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Monitor Piket" heading="Monitor Piket" width="wide">
-    <x-page-header title="Monitor Piket" :subtitle="$hariLabel ? $hariLabel . ', ' . $tanggal->translatedFormat('d M Y') : $tanggal->translatedFormat('d M Y') . ' — akhir pekan, tidak ada jadwal pelajaran'">
-        <x-ui.button :href="route('piket.monitor.ekspor', ['tanggal' => $tanggal->toDateString()])" variant="secondary" icon="download">Ekspor Ringkasan</x-ui.button>
-    </x-page-header>
+    @php $subtitle = $hariLabel ? $hariLabel . ', ' . $tanggal->translatedFormat('d M Y') : $tanggal->translatedFormat('d M Y') . ' — akhir pekan, tidak ada jadwal pelajaran'; @endphp
 
-    {{-- Ganti tanggal --}}
-    <form method="GET" class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-surface-alt bg-card p-4">
+    @if ($admin)
+        <x-admin.page title="Monitor Piket" :subtitle="$subtitle">
+            <x-slot:action>
+                <x-ui.button :href="route('piket.monitor.ekspor', ['tanggal' => $tanggal->toDateString()])" variant="secondary" icon="download">Ekspor Ringkasan</x-ui.button>
+            </x-slot:action>
+        </x-admin.page>
+    @else
+        <x-page-header title="Monitor Piket" :subtitle="$subtitle">
+            <x-ui.button :href="route('piket.monitor.ekspor', ['tanggal' => $tanggal->toDateString()])" variant="secondary" icon="download">Ekspor Ringkasan</x-ui.button>
+        </x-page-header>
+    @endif
+
+    <x-admin.filters :action="route('piket.monitor.index')">
         <input type="hidden" name="mode" value="{{ $mode }}">
-        <x-ui.input label="Tanggal" name="tanggal" type="date" :value="$tanggal->toDateString()" />
-        <x-ui.button type="submit" icon="search">Tampilkan</x-ui.button>
-    </form>
+        <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" />
+    </x-admin.filters>
 
     {{-- Roster shift piket hari itu — guru piket TIDAK mengajar selama shiftnya --}}
     @if ($shiftPiket->isNotEmpty())
@@ -49,7 +57,7 @@
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
         @foreach (['kelas' => 'Per Kelas', 'guru' => 'Per Guru'] as $key => $label)
             <a href="{{ route('piket.monitor.index', ['tanggal' => $tanggal->toDateString(), 'mode' => $key]) }}"
-               @class(['shrink-0 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap', 'bg-navy text-card' => $mode === $key, 'text-muted-2 hover:text-ink' => $mode !== $key])>
+               @class(['flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap', 'bg-navy text-card' => $mode === $key, 'text-muted-2 hover:text-ink' => $mode !== $key])>
                 {{ $label }}
             </a>
         @endforeach

@@ -4,21 +4,23 @@
 @endphp
 
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Rekap Kehadiran Siswa" heading="Rekap Kehadiran Siswa" width="wide">
-    <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan">
-        <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
-    </x-page-header>
+    @if ($admin)
+        <x-admin.page title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan">
+            <x-slot:action>
+                <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
+            </x-slot:action>
+        </x-admin.page>
+    @else
+        <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan">
+            <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
+        </x-page-header>
+    @endif
 
-    <form method="GET" class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-surface-alt bg-card p-4">
-        <x-ui.input label="Dari tanggal" name="dari" type="date" :value="$dari->toDateString()" />
-        <x-ui.input label="Sampai tanggal" name="sampai" type="date" :value="$sampai->toDateString()" />
-        <x-ui.select label="Kelas" name="kelas_id" class="min-w-40">
-            <option value="">Semua kelas</option>
-            @foreach ($kelasList as $k)
-                <option value="{{ $k->id }}" @selected(request('kelas_id') == $k->id)>{{ $k->nama }}</option>
-            @endforeach
-        </x-ui.select>
-        <x-ui.button type="submit" icon="search">Tampilkan</x-ui.button>
-    </form>
+    <x-admin.filters :action="route('rekap.siswa.index')">
+        <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" />
+        <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" />
+        <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua kelas" />
+    </x-admin.filters>
 
     @if ($totalAlphaTinggi > 0)
         <x-alert type="warning" class="mb-4">

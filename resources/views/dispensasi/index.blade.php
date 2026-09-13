@@ -8,21 +8,34 @@
 @endphp
 
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Dispensasi" heading="Dispensasi Siswa" width="wide">
-    <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
-        <div class="flex gap-2">
-            @if ($bolehEkspor)
-                <x-ui.button :href="route('dispensasi.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
-            @endif
-            @if ($bolehAjukan)
-                <x-ui.button :href="route('dispensasi.create')" icon="add">Ajukan Dispensasi</x-ui.button>
-            @endif
-        </div>
-    </x-page-header>
+    @if ($admin)
+        <x-admin.page title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
+            <x-slot:action>
+                @if ($bolehEkspor)
+                    <x-ui.button :href="route('dispensasi.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
+                @endif
+                @if ($bolehAjukan)
+                    <x-ui.button :href="route('dispensasi.create')" icon="add">Ajukan Dispensasi</x-ui.button>
+                @endif
+            </x-slot:action>
+        </x-admin.page>
+    @else
+        <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
+            <div class="flex gap-2">
+                @if ($bolehEkspor)
+                    <x-ui.button :href="route('dispensasi.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
+                @endif
+                @if ($bolehAjukan)
+                    <x-ui.button :href="route('dispensasi.create')" icon="add">Ajukan Dispensasi</x-ui.button>
+                @endif
+            </div>
+        </x-page-header>
+    @endif
 
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
             <a href="{{ route('dispensasi.index', array_merge(request()->except('tab', 'page'), ['tab' => $key])) }}"
-               @class(['shrink-0 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap', 'bg-navy text-card' => $tab === $key, 'text-muted-2 hover:text-ink' => $tab !== $key])>
+               @class(['flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap', 'bg-navy text-card' => $tab === $key, 'text-muted-2 hover:text-ink' => $tab !== $key])>
                 {{ $label }}
             </a>
         @endforeach

@@ -121,11 +121,49 @@ function initModals() {
     });
 }
 
+/* Auto-search: kolom pencarian langsung submit form-nya sendiri sambil ngetik
+ * (di-debounce), jadi gak perlu klik tombol "Cari" tiap ganti kata kunci.
+ * Pakai:  <input type="search" data-autosearch ...> */
+function initAutoSearch() {
+    let timer;
+    document.querySelectorAll('[data-autosearch]').forEach((input) => {
+        input.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => input.form?.requestSubmit(), 450);
+        });
+    });
+}
+
+/* Grup sidebar admin (<details data-nav-group="...">) diingat lewat
+ * localStorage, biar grup yang sudah dibuka user TETAP kebuka pas pindah
+ * halaman -- bukan cuma ngikut halaman aktif doang. */
+function initNavGroups() {
+    const groups = document.querySelectorAll('[data-nav-group]');
+    if (!groups.length) return;
+
+    let opened = [];
+    try { opened = JSON.parse(localStorage.getItem('adminNavOpen') || '[]'); } catch (_) { /* abaikan */ }
+
+    groups.forEach((el) => {
+        if (opened.includes(el.dataset.navGroup)) el.open = true;
+
+        el.addEventListener('toggle', () => {
+            let list = [];
+            try { list = JSON.parse(localStorage.getItem('adminNavOpen') || '[]'); } catch (_) { /* abaikan */ }
+            list = list.filter((g) => g !== el.dataset.navGroup);
+            if (el.open) list.push(el.dataset.navGroup);
+            try { localStorage.setItem('adminNavOpen', JSON.stringify(list)); } catch (_) { /* abaikan */ }
+        });
+    });
+}
+
 function init() {
     initPasswordToggles();
     initUploadPreview();
     initConfirm();
     initModals();
+    initAutoSearch();
+    initNavGroups();
 }
 
 document.addEventListener('DOMContentLoaded', init);

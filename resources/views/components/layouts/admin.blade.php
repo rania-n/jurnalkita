@@ -35,7 +35,7 @@
                 @endphp
 
                 @if ($isGroup)
-                    <details class="group" @if ($groupActive) open @endif>
+                    <details class="group" data-nav-group="{{ $item['group'] }}" @if ($groupActive) open @endif>
                         <summary
                             @class([
                                 'flex cursor-pointer list-none items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors [&::-webkit-details-marker]:hidden',

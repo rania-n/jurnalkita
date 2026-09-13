@@ -11,7 +11,7 @@
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
             <a href="{{ route('sekretaris.jurnal.index', array_filter(['status' => $key])) }}"
-               @class(['shrink-0 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap', 'bg-navy text-card' => $status === ($key ?: null), 'text-muted-2 hover:text-ink' => $status !== ($key ?: null)])>
+               @class(['flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap', 'bg-navy text-card' => $status === ($key ?: null), 'text-muted-2 hover:text-ink' => $status !== ($key ?: null)])>
                 {{ $label }}
             </a>
         @endforeach

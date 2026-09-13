@@ -17,6 +17,9 @@
     $guruTanpaAkun = \App\Models\Guru::whereNull('user_id')->orderBy('nama')->get(['id', 'nama', 'nip']);
     $siswaTanpaAkun = \App\Models\Siswa::whereNull('user_id')->where('jabatan', 'pengurus')->with('kelas')->orderBy('nama')->get();
     $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
+    $roleTabs = ['' => 'Semua'] + $roleLabel;
+    $roleAktif = (string) request()->query('role');
+    $queryTanpaRole = request()->except('page', 'role');
 @endphp
 
 <x-layouts.admin title="Manajemen Akun" heading="Manajemen Akun">
@@ -29,9 +32,20 @@
         </x-slot:action>
     </x-admin.page>
 
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
+        @foreach ($roleTabs as $key => $label)
+            <a href="{{ route('master.akun.index', array_merge($queryTanpaRole, $key === '' ? [] : ['role' => $key])) }}"
+               @class(['flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $roleAktif === $key, 'text-muted-2 hover:text-ink' => $roleAktif !== $key])>
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
     <x-admin.filters :action="route('master.akun.index')">
         <x-admin.f-search placeholder="Cari nama / email..." />
-        <x-admin.f-select name="role" label="Peran" :options="$roleLabel" all="Semua Peran" />
+        @if ($roleAktif !== '')
+            <input type="hidden" name="role" value="{{ $roleAktif }}">
+        @endif
     </x-admin.filters>
 
     @if ($users->isEmpty())

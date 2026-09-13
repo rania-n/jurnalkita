@@ -1,8 +1,8 @@
 @php
-    $q       = request('cari');
-    $userId  = request('user');
-    $dari    = request('dari');
-    $sampai  = request('sampai');
+    $q       = request()->query('cari');
+    $userId  = request()->query('user');
+    $dari    = request()->query('dari');
+    $sampai  = request()->query('sampai');
 
     $rows = \App\Models\AuditLog::with('user')
         ->when($q, fn ($b) => $b->where(fn ($w) => $w
@@ -22,58 +22,12 @@
 <x-layouts.admin title="Audit Log" heading="Audit Log">
     <x-admin.page title="Audit Log" subtitle="{{ $rows->total() }} entri" />
 
-    {{-- Filter --}}
-    <form method="GET" action="{{ route('master.audit-log.index') }}"
-          class="mb-4 flex flex-wrap items-end gap-3">
-        {{-- Cari --}}
-        <label class="flex flex-col gap-1">
-            <span class="text-xs font-semibold text-muted-2">Cari</span>
-            <input type="search" name="cari" value="{{ $q }}"
-                   placeholder="Aksi atau deskripsi…"
-                   class="h-10 rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy w-56" />
-        </label>
-
-        {{-- Filter user --}}
-        <label class="flex flex-col gap-1">
-            <span class="text-xs font-semibold text-muted-2">User</span>
-            <span class="relative">
-                <select name="user" onchange="this.form.requestSubmit()"
-                        class="h-10 w-48 appearance-none rounded-lg border border-surface-alt bg-card pl-3 pr-8 text-sm font-medium text-ink outline-none focus:border-navy">
-                    <option value="">Semua User</option>
-                    @foreach ($userList as $u)
-                        <option value="{{ $u->id }}" @selected((string) $userId === (string) $u->id)>{{ $u->name }}</option>
-                    @endforeach
-                </select>
-                <x-icon name="expand_more" :size="18" class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted" />
-            </span>
-        </label>
-
-        {{-- Dari --}}
-        <label class="flex flex-col gap-1">
-            <span class="text-xs font-semibold text-muted-2">Dari</span>
-            <input type="date" name="dari" value="{{ $dari }}"
-                   class="h-10 rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy" />
-        </label>
-
-        {{-- Sampai --}}
-        <label class="flex flex-col gap-1">
-            <span class="text-xs font-semibold text-muted-2">Sampai</span>
-            <input type="date" name="sampai" value="{{ $sampai }}"
-                   class="h-10 rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy" />
-        </label>
-
-        <button type="submit"
-                class="h-10 rounded-lg bg-navy px-4 text-sm font-semibold text-white hover:bg-navy/90">
-            Terapkan
-        </button>
-
-        @if ($q || $userId || $dari || $sampai)
-            <a href="{{ route('master.audit-log.index') }}"
-               class="h-10 flex items-center rounded-lg border border-surface-alt px-4 text-sm font-semibold text-muted hover:bg-surface">
-                Reset
-            </a>
-        @endif
-    </form>
+    <x-admin.filters :action="route('master.audit-log.index')">
+        <x-admin.f-search placeholder="Aksi atau deskripsi..." />
+        <x-admin.f-select name="user" label="User" :options="$userList->pluck('name', 'id')" all="Semua User" />
+        <x-admin.f-date name="dari" label="Dari" />
+        <x-admin.f-date name="sampai" label="Sampai" />
+    </x-admin.filters>
 
     @if ($rows->isEmpty())
         <x-ui.empty title="Tidak ada log yang cocok" />
