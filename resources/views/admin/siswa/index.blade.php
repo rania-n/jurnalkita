@@ -1,8 +1,14 @@
 @php
-    $q = request('cari');
-    $kelasId = request('kelas');
-    $jk = request('jk');
-    $status = request('status');
+    // Pakai request()->query(...), BUKAN request('status') -- Route::view() ini
+    // menyimpan parameter aksi internalnya sendiri (view/data/status/headers) di
+    // route parameters, dan request('status') (helper __get) jatuh balik ke situ
+    // kalau tidak ada di query string. Akibatnya $status selalu ke-isi 200 (kode
+    // HTTP default Route::view()), bikin filter WHERE status=200 selalu aktif dan
+    // tabel selalu kosong. request()->query('status') tidak punya fallback itu.
+    $q = request()->query('cari');
+    $kelasId = request()->query('kelas');
+    $jk = request()->query('jk');
+    $status = request()->query('status');
 
     $rows = \App\Models\Siswa::with('kelas')
         ->when($q, fn ($b) => $b->where(fn ($w) => $w->where('nama', 'like', "%{$q}%")->orWhere('nis', 'like', "%{$q}%")))

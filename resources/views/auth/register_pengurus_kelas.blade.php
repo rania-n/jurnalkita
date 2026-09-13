@@ -2,7 +2,7 @@
     <x-page-header
         title="Registrasi Pengurus Kelas"
         subtitle="Akses jurnal mandiri perwakilan kelas"
-        :back="route('pilih_peran')"
+        :back="url()->previous(route('pilih_peran'))"
     />
 
     <x-alert type="warning" class="mb-6">

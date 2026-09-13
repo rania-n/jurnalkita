@@ -2,7 +2,7 @@
     <x-page-header
         title="Registrasi Guru"
         subtitle="Lengkapi biodata pengajar Anda"
-        :back="route('pilih_peran')"
+        :back="url()->previous(route('pilih_peran'))"
     />
 
     <x-alert type="warning" class="mb-6">

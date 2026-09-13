@@ -25,6 +25,8 @@ class JamPelajaranController extends Controller
             'mulai.*' => ['required', 'date_format:H:i'],
             'selesai' => ['required', 'array'],
             'selesai.*' => ['required', 'date_format:H:i'],
+            'keterangan' => ['nullable', 'array'],
+            'keterangan.*' => ['nullable', 'string', 'max:100'],
         ]);
 
         // Kategori baru ditulis manual admin (mis. "Ramadhan") -> disimpan sebagai slug
@@ -41,6 +43,7 @@ class JamPelajaranController extends Controller
                     'jam_ke' => $i + 1,
                     'mulai' => $mulai,
                     'selesai' => $data['selesai'][$i] ?? $mulai,
+                    'keterangan' => $data['keterangan'][$i] ?? null,
                     'kategori' => $data['kategori'],
                 ]);
             }

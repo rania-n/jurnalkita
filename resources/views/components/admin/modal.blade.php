@@ -27,3 +27,12 @@
         {{ $slot }}
     </div>
 </dialog>
+
+@if ($errors->any())
+    {{-- Submit gagal validasi -> balik ke halaman ini dengan dialog masih tertutup
+         secara default (native <dialog> butuh showModal() eksplisit). Tanpa ini,
+         pesan @error() di tiap field ketutup dialog dan admin cuma lihat halaman
+         reload biasa -- kelihatan kayak "data ga masuk" padahal sebenarnya ketolak
+         validasi dan alasannya ada, cuma nggak kelihatan. --}}
+    <script>document.getElementById(@js($id))?.showModal();</script>
+@endif

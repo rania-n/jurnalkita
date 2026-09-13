@@ -11,7 +11,7 @@
     <x-admin.page
         title="Persetujuan Akun"
         subtitle="{{ $users->count() }} pendaftaran menunggu diputuskan"
-        :back="route('master.akun.index')"
+        :back="url()->previous(route('master.akun.index'))"
     />
 
     @if ($users->isEmpty())

@@ -2,7 +2,7 @@
     <x-page-header
         title="Isi Jurnal Pengganti"
         subtitle="Untuk guru yang memberi tugas via WA & tidak sempat mengisi sendiri"
-        :back="route('sekretaris.jurnal.index')"
+        :back="url()->previous(route('sekretaris.jurnal.index'))"
     />
 
     <x-alert type="info" class="mb-4">Hanya untuk status <strong>Tugas Luar</strong> atau <strong>Tidak Hadir</strong>. Jurnal ini otomatis terverifikasi.</x-alert>

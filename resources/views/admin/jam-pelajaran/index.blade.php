@@ -62,26 +62,28 @@
             @csrf
             <input type="hidden" name="kategori" value="{{ $set }}">
 
-            <div class="grid grid-cols-[2.5rem_1fr_1fr_2.25rem] gap-2 border-b border-surface-alt pb-2 text-xs font-bold uppercase tracking-wide text-muted-2">
-                <span>JP</span><span>Mulai</span><span>Selesai</span><span></span>
+            <div class="hidden gap-2 border-b border-surface-alt pb-2 text-xs font-bold uppercase tracking-wide text-muted-2 sm:flex">
+                <span class="w-8 shrink-0">JP</span><span class="w-28 shrink-0">Mulai</span><span class="w-28 shrink-0">Selesai</span><span class="flex-1">Keterangan</span><span class="w-8 shrink-0"></span>
             </div>
 
             <div data-jp-rows class="max-h-[45vh] overflow-y-auto">
                 @forelse ($rows as $jp)
-                    <div class="grid grid-cols-[2.5rem_1fr_1fr_2.25rem] items-center gap-2 py-1.5" data-jp-row>
-                        <span class="text-sm font-bold text-ink" data-jp-no>{{ $loop->iteration }}</span>
-                        <input type="time" name="mulai[]" value="{{ $jp->mulai?->format('H:i') }}" required class="rounded-lg border border-surface-alt bg-card px-2 py-2 text-sm outline-none focus:border-navy">
-                        <input type="time" name="selesai[]" value="{{ $jp->selesai?->format('H:i') }}" required class="rounded-lg border border-surface-alt bg-card px-2 py-2 text-sm outline-none focus:border-navy">
-                        <button type="button" data-jp-remove class="flex h-8 w-8 items-center justify-center rounded-lg bg-alpha-soft text-alpha hover:bg-[#fecdd3]" aria-label="Hapus baris">
+                    <div class="flex flex-wrap items-center gap-2 border-b border-surface-alt/60 py-2 last:border-0" data-jp-row>
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-sm font-bold text-ink" data-jp-no>{{ $loop->iteration }}</span>
+                        <input type="time" name="mulai[]" value="{{ $jp->mulai?->format('H:i') }}" required class="h-9 w-28 shrink-0 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                        <input type="time" name="selesai[]" value="{{ $jp->selesai?->format('H:i') }}" required class="h-9 w-28 shrink-0 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                        <input type="text" name="keterangan[]" value="{{ $jp->keterangan }}" placeholder="Opsional" class="h-9 min-w-[8rem] flex-1 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                        <button type="button" data-jp-remove class="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-alpha-soft text-alpha hover:bg-[#fecdd3]" aria-label="Hapus baris">
                             <x-icon name="delete" :size="16" />
                         </button>
                     </div>
                 @empty
-                    <div class="grid grid-cols-[2.5rem_1fr_1fr_2.25rem] items-center gap-2 py-1.5" data-jp-row>
-                        <span class="text-sm font-bold text-ink" data-jp-no>1</span>
-                        <input type="time" name="mulai[]" value="07:00" required class="rounded-lg border border-surface-alt bg-card px-2 py-2 text-sm outline-none focus:border-navy">
-                        <input type="time" name="selesai[]" value="07:45" required class="rounded-lg border border-surface-alt bg-card px-2 py-2 text-sm outline-none focus:border-navy">
-                        <button type="button" data-jp-remove class="flex h-8 w-8 items-center justify-center rounded-lg bg-alpha-soft text-alpha" aria-label="Hapus baris">
+                    <div class="flex flex-wrap items-center gap-2 border-b border-surface-alt/60 py-2 last:border-0" data-jp-row>
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-sm font-bold text-ink" data-jp-no>1</span>
+                        <input type="time" name="mulai[]" value="07:00" required class="h-9 w-28 shrink-0 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                        <input type="time" name="selesai[]" value="07:45" required class="h-9 w-28 shrink-0 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                        <input type="text" name="keterangan[]" placeholder="Opsional" class="h-9 min-w-[8rem] flex-1 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                        <button type="button" data-jp-remove class="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-alpha-soft text-alpha" aria-label="Hapus baris">
                             <x-icon name="delete" :size="16" />
                         </button>
                     </div>
@@ -105,16 +107,17 @@
             @csrf
             <x-ui.input label="Nama Kategori" name="kategori_baru" placeholder="Contoh: Ramadhan, Ujian" class="mb-3" />
 
-            <div class="grid grid-cols-[2.5rem_1fr_1fr_2.25rem] gap-2 border-b border-surface-alt pb-2 text-xs font-bold uppercase tracking-wide text-muted-2">
-                <span>JP</span><span>Mulai</span><span>Selesai</span><span></span>
+            <div class="hidden gap-2 border-b border-surface-alt pb-2 text-xs font-bold uppercase tracking-wide text-muted-2 sm:flex">
+                <span class="w-8 shrink-0">JP</span><span class="w-28 shrink-0">Mulai</span><span class="w-28 shrink-0">Selesai</span><span class="flex-1">Keterangan</span><span class="w-8 shrink-0"></span>
             </div>
 
             <div data-jp-rows class="max-h-[45vh] overflow-y-auto">
-                <div class="grid grid-cols-[2.5rem_1fr_1fr_2.25rem] items-center gap-2 py-1.5" data-jp-row>
-                    <span class="text-sm font-bold text-ink" data-jp-no>1</span>
-                    <input type="time" name="mulai[]" value="07:00" required class="rounded-lg border border-surface-alt bg-card px-2 py-2 text-sm outline-none focus:border-navy">
-                    <input type="time" name="selesai[]" value="07:45" required class="rounded-lg border border-surface-alt bg-card px-2 py-2 text-sm outline-none focus:border-navy">
-                    <button type="button" data-jp-remove class="flex h-8 w-8 items-center justify-center rounded-lg bg-alpha-soft text-alpha" aria-label="Hapus baris">
+                <div class="flex flex-wrap items-center gap-2 border-b border-surface-alt/60 py-2 last:border-0" data-jp-row>
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-sm font-bold text-ink" data-jp-no>1</span>
+                    <input type="time" name="mulai[]" value="07:00" required class="h-9 w-28 shrink-0 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                    <input type="time" name="selesai[]" value="07:45" required class="h-9 w-28 shrink-0 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                    <input type="text" name="keterangan[]" placeholder="Opsional" class="h-9 min-w-[8rem] flex-1 rounded-lg border border-surface-alt bg-card px-2 text-sm outline-none focus:border-navy">
+                    <button type="button" data-jp-remove class="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-alpha-soft text-alpha" aria-label="Hapus baris">
                         <x-icon name="delete" :size="16" />
                     </button>
                 </div>

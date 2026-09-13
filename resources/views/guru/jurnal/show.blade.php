@@ -9,7 +9,7 @@
     <x-page-header
         :title="$jurnal->jadwal->mapel->nama"
         :subtitle="$jurnal->jadwal->kelas->nama . ' · ' . $jurnal->tanggal->translatedFormat('d M Y')"
-        :back="route('jurnal.index')"
+        :back="url()->previous(route('jurnal.index'))"
     />
 
     {{-- Status verifikasi --}}

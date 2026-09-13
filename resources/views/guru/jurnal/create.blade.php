@@ -2,7 +2,7 @@
     <x-page-header
         title="Form Jurnal Mengajar"
         subtitle="Isi jurnal mengajar dan kehadiran siswa"
-        :back="route('guru.dashboard')"
+        :back="url()->previous(route('guru.dashboard'))"
     />
 
     @if ($jadwals->isEmpty())

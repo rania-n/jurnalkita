@@ -19,9 +19,13 @@
 @endphp
 
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Profil" heading="Profil">
-    <x-page-header title="Profil" subtitle="Data akun Anda" />
+    @if ($admin)
+        <x-admin.page title="Profil" subtitle="Data akun Anda" />
+    @else
+        <x-page-header title="Profil" subtitle="Data akun Anda" />
+    @endif
 
-    <div class="max-w-2xl">
+    <div @class(['max-w-2xl', 'rounded-2xl border border-surface-alt bg-card p-5 sm:p-6' => $admin])>
         <div class="flex items-center gap-4 py-2">
             <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-navy text-xl font-bold text-card">
                 {{ $inisial }}

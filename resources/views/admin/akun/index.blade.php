@@ -2,9 +2,12 @@
     // Manajemen Akun = akun yang SUDAH ada (approved/rejected) doang -- pendaftaran
     // yang masih menunggu diputuskan ada di halaman terpisah "Persetujuan Akun"
     // (master.akun.persetujuan), biar nggak campur aksi "putuskan" sama "kelola".
+    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka', 'satpam' => 'Satpam'];
+
     $users = \App\Models\User::with('guru', 'siswa.kelas')
         ->where('status', '!=', 'pending')
-        ->when(request('cari'), fn ($q, $c) => $q->where(fn ($w) => $w->where('name', 'like', "%{$c}%")->orWhere('email', 'like', "%{$c}%")))
+        ->when(request()->query('cari'), fn ($q, $c) => $q->where(fn ($w) => $w->where('name', 'like', "%{$c}%")->orWhere('email', 'like', "%{$c}%")))
+        ->when(request()->query('role'), fn ($q, $r) => $q->where('role', $r))
         ->orderByRaw(\App\Support\Db::orderByList('status', ['approved', 'rejected']))
         ->orderBy('name')
         ->get();
@@ -14,7 +17,6 @@
     $guruTanpaAkun = \App\Models\Guru::whereNull('user_id')->orderBy('nama')->get(['id', 'nama', 'nip']);
     $siswaTanpaAkun = \App\Models\Siswa::whereNull('user_id')->where('jabatan', 'pengurus')->with('kelas')->orderBy('nama')->get();
     $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
-    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka', 'satpam' => 'Satpam'];
 @endphp
 
 <x-layouts.admin title="Manajemen Akun" heading="Manajemen Akun">
@@ -29,6 +31,7 @@
 
     <x-admin.filters :action="route('master.akun.index')">
         <x-admin.f-search placeholder="Cari nama / email..." />
+        <x-admin.f-select name="role" label="Peran" :options="$roleLabel" all="Semua Peran" />
     </x-admin.filters>
 
     @if ($users->isEmpty())

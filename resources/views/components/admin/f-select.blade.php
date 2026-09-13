@@ -2,14 +2,18 @@
 
 @php
     // $options: ['value' => 'Label', ...]  atau  Collection of ['id','label']
-    $current = request($name);
+    // request()->query(), BUKAN request($name) -- kalau $name kebetulan 'status'/
+    // 'view'/'data'/'headers' dan field ini dipakai di halaman Route::view(),
+    // request($name) (helper __get) jatuh balik ke parameter internal Route::view()
+    // itu sendiri kalau query string kosong (lihat fix di admin/siswa/index.blade.php).
+    $current = request()->query($name);
 @endphp
 
-<label class="flex flex-col gap-1">
+<label class="flex min-w-[9rem] flex-1 flex-col gap-1 sm:max-w-[14rem]">
     <span class="text-xs font-semibold text-muted-2">{{ $label }}</span>
     <span class="relative">
         <select name="{{ $name }}" onchange="this.form.requestSubmit()"
-            class="h-10 w-44 appearance-none rounded-lg border border-surface-alt bg-card pl-3 pr-8 text-sm font-medium text-ink outline-none focus:border-navy">
+            class="h-10 w-full appearance-none rounded-lg border border-surface-alt bg-card pl-3 pr-8 text-sm font-medium text-ink outline-none focus:border-navy">
             <option value="">{{ $all }}</option>
             @foreach ($options as $value => $text)
                 <option value="{{ $value }}" @selected((string) $current === (string) $value)>{{ $text }}</option>

@@ -8,7 +8,7 @@
     <x-page-header
         :title="$jurnal->jadwal->mapel->nama"
         :subtitle="'Oleh ' . $jurnal->guru->nama . ' · ' . $jurnal->tanggal->translatedFormat('d M Y')"
-        :back="route('sekretaris.jurnal.index')"
+        :back="url()->previous(route('sekretaris.jurnal.index'))"
     />
 
     @if (! $bisaVerifikasi)

@@ -21,7 +21,7 @@
     <x-page-header
         :title="$dispensasi->siswa->nama"
         :subtitle="$dispensasi->siswa->kelas?->nama . ' · ' . $dispensasi->labelTanggal()"
-        :back="route('dispensasi.index')"
+        :back="url()->previous(route('dispensasi.index'))"
     />
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">

@@ -27,16 +27,53 @@
 
         <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-2">
             @foreach ($nav as $item)
-                @php $active = \Illuminate\Support\Facades\Route::has($item['route']) && request()->routeIs($item['match'] ?? $item['route']); @endphp
-                <a href="{{ \Illuminate\Support\Facades\Route::has($item['route']) ? route($item['route']) : '#' }}"
-                   @class([
-                       'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors',
-                       'bg-surface text-navy' => $active,
-                       'text-muted hover:bg-surface hover:text-ink' => ! $active,
-                   ])>
-                    <x-icon :name="$item['icon']" :size="20" :fill="$active" />
-                    <span>{{ $item['label'] }}</span>
-                </a>
+                @php
+                    $isGroup = isset($item['items']);
+                    $groupActive = $isGroup && collect($item['items'])->contains(
+                        fn ($sub) => \Illuminate\Support\Facades\Route::has($sub['route']) && request()->routeIs($sub['match'] ?? $sub['route'])
+                    );
+                @endphp
+
+                @if ($isGroup)
+                    <details class="group" @if ($groupActive) open @endif>
+                        <summary
+                            @class([
+                                'flex cursor-pointer list-none items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors [&::-webkit-details-marker]:hidden',
+                                'text-navy' => $groupActive,
+                                'text-muted hover:bg-surface hover:text-ink' => ! $groupActive,
+                            ])>
+                            <x-icon :name="$item['icon']" :size="20" :fill="$groupActive" />
+                            <span class="flex-1">{{ $item['group'] }}</span>
+                            <x-icon name="expand_more" :size="18" class="transition-transform group-open:rotate-180" />
+                        </summary>
+
+                        <div class="ml-3.5 flex flex-col gap-0.5 border-l border-surface-alt py-0.5 pl-3.5">
+                            @foreach ($item['items'] as $sub)
+                                @php $active = \Illuminate\Support\Facades\Route::has($sub['route']) && request()->routeIs($sub['match'] ?? $sub['route']); @endphp
+                                <a href="{{ \Illuminate\Support\Facades\Route::has($sub['route']) ? route($sub['route']) : '#' }}"
+                                   @class([
+                                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+                                       'bg-surface text-navy' => $active,
+                                       'text-muted hover:bg-surface hover:text-ink' => ! $active,
+                                   ])>
+                                    <x-icon :name="$sub['icon']" :size="18" :fill="$active" />
+                                    <span>{{ $sub['label'] }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </details>
+                @else
+                    @php $active = \Illuminate\Support\Facades\Route::has($item['route']) && request()->routeIs($item['match'] ?? $item['route']); @endphp
+                    <a href="{{ \Illuminate\Support\Facades\Route::has($item['route']) ? route($item['route']) : '#' }}"
+                       @class([
+                           'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors',
+                           'bg-surface text-navy' => $active,
+                           'text-muted hover:bg-surface hover:text-ink' => ! $active,
+                       ])>
+                        <x-icon :name="$item['icon']" :size="20" :fill="$active" />
+                        <span>{{ $item['label'] }}</span>
+                    </a>
+                @endif
             @endforeach
         </nav>
 

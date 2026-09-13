@@ -2,7 +2,7 @@
     <x-page-header
         title="Rekap Kehadiran Kelas"
         :subtitle="$kelas->nama . ' · ' . now()->translatedFormat('F Y') . ' · Anda wali kelas ini'"
-        :back="$adaKelasLain ? route('guru.wali-kelas.index') : null"
+        :back="$adaKelasLain ? url()->previous(route('guru.wali-kelas.index')) : null"
     />
 
     @if ($siswas->isEmpty())

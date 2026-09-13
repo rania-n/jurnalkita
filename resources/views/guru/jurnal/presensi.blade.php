@@ -8,7 +8,7 @@
     <x-page-header
         title="Presensi Siswa"
         :subtitle="$jurnal->jadwal->kelas->nama . ' · ' . $jurnal->jadwal->mapel->nama"
-        :back="route('jurnal.show', $jurnal)"
+        :back="url()->previous(route('jurnal.show', $jurnal))"
     />
 
     @if ($jurnal->status_verifikasi === 'revisi')

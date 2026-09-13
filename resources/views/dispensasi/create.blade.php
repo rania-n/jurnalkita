@@ -2,7 +2,7 @@
     <x-page-header
         title="Form Pengajuan Dispensasi"
         subtitle="Diajukan oleh guru piket"
-        :back="route('dispensasi.index')"
+        :back="url()->previous(route('dispensasi.index'))"
     />
 
     <form method="POST" action="{{ route('dispensasi.store') }}" enctype="multipart/form-data">
