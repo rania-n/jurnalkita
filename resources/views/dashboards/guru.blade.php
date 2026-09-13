@@ -4,7 +4,7 @@
     $jadwalHariIni = $hari && $guru
         ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hari)->orderBy('jam_ke_mulai')->get()
         : collect();
-    $piketHariIni = $guru && $guru->jadwalPikets()->where('hari', $hari)->exists();
+    $piketHariIni = auth()->user()->piketHariIni();
     $isWali = auth()->user()->isWali();
 
     // Jadwal yang jurnalnya sudah diisi hari ini

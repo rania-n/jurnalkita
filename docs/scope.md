@@ -20,7 +20,9 @@ Aturan alur detail: `docs/spec.md`.
 
 ## Backlog (NANTI, jangan sekarang)
 
-- Guru pengganti & tukar jam
+- **Guru pengganti & tukar jam** — sengaja **paling akhir**, cuma dikerjakan kalau
+  audit semua role (guru → pengurus kelas → waka → satpam) sudah selesai duluan
+  dan masih ada sisa waktu. Urutan lengkap: `docs/halaman.md` §"Urutan saran".
 - Notifikasi (siapa dapat apa — sudah dirancang, lihat `spec.md` §G)
 - Rekap jurnal per guru (portofolio mengajar)
 - SMTP produksi

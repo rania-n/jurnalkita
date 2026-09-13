@@ -37,7 +37,7 @@
                     <div class="flex items-center gap-2.5">
                         <x-ui.avatar :label="$a->siswa->no_absen ?? '–'" :gender="$a->siswa->jenis_kelamin" />
                         <div class="flex min-w-0 flex-col">
-                            <span class="truncate text-sm font-semibold text-ink">{{ $a->siswa->nama }}</span>
+                            <a href="{{ route('guru.siswa.show', $a->siswa) }}" class="truncate text-sm font-semibold text-ink hover:text-navy hover:underline">{{ $a->siswa->nama }}</a>
                             <span class="text-[11px] font-semibold text-muted-2">NIS: {{ $a->siswa->nis }}</span>
                         </div>
                     </div>

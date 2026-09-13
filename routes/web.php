@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\DispensasiController;
 use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\Guru\JurnalController;
+use App\Http\Controllers\Guru\SiswaController as GuruSiswaController;
 use App\Http\Controllers\Guru\WaliKelasController;
 use App\Http\Controllers\PiketController;
 use App\Http\Controllers\RekapController;
@@ -112,6 +113,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/guru/jurnal/{jurnal}', [JurnalController::class, 'destroy'])->name('jurnal.destroy');
         Route::get('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensi'])->name('jurnal.presensi');
         Route::post('/guru/jurnal/{jurnal}/presensi', [JurnalController::class, 'presensiSave'])->name('jurnal.presensi.save');
+
+        Route::get('/guru/siswa/{siswa}', [GuruSiswaController::class, 'show'])->name('guru.siswa.show');
     });
 
     /* ==================== SEKRETARIS (pengurus kelas) ==================== */
