@@ -91,14 +91,8 @@
             @csrf
             <x-ui.input label="Catatan (opsional)" name="catatan" :value="old('catatan')" />
             <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
-                <button type="submit" name="keputusan" value="approved"
-                    class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-hadir/25 bg-hadir-soft text-base font-bold text-hadir">
-                    <x-icon name="check" :size="20" /> Setujui
-                </button>
-                <button type="submit" name="keputusan" value="rejected" data-confirm="Yakin tolak dispensasi ini?"
-                    class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-alpha/25 bg-alpha-soft text-base font-bold text-alpha">
-                    <x-icon name="close" :size="20" /> Tolak
-                </button>
+                <x-ui.button type="submit" name="keputusan" value="approved" variant="success" icon="check" class="flex-1">Setujui</x-ui.button>
+                <x-ui.button type="submit" name="keputusan" value="rejected" variant="danger" icon="close" data-confirm="Yakin tolak dispensasi ini?" class="flex-1">Tolak</x-ui.button>
             </div>
         </form>
     @endif

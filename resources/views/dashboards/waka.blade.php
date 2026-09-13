@@ -6,6 +6,18 @@
     $adaJadwalWaka = \App\Models\User::where('role', 'waka')->whereHas('jadwalWakas')->exists();
     $bertugasHariIni = $user->wakaBertugasHariIni();
     $wakaBertugas = (! $bertugasHariIni && $adaJadwalWaka) ? \App\Models\User::wakaUntukHariIni() : null;
+
+    // K2: dulu dasbor cuma nampilin 1 hitungan (perlu approval) -- sekarang
+    // dilengkapi statistik bulan berjalan + daftar dispensasi terbaru, biar
+    // Waka lihat aktivitas tanpa harus buka Antrean Dispensasi dulu.
+    $dispensasiBulanIni = \App\Models\Dispensasi::whereMonth('tanggal', now()->month)
+        ->whereYear('tanggal', now()->year);
+    $statistikBulanIni = [
+        'diajukan' => (clone $dispensasiBulanIni)->count(),
+        'disetujui' => (clone $dispensasiBulanIni)->where('status_akhir', 'approved')->count(),
+        'ditolak' => (clone $dispensasiBulanIni)->where('status_akhir', 'rejected')->count(),
+    ];
+    $dispensasiTerbaru = \App\Models\Dispensasi::with('siswa.kelas')->latest('created_at')->limit(5)->get();
 @endphp
 
 <x-layouts.app title="Beranda Waka" width="wide">
@@ -57,4 +69,42 @@
             <x-icon name="chevron_right" :size="20" class="text-muted" />
         </a>
     </div>
+
+    <h2 class="mb-2 mt-6 text-sm font-bold text-ink">Dispensasi Bulan Ini ({{ now()->translatedFormat('F Y') }})</h2>
+    <div class="mb-6 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
+        <x-ui.stat label="Diajukan" tone="izin" :value="$statistikBulanIni['diajukan']" />
+        <x-ui.stat label="Disetujui" tone="hadir" :value="$statistikBulanIni['disetujui']" />
+        <x-ui.stat label="Ditolak" tone="alpha" :value="$statistikBulanIni['ditolak']" />
+    </div>
+
+    <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-bold text-ink">Dispensasi Terbaru</h2>
+        <a href="{{ route('dispensasi.index') }}" class="text-sm font-semibold text-navy">Lihat Semua →</a>
+    </div>
+
+    @if ($dispensasiTerbaru->isEmpty())
+        <x-ui.empty icon="fact_check" title="Belum ada dispensasi" />
+    @else
+        <x-ui.card-list>
+            @foreach ($dispensasiTerbaru as $d)
+                <x-ui.list-card
+                    :title="$d->siswa->nama"
+                    :meta="[$d->siswa->kelas?->nama . ' · ' . $d->labelTanggal(), str($d->alasan)->limit(50)]"
+                >
+                    <x-slot:badge>
+                        @if ($d->sudahKadaluarsa())
+                            <x-ui.status-badge status="kadaluarsa">Kadaluarsa</x-ui.status-badge>
+                        @else
+                            <x-ui.status-badge :status="['pending' => 'menunggu', 'approved' => 'disetujui', 'rejected' => 'ditolak'][$d->status_akhir]">
+                                {{ ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$d->status_akhir] }}
+                            </x-ui.status-badge>
+                        @endif
+                    </x-slot:badge>
+                    <x-slot:actions>
+                        <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.show', $d)" />
+                    </x-slot:actions>
+                </x-ui.list-card>
+            @endforeach
+        </x-ui.card-list>
+    @endif
 </x-layouts.app>
