@@ -87,6 +87,7 @@ return [
             // baru" beda konteks dari "kelola akun yang sudah ada".
             ['label' => 'Persetujuan Akun', 'icon' => 'how_to_reg', 'route' => 'master.akun.persetujuan'],
             ['label' => 'Audit Log', 'icon' => 'history', 'route' => 'master.audit-log.index'],
+            ['label' => 'Backup Data', 'icon' => 'cloud_download', 'route' => 'master.backup.index'],
         ]],
 
         ['group' => 'Data Master', 'icon' => 'database', 'items' => [

@@ -8,9 +8,32 @@ use App\Models\Kelas;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class KelasController extends Controller
 {
+    /**
+     * K3: rangkuman satu kelas dalam satu halaman -- dulu roster, jadwal, dan
+     * wali kepisah di 3 menu berbeda (Data Siswa, Jadwal Pelajaran, kolom Wali
+     * di Data Kelas), admin harus buka satu-satu buat lihat gambaran lengkap.
+     */
+    public function show(Kelas $kelas): View
+    {
+        $kelas->load('wali');
+
+        $siswas = $kelas->siswas()->orderBy('no_absen')->get();
+
+        $jadwalPerHari = $kelas->jadwals()
+            ->with('mapel', 'guru')
+            ->orderBy('jam_ke_mulai')
+            ->get()
+            ->groupBy('hari');
+
+        $hariLabel = config('akademik.hari');
+
+        return view('admin.kelas.show', compact('kelas', 'siswas', 'jadwalPerHari', 'hariLabel'));
+    }
+
     public function save(Request $request): RedirectResponse
     {
         $data = $request->validate([

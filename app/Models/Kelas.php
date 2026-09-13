@@ -42,6 +42,12 @@ class Kelas extends Model
         return $this->hasMany(Jadwal::class);
     }
 
+    /** Akun pengurus kelas ("sekretaris") kelas ini, kalau ada. 1 kelas = 1 pengurus. */
+    public function pengurusUser(): ?User
+    {
+        return $this->siswas()->where('jabatan', 'pengurus')->first()?->user;
+    }
+
     /** Kelas tahun ajaran yang sedang aktif (atau tanpa tahun ajaran sama sekali — data lama). */
     public function scopeAktif(Builder $query): Builder
     {

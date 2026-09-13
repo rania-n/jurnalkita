@@ -44,6 +44,7 @@
                     <td class="px-4 py-3 text-muted">{{ $k->wali?->nama ?: '—' }}</td>
                     <td class="px-4 py-3">
                         <x-admin.row-actions
+                            :detail="route('master.kelas.show', $k)"
                             edit-modal="modal-kelas"
                             edit-title="Ubah Kelas"
                             :edit-id="$k->id"

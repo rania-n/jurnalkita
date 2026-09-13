@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AkunController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\JadwalPiketController;
@@ -62,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::view('/admin/guru', 'admin.guru.index')->name('master.guru.index');
         Route::view('/admin/kelas', 'admin.kelas.index')->name('master.kelas.index');
+        Route::get('/admin/kelas/{kelas}', [KelasController::class, 'show'])->name('master.kelas.show');
         Route::view('/admin/siswa', 'admin.siswa.index')->name('master.siswa.index');
         Route::view('/admin/mapel', 'admin.mapel.index')->name('master.mapel.index');
         Route::view('/admin/jadwal-pelajaran', 'admin.jadwal-pelajaran.index')->name('master.jadwal-pelajaran.index');
@@ -72,6 +74,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin/akun-persetujuan', 'admin.akun.persetujuan')->name('master.akun.persetujuan');
         Route::view('/admin/audit-log', 'admin.audit-log.index')->name('master.audit-log.index');
         Route::view('/admin/tahun-ajaran', 'admin.tahun-ajaran.index')->name('master.tahun-ajaran.index');
+        Route::get('/admin/backup', [BackupController::class, 'index'])->name('master.backup.index');
+        Route::get('/admin/backup/unduh', [BackupController::class, 'download'])->name('master.backup.download');
 
         /* Manajemen akun */
         Route::post('/admin/akun', [AkunController::class, 'save'])->name('master.akun.save');

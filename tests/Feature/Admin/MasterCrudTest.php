@@ -3,8 +3,11 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Guru;
+use App\Models\Jadwal;
 use App\Models\JamPelajaran;
+use App\Models\Kelas;
 use App\Models\Mapel;
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -77,6 +80,35 @@ class MasterCrudTest extends TestCase
         ])->assertRedirect();
 
         $this->assertDatabaseHas('kelas', ['nama' => 'X RPL 2', 'jurusan' => 'RPL', 'nomor' => 2]);
+    }
+
+    public function test_detail_kelas_menampilkan_roster_dan_jadwal(): void
+    {
+        $wali = Guru::create(['nama' => 'Bu Wali']);
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $wali->id]);
+        Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L', 'no_absen' => 1]);
+
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $wali->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+
+        $response = $this->actingAs($this->admin())->get("/admin/kelas/{$kelas->id}");
+
+        $response->assertOk()
+            ->assertSee('Bu Wali')
+            ->assertSee('Budi')
+            ->assertSee('Matematika')
+            ->assertSee('Senin');
+    }
+
+    public function test_tombol_detail_kelas_ada_di_daftar(): void
+    {
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+
+        $this->actingAs($this->admin())->get('/admin/kelas')
+            ->assertOk()->assertSee(route('master.kelas.show', $kelas), false);
     }
 
     public function test_guru_utama_and_tambahan_mapel(): void
