@@ -16,7 +16,6 @@ class GuruController extends Controller
             'id' => ['nullable', 'exists:gurus,id'],
             'nama' => ['required', 'string', 'max:255'],
             'nip' => ['nullable', 'string', 'max:30'],
-            'no_hp' => ['nullable', 'string', 'max:20'],
             'mapel_utama_id' => ['nullable', 'exists:mapels,id'],
             'mapel_tambahan' => ['nullable', 'array'],
             'mapel_tambahan.*' => ['exists:mapels,id'],
@@ -25,10 +24,11 @@ class GuruController extends Controller
         $guru = $request->filled('id') ? Guru::findOrFail($data['id']) : new Guru;
         $baru = ! $guru->exists;
 
+        // no_hp SENGAJA tidak disentuh di sini -- diisi sekali lewat Manajemen Akun
+        // ("Buat Akun"/"Ubah Akun"), biar nggak ada 2 tempat isi nomor yang beda.
         $guru->fill([
             'nama' => $data['nama'],
             'nip' => $data['nip'] ?? null,
-            'no_hp' => $data['no_hp'] ?? null,
             'mapel_utama_id' => $data['mapel_utama_id'] ?? null,
         ])->save();
 

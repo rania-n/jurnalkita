@@ -72,8 +72,11 @@ class SiswaTest extends TestCase
         $this->assertDatabaseHas('siswas', ['nama' => 'Ketua B', 'jabatan' => 'pengurus']);
     }
 
-    public function test_admin_bisa_simpan_dan_ubah_no_hp_siswa_dari_data_siswa(): void
+    public function test_data_siswa_tidak_punya_field_no_hp_itu_cuma_lewat_manajemen_akun(): void
     {
+        // no_hp sengaja TIDAK bisa diisi/diubah lewat Data Siswa -- satu-satunya
+        // jalan masuk nomor WA adalah Manajemen Akun (lihat AkunTest), biar nggak
+        // ada 2 tempat isi nomor yang bisa beda nilainya.
         $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
 
         $this->actingAs($this->admin())->post('/admin/siswa', [
@@ -82,14 +85,7 @@ class SiswaTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $siswa = Siswa::where('nis', '001')->firstOrFail();
-        $this->assertSame('081211112222', $siswa->no_hp);
-
-        $this->actingAs($this->admin())->post('/admin/siswa', [
-            'id' => $siswa->id, 'kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi',
-            'jenis_kelamin' => 'L', 'jabatan' => 'anggota', 'no_hp' => '081299998888',
-        ])->assertSessionHasNoErrors();
-
-        $this->assertSame('081299998888', $siswa->fresh()->no_hp);
+        $this->assertNull($siswa->no_hp, 'no_hp yang dikirim lewat Data Siswa harus diabaikan');
     }
 
     public function test_kelas_bisa_dibuat_diubah_dihapus_lewat_admin(): void

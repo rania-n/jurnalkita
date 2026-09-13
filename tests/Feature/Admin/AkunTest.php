@@ -85,13 +85,15 @@ class AkunTest extends TestCase
 
     public function test_buat_akun_guru_baru_bisa_isi_no_hp(): void
     {
+        // no_hp cuma disimpan di users.no_hp (satu sumber) -- TIDAK ikut ditulis
+        // ke gurus.no_hp, biar nggak ada 2 tempat nomor WA yang bisa beda.
         $this->actingAs($this->admin())->post('/admin/akun', $this->akunPayload([
             'role' => 'guru', 'sumber' => 'baru', 'nama' => 'Pak Guru',
             'email' => 'guru-hp@sekolah.test', 'no_hp' => '081211112222',
         ]))->assertRedirect();
 
         $this->assertDatabaseHas('users', ['email' => 'guru-hp@sekolah.test', 'no_hp' => '081211112222']);
-        $this->assertDatabaseHas('gurus', ['nama' => 'Pak Guru', 'no_hp' => '081211112222']);
+        $this->assertDatabaseHas('gurus', ['nama' => 'Pak Guru', 'no_hp' => null]);
     }
 
     public function test_buat_akun_pengurus_kelas_bisa_isi_no_hp(): void
@@ -103,7 +105,8 @@ class AkunTest extends TestCase
             'email' => 'ketua-hp@sekolah.test', 'kelas_id' => $kelas->id, 'nis' => '001', 'no_hp' => '081233334444',
         ]))->assertRedirect();
 
-        $this->assertDatabaseHas('siswas', ['nama' => 'Ketua Kelas', 'no_hp' => '081233334444']);
+        $this->assertDatabaseHas('users', ['email' => 'ketua-hp@sekolah.test', 'no_hp' => '081233334444']);
+        $this->assertDatabaseHas('siswas', ['nama' => 'Ketua Kelas', 'no_hp' => null]);
     }
 
     public function test_halaman_manajemen_akun_tidak_menampilkan_akun_pending(): void

@@ -53,9 +53,12 @@ class AkunController extends Controller
             'email_verified_at' => now(),
         ]);
 
+        // no_hp cuma disimpan di users.no_hp (satu sumber, dipakai fitur WA) --
+        // TIDAK ikut ditulis ke gurus.no_hp/siswas.no_hp, biar nggak ada 2 tempat
+        // yang bisa beda nilai buat "nomor WA yang sama".
         if ($data['role'] === 'guru') {
             $guru = $sumberId ? Guru::findOrFail($sumberId) : new Guru([
-                'nama' => $data['nama'], 'nip' => $data['nip'] ?? null, 'no_hp' => $data['no_hp'] ?? null,
+                'nama' => $data['nama'], 'nip' => $data['nip'] ?? null,
             ]);
             $guru->user_id = $user->id;
             $guru->save();
@@ -80,7 +83,6 @@ class AkunController extends Controller
                 'nis' => $data['nis'],
                 'kelas_id' => $data['kelas_id'],
                 'jenis_kelamin' => $data['jenis_kelamin'] ?? 'L',
-                'no_hp' => $data['no_hp'] ?? null,
                 'jabatan' => 'pengurus',
             ]);
             $siswa->user_id = $user->id;

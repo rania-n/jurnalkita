@@ -44,7 +44,6 @@
                             :edit-fill="[
                                 'nama' => $g->nama,
                                 'nip' => $g->nip,
-                                'no_hp' => $g->no_hp,
                                 'mapel_utama_id' => $g->mapel_utama_id,
                                 'mapel_tambahan' => $g->mapels->pluck('id'),
                             ]"
@@ -60,10 +59,11 @@
     <x-admin.modal id="modal-guru" title="Tambah Guru">
         <form method="POST" action="{{ route('master.guru.save') }}" class="flex flex-col gap-4">
             @csrf
-            <p class="text-xs text-muted-2">Data guru saja. Akun login dibuat lewat menu "Buat Akun".</p>
+            <p class="text-xs text-muted-2">
+                Data guru saja. Akun login + No. WhatsApp diisi lewat menu "Manajemen Akun → Buat Akun".
+            </p>
             <x-ui.input label="Nama Lengkap" name="nama" />
             <x-ui.input label="NIP (opsional)" name="nip" />
-            <x-ui.input label="No. Telepon" name="no_hp" inputmode="numeric" />
 
             <x-ui.select label="Mapel Utama" name="mapel_utama_id">
                 <option value="">— belum ditentukan —</option>

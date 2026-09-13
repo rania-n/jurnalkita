@@ -35,9 +35,12 @@
         <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <x-ui.field-static label="Email" icon="mail" class="sm:col-span-2">{{ $user->email }}</x-ui.field-static>
 
+            {{-- No. WhatsApp SATU sumber buat semua peran: users.no_hp (diisi admin
+                 lewat Manajemen Akun) -- bukan dari tabel gurus/siswas. --}}
+            <x-ui.field-static label="No. WhatsApp" icon="call">{{ $user->no_hp ?: '—' }}</x-ui.field-static>
+
             @if ($guru)
                 <x-ui.field-static label="NIP" icon="badge">{{ $guru->nip ?: '—' }}</x-ui.field-static>
-                <x-ui.field-static label="No. WhatsApp" icon="call">{{ $guru->no_hp ?: '—' }}</x-ui.field-static>
                 <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
                 @if ($guru->mapels->isNotEmpty())
                     <x-ui.field-static label="Mapel Tambahan" icon="library_books">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
@@ -50,8 +53,6 @@
                 <x-ui.field-static label="NIS" icon="badge">{{ $siswa->nis }}</x-ui.field-static>
                 <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
                 <x-ui.field-static label="Jabatan" icon="workspace_premium">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
-            @elseif (in_array($user->role, ['waka', 'satpam']))
-                <x-ui.field-static label="No. WhatsApp" icon="call" class="sm:col-span-2">{{ $user->no_hp ?: '—' }}</x-ui.field-static>
             @endif
         </div>
 

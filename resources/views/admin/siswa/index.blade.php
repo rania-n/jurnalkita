@@ -65,7 +65,7 @@
                             edit-modal="modal-siswa"
                             edit-title="Ubah Siswa"
                             :edit-id="$s->id"
-                            :edit-fill="['nis' => $s->nis, 'nama' => $s->nama, 'kelas_id' => $s->kelas_id, 'no_absen' => $s->no_absen, 'no_hp' => $s->no_hp, 'jenis_kelamin' => $s->jenis_kelamin, 'jabatan' => $s->jabatan, 'status' => $s->status]"
+                            :edit-fill="['nis' => $s->nis, 'nama' => $s->nama, 'kelas_id' => $s->kelas_id, 'no_absen' => $s->no_absen, 'jenis_kelamin' => $s->jenis_kelamin, 'jabatan' => $s->jabatan, 'status' => $s->status]"
                             :delete-action="route('master.siswa.destroy', $s)"
                             delete-confirm="Yakin hapus {{ $s->nama }}?"
                         />
@@ -80,6 +80,10 @@
     <x-admin.modal id="modal-siswa" title="Tambah Siswa">
         <form method="POST" action="{{ route('master.siswa.save') }}" class="flex flex-col gap-4">
             @csrf
+            <p class="text-xs text-muted-2">
+                Data siswa saja. Akun login (khusus pengurus kelas) + No. WhatsApp
+                diisi lewat menu "Manajemen Akun → Buat Akun".
+            </p>
             <x-ui.select label="Kelas" name="kelas_id">
                 <option value="" disabled selected hidden>Pilih kelas</option>
                 @foreach ($kelasAktifList as $k)
@@ -89,7 +93,6 @@
             <x-ui.input label="NIS" name="nis" inputmode="numeric" />
             <x-ui.input label="Nama Lengkap" name="nama" />
             <x-ui.input label="Nomor Presensi" name="no_absen" type="number" min="1" />
-            <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" />
             <x-ui.select label="Jenis Kelamin" name="jenis_kelamin">
                 <option value="" disabled selected hidden>Pilih</option>
                 <option value="L">Laki-laki</option>
