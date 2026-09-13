@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Sekretaris;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Kelas;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class KelasController extends Controller
@@ -24,9 +25,10 @@ class KelasController extends Controller
     }
 
     /** V2: jadwal pelajaran kelas, seminggu, dikelompokkan per hari. */
-    public function jadwal(): View
+    public function jadwal(Request $request): View
     {
         $kelas = $this->kelas();
+        $hari = $request->query('hari', 'semua');
 
         $jadwalPerHari = $kelas->jadwals()
             ->with('mapel', 'guru')
@@ -34,7 +36,14 @@ class KelasController extends Controller
             ->get()
             ->groupBy('hari');
 
-        return view('sekretaris.jadwal', compact('kelas', 'jadwalPerHari'));
+        if ($hari !== 'semua') {
+            // filter(), bukan only() -- Eloquent\Collection::only() ngasumsiin
+            // itemnya Model (manggil getKey()), meledak di atas hasil groupBy()
+            // yang itemnya sub-Collection. Lihat Guru\JadwalController.
+            $jadwalPerHari = $jadwalPerHari->filter(fn ($v, $k) => $k === $hari);
+        }
+
+        return view('sekretaris.jadwal', compact('kelas', 'jadwalPerHari', 'hari'));
     }
 
     /** Rekap kehadiran kelas bulan berjalan, per siswa. */

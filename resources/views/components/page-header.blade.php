@@ -15,7 +15,10 @@
         </a>
     @endif
 
-    <header class="flex items-start gap-3">
+    {{-- Judul panjang + tombol aksi gampang sesak berdempetan di layar sempit --
+         susun ke bawah (judul dulu, tombol di bawahnya) di mobile, baru sejajar
+         mulai `sm:`. --}}
+    <header class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start">
         <div class="flex flex-1 flex-col gap-0.5">
             <h1 class="text-[22px] font-bold leading-tight text-ink lg:text-[26px]">{{ $title }}</h1>
             @if ($subtitle)
@@ -23,6 +26,8 @@
             @endif
         </div>
 
-        {{ $slot }}
+        @if ($slot->isNotEmpty())
+            <div class="flex shrink-0 flex-wrap gap-2">{{ $slot }}</div>
+        @endif
     </header>
 </div>

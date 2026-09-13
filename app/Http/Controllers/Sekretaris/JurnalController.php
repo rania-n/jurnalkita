@@ -115,6 +115,14 @@ class JurnalController extends Controller
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
         abort_unless($jadwal->kelas_id === $kelas->id, 403);
 
+        // Jam mulai SELALU ikut jadwal aslinya (bukan input form) -- sama kayak
+        // aturan Guru\JurnalController::store(). jam_ke_selesai boleh lebih lama
+        // dari jadwal aslinya kalau memang begitu kenyataannya.
+        $data['jam_ke_mulai'] = $jadwal->jam_ke_mulai;
+        if ($data['jam_ke_selesai'] < $data['jam_ke_mulai']) {
+            $data['jam_ke_selesai'] = $jadwal->jam_ke_selesai;
+        }
+
         $sudahAda = Jurnal::where('jadwal_id', $jadwal->id)
             ->whereDate('tanggal', now()->toDateString())
             ->first();

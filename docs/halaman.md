@@ -86,8 +86,27 @@ mapel — ini K4, selesai 2026-09-13) · Profil
 > nyusul pas giliran audit masing-masing kalau relevan.
 
 ### Pengurus Kelas (layout mobile)
-Beranda · Verifikasi Jurnal (daftar) · Periksa Jurnal (verifikasi / minta revisi) ·
-Isi Jurnal Pengganti · Profil
+Beranda · Verifikasi Jurnal (daftar + tab status) · Periksa Jurnal (verifikasi /
+minta revisi) · Isi Jurnal Pengganti · **Daftar Siswa Sekelas** (read-only,
+ini K1) · **Jadwal Pelajaran Kelas** (seminggu, tab hari) · **Rekap Kehadiran**
+(kehadiran siswa sekelas bulan berjalan) · Profil
+
+> **Audit Pengurus Kelas selesai 2026-09-13**: ternyata K1 (Daftar Siswa
+> Sekelas) **sudah dibangun duluan** (`Sekretaris\KelasController@siswa`),
+> begitu juga 2 halaman bonus yang belum tercatat di sini — Jadwal Pelajaran
+> Kelas & Rekap Kehadiran, keduanya sudah full berfungsi + ada test. Yang
+> dikerjakan sesi ini: bug tombol Kembali (`url()->previous()` yang sama
+> seperti di Guru) diperbaiki di Periksa Jurnal & Isi Jurnal Pengganti; Jadwal
+> Pelajaran Kelas dapat tab hari (Semua/Senin–Jumat), sama kayak punya Guru;
+> Isi Jurnal Pengganti sekarang jam ke-mulai/selesai auto-fill dari jadwal
+> yang dipilih (dulu 2 dropdown manual terpisah, gampang salah input) — sama
+> persis pola yang dipakai Form Jurnal Guru; tombol Verifikasi/Minta Revisi
+> di Periksa Jurnal diganti pakai `x-ui.button` (dulu styling manual sendiri,
+> sekarang konsisten sama tombol di halaman lain); komponen bersama
+> `x-page-header` diperbaiki supaya judul panjang + tombol aksi nggak
+> berdesakan di layar sempit (turun ke bawah dulu, baru sejajar mulai `sm:`)
+> — ini otomatis ikut memperbaiki semua halaman lain yang pakai pola sama.
+> Ikon "Hubungi Admin" di topbar diperluas ke semua peran (dulu guru doang).
 
 ### Waka (layout mobile)
 Beranda · Antrean Dispensasi (daftar + detail + setujui/tolak) ·
@@ -108,12 +127,14 @@ Diputuskan 2026-09-13: K1–K4 **jadi** (bukan opsional lagi), dikerjakan pas gi
 audit role pemiliknya (lihat "Urutan saran" di bawah). K5–K6 tetap boleh diambil
 kapan saja, sela-sela modul mana pun.
 
-**K4 dan K6 sudah selesai** (giliran audit Guru, 2026-09-13) — lihat catatan di
-bagian "Guru" di atas. Sisa: K1, K2, K3, K5.
+**K1, K4, K6 sudah selesai.** K4 & K6 pas giliran audit Guru (2026-09-13) —
+lihat bagian "Guru" di atas. K1 ternyata **sudah ada dari sesi sebelumnya**,
+ketauan pas audit Pengurus Kelas (2026-09-13) — lihat bagian "Pengurus Kelas"
+di atas. Sisa: K2, K3, K5.
 
 | # | Halaman | Untuk | Catatan | Dikerjakan pas audit |
 |---|---|---|---|---|
-| K1 | **Daftar siswa sekelas** (read-only) | Pengurus kelas | Lihat NIS / no. absen teman sekelas. ~½ hari. | Pengurus Kelas |
+| ~~K1~~ | ~~Daftar siswa sekelas (read-only)~~ | Pengurus kelas | **Selesai** — sudah ada duluan, dikonfirmasi 2026-09-13. | Pengurus Kelas |
 | K2 | **Dashboard Waka lebih berisi** | Waka | Sekarang cuma 1 kartu. Tambah statistik dispensasi (bulan ini: diajukan / disetujui / ditolak) + daftar terbaru. | Waka |
 | K3 | **Detail Kelas** (roster + jadwal + wali) | Admin | Sekarang info kelas kepisah di 3 menu. Satu halaman rangkuman. | Admin (susulan, kecil) |
 | K5 | **Halaman 403 / 404 custom** | Semua | Sekarang pakai bawaan Laravel (polos). | Kapan saja |
@@ -147,9 +168,9 @@ audit menyeluruh per role dengan urutan ini — alasannya di kolom kanan:
 
 | Urutan | Role | Kenapa duluan | Ikut dikerjakan pas giliran ini |
 |---|---|---|---|
-| 1 | **Guru** | Ini inti aplikasi ("Jurnal & Absensi **Guru**") — paling sering dipakai, paling penting buat dinilai. | K4 (Detail Siswa), K6 (shortcut piket/dispensasi di beranda) |
-| 2 | **Pengurus Kelas** (sekretaris) | Alur jurnal nggak selesai tanpa verifikasi mereka — langsung nyambung ke hasil kerja Guru di langkah 1. | K1 (Daftar siswa sekelas) |
-| 3 | **Waka** | Tahap kedua approval dispensasi — kurang kritis dibanding 1–2, tapi masih dipakai rutin. | K2 (Dashboard Waka diperkaya) |
+| 1 | ~~**Guru**~~ ✅ | Ini inti aplikasi ("Jurnal & Absensi **Guru**") — paling sering dipakai, paling penting buat dinilai. | K4 (Detail Siswa), K6 (shortcut piket/dispensasi di beranda) |
+| 2 | ~~**Pengurus Kelas**~~ ✅ (sekretaris) | Alur jurnal nggak selesai tanpa verifikasi mereka — langsung nyambung ke hasil kerja Guru di langkah 1. | K1 (Daftar siswa sekelas, ternyata sudah ada) |
+| 3 | **Waka** ← *lanjut ke sini* | Tahap kedua approval dispensasi — kurang kritis dibanding 1–2, tapi masih dipakai rutin. | K2 (Dashboard Waka diperkaya) |
 | 4 | **Satpam** | Alurnya paling sempit (scan QR + catat telat gerbang), paling kecil risikonya, aman di akhir. | — |
 | — | Admin (susulan kecil) | Sisa printilan admin yang bukan bug (K3 Detail Kelas, tombol Detail, fitur backup) — diselipkan kapan senggang, bukan blocker. | K3, tombol Detail, fitur backup |
 | **Paling akhir** | **B8 — Guru pengganti & tukar jam** | Fitur besar & baru, cuma dikerjakan **kalau 1–4 di atas sudah beres semua** dan masih ada sisa waktu sebelum deadline/sidang. | — |

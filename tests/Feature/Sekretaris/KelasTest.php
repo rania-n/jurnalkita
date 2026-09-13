@@ -82,6 +82,24 @@ class KelasTest extends TestCase
             ->assertOk()->assertSee('Belum ada jadwal pelajaran');
     }
 
+    public function test_tab_hari_memfilter_jadwal_kelas(): void
+    {
+        $guru = Guru::create(['nama' => 'Bu Sarah']);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+
+        // Regresi: Collection::only() meledak di atas hasil groupBy() (lihat
+        // Guru\JadwalController) -- pastikan filter tab hari nggak error 500.
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jadwal?hari=senin')
+            ->assertOk()->assertSee('Matematika');
+
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jadwal?hari=selasa')
+            ->assertOk()->assertSee('Belum ada jadwal pelajaran')->assertDontSee('Matematika');
+    }
+
     public function test_rekap_menghitung_kehadiran_bulan_ini(): void
     {
         $guru = Guru::create(['nama' => 'Bu Sarah']);

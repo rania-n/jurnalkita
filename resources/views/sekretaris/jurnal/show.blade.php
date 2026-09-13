@@ -8,7 +8,7 @@
     <x-page-header
         :title="$jurnal->jadwal->mapel->nama"
         :subtitle="'Oleh ' . $jurnal->guru->nama . ' · ' . $jurnal->tanggal->translatedFormat('d M Y')"
-        :back="url()->previous(route('sekretaris.jurnal.index'))"
+        :back="route('sekretaris.jurnal.index')"
     />
 
     @if (! $bisaVerifikasi)
@@ -40,14 +40,8 @@
                     @csrf
                     <x-ui.textarea label="Catatan (wajib jika minta revisi)" name="catatan" :rows="2" placeholder="Contoh: materi tidak sesuai dengan yang diajarkan.">{{ old('catatan') }}</x-ui.textarea>
                     <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
-                        <button type="submit" name="keputusan" value="terima"
-                            class="press flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-hadir/25 bg-hadir-soft text-sm font-bold text-hadir">
-                            <x-icon name="check" :size="18" /> Sesuai — Verifikasi
-                        </button>
-                        <button type="submit" name="keputusan" value="revisi"
-                            class="press flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-alpha/25 bg-alpha-soft text-sm font-bold text-alpha">
-                            <x-icon name="edit" :size="18" /> Minta Revisi
-                        </button>
+                        <x-ui.button type="submit" name="keputusan" value="terima" variant="success" icon="check" class="flex-1">Sesuai — Verifikasi</x-ui.button>
+                        <x-ui.button type="submit" name="keputusan" value="revisi" variant="danger" icon="edit" class="flex-1">Minta Revisi</x-ui.button>
                     </div>
                 </form>
             @endif

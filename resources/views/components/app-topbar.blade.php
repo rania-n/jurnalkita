@@ -20,10 +20,13 @@
 
     // Hubungi Admin -- dulu cuma nongol di dasbor Guru, sekarang ditaruh di topbar
     // biar bisa dijangkau dari halaman MANA PUN, bukan cuma pas kebetulan lagi di
-    // beranda. Guru rata-rata bapak/ibu yang kurang teknologi, jadi jalur bantuan
-    // harus selalu kelihatan, bukan disembunyikan.
-    $admin = $user?->role === 'guru' ? \App\Models\User::where('role', 'admin')->whereNotNull('no_hp')->first() : null;
-    $waLinkAdmin = $admin ? \App\Support\WaLink::url($admin->no_hp, "Halo Admin jurnalkita, saya {$nama}, mau tanya soal akun/jadwal.") : null;
+    // beranda. Berlaku semua peran non-admin yang pakai shell ini (admin sendiri
+    // pakai layouts.admin, nggak lewat sini) -- semua orang butuh jalur bantuan
+    // yang selalu kelihatan, bukan disembunyikan.
+    $admin = $user && $user->role !== 'admin'
+        ? \App\Models\User::where('role', 'admin')->whereNotNull('no_hp')->first()
+        : null;
+    $waLinkAdmin = $admin ? \App\Support\WaLink::url($admin->no_hp, "Halo Admin jurnalkita, saya {$nama} ({$roleLabel}), mau tanya soal akun/jadwal.") : null;
 
     $jumlahBelumDibaca = $user?->unreadNotifications->count() ?? 0;
 @endphp
