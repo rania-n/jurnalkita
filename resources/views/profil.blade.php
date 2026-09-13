@@ -61,9 +61,28 @@
         </div>
 
         <x-alert type="info" class="mt-6">
-            Perubahan data akun dilakukan oleh Admin. Untuk ganti kata sandi, gunakan
-            <strong>Lupa kata sandi</strong> di halaman masuk.
+            Perubahan data akun (nama, email, dll) dilakukan oleh Admin. Anda hanya bisa
+            mengubah <strong>kata sandi</strong> sendiri lewat form di bawah.
         </x-alert>
+
+        @if (session('status') === 'password-updated')
+            <x-alert type="success" class="mt-4">Kata sandi berhasil diubah.</x-alert>
+        @endif
+
+        <div class="mt-6 border-t border-surface-alt pt-6">
+            <h2 class="mb-3 text-sm font-bold text-ink">Ubah Kata Sandi</h2>
+
+            <form method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-3">
+                @csrf
+                @method('PUT')
+
+                <x-ui.input label="Kata Sandi Saat Ini" name="current_password" type="password" icon="lock" :error-bag="'updatePassword'" />
+                <x-ui.input label="Kata Sandi Baru" name="password" type="password" icon="lock_reset" :error-bag="'updatePassword'" />
+                <x-ui.input label="Konfirmasi Kata Sandi Baru" name="password_confirmation" type="password" icon="lock_reset" :error-bag="'updatePassword'" />
+
+                <x-ui.button type="submit" icon="save" class="mt-1 sm:self-start">Simpan Kata Sandi</x-ui.button>
+            </form>
+        </div>
 
         <div class="mt-6">
             <x-logout-button variant="full" />

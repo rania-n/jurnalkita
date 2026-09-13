@@ -6,6 +6,8 @@
         : collect();
     $piketHariIni = auth()->user()->piketHariIni();
     $isWali = auth()->user()->isWali();
+    $admin = \App\Models\User::where('role', 'admin')->whereNotNull('no_hp')->first();
+    $waLinkAdmin = $admin ? \App\Support\WaLink::url($admin->no_hp, "Halo Admin jurnalkita, saya {$guru?->nama}, mau tanya soal akun/jadwal.") : null;
 
     // Jadwal yang jurnalnya sudah diisi hari ini
     $sudahDiisi = $guru
@@ -67,7 +69,9 @@
         </div>
 
         @if ($jadwalHariIni->isEmpty())
-            <x-ui.empty icon="event_busy" title="Tidak ada jadwal hari ini" />
+            <x-ui.empty icon="event_busy" title="Tidak ada jadwal hari ini" desc="Mau isi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.">
+                <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
+            </x-ui.empty>
         @else
             <x-ui.card-list>
                 @foreach ($jadwalHariIni as $j)
@@ -87,4 +91,18 @@
             </x-ui.card-list>
         @endif
     @endunless
+
+    @if ($waLinkAdmin)
+        <a href="{{ $waLinkAdmin }}" target="_blank" rel="noopener"
+           class="press mt-6 flex items-center gap-3 rounded-2xl border border-surface-alt bg-card p-4">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                <x-icon name="support_agent" :size="24" />
+            </span>
+            <div class="flex-1">
+                <p class="text-sm font-bold text-ink">Butuh bantuan? Hubungi Admin</p>
+                <p class="text-xs text-muted">{{ $admin->name }} · {{ $admin->no_hp }} (WhatsApp)</p>
+            </div>
+            <x-icon name="chevron_right" :size="20" class="text-muted" />
+        </a>
+    @endif
 </x-layouts.app>

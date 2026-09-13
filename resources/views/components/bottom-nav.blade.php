@@ -7,6 +7,11 @@
             'url' => route($item['route']),
             'active' => request()->routeIs($item['match'] ?? $item['route']),
         ]));
+
+    // Item 'fab' (mis. "Isi Jurnal") dipisah dari daftar biasa -- dirender sebagai
+    // tombol bulat melayang di tengah, bukan ikut baris menu rata seperti yang lain.
+    $fab = $items->firstWhere('fab', true);
+    $items = $items->reject(fn ($item) => $item['fab'] ?? false);
 @endphp
 
 @if ($items->isNotEmpty())
@@ -33,5 +38,15 @@
                 </li>
             @endforeach
         </ul>
+
+        @if ($fab)
+            <a
+                href="{{ $fab['url'] }}"
+                class="press absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-navy text-card shadow-lg shadow-navy/30 ring-4 ring-surface"
+                aria-label="{{ $fab['label'] }}"
+            >
+                <x-icon :name="$fab['icon']" :size="26" fill />
+            </a>
+        @endif
     </nav>
 @endif

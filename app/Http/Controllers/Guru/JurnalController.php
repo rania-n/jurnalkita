@@ -28,14 +28,17 @@ class JurnalController extends Controller
     }
 
     /* --------------------------------------------------------------- Riwayat */
-    public function index(): View
+    public function index(Request $request): View
     {
+        $status = $request->query('status', 'semua');
+
         $jurnals = $this->guru()->jurnals()
             ->with('jadwal.kelas', 'jadwal.mapel')
+            ->when($status !== 'semua', fn ($q) => $q->where('status_verifikasi', $status))
             ->latest('tanggal')->latest('id')
-            ->paginate(15);
+            ->paginate(15)->withQueryString();
 
-        return view('guru.jurnal.index', compact('jurnals'));
+        return view('guru.jurnal.index', compact('jurnals', 'status'));
     }
 
     /* ------------------------------------------------------------ Form baru */
@@ -66,13 +69,9 @@ class JurnalController extends Controller
     {
         $guru = $this->guru();
 
-        // Jam mulai terkunci ke jam pelajaran sekarang (tidak bisa di-backdate dari form).
-        $request->merge(['jam_ke_mulai' => Waktu::jpSekarang()]);
-
         $data = $request->validate([
             'jadwal_id' => ['required', 'exists:jadwals,id'],
-            'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:15'],
-            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
+            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15'],
             'status_guru' => ['required', 'in:hadir,tugas,tidak_hadir'],
             'materi' => ['required', 'string'],
             'metode' => ['nullable', 'string', 'max:255'],
@@ -81,6 +80,14 @@ class JurnalController extends Controller
 
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
         abort_unless($jadwal->guru_id === $guru->id, 403);
+
+        // Jam mulai SELALU ikut jadwal yang dipilih (bukan input klien, bukan jam
+        // sekarang) -- ini yang benar-benar dijadwalkan, mau diisi tepat waktu atau
+        // telat sekalipun. jam_ke_selesai boleh lebih lama dari jadwal aslinya.
+        $data['jam_ke_mulai'] = $jadwal->jam_ke_mulai;
+        if ($data['jam_ke_selesai'] < $data['jam_ke_mulai']) {
+            $data['jam_ke_selesai'] = $jadwal->jam_ke_selesai;
+        }
 
         // Cegah jurnal ganda untuk jadwal yang sama di hari yang sama.
         $sudahAda = Jurnal::where('jadwal_id', $jadwal->id)

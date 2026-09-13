@@ -4,6 +4,7 @@
     'type' => 'text',
     'icon' => null,
     'hint' => null,
+    'errorBag' => 'default',
 ])
 
 @php
@@ -23,7 +24,7 @@
         <x-ui.label :for="$id">{{ $label }}</x-ui.label>
     @endif
 
-    <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy @error($name) !border-alpha @enderror">
+    <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy @error($name, $errorBag) !border-alpha @enderror">
         @if ($icon)
             <x-icon :name="$icon" :size="20" class="shrink-0 text-muted-2" />
         @endif
@@ -38,7 +39,7 @@
         {{ $slot }}
     </div>
 
-    @error($name)
+    @error($name, $errorBag)
         <p class="text-xs font-medium text-alpha">{{ $message }}</p>
     @else
         @if ($hint)

@@ -55,7 +55,7 @@ class JadwalTest extends TestCase
         Guru::create(['user_id' => $user->id, 'nama' => 'Guru Baru']);
 
         $this->actingAs($user)->get('/guru/jadwal')
-            ->assertOk()->assertSee('Belum ada jadwal mengajar');
+            ->assertOk()->assertSee('Belum ada jadwal');
     }
 
     public function test_kartu_shortcut_piket_muncul_hanya_saat_guru_piket_hari_ini(): void

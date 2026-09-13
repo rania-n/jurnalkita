@@ -18,6 +18,10 @@ class JadwalController extends Controller
             ->get()
             ->groupBy('hari');
 
-        return view('guru.jadwal', compact('jadwalPerHari'));
+        // Jadwal piket ikut ditampilkan di halaman yang sama -- guru sering lupa
+        // kalau jadwal piket & jadwal mengajar dipisah 2 halaman/menu berbeda.
+        $piketPerHari = $guru->jadwalPikets()->orderBy('mulai')->get()->groupBy('hari');
+
+        return view('guru.jadwal', compact('jadwalPerHari', 'piketPerHari'));
     }
 }

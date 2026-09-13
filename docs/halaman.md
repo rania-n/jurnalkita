@@ -39,6 +39,22 @@ mapel — ini K4, selesai 2026-09-13) · Profil
 > Dispensasi di beranda saat piket) ternyata **sudah ada duluan** — cuma
 > dirapikan dikit (pakai `User::piketHariIni()`, bukan query manual ulang).
 
+> **Polish Guru selesai 2026-09-13** (giliran audit yang sama, batch kedua):
+> jam ke-mulai/selesai di Form Jurnal sekarang otomatis ikut jadwal yang
+> dipilih (bukan lagi ikut jam saat ini); navbar mobile dapat tombol bulat
+> "Isi Jurnal" yang lebih besar & beda warna di tengah; Riwayat Jurnal dapat
+> tab status (Semua/Menunggu/Berhasil/Perlu Revisi); Detail Jurnal dirapikan
+> jadi tampilan-dulu-baru-aksi — Ubah/Hapus dipindah ke paling bawah setelah
+> presensi, dan Ubah dibuka lewat popup (bukan form yang langsung aktif);
+> Jadwal Mengajar Saya sekarang ikut menampilkan jadwal piket per hari;
+> Beranda dapat kartu "Hubungi Admin" (WA) + CTA "Isi Jurnal" saat tidak ada
+> jadwal hari ini biar guru yang kurang teknologi tidak bingung; Profil bisa
+> ganti password sendiri (field lain tetap statis, dikelola admin). Bug
+> timezone (aplikasi jalan di UTC padahal sekolahnya WIB, bikin deteksi "jam
+> pelajaran sekarang" meleset) ikut diperbaiki di `config/app.php`.
+> Notifikasi (B1) **belum** dikerjakan — sesuai keputusan di bawah, itu
+> nunggu sampai semua role (Guru/Pengurus Kelas/Waka/Satpam) selesai.
+
 ### Pengurus Kelas (layout mobile)
 Beranda · Verifikasi Jurnal (daftar) · Periksa Jurnal (verifikasi / minta revisi) ·
 Isi Jurnal Pengganti · Profil

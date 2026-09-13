@@ -15,6 +15,11 @@ return [
     'guru' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
         ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        // 'fab' => tombol bulat lebih besar & beda warna di tengah bottom-nav mobile
+        // (lihat components/bottom-nav.blade.php) -- biar aksi paling sering dipakai
+        // (isi jurnal) langsung kelihatan, gak ketutup menu lain. Nggak dipakai
+        // guru-piket (hari piket, guru nggak dijadwalkan mengajar).
+        ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
@@ -24,6 +29,7 @@ return [
     'guru-wali' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
         ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Wali Kelas', 'icon' => 'groups', 'route' => 'guru.wali-kelas.index', 'match' => 'guru.wali-kelas.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
