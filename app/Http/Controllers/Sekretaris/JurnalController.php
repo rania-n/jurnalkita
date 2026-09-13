@@ -96,7 +96,12 @@ class JurnalController extends Controller
             ->when($hariIni, fn ($q) => $q->where('hari', $hariIni))
             ->orderBy('jam_ke_mulai')->get();
 
-        return view('sekretaris.jurnal.pengganti', compact('kelas', 'jadwals'));
+        // Pengurus kelas ADA di kelas itu, jadi dia yang paling tau siapa yang
+        // beneran hadir/nggak hari ini -- presensinya diisi bareng, bukan asal
+        // ditandai hadir semua.
+        $siswas = $kelas->siswas()->orderBy('no_absen')->get();
+
+        return view('sekretaris.jurnal.pengganti', compact('kelas', 'jadwals', 'siswas'));
     }
 
     public function storePengganti(Request $request): RedirectResponse
@@ -110,6 +115,9 @@ class JurnalController extends Controller
             'status_guru' => ['required', 'in:tugas,tidak_hadir'],   // pengganti tidak boleh "hadir"
             'materi' => ['required', 'string'],
             'tugas_tambahan' => ['nullable', 'string'],
+            'presensi' => ['required', 'array'],
+            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
+            'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
         ]);
 
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
@@ -133,7 +141,7 @@ class JurnalController extends Controller
 
         $jurnal = DB::transaction(function () use ($data, $jadwal) {
             $jurnal = Jurnal::create([
-                ...$data,
+                ...collect($data)->except('presensi')->all(),
                 'guru_id' => $jadwal->guru_id,
                 'tanggal' => now()->toDateString(),
                 'diisi_oleh_pengurus' => true,
@@ -142,7 +150,13 @@ class JurnalController extends Controller
             ]);
 
             foreach ($jadwal->kelas->siswas as $siswa) {
-                Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id, 'status' => 'hadir']);
+                $isi = $data['presensi'][$siswa->id] ?? ['status' => 'hadir', 'catatan' => null];
+                Absensi::create([
+                    'jurnal_id' => $jurnal->id,
+                    'siswa_id' => $siswa->id,
+                    'status' => $isi['status'],
+                    'catatan' => $isi['catatan'] ?? null,
+                ]);
             }
 
             return $jurnal;

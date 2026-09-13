@@ -138,21 +138,35 @@ class VerifikasiJurnalTest extends TestCase
 
     public function test_jurnal_pengganti_hanya_tugas_atau_tidak_hadir(): void
     {
+        $ketua = Siswa::where('nis', '001')->firstOrFail();
+        $anggota = Siswa::where('nis', '002')->firstOrFail();
+        $presensi = [
+            $ketua->id => ['status' => 'hadir'],
+            $anggota->id => ['status' => 'hadir'],
+        ];
+
         $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'x',
+            'status_guru' => 'hadir', 'materi' => 'x', 'presensi' => $presensi,
         ])->assertSessionHasErrors('status_guru');
 
         $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
             'status_guru' => 'tugas', 'materi' => 'Kerjakan LKS hal. 10',
+            'presensi' => [
+                $ketua->id => ['status' => 'sakit'],
+                $anggota->id => ['status' => 'hadir'],
+            ],
         ])->assertRedirect();
 
         $jurnal = Jurnal::first();
         $this->assertTrue($jurnal->diisi_oleh_pengurus);
         $this->assertSame('terverifikasi', $jurnal->status_verifikasi);
         $this->assertCount(2, $jurnal->absensis);
+        // Pengurus kelas beneran bisa nandain siapa yang nggak hadir, bukan
+        // ke-hardcode "hadir" semua.
+        $this->assertSame('sakit', $jurnal->absensis()->where('siswa_id', $ketua->id)->value('status'));
     }
 }
