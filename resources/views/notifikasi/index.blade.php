@@ -1,5 +1,8 @@
 <x-layouts.app title="Notifikasi">
-    <x-page-header title="Notifikasi" subtitle="Pemberitahuan untuk Anda">
+    {{-- Lonceng notifikasi bisa dipencet dari halaman MANA PUN, jadi nggak ada
+         satu "halaman induk" yang tetap -- back()-nya JS history, bukan route()
+         tetap kayak kebanyakan halaman lain. --}}
+    <x-page-header title="Notifikasi" subtitle="Pemberitahuan untuk Anda" back="javascript:history.back()">
         @if (auth()->user()->unreadNotifications->isNotEmpty())
             <form method="POST" action="{{ route('notifikasi.tandai-semua-dibaca') }}">
                 @csrf

@@ -178,6 +178,40 @@ class NotifikasiTest extends TestCase
         Notification::assertSentTo($sekretaris, JurnalPerluDiperiksa::class);
     }
 
+    /**
+     * Regresi: tautan notifikasi disimpan sebagai URL ABSOLUT (pakai route()
+     * saat notifikasi dikirim). Kalau APP_URL pernah salah setel atau situsnya
+     * dibuka dari domain lain, redirect ke URL absolut itu lompat ke domain
+     * BEDA -> sesi login ketinggalan di domain asal -> user ngerasa "kepencet
+     * malah balik ke halaman login". buka() harus redirect pakai PATH doang
+     * (relatif), bukan URL absolut, biar selalu ikut domain yang lagi dipakai.
+     */
+    public function test_buka_notifikasi_redirect_pakai_path_bukan_domain_yang_tersimpan(): void
+    {
+        $guruUser = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $guruUser->id, 'nama' => 'Pak Guru']);
+
+        $guruUser->notify(new class extends \Illuminate\Notifications\Notification
+        {
+            public function via($notifiable): array
+            {
+                return ['database'];
+            }
+
+            public function toArray($notifiable): array
+            {
+                // Sengaja domain BEDA dari yang dipakai request test ini --
+                // meniru kondisi APP_URL salah setel / situs dibuka dari domain lain.
+                return ['title' => 'Tes', 'body' => 'Isi', 'url' => 'http://domain-lain-sama-sekali.test/guru/jurnal/99?status=pending'];
+            }
+        });
+
+        $id = $guruUser->notifications()->first()->id;
+
+        $this->actingAs($guruUser)->get("/notifikasi/{$id}/buka")
+            ->assertRedirect('/guru/jurnal/99?status=pending');
+    }
+
     public function test_halaman_notifikasi_tampil_dan_bisa_ditandai_dibaca(): void
     {
         $guruUser = User::factory()->role('guru')->create();
