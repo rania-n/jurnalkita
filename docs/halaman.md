@@ -90,15 +90,19 @@ hadir/sakit/izin/alpha/dispensasi siswa itu, lintas mapel — ini K4, selesai
 > baru login disambut popup pilihan "Isi Jurnal Sekarang" / "Lihat Beranda
 > Dulu" (blur backdrop, sekali per sesi login).
 >
-> **Notifikasi (B1) — versi guru sudah jalan**, lebih cepat dari rencana
-> (awalnya ditunda sampai 4 role selesai, tapi user minta dikerjakan
-> sekarang): tabel `notifications` bawaan Laravel (`Notifiable` trait, sudah
-> ada di model User) + 2 notifikasi nyata — guru dapat notif saat jurnalnya
-> diminta revisi pengurus kelas, guru piket dapat notif saat dispensasinya
-> diputuskan Waka. Ikon lonceng di topbar (badge titik merah kalau ada yang
-> belum dibaca) → halaman `/notifikasi` (tandai satu / tandai semua dibaca).
-> Peran lain (Pengurus Kelas/Waka/Satpam) belum dapat notifikasi apa pun —
-> nyusul pas giliran audit masing-masing kalau relevan.
+> **Notifikasi (B1) — SEKARANG LENGKAP SEMUA, 2026-09-13.** Awalnya cuma versi
+> Guru (jurnal diminta revisi, dispensasi diputuskan) dikerjakan duluan atas
+> permintaan langsung; sisanya ditunda sampai 4 role selesai — begitu ke-4
+> role kelar, seluruh matriks di `spec.md` §G ikut dikerjakan sekaligus:
+> Waka dapat notif tiap ada dispensasi baru, guru mapel terkait dapat notif
+> kalau ada siswanya yang dispensasi di jam dia ngajar, pengurus kelas dapat
+> notif tiap ada jurnal baru / jurnal hasil revisi yang perlu diperiksa.
+> Tabel `notifications` bawaan Laravel (`Notifiable` trait di model User),
+> ikon lonceng di topbar (badge titik merah kalau ada yang belum dibaca) →
+> halaman `/notifikasi` (tandai satu / tandai semua dibaca) — infrastruktur
+> yang sama dipakai semua peran, cuma nambah class `Notification` +
+> pemicunya di controller terkait. Satpam sengaja nggak dapat notif apa
+> pun — nggak ada event async yang relevan buat kerja mereka.
 
 ### Pengurus Kelas (layout mobile)
 Beranda · Verifikasi Jurnal (daftar + tab status) · Periksa Jurnal (verifikasi /
@@ -183,18 +187,34 @@ Diputuskan 2026-09-13: K1–K4 **jadi** (bukan opsional lagi), dikerjakan pas gi
 audit role pemiliknya (lihat "Urutan saran" di bawah). K5–K6 tetap boleh diambil
 kapan saja, sela-sela modul mana pun.
 
-**K1, K2, K4, K6 sudah selesai.** K4 & K6 pas giliran audit Guru
+**K1, K2, K3, K4, K6 sudah selesai.** K4 & K6 pas giliran audit Guru
 (2026-09-13) — lihat bagian "Guru" di atas. K1 ternyata **sudah ada dari
 sesi sebelumnya**, ketauan pas audit Pengurus Kelas (2026-09-13) — lihat
 bagian "Pengurus Kelas" di atas. K2 dikerjakan pas audit Waka (2026-09-13)
-— lihat bagian "Waka" di atas. Sisa: K3, K5.
+— lihat bagian "Waka" di atas. K3 dikerjakan 2026-09-13 sebagai susulan
+Admin setelah audit ke-4 role kelar. Sisa: K5 (kapan saja, tidak mendesak).
 
 | # | Halaman | Untuk | Catatan | Dikerjakan pas audit |
 |---|---|---|---|---|
 | ~~K1~~ | ~~Daftar siswa sekelas (read-only)~~ | Pengurus kelas | **Selesai** — sudah ada duluan, dikonfirmasi 2026-09-13. | Pengurus Kelas |
 | ~~K2~~ | ~~Dashboard Waka lebih berisi~~ | Waka | **Selesai** — statistik dispensasi bulan ini + daftar terbaru ditambahkan, 2026-09-13. | Waka |
-| K3 | **Detail Kelas** (roster + jadwal + wali) | Admin | Sekarang info kelas kepisah di 3 menu. Satu halaman rangkuman. | Admin (susulan, kecil) |
+| ~~K3~~ | ~~Detail Kelas (roster + jadwal + wali)~~ | Admin | **Selesai** — `master.kelas.show`, dibuka lewat tombol Detail di Data Kelas, 2026-09-13. | Admin (susulan, kecil) |
 | K5 | **Halaman 403 / 404 custom** | Semua | Sekarang pakai bawaan Laravel (polos). | Kapan saja |
+
+> **Susulan Admin selesai 2026-09-13** (setelah audit ke-4 role kelar,
+> "kapan senggang" dari rencana awal): **K3 — Detail Kelas** (roster siswa +
+> jadwal pelajaran seminggu + wali kelas dalam satu halaman, tombol "Detail"
+> pakai komponen `x-admin.row-actions` yang memang sudah punya slot itu dari
+> awal, cuma belum dipakai di manapun). **Tombol Detail** — dicek lagi tabel
+> admin lain, tetap tidak ada yang datanya benar-benar kepotong, jadi cuma
+> dipakai di Data Kelas (K3) yang memang butuh. **Fitur Backup Data** —
+> halaman baru (`/admin/backup`), tombol unduh langsung (`mysqldump` via
+> `Symfony\Process`, streaming, TIDAK disimpan di server), plus riwayat
+> unduh (dicatat di Audit Log). Sengaja simpel: tanpa penjadwalan otomatis,
+> tanpa penyimpanan persisten — admin unduh manual kapan perlu, lalu simpan
+> sendiri. Test: `tests/Feature/Admin/BackupTest.php` (akses/role doang —
+> `mysqldump` sungguhan di luar cakupan test suite yang pakai SQLite
+> in-memory, sudah diverifikasi manual lewat browser terhadap MySQL dev).
 
 ---
 
@@ -208,13 +228,16 @@ Sudah tercatat di `docs/scope.md`.
 > `docs/spec.md` §A dan §E.
 
 > B6 (rekap wali kelas) & B9 (kategori jam pelajaran dinamis) — **sudah selesai
-> juga**, dikerjakan lebih awal dari rencana. Sisa backlog beneran cuma B1, B8, B10.
+> juga**, dikerjakan lebih awal dari rencana. B1 (Notifikasi) **juga sudah
+> selesai** (2026-09-13, lihat bagian "Guru" di atas — dikerjakan bertahap,
+> versi Guru duluan lalu dilengkapi penuh begitu ke-4 role kelar). Sisa
+> backlog beneran cuma B8 & B10.
 
 | # | Fitur | Kenapa ditunda | Prioritas |
 |---|---|---|---|
-| B1 | **Notifikasi** (lonceng + halaman) | guru piket → status dispensasi; guru → jurnal diminta revisi. Perlu tabel + realtime/polling. | Kalau masih ada waktu setelah semua role selesai |
-| B8 | **Guru pengganti & tukar jam** | Alur persetujuan antar guru, butuh state machine baru. | **Paling akhir** — dikerjakan cuma kalau semua role (guru/pengurus kelas/waka/satpam) sudah beres & masih ada sisa waktu. Keputusan 2026-09-13. |
-| B10 | **Geolokasi + deteksi telat** pada jurnal | Kolom lat/long/islate, izin lokasi browser. | Sama seperti B1 — belakangan |
+| ~~B1~~ | ~~**Notifikasi** (lonceng + halaman)~~ | — | **Selesai 2026-09-13.** Seluruh matriks `spec.md` §G jalan. |
+| B8 | **Guru pengganti & tukar jam** | Alur persetujuan antar guru, butuh state machine baru — belum ada spec/rancangan sama sekali di dokumen manapun. | **Paling akhir** — dikerjakan cuma kalau semua role (guru/pengurus kelas/waka/satpam) sudah beres & masih ada sisa waktu. Keputusan 2026-09-13. Semua role SUDAH beres, tapi belum ada rancangan alurnya — butuh diklarifikasi dulu sebelum dikerjakan, bukan ditebak. |
+| B10 | **Geolokasi + deteksi telat** pada jurnal | Kolom lat/long/islate, izin lokasi browser — perlu keputusan produk (izin lokasi itu sensitif). | Belakangan, butuh keputusan eksplisit dulu. |
 
 ---
 
@@ -229,11 +252,11 @@ audit menyeluruh per role dengan urutan ini — alasannya di kolom kanan:
 | 2 | ~~**Pengurus Kelas**~~ ✅ (sekretaris) | Alur jurnal nggak selesai tanpa verifikasi mereka — langsung nyambung ke hasil kerja Guru di langkah 1. | K1 (Daftar siswa sekelas, ternyata sudah ada) |
 | 3 | ~~**Waka**~~ ✅ | Tahap kedua approval dispensasi — kurang kritis dibanding 1–2, tapi masih dipakai rutin. | K2 (Dashboard Waka diperkaya) |
 | 4 | ~~**Satpam**~~ ✅ | Alurnya paling sempit (scan QR + catat telat gerbang), paling kecil risikonya, aman di akhir. | Rute hapus `CatatanTerlambat` (gap, model sudah `SoftDeletes` tapi belum ada UI-nya) |
-| — | Admin (susulan kecil) | Sisa printilan admin yang bukan bug (K3 Detail Kelas, tombol Detail, fitur backup) — diselipkan kapan senggang, bukan blocker. | K3, tombol Detail, fitur backup |
-| **Paling akhir** ← *lanjut ke sini kalau masih ada waktu* | **B8 — Guru pengganti & tukar jam** | Fitur besar & baru, cuma dikerjakan **kalau 1–4 di atas sudah beres semua** dan masih ada sisa waktu sebelum deadline/sidang. | — |
+| — | ~~Admin (susulan kecil)~~ ✅ | Sisa printilan admin yang bukan bug (K3 Detail Kelas, tombol Detail, fitur backup) — diselipkan kapan senggang, bukan blocker. | K3, tombol Detail, fitur backup — **semua selesai 2026-09-13** |
+| **Paling akhir** ← *butuh rancangan dulu sebelum dikerjakan* | **B8 — Guru pengganti & tukar jam** | Fitur besar & baru, cuma dikerjakan **kalau 1–4 di atas sudah beres semua** dan masih ada sisa waktu sebelum deadline/sidang. | — |
 
-**Semua 4 role (Guru/Pengurus Kelas/Waka/Satpam) sudah selesai diaudit per
-2026-09-13.** Sisa kerjaan besar: B8 (kalau masih ada waktu), susulan kecil
-Admin (K3/tombol Detail/backup — kapan senggang), dan B1/B10 yang memang
-sengaja ditunda paling belakang (kecuali versi Guru dari B1/Notifikasi yang
-sudah jalan duluan, lihat bagian "Guru").
+**Semua 4 role (Guru/Pengurus Kelas/Waka/Satpam), susulan kecil Admin
+(K3/tombol Detail/backup), dan B1 (Notifikasi, lengkap semua peran) sudah
+selesai per 2026-09-13.** Sisa cuma B8 (butuh rancangan alur dulu sebelum
+dikerjakan, bukan cuma "kalau ada waktu") dan B10 (butuh keputusan produk
+soal izin lokasi browser).

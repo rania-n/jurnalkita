@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Dispensasi;
+use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\User;
+use App\Notifications\DispensasiBaru;
 use App\Notifications\DispensasiDiputuskan;
+use App\Notifications\SiswaDispensasiDiKelasAnda;
 use App\Support\WaLink;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -156,6 +160,10 @@ class DispensasiController extends Controller
 
         AuditLog::catat('Ajukan Dispensasi', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);
 
+        foreach (User::where('role', 'waka')->get() as $waka) {
+            $waka->notify(new DispensasiBaru($dispensasi));
+        }
+
         // Langsung ke halaman detail dengan tanda "kirim=1" -> otomatis kebuka WhatsApp
         // (lihat show()), jadi piket nggak perlu tap tombol "Kirim Link" secara terpisah.
         return redirect()->route('dispensasi.show', [$dispensasi, 'kirim' => 1])
@@ -254,11 +262,46 @@ class DispensasiController extends Controller
 
         $dispensasi->pengaju?->notify(new DispensasiDiputuskan($dispensasi));
 
+        if ($dispensasi->status_akhir === 'approved') {
+            foreach ($this->guruMapelTerkait($dispensasi) as $guruUser) {
+                $guruUser->notify(new SiswaDispensasiDiKelasAnda($dispensasi));
+            }
+        }
+
         return redirect()->route('dispensasi.index')->with(
             'success',
             $dispensasi->status_akhir === 'approved'
                 ? 'Dispensasi disetujui. Presensi siswa otomatis diperbarui.'
                 : 'Keputusan Waka disimpan.'
         );
+    }
+
+    /**
+     * Guru yang jadwalnya bentrok sama rentang tanggal+jam dispensasi ini --
+     * mereka yang "kena dampak" (siswanya nggak masuk pelajaran mereka),
+     * sesuai spec.md §G "Guru mapel terkait".
+     */
+    private function guruMapelTerkait(Dispensasi $dispensasi): Collection
+    {
+        $hariSet = collect($dispensasi->rentangTanggal())
+            ->map(fn ($tanggal) => ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? null)
+            ->filter()
+            ->unique();
+
+        if ($hariSet->isEmpty()) {
+            return collect();
+        }
+
+        return Jadwal::where('kelas_id', $dispensasi->siswa->kelas_id)
+            ->whereIn('hari', $hariSet)
+            ->when($dispensasi->jam_ke_mulai, function ($q) use ($dispensasi) {
+                $selesai = $dispensasi->jam_ke_selesai ?? 15;
+                $q->where('jam_ke_mulai', '<=', $selesai)->where('jam_ke_selesai', '>=', $dispensasi->jam_ke_mulai);
+            })
+            ->with('guru.user')
+            ->get()
+            ->pluck('guru.user')
+            ->filter()
+            ->unique('id');
     }
 }

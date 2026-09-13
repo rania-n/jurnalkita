@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Dispensasi;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
+use App\Notifications\JurnalPerluDiperiksa;
 use App\Support\Waktu;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -158,6 +159,8 @@ class JurnalController extends Controller
 
         AuditLog::catat('Tambah Jurnal', "Jurnal {$jadwal->mapel->nama} — {$jadwal->kelas->nama}", $jurnal);
 
+        $jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal));
+
         return redirect()->route('jurnal.show', $jurnal)
             ->with('success', 'Jurnal & presensi tersimpan.');
     }
@@ -185,6 +188,8 @@ class JurnalController extends Controller
 
         // Jam mulai tidak ikut diubah — pakai nilai jurnal untuk validasi jam selesai.
         $request->merge(['jam_ke_mulai' => $jurnal->jam_ke_mulai]);
+
+        $sudahRevisi = $jurnal->status_verifikasi === 'revisi';
 
         $data = $request->validate([
             'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
@@ -217,6 +222,10 @@ class JurnalController extends Controller
         });
 
         AuditLog::catat('Ubah Jurnal', "Ubah jurnal #{$jurnal->id}", $jurnal);
+
+        if ($sudahRevisi) {
+            $jurnal->jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal, hasilRevisi: true));
+        }
 
         return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal & presensi diperbarui.');
     }
