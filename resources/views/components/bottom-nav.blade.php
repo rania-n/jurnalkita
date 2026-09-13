@@ -40,15 +40,15 @@
         </ul>
 
         @if ($fab)
+            {{-- Satu bentuk pil melayang (ikon + label NYATU dalam satu latar
+                 navy), bukan lingkaran + teks terpisah -- biar kelihatan satu
+                 tombol utuh, bukan ikon dengan label yang "kelempar" di luar. --}}
             <a
                 href="{{ $fab['url'] }}"
-                class="press absolute left-1/2 top-0 flex -translate-x-1/2 -translate-y-2 flex-col items-center gap-0.5"
-                aria-label="{{ $fab['label'] }}"
+                class="press absolute left-1/2 top-0 flex -translate-x-1/2 -translate-y-3.5 flex-col items-center gap-0.5 rounded-2xl bg-navy px-4 py-2 text-card shadow-lg shadow-navy/30 ring-4 ring-surface"
             >
-                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-navy text-card shadow-lg shadow-navy/30 ring-4 ring-surface">
-                    <x-icon :name="$fab['icon']" :size="26" fill />
-                </span>
-                <span class="text-[10px] font-bold text-navy">{{ $fab['label'] }}</span>
+                <x-icon :name="$fab['icon']" :size="22" fill />
+                <span class="text-[10px] font-bold leading-none whitespace-nowrap">{{ $fab['label'] }}</span>
             </a>
         @endif
     </nav>
