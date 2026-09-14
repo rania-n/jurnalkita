@@ -36,6 +36,12 @@
             {{ $input->class('w-full border-none bg-transparent text-[15px] text-ink outline-none placeholder:text-placeholder') }}
         >
 
+        @if($type === 'password')
+            <button type="button" data-toggle-password="#{{ $id }}" class="flex shrink-0 items-center text-muted-2 hover:text-ink focus:outline-none transition-colors" tabindex="-1" aria-label="Tampilkan kata sandi">
+                <x-icon name="visibility" :size="20" />
+            </button>
+        @endif
+
         {{ $slot }}
     </div>
 
