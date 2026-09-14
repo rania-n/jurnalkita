@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureRole::class,
         ]);
+
+        // Percaya header X-Forwarded-* dari proxy manapun (cloudflared/ngrok/Herd
+        // Share) supaya Laravel tau request aslinya HTTPS -- tanpa ini, link
+        // CSS/JS ditulis "http://" padahal halamannya dibuka lewat "https://"
+        // (tunnel), jadi diblokir browser (mixed content) dan gaya jadi kosong.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
