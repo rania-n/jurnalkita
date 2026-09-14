@@ -16,11 +16,7 @@
 
         <x-ui.input label="Email" name="email" type="email" placeholder="Masukkan email" :value="old('email')" autofocus />
 
-        <x-ui.input label="Kata Sandi" name="password" type="password" id="password" placeholder="Masukkan kata sandi">
-            <button type="button" data-toggle-password="#password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan kata sandi">
-                <x-icon name="visibility" :size="20" />
-            </button>
-        </x-ui.input>
+        <x-ui.input label="Kata Sandi" name="password" type="password" id="password" placeholder="Masukkan kata sandi" />
 
         <div class="flex items-center justify-between">
             <label class="flex cursor-pointer items-center gap-2">
