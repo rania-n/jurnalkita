@@ -66,7 +66,7 @@
 
     {{-- Link WhatsApp — versi hemat biaya, tinggal tekan kirim --}}
     <div class="mt-3 flex max-w-xl flex-col gap-2">
-        @if ($waLinkWaka)
+        @if ($waLinkWaka && auth()->user()->role !== 'waka')
             <a href="{{ $waLinkWaka }}" target="_blank" rel="noopener"
                class="press flex h-11 items-center justify-center gap-2 rounded-xl bg-hadir-soft text-sm font-bold text-hadir">
                 <x-icon name="chat" :size="18" /> Kirim Link Persetujuan ke Waka (WA)
