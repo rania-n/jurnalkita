@@ -45,8 +45,13 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            // Kolom Email DAN Kata Sandi sama-sama ditandai merah -- pesannya
+            // sengaja nggak nyebut spesifik yang mana yang salah (demi
+            // keamanan, lihat lang/id/auth.php), jadi kalau cuma kolom Email
+            // yang merah malah nyiratkan seolah email-nya pasti salah.
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+                'password' => trans('auth.failed'),
             ]);
         }
 
