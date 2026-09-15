@@ -20,12 +20,14 @@
         </x-admin.page>
     @else
         <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
-            <div class="flex gap-2">
+            {{-- HP: numpuk penuh biar teksnya nggak sampe kepotong 2 baris pas
+                 berdempetan. Mulai sm: baru sejajar seperlunya. --}}
+            <div class="flex flex-col gap-2 sm:flex-row">
                 @if ($bolehEkspor)
-                    <x-ui.button :href="route('dispensasi.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
+                    <x-ui.button :href="route('dispensasi.ekspor', request()->query())" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor CSV</x-ui.button>
                 @endif
                 @if ($bolehAjukan)
-                    <x-ui.button :href="route('dispensasi.create')" icon="add">Ajukan Dispensasi</x-ui.button>
+                    <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full sm:w-auto">Ajukan Dispensasi</x-ui.button>
                 @endif
             </div>
         </x-page-header>

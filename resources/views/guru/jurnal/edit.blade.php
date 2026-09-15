@@ -20,12 +20,11 @@
         @csrf
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-ui.field-static label="Jam ke- (mulai)" icon="lock_clock">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
-            <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai">
-                @for ($i = $jurnal->jam_ke_mulai; $i <= 13; $i++)
-                    <option value="{{ $i }}" @selected(old('jam_ke_selesai', $jurnal->jam_ke_selesai) == $i)>Jam ke-{{ $i }}</option>
-                @endfor
-            </x-ui.select>
+            {{-- Jam mulai & selesai ikut jadwal, nggak bisa diedit manual (sama
+                 kayak Form Jurnal baru). --}}
+            <x-ui.field-static label="Jam ke- (mulai)" icon="schedule">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
+            <x-ui.field-static label="Jam ke- (selesai)" icon="schedule">Jam ke-{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
+            <input type="hidden" name="jam_ke_selesai" value="{{ $jurnal->jam_ke_selesai }}">
 
             <x-ui.choice
                 label="Status Kehadiran Anda"
@@ -35,15 +34,33 @@
                 :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
                 :value="old('status_guru', $jurnal->status_guru)"
             />
+        </div>
 
-            <x-ui.textarea label="Materi" name="materi" :rows="3" class="sm:col-span-2">{{ old('materi', $jurnal->materi) }}</x-ui.textarea>
-            <x-ui.textarea label="Metode Pembelajaran" name="metode" :rows="2">{{ old('metode', $jurnal->metode) }}</x-ui.textarea>
+        {{-- Semua field di sini full-width, jadi nggak perlu ikut grid 2-kolom di atas. --}}
+        <div id="blok-hadir" class="mt-4 flex flex-col gap-4">
+            <x-ui.textarea label="Materi" name="materi" :rows="3">{{ old('materi', $jurnal->materi) }}</x-ui.textarea>
+
+            <div class="flex flex-col gap-1.5">
+                <x-ui.choice
+                    label="Metode Pembelajaran"
+                    name="metode_pilihan"
+                    :options="$metodeLabel"
+                    :value="$metodeTerpilih"
+                />
+                <div id="metode_custom_wrap" hidden>
+                    <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" />
+                </div>
+            </div>
+        </div>
+
+        <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
             <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2">{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
+            <x-ui.textarea label="Alasan" name="alasan" :rows="2">{{ old('alasan', $jurnal->alasan) }}</x-ui.textarea>
         </div>
 
         @include('guru.jurnal._presensi-grid')
 
-        <div class="mt-4 max-w-sm">
+        <div class="mt-4">
             @if ($jurnal->foto_bukti)
                 <div class="mb-2 flex flex-col gap-1.5">
                     <x-ui.label>Foto Suasana Kelas (sudah diunggah)</x-ui.label>
@@ -54,10 +71,12 @@
                 </div>
             @endif
             <x-ui.upload
-                :label="$jurnal->foto_bukti ? 'Ganti Foto Suasana Kelas (opsional)' : 'Foto Suasana Kelas (opsional)'"
+                :label="$jurnal->foto_bukti ? 'Ganti Foto Suasana Kelas (opsional)' : 'Foto Suasana Kelas'"
                 name="foto_bukti"
-                title="Lampirkan Foto Suasana Kelas"
-                hint="Bukti pembelajaran sedang berlangsung"
+                title="Ambil Foto Suasana Kelas"
+                :hint="$jurnal->foto_bukti ? 'Opsional — biarin kosong kalau foto lama masih dipakai' : 'Wajib diisi — bukti pembelajaran sedang berlangsung'"
+                capture="environment"
+                :required="! $jurnal->foto_bukti"
             />
         </div>
 
@@ -65,4 +84,31 @@
             <x-ui.button type="submit" block icon="save">Simpan Perubahan</x-ui.button>
         </x-ui.sticky-bar>
     </form>
+
+    @push('scripts')
+        <script>
+            (function () {
+                // Status Kehadiran -> Hadir nampilin Materi+Metode, selain itu
+                // nampilin Tugas Tambahan+Alasan.
+                const blokHadir = document.getElementById('blok-hadir');
+                const blokTidakHadir = document.getElementById('blok-tidak-hadir');
+                function syncStatusGuru() {
+                    const val = document.querySelector('input[name="status_guru"]:checked')?.value;
+                    blokHadir.hidden = val !== 'hadir';
+                    blokTidakHadir.hidden = val === 'hadir';
+                }
+                document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
+                syncStatusGuru();
+
+                // Metode Pembelajaran "Lainnya" -> munculin kotak teks bebas.
+                const metodeCustom = document.getElementById('metode_custom_wrap');
+                function syncMetode() {
+                    const val = document.querySelector('input[name="metode_pilihan"]:checked')?.value;
+                    metodeCustom.hidden = val !== 'lainnya';
+                }
+                document.querySelectorAll('input[name="metode_pilihan"]').forEach((el) => el.addEventListener('change', syncMetode));
+                syncMetode();
+            })();
+        </script>
+    @endpush
 </x-layouts.app>

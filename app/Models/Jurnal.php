@@ -14,7 +14,7 @@ class Jurnal extends Model
 
     protected $fillable = [
         'jadwal_id', 'guru_id', 'tanggal', 'jam_ke_mulai', 'jam_ke_selesai',
-        'status_guru', 'materi', 'metode', 'tugas_tambahan', 'foto_bukti',
+        'status_guru', 'materi', 'metode', 'tugas_tambahan', 'alasan', 'foto_bukti',
         'diisi_oleh_pengurus', 'status_verifikasi', 'verifikator_id', 'catatan_verifikasi',
         'lat', 'lng', 'jarak_meter', 'terlambat',
     ];

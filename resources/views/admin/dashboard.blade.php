@@ -19,6 +19,8 @@
 @endphp
 
 <x-layouts.admin title="Beranda" heading="Beranda">
+    <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
+
     @if ($pendingAkun > 0)
         <a href="{{ route('master.akun.index', ['tab' => 'pending']) }}" class="mb-6 block">
             <x-alert type="warning">

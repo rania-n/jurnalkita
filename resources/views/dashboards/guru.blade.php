@@ -22,6 +22,8 @@
 <x-layouts.app title="Beranda Guru" width="wide">
     <x-page-header title="Beranda" :subtitle="'Selamat mengajar, ' . auth()->user()->name" />
 
+    <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
+
     @if ($tampilkanPilihanAwal)
         <dialog id="modal-pilihan-awal"
                 class="fixed inset-0 m-auto w-[min(26rem,calc(100vw-2rem))] rounded-2xl border-0 bg-card p-0 text-ink shadow-2xl backdrop:bg-navy/30 backdrop:backdrop-blur-sm">
@@ -30,11 +32,22 @@
                     <x-icon name="waving_hand" :size="28" />
                 </span>
                 <h3 class="mt-2 text-lg font-bold text-ink">Halo, {{ auth()->user()->name }}!</h3>
-                <p class="text-sm text-muted">Mau langsung isi jurnal, atau lihat-lihat beranda dulu?</p>
+                @if ($piketHariIni)
+                    <p class="text-sm text-muted">Anda bertugas piket hari ini. Mau langsung ke monitor piket, atau lihat-lihat beranda dulu?</p>
+                @else
+                    <p class="text-sm text-muted">Mau langsung isi jurnal, atau lihat-lihat beranda dulu?</p>
+                @endif
             </div>
 
             <div class="flex flex-col gap-2 p-6 pt-4">
-                <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="w-full">Isi Jurnal Sekarang</x-ui.button>
+                {{-- Hari piket: guru nggak dijadwalkan mengajar (lihat catatan di
+                     bawah), jadi jangan tawarin "Isi Jurnal" di sini juga --
+                     tawarkan hal yang relevan sama piketnya. --}}
+                @if ($piketHariIni)
+                    <x-ui.button :href="route('piket.monitor.index')" icon="monitoring" class="w-full">Pantau Piket Sekarang</x-ui.button>
+                @else
+                    <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="w-full">Isi Jurnal Sekarang</x-ui.button>
+                @endif
                 <x-ui.button type="button" variant="secondary" data-modal-close class="w-full">Lihat Beranda Dulu</x-ui.button>
             </div>
         </dialog>

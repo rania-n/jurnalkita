@@ -44,6 +44,7 @@ return [
     'guru-piket' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
         ['label' => 'Piket', 'icon' => 'event_available', 'route' => 'piket.index'],
+        ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
@@ -56,9 +57,15 @@ return [
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
+    // Waka juga megang jadwal mengajar sendiri (bukan cuma approve dispensasi) --
+    // kalau akunnya kebetulan nggak ada data Guru terkait, klik menu ini cuma
+    // nolak dengan pesan jelas (lihat JurnalController::guru()), bukan error.
     'waka' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'waka.dashboard'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
+        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
+        ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
         ['label' => 'Rekap', 'icon' => 'bar_chart', 'route' => 'rekap.siswa.index', 'match' => 'rekap.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],

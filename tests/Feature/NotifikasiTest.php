@@ -16,8 +16,11 @@ use App\Notifications\DispensasiDiputuskan;
 use App\Notifications\JurnalPerluDiperiksa;
 use App\Notifications\JurnalPerluRevisi;
 use App\Notifications\SiswaDispensasiDiKelasAnda;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class NotifikasiTest extends TestCase
@@ -104,7 +107,7 @@ class NotifikasiTest extends TestCase
 
     public function test_guru_mapel_terkait_dapat_notifikasi_saat_dispensasi_disetujui(): void
     {
-        $this->travelTo(now()->next(\Carbon\Carbon::MONDAY));
+        $this->travelTo(now()->next(Carbon::MONDAY));
 
         $piket = User::factory()->role('guru')->create();
         $guruPiket = Guru::create(['user_id' => $piket->id, 'nama' => 'Guru Piket']);
@@ -156,11 +159,13 @@ class NotifikasiTest extends TestCase
         ]);
 
         Notification::fake();
+        Storage::fake('public');
 
         // Jurnal baru.
         $this->actingAs($guruUser)->post('/guru/jurnal', [
             'jadwal_id' => $jadwal->id, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
             'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect();
 
         Notification::assertSentTo($sekretaris, JurnalPerluDiperiksa::class);

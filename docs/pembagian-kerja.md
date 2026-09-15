@@ -32,7 +32,7 @@ Akun buat testing (semua sandinya `password`):
 | Peran | Email |
 |---|---|
 | Admin | `admin@jurnalkita.test` |
-| Guru (juga piket) | `guru1@jurnalkita.test` |
+| Guru (juga piket) | `winartin@jurnalkita.test` |
 | Pengurus kelas | `kelas1@jurnalkita.test` |
 | Waka | `waka@jurnalkita.test` |
 
@@ -61,7 +61,7 @@ npm run build
 > ✅ **Z1 dan Z2 sudah selesai** (dikerjakan langsung, bukan Zahwa — dia sempat coba tapi
 > masih kesulitan). Nggak perlu dikerjakan lagi. Kalau Zahwa masih mau bantu, kasih dia
 > tugas dari paket lain yang belum sempat, atau minta dia bantu **testing manual**:
-> login sebagai `guru1@jurnalkita.test`, coba tiap alur, laporkan kalau ada yang aneh.
+> login sebagai `winartin@jurnalkita.test`, coba tiap alur, laporkan kalau ada yang aneh.
 
 ### Z1. Kartu shortcut di beranda guru
 
@@ -74,7 +74,7 @@ Kalau guru lagi kena jadwal piket hari ini, munculkan 2 kartu tombol:
 - Route tujuan: `route('piket.index')` dan `route('dispensasi.create')`
 
 **Selesai kalau:**
-- [ ] Login `guru1@jurnalkita.test` → kartu muncul di beranda
+- [ ] Login `winartin@jurnalkita.test` → kartu muncul di beranda
 - [ ] Kartu **tidak** muncul buat guru yang hari itu nggak piket
 - [ ] Tombol diklik → masuk ke halaman yang benar
 - [ ] Di HP 1 kolom, di desktop 2 kolom

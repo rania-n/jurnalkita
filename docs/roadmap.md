@@ -53,4 +53,4 @@ guru pengganti & tukar jam, ekspor laporan piket, notifikasi, rekap wali kelas.
 
 ## Akun demo (password: `password`)
 
-`admin@jurnalkita.test` · `guru1@jurnalkita.test` · `kelas1@jurnalkita.test` · `waka@jurnalkita.test` · `satpam@jurnalkita.test`
+`admin@jurnalkita.test` · `winartin@jurnalkita.test` · `kelas1@jurnalkita.test` · `waka@jurnalkita.test` · `satpam@jurnalkita.test`

@@ -11,6 +11,8 @@ use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PagesRenderTest extends TestCase
@@ -84,8 +86,11 @@ class PagesRenderTest extends TestCase
             'status_verifikasi' => 'revisi', 'catatan_verifikasi' => 'Perbaiki materi', 'verifikator_id' => null,
         ]);
 
+        Storage::fake('public');
+
         $this->actingAs($user)->post("/guru/jurnal/{$jurnal->id}", [
             'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'materi baru yang lengkap',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect();
 
         $jurnal->refresh();

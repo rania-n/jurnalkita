@@ -105,6 +105,21 @@ function initModals() {
 
             dlg.showModal();
             dlg.dispatchEvent(new CustomEvent('modal:open'));
+
+            // Modal isi via AJAX (dipakai buat "lihat detail" tanpa pindah
+            // halaman): <button data-modal-open="id" data-ajax-url="...">,
+            // dialognya butuh satu <div data-modal-ajax-target> buat nampung
+            // HTML fragment yang di-fetch.
+            const ajaxTarget = dlg.querySelector('[data-modal-ajax-target]');
+            if (ajaxTarget && opener.dataset.ajaxUrl) {
+                ajaxTarget.innerHTML = '<p class="py-10 text-center text-sm text-muted-2">Memuat…</p>';
+                fetch(opener.dataset.ajaxUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then((r) => (r.ok ? r.text() : Promise.reject()))
+                    .then((html) => { ajaxTarget.innerHTML = html; })
+                    .catch(() => {
+                        ajaxTarget.innerHTML = '<p class="py-10 text-center text-sm text-alpha">Gagal memuat detail. Coba lagi.</p>';
+                    });
+            }
             return;
         }
 
@@ -144,12 +159,46 @@ function initNavGroups() {
     });
 }
 
+/* Tabel admin (.responsive-table, lihat x-admin.table) jadi kartu bertumpuk
+ * di HP lewat CSS (app.css) -- tapi CSS-nya butuh tahu nama kolom tiap sel
+ * (data-label), jadi di sini label itu diambil otomatis dari <thead><th>
+ * dan dipasang ke <td> yang sejajar. Nggak perlu ubah markup di tiap
+ * halaman admin satu-satu. */
+function initResponsiveTables() {
+    document.querySelectorAll('table.responsive-table').forEach((table) => {
+        const heads = [...table.querySelectorAll('thead th')].map((th) => th.textContent.trim());
+        if (!heads.length) return;
+        table.querySelectorAll('tbody tr').forEach((tr) => {
+            [...tr.children].forEach((td, i) => {
+                if (heads[i]) td.setAttribute('data-label', heads[i]);
+            });
+        });
+    });
+}
+
+/* Jam berjalan di widget x-ui.jam-sekarang (dasbor) -- JP-nya dihitung server,
+ * tapi jamnya sendiri di-tick tiap detik di client biar kelihatan "hidup". */
+function initJamSekarang() {
+    const els = document.querySelectorAll('[data-jam-sekarang]');
+    if (!els.length) return;
+
+    const tulis = () => {
+        const teks = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        els.forEach((el) => { el.textContent = teks; });
+    };
+
+    tulis();
+    setInterval(tulis, 15000);
+}
+
 function init() {
     initPasswordToggles();
     initUploadPreview();
     initConfirm();
     initModals();
     initNavGroups();
+    initResponsiveTables();
+    initJamSekarang();
 }
 
 document.addEventListener('DOMContentLoaded', init);

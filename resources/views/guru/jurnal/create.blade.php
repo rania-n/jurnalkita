@@ -26,31 +26,44 @@
                 $selesaiAwal = old('jam_ke_selesai', $jadwalTerpilih->jam_ke_selesai ?? $jpSekarang);
             @endphp
 
-            {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
-                 yang tepat ikut kerender dari server. Materi/dll yang sudah
-                 diketik sebelum ganti jadwal memang akan hilang -- wajar karena
-                 pindah kelas = konteks jurnalnya beda total. --}}
-            <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2">
-                <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
-                @foreach ($jadwals as $j)
-                    <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected($jadwalTerpilih?->id === $j->id)>
-                        {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}
-                    </option>
-                @endforeach
-            </x-ui.select>
+            @if ($jadwalTerkunci)
+                <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" class="sm:col-span-2">
+                    {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
+                </x-ui.field-static>
+                <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
+                <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Otomatis ikut jadwal Anda sekarang. Salah jadwal? Hubungi Admin.</p>
+            @else
+                {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
+                     yang tepat ikut kerender dari server. Materi/dll yang sudah
+                     diketik sebelum ganti jadwal memang akan hilang -- wajar karena
+                     pindah kelas = konteks jurnalnya beda total. --}}
+                <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2">
+                    <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
+                    @foreach ($jadwals as $j)
+                        <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected($jadwalTerpilih?->id === $j->id)>
+                            {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}
+                        </option>
+                    @endforeach
+                </x-ui.select>
+            @endif
 
+            {{-- Jam mulai & selesai SELALU ngikut jadwal (statis, nggak bisa diedit
+                 manual) -- guru nggak perlu (dan nggak boleh) ngarang jam sendiri,
+                 itu udah ditentuin jadwalnya. Pas jadwal diganti lewat dropdown di
+                 atas, dua-duanya ikut kesinkron otomatis (lihat sync() di bawah). --}}
             <div>
                 <x-ui.field-static label="Jam ke- (mulai)" icon="schedule">
                     <span id="tampilan-jam-mulai">Jam ke-{{ $mulaiAwal }}</span>
                 </x-ui.field-static>
                 <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
             </div>
-            <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" id="jam_ke_selesai">
-                @for ($i = 1; $i <= $jpMaks; $i++)
-                    <option value="{{ $i }}" @selected($selesaiAwal == $i)>Jam ke-{{ $i }}</option>
-                @endfor
-            </x-ui.select>
-            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">Pilih jadwal dulu — jam mulai otomatis mengikuti jadwal itu. Atur jam selesai kalau mengajarnya lebih lama.</p>
+            <div>
+                <x-ui.field-static label="Jam ke- (selesai)" icon="schedule">
+                    <span id="tampilan-jam-selesai">Jam ke-{{ $selesaiAwal }}</span>
+                </x-ui.field-static>
+                <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">
+            </div>
+            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">Jam mengajar otomatis mengikuti jadwal yang dipilih.</p>
 
             <x-ui.choice
                 label="Status Kehadiran Anda"
@@ -60,21 +73,42 @@
                 :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
                 :value="old('status_guru', 'hadir')"
             />
+            </div>
 
-            <x-ui.textarea label="Materi" name="materi" :rows="3" class="sm:col-span-2" placeholder="Materi yang diajarkan...">{{ old('materi') }}</x-ui.textarea>
-            <x-ui.textarea label="Metode Pembelajaran" name="metode" :rows="2" placeholder="Ceramah, diskusi, praktik, ulangan, dll...">{{ old('metode') }}</x-ui.textarea>
-            <x-ui.textarea label="Tugas Tambahan (jika Anda tidak hadir)" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman...">{{ old('tugas_tambahan') }}</x-ui.textarea>
+            {{-- Semua field di sini full-width (sm:col-span-2), jadi nggak perlu ikut
+                 grid 2-kolom di atas -- aman langsung disembunyikan/ditampilkan. --}}
+            <div id="blok-hadir" class="mt-4 flex flex-col gap-4">
+                <x-ui.textarea label="Materi" name="materi" :rows="3" placeholder="Materi yang diajarkan...">{{ old('materi') }}</x-ui.textarea>
+
+                <div class="flex flex-col gap-1.5">
+                    <x-ui.choice
+                        label="Metode Pembelajaran"
+                        name="metode_pilihan"
+                        :options="$metodeLabel"
+                        :value="$metodeTerpilih"
+                    />
+                    <div id="metode_custom_wrap" hidden>
+                        <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" />
+                    </div>
+                </div>
+            </div>
+
+            <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
+                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman...">{{ old('tugas_tambahan') }}</x-ui.textarea>
+                <x-ui.textarea label="Alasan" name="alasan" :rows="2" placeholder="Alasan tidak hadir / tugas luar...">{{ old('alasan') }}</x-ui.textarea>
             </div>
 
             @if ($jadwalTerpilih)
                 @include('guru.jurnal._presensi-grid')
 
-                <div class="mt-4 max-w-sm">
+                <div class="mt-4">
                     <x-ui.upload
-                        label="Foto Suasana Kelas (opsional)"
+                        label="Foto Suasana Kelas"
                         name="foto_bukti"
-                        title="Lampirkan Foto Suasana Kelas"
-                        hint="Bukti pembelajaran sedang berlangsung"
+                        title="Ambil Foto Suasana Kelas"
+                        hint="Wajib diisi — bukti pembelajaran sedang berlangsung"
+                        capture="environment"
+                        required
                     />
                 </div>
             @else
@@ -89,35 +123,62 @@
         @push('scripts')
             <script>
                 (function () {
+                    // Jadwal terkunci (jadwalTerkunci=true) -> select-nya nggak dirender
+                    // sama sekali, jadi elemen ini bisa null.
                     const jadwal = document.getElementById('jadwal_id');
-                    const tampilan = document.getElementById('tampilan-jam-mulai');
-                    const inputMulai = document.getElementById('jam_ke_mulai');
-                    const selectSelesai = document.getElementById('jam_ke_selesai');
-                    const keterangan = document.getElementById('keterangan-jam');
+                    if (jadwal) {
+                        const tampilanMulai = document.getElementById('tampilan-jam-mulai');
+                        const inputMulai = document.getElementById('jam_ke_mulai');
+                        const tampilanSelesai = document.getElementById('tampilan-jam-selesai');
+                        const inputSelesai = document.getElementById('jam_ke_selesai');
+                        const keterangan = document.getElementById('keterangan-jam');
 
-                    function sync() {
-                        const opt = jadwal.selectedOptions[0];
-                        const mulai = opt?.dataset.mulai;
-                        const selesai = opt?.dataset.selesai;
-                        if (!mulai) return;
+                        function sync() {
+                            const opt = jadwal.selectedOptions[0];
+                            const mulai = opt?.dataset.mulai;
+                            const selesai = opt?.dataset.selesai;
+                            if (!mulai) return;
 
-                        tampilan.textContent = 'Jam ke-' + mulai;
-                        inputMulai.value = mulai;
-                        selectSelesai.value = selesai;
-                        keterangan.textContent = 'Jam mulai otomatis ikut jadwal ini (Jam ke-' + mulai + '). Atur jam selesai kalau mengajarnya lebih lama.';
+                            tampilanMulai.textContent = 'Jam ke-' + mulai;
+                            inputMulai.value = mulai;
+                            tampilanSelesai.textContent = 'Jam ke-' + selesai;
+                            inputSelesai.value = selesai;
+                            keterangan.textContent = 'Jam mengajar otomatis mengikuti jadwal yang dipilih (Jam ke-' + mulai + '–' + selesai + ').';
+                        }
+
+                        // Ganti jadwal -> presensi kelas yang beda perlu dirender ulang
+                        // dari server, jadi muat ulang halaman dengan jadwal itu.
+                        jadwal.addEventListener('change', () => {
+                            if (!jadwal.value) return;
+                            window.location.href = '{{ route('jurnal.create') }}?jadwal=' + jadwal.value;
+                        });
+
+                        // Browser bisa langsung memilih satu-satunya opsi jadwal saat halaman
+                        // dimuat (placeholder "Pilih jadwal" disembunyikan) tanpa memicu event
+                        // "change" -- sinkronkan sekali di awal biar jam yang tampil ga meleset.
+                        sync();
                     }
 
-                    // Ganti jadwal -> presensi kelas yang beda perlu dirender ulang
-                    // dari server, jadi muat ulang halaman dengan jadwal itu.
-                    jadwal.addEventListener('change', () => {
-                        if (!jadwal.value) return;
-                        window.location.href = '{{ route('jurnal.create') }}?jadwal=' + jadwal.value;
-                    });
+                    // Status Kehadiran -> Hadir nampilin Materi+Metode, selain itu
+                    // nampilin Tugas Tambahan+Alasan.
+                    const blokHadir = document.getElementById('blok-hadir');
+                    const blokTidakHadir = document.getElementById('blok-tidak-hadir');
+                    function syncStatusGuru() {
+                        const val = document.querySelector('input[name="status_guru"]:checked')?.value;
+                        blokHadir.hidden = val !== 'hadir';
+                        blokTidakHadir.hidden = val === 'hadir';
+                    }
+                    document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
+                    syncStatusGuru();
 
-                    // Browser bisa langsung memilih satu-satunya opsi jadwal saat halaman
-                    // dimuat (placeholder "Pilih jadwal" disembunyikan) tanpa memicu event
-                    // "change" -- sinkronkan sekali di awal biar jam yang tampil ga meleset.
-                    sync();
+                    // Metode Pembelajaran "Lainnya" -> munculin kotak teks bebas.
+                    const metodeCustom = document.getElementById('metode_custom_wrap');
+                    function syncMetode() {
+                        const val = document.querySelector('input[name="metode_pilihan"]:checked')?.value;
+                        metodeCustom.hidden = val !== 'lainnya';
+                    }
+                    document.querySelectorAll('input[name="metode_pilihan"]').forEach((el) => el.addEventListener('change', syncMetode));
+                    syncMetode();
                 })();
             </script>
         @endpush

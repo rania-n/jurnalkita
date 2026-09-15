@@ -71,19 +71,24 @@ class DatabaseSeeder extends Seeder
         ])->map(fn ($m) => Mapel::create($m));
 
         // ----------------------------------------------------------------- Guru
+        // Dulu ada 5 guru isian generik (Budi Santoso dkk) buat ngisi jadwal contoh
+        // di 4 kelas demo -- udah dihapus, soalnya sekarang 4 kelas demo itu (X RPL
+        // 1/2, XI RPL 1, XI TKJ 1) kebagian jadwal ASLI dari DataAsliSeeder, jadi
+        // guru isian generik itu cuma nambah kebingungan (nama fiktif, jadwal
+        // ngawur numpuk-numpuk). Winartin doang yang dipertahankan di sini karena
+        // namanya PERSIS sama dengan guru di data asli (dia otomatis "jadi" guru
+        // sungguhan begitu DataAsliSeeder jalan, bukan didobel).
         $guruData = [
             ['nama' => 'Winartin, S.Pd', 'mapel' => 'BIG', 'akun' => true, 'piket' => 'senin'],
-            ['nama' => 'Budi Santoso, S.Pd', 'mapel' => 'MAT', 'akun' => true, 'piket' => 'rabu'],
-            ['nama' => 'Drs. M. Yusuf', 'mapel' => 'BIN', 'akun' => true, 'piket' => 'rabu'],
-            ['nama' => 'Sarah Amelia, M.Pd', 'mapel' => 'PBO', 'akun' => false, 'piket' => 'kamis'],
-            ['nama' => 'Rendra Prakoso, S.Kom', 'mapel' => 'PWL', 'akun' => true, 'piket' => null],
-            ['nama' => 'Dewi Anjani, S.Pd', 'mapel' => 'MAT', 'akun' => false, 'piket' => null],
         ];
 
-        $gurus = collect($guruData)->map(function ($g, $i) use ($mapels) {
+        $gurus = collect($guruData)->map(function ($g) use ($mapels) {
+            // Email ikut pola yang sama kayak guru data asli (nama depan.nama
+            // belakang, tanpa gelar) -- bukan "guru1@" lagi, biar konsisten &
+            // nggak keliatan beda perlakuan padahal dia guru sungguhan juga.
             $user = $g['akun'] ? User::create([
                 'name' => $g['nama'],
-                'email' => 'guru'.($i + 1).'@jurnalkita.test',
+                'email' => 'winartin@jurnalkita.test',
                 'email_verified_at' => now(), 'password' => Hash::make('password'),
                 'role' => 'guru', 'status' => 'approved',
             ]) : null;
@@ -107,17 +112,29 @@ class DatabaseSeeder extends Seeder
         });
 
         // -------------------------------------------------------- Jam pelajaran
-        $jamMulai = ['07:00', '07:45', '08:30', '09:15', '10:15', '11:00', '11:45', '12:30'];
-        foreach ($jamMulai as $idx => $mulai) {
-            $selesai = date('H:i', strtotime($mulai) + 45 * 60);
-            JamPelajaran::create([
-                'jam_ke' => $idx + 1, 'mulai' => $mulai, 'selesai' => $selesai,
-                'kategori' => 'senin_kamis',
-            ]);
-            JamPelajaran::create([
-                'jam_ke' => $idx + 1, 'mulai' => $mulai, 'selesai' => date('H:i', strtotime($mulai) + 35 * 60),
-                'kategori' => 'jumat',
-            ]);
+        // Sumber: docs/data-asli/jam-pelajaran.md (jadwal SMKN 1 Boyolangu asli,
+        // versi 35 menit/JP Senin-Kamis yang dikonfirmasi berlaku sekarang).
+        // Senin-Kamis cuma sampai JP10 (JP11-13 tidak dipakai -- makanya tidak
+        // dibuat baris untuk itu). Jumat polanya beda & sampai JP13.
+        $jpSeninKamis = [
+            1 => ['07:00', '07:35'], 2 => ['07:35', '08:10'], 3 => ['08:10', '08:45'], 4 => ['08:45', '09:20'],
+            // Istirahat 1: 09:20-09:40
+            5 => ['09:40', '10:15'], 6 => ['10:15', '10:50'], 7 => ['10:50', '11:25'],
+            // Istirahat 2: 11:25-13:30
+            8 => ['13:30', '14:05'], 9 => ['14:05', '14:40'], 10 => ['14:40', '15:15'],
+        ];
+        $jpJumat = [
+            1 => ['07:00', '07:30'], 2 => ['07:30', '08:00'], 3 => ['08:00', '08:30'], 4 => ['08:30', '09:00'], 5 => ['09:00', '09:30'],
+            // Istirahat 1: 09:30-09:50
+            6 => ['09:50', '10:20'], 7 => ['10:20', '10:50'], 8 => ['10:50', '11:20'],
+            // Istirahat 2: 11:20-13:30
+            9 => ['13:30', '13:55'], 10 => ['13:55', '14:20'], 11 => ['14:20', '14:45'], 12 => ['14:45', '15:10'], 13 => ['15:10', '15:35'],
+        ];
+        foreach ($jpSeninKamis as $jamKe => [$mulai, $selesai]) {
+            JamPelajaran::create(['jam_ke' => $jamKe, 'mulai' => $mulai, 'selesai' => $selesai, 'kategori' => 'senin_kamis']);
+        }
+        foreach ($jpJumat as $jamKe => [$mulai, $selesai]) {
+            JamPelajaran::create(['jam_ke' => $jamKe, 'mulai' => $mulai, 'selesai' => $selesai, 'kategori' => 'jumat']);
         }
 
         // ----------------------------------------------------------------- Kelas
@@ -129,7 +146,7 @@ class DatabaseSeeder extends Seeder
         ])->map(fn ($k, $i) => Kelas::create([
             ...$k,
             'nama' => "{$k['tingkat']} {$k['jurusan']} {$k['nomor']}",
-            'wali_id' => $gurus[$i % $gurus->count()]->id,
+            'wali_id' => $gurus->first()->id,
             'tahun_ajaran_id' => $tahunAjaran->id,
         ]));
 
@@ -161,42 +178,9 @@ class DatabaseSeeder extends Seeder
             }
         });
 
-        // ----------------------------------------------------------------- Jadwal
-        $hariList = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
-        $kelas->each(function (Kelas $k) use ($mapels, $gurus, $hariList) {
-            foreach ($hariList as $hi => $hari) {
-                Jadwal::create([
-                    'kelas_id' => $k->id,
-                    'mapel_id' => $mapels[$hi % $mapels->count()]->id,
-                    'guru_id' => $gurus[$hi % $gurus->count()]->id,
-                    'ruang' => fake()->randomElement(config('akademik.ruangan')),
-                    'hari' => $hari,
-                    'jam_ke_mulai' => 1,
-                    'jam_ke_selesai' => 2,
-                ]);
-            }
-        });
-
-        // -------------------------------------------------- Contoh jurnal + absensi
-        Jadwal::with('kelas.siswas')->take(3)->get()->each(function (Jadwal $jadwal, $i) {
-            $jurnal = Jurnal::create([
-                'jadwal_id' => $jadwal->id,
-                'guru_id' => $jadwal->guru_id,
-                'tanggal' => now()->subDays($i),
-                'jam_ke_mulai' => $jadwal->jam_ke_mulai,
-                'jam_ke_selesai' => $jadwal->jam_ke_selesai,
-                'status_guru' => 'hadir',
-                'materi' => 'Materi pertemuan '.($i + 1).': dasar dan latihan.',
-                'metode' => 'Ceramah, diskusi, latihan',
-                'status_verifikasi' => $i === 0 ? 'pending' : 'terverifikasi',
-            ]);
-
-            $jadwal->kelas->siswas->each(fn (Siswa $s) => Absensi::create([
-                'jurnal_id' => $jurnal->id,
-                'siswa_id' => $s->id,
-                'status' => fake()->randomElement(['hadir', 'hadir', 'hadir', 'sakit', 'izin']),
-            ]));
-        });
+        // Jadwal & jurnal contoh buat 4 kelas demo (X RPL 1/2, XI RPL 1, XI TKJ 1)
+        // udah datang dari DataAsliSeeder (jadwal ASLI, bukan isian generik lagi) --
+        // lihat bagian bawah file ini.
 
         // ---------------------------- Akun demo: guru tanpa piket vs guru piket hari ini
         // Dipisah jelas biar gampang dites/didemokan. Piket & jadwalnya dipasang ke HARI
@@ -287,5 +271,12 @@ class DatabaseSeeder extends Seeder
             'nis' => fake()->unique()->numerify('2026####'), 'nama' => 'Ketua XI RPL 1',
             'jenis_kelamin' => 'P', 'jabatan' => 'pengurus',
         ]);
+
+        // ------------------------------------------------------- Data ASLI sekolah
+        // Mapel/kelas/guru+akun/jadwal/piket KBM/piket Waka asli SMKN 1 Boyolangu.
+        // Ditaruh PALING TERAKHIR (setelah semua contoh demo di atas) supaya query
+        // "take(N)"/index tetap/kelas[0..3] di atas nggak kesenggol data asli yang
+        // jumlahnya ratusan baris. Lihat DataAsliSeeder untuk detail sumber & proses.
+        (new DataAsliSeeder)->run($tahunAjaran, $kelas);
     }
 }

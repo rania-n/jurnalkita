@@ -3,8 +3,10 @@
     'name' => 'q',
 ])
 
-<div class="flex h-11 items-center gap-2 rounded-xl bg-surface-alt px-4">
-    <x-icon name="search" :size="18" class="shrink-0 text-muted" />
+{{-- Putih + border (bukan abu-abu polos) biar kelihatan jelas ini kolom input,
+     bukan sekadar dekorasi -- dan h-10 (bukan h-11) biar nggak kebesaran. --}}
+<div class="flex h-10 items-center gap-2 rounded-lg border border-surface-alt bg-card px-3">
+    <x-icon name="search" :size="16" class="shrink-0 text-muted" />
     <input
         type="search"
         name="{{ $name }}"

@@ -32,22 +32,47 @@
     @if ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa" />
     @else
-        <x-admin.table :head="['Kelas', 'No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi', 'Terlambat']">
-            @foreach ($siswas as $s)
-                @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
-                <tr @class(['bg-alpha-soft/30' => $alphaTinggi])>
-                    <td class="px-4 py-2.5 text-muted">{{ $s->kelas?->nama ?? '—' }}</td>
-                    <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
-                    <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
-                    <td class="px-4 py-2.5 text-hadir">{{ $r['hadir'] ?? 0 }}</td>
-                    <td class="px-4 py-2.5 text-sakit">{{ $r['sakit'] ?? 0 }}</td>
-                    <td class="px-4 py-2.5 text-izin">{{ $r['izin'] ?? 0 }}</td>
-                    <td class="px-4 py-2.5 font-bold {{ $alphaTinggi ? 'text-alpha' : 'text-alpha/70' }}">{{ $r['alpha'] ?? 0 }}</td>
-                    <td class="px-4 py-2.5 text-dispen">{{ $r['dispensasi'] ?? 0 }}</td>
-                    <td class="px-4 py-2.5 font-semibold text-navy">{{ $terlambat[$s->id] ?? 0 }}</td>
-                </tr>
-            @endforeach
-        </x-admin.table>
-        <p class="mt-3 text-xs text-muted-2">Baris merah muda = alpha {{ $ambangAlpha }}x atau lebih pada rentang tanggal ini.</p>
+        {{-- Desktop: tabel biasa. HP: kartu ringkas (bukan tabel) -- 9 kolom
+             kalau ditumpuk per-field kepanjangan, jadi diganti badge angka
+             sejajar tanpa label per kartu (lihat x-ui.rekap-chip-card). --}}
+        <div class="hidden sm:block">
+            <x-admin.table :head="['Kelas', 'No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi', 'Terlambat']">
+                @foreach ($siswas as $s)
+                    @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
+                    <tr @class(['bg-alpha-soft/30' => $alphaTinggi])>
+                        <td class="px-4 py-2.5 text-muted">{{ $s->kelas?->nama ?? '—' }}</td>
+                        <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
+                        <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
+                        <td class="px-4 py-2.5 text-hadir">{{ $r['hadir'] ?? 0 }}</td>
+                        <td class="px-4 py-2.5 text-sakit">{{ $r['sakit'] ?? 0 }}</td>
+                        <td class="px-4 py-2.5 text-izin">{{ $r['izin'] ?? 0 }}</td>
+                        <td class="px-4 py-2.5 font-bold {{ $alphaTinggi ? 'text-alpha' : 'text-alpha/70' }}">{{ $r['alpha'] ?? 0 }}</td>
+                        <td class="px-4 py-2.5 text-dispen">{{ $r['dispensasi'] ?? 0 }}</td>
+                        <td class="px-4 py-2.5 font-semibold text-navy">{{ $terlambat[$s->id] ?? 0 }}</td>
+                    </tr>
+                @endforeach
+            </x-admin.table>
+        </div>
+
+        <div class="sm:hidden">
+            <x-ui.rekap-legend terlambat />
+            <div class="flex flex-col gap-2">
+                @foreach ($siswas as $s)
+                    @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
+                    <x-ui.rekap-chip-card
+                        :nama="$s->nama"
+                        :meta="($s->kelas?->nama ?? '—') . ' · No. ' . ($s->no_absen ?? '—')"
+                        :hadir="$r['hadir'] ?? 0"
+                        :sakit="$r['sakit'] ?? 0"
+                        :izin="$r['izin'] ?? 0"
+                        :alpha="$r['alpha'] ?? 0"
+                        :dispensasi="$r['dispensasi'] ?? 0"
+                        :terlambat="$terlambat[$s->id] ?? 0"
+                        :sorot="$alphaTinggi"
+                    />
+                @endforeach
+            </div>
+        </div>
+        <p class="mt-3 text-xs text-muted-2">Merah muda = alpha {{ $ambangAlpha }}x atau lebih pada rentang tanggal ini.</p>
     @endif
 </x-dynamic-component>

@@ -3,13 +3,7 @@
     $guru = $user->guru;
     $siswa = $user->siswa;
 
-    $roleLabel = [
-        'admin' => 'Administrator',
-        'guru' => 'Guru',
-        'siswa' => 'Pengurus Kelas',
-        'waka' => 'Waka Kesiswaan',
-        'satpam' => 'Satpam',
-    ][$user->role] ?? 'Pengguna';
+    $roleLabel = $user->roleLabel();
 
     $nama = $guru->nama ?? $siswa->nama ?? $user->name;
     $inisial = collect(explode(' ', $nama))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
@@ -126,10 +120,6 @@
                     
                     <x-ui.button type="submit" form="form-password-update" variant="primary">Simpan</x-ui.button>
                 </div>
-            </div>
-
-            <div class="lg:hidden">
-                <x-logout-button variant="full" />
             </div>
         </div>
     </div>

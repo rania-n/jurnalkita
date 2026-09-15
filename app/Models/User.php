@@ -132,6 +132,23 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->siswa?->kelas;
     }
 
+    /**
+     * Label peran buat ditampilin (header, profil, dll) -- SATU sumber kebenaran,
+     * dulu ada 4 versi beda-beda nyebar di beberapa view (nggak sinkron: "Waka"
+     * vs "Waka Kesiswaan", "Admin" vs "Administrator", dst).
+     */
+    public function roleLabel(): string
+    {
+        return match ($this->role) {
+            'admin' => 'Admin',
+            'guru' => $this->piketHariIni() ? 'Guru Piket' : 'Guru',
+            'siswa' => $this->kelasSekretaris() ? 'Pengurus '.$this->kelasSekretaris()->nama : 'Pengurus Kelas',
+            'waka' => 'Waka Kesiswaan',
+            'satpam' => 'Satpam',
+            default => 'Pengguna',
+        };
+    }
+
     /** Nama folder/route dashboard sesuai peran efektif. */
     public function homeRoute(): string
     {

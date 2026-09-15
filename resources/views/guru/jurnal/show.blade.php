@@ -31,9 +31,10 @@
         <x-ui.field-static label="Jam ke- (mulai)" icon="schedule">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
         <x-ui.field-static label="Jam ke- (selesai)" icon="schedule">Jam ke-{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
         <x-ui.field-static label="Status Kehadiran Anda" class="sm:col-span-2">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
-        <x-ui.field-static label="Materi" class="sm:col-span-2">{{ $jurnal->materi }}</x-ui.field-static>
+        <x-ui.field-static label="Materi" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
         <x-ui.field-static label="Metode">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
         <x-ui.field-static label="Tugas Tambahan">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
+        <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
     </div>
 
     @if ($jurnal->foto_bukti)

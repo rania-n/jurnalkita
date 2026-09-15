@@ -108,11 +108,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     /* =============================== GURU =============================== */
     Route::middleware('role:guru')->group(function () {
         Route::view('/guru', 'dashboards.guru')->name('guru.dashboard');
-        Route::get('/guru/jadwal', [GuruJadwalController::class, 'index'])->name('guru.jadwal.index');
         Route::view('/guru/piket', 'guru.piket')->name('piket.index');
 
         Route::get('/guru/wali-kelas', [WaliKelasController::class, 'index'])->name('guru.wali-kelas.index');
         Route::get('/guru/wali-kelas/{kelas}', [WaliKelasController::class, 'rekap'])->name('guru.wali-kelas.rekap');
+    });
+
+    // Isi Jurnal + Jadwal Mengajar -- Waka ikut dikasih akses karena di dunia
+    // nyata Waka juga megang jadwal ngajar sendiri (bukan cuma approve
+    // dispensasi). Kalau akun waka itu kebetulan nggak ada data Guru terkait,
+    // JurnalController::guru() sendiri yang nolak dengan pesan jelas.
+    Route::middleware('role:guru,waka')->group(function () {
+        Route::get('/guru/jadwal', [GuruJadwalController::class, 'index'])->name('guru.jadwal.index');
 
         Route::get('/guru/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
         Route::get('/guru/jurnal/tambah', [JurnalController::class, 'create'])->name('jurnal.create');
@@ -165,6 +172,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [PiketController::class, 'index'])->name('index');
         Route::get('/ekspor', [PiketController::class, 'ekspor'])->name('ekspor');
         Route::get('/ekspor/{tipe}/{id}', [PiketController::class, 'eksporDetail'])->name('ekspor.detail');
+        Route::get('/jurnal/{jurnal}', [PiketController::class, 'jurnalDetail'])->name('jurnal');
     });
 
     /* ===== REKAP KEHADIRAN SISWA (lintas kelas — waka + admin) ===== */

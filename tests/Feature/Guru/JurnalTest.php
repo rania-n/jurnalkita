@@ -51,10 +51,13 @@ class JurnalTest extends TestCase
 
     public function test_simpan_jurnal_membuat_absensi_default_hadir(): void
     {
+        Storage::fake('public');
+
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
             'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect();
 
         $jurnal = Jurnal::first();
@@ -66,10 +69,13 @@ class JurnalTest extends TestCase
 
     public function test_tidak_bisa_buat_jurnal_ganda_untuk_jadwal_sama_hari_ini(): void
     {
+        Storage::fake('public');
+
         $payload = [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
             'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ];
 
         $this->actingAs($this->user)->post('/guru/jurnal', $payload)->assertRedirect();
@@ -80,6 +86,8 @@ class JurnalTest extends TestCase
 
     public function test_siswa_dengan_dispensasi_disetujui_otomatis_dispensasi(): void
     {
+        Storage::fake('public');
+
         $siswa = Siswa::first();
         Dispensasi::create([
             'siswa_id' => $siswa->id,
@@ -93,6 +101,7 @@ class JurnalTest extends TestCase
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
             'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ]);
 
         $this->assertSame('dispensasi', Jurnal::first()->absensis()->where('siswa_id', $siswa->id)->value('status'));
@@ -135,6 +144,7 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
             'status_guru' => 'hadir', 'materi' => 'x',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ]);
         $jurnal = Jurnal::first();
         $siswaA = Siswa::where('nis', '001')->firstOrFail();
@@ -189,9 +199,12 @@ class JurnalTest extends TestCase
 
     public function test_guru_bisa_hapus_jurnal_yang_belum_diverifikasi(): void
     {
+        Storage::fake('public');
+
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
             'status_guru' => 'hadir', 'materi' => 'salah kelas',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ]);
         $jurnal = Jurnal::firstOrFail();
 

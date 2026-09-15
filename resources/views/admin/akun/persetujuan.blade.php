@@ -4,7 +4,7 @@
         ->orderBy('name')
         ->get();
 
-    $roleLabel = ['guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka', 'satpam' => 'Satpam'];
+    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan', 'satpam' => 'Satpam'];
 @endphp
 
 <x-layouts.admin title="Persetujuan Akun" heading="Persetujuan Akun">

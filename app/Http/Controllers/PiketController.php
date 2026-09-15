@@ -148,6 +148,19 @@ class PiketController extends Controller
         }, "monitor-piket-{$tipe}-".Str::slug($label).'-'.$tanggal->toDateString().'.csv', ['Content-Type' => 'text/csv']);
     }
 
+    /**
+     * Fragment HTML (bukan halaman penuh) buat popup "lihat detail" di Monitor
+     * Piket -- guru piket/waka/admin boleh lihat jurnal GURU LAIN di sini
+     * (read-only, beda dari JurnalController::show() yang dikunci milik sendiri).
+     */
+    public function jurnalDetail(Jurnal $jurnal): View
+    {
+        $this->pastikanBolehLihat();
+        $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'guru', 'absensis.siswa');
+
+        return view('piket._jurnal-detail-fragment', compact('jurnal'));
+    }
+
     /** Roster guru piket hari itu (shift jam, bukan sehari penuh) — buat ditampilkan di atas Monitor Piket. */
     private function shiftPiketHariItu(Carbon $tanggal): Collection
     {

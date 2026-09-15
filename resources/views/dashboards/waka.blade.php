@@ -18,10 +18,24 @@
         'ditolak' => (clone $dispensasiBulanIni)->where('status_akhir', 'rejected')->count(),
     ];
     $dispensasiTerbaru = \App\Models\Dispensasi::with('siswa.kelas')->latest('created_at')->limit(5)->get();
+
+    // Waka juga bisa punya jadwal mengajar sendiri (bukan cuma approve
+    // dispensasi) -- kalau akunnya terhubung ke data Guru, tampilin jadwal hari
+    // ini sama kayak dashboard guru biasa.
+    $guruWaka = $user->guru;
+    $hariIniWaka = \App\Support\HariSekolah::hariIni();
+    $jadwalHariIniWaka = $guruWaka && $hariIniWaka
+        ? $guruWaka->jadwals()->with('kelas', 'mapel')->where('hari', $hariIniWaka)->orderBy('jam_ke_mulai')->get()
+        : collect();
+    $sudahDiisiWaka = $guruWaka
+        ? $guruWaka->jurnals()->whereDate('tanggal', today())->pluck('jadwal_id')->all()
+        : [];
 @endphp
 
 <x-layouts.app title="Beranda Waka" width="wide">
     <x-page-header title="Beranda Waka Kesiswaan" subtitle="Persetujuan dispensasi tahap 2" />
+
+    <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
 
     @if ($adaJadwalWaka)
         @if ($bertugasHariIni)
@@ -69,6 +83,36 @@
             <x-icon name="chevron_right" :size="20" class="text-muted" />
         </a>
     </div>
+
+    @if ($guruWaka)
+        <div class="mb-3 mt-6 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-ink">Jadwal Mengajar Hari Ini</h2>
+            <a href="{{ route('jurnal.index') }}" class="text-sm font-semibold text-navy">Riwayat Jurnal →</a>
+        </div>
+
+        @if ($jadwalHariIniWaka->isEmpty())
+            <x-ui.empty icon="event_busy" title="Tidak ada jadwal mengajar hari ini" desc="Mau isi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.">
+                <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
+            </x-ui.empty>
+        @else
+            <x-ui.card-list>
+                @foreach ($jadwalHariIniWaka as $j)
+                    <x-ui.list-card
+                        :title="$j->mapel->nama"
+                        :meta="[$j->kelas->nama . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai, 'Ruang ' . ($j->ruang ?? '-')]"
+                    >
+                        <x-slot:actions>
+                            @if (in_array($j->id, $sudahDiisiWaka))
+                                <x-ui.action-button label="Sudah diisi" icon="check_circle" variant="success" href="{{ route('jurnal.index') }}" />
+                            @else
+                                <x-ui.action-button label="Isi Jurnal" icon="edit_note" variant="info" :href="route('jurnal.create', ['jadwal' => $j->id])" />
+                            @endif
+                        </x-slot:actions>
+                    </x-ui.list-card>
+                @endforeach
+            </x-ui.card-list>
+        @endif
+    @endif
 
     <h2 class="mb-2 mt-6 text-sm font-bold text-ink">Dispensasi Bulan Ini ({{ now()->translatedFormat('F Y') }})</h2>
     <div class="mb-6 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">

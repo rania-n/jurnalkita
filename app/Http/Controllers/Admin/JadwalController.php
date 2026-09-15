@@ -32,6 +32,13 @@ class JadwalController extends Controller
             return back()->with('error', $pesan)->withInput();
         }
 
+        // Satu guru fisiknya cuma bisa ngajar 1 kelas dalam satu waktu -- cegah
+        // admin nambah jadwal yang jam-nya numpuk sama jadwal guru itu sendiri
+        // di kelas lain, hari yang sama (edit -> jadwal dia sendiri dikecualikan).
+        if ($pesan = $this->konflikJadwalGuru($data)) {
+            return back()->with('error', $pesan)->withInput();
+        }
+
         $jadwal = $request->filled('id') ? Jadwal::findOrFail($data['id']) : new Jadwal;
         $baru = ! $jadwal->exists;
 
@@ -49,6 +56,24 @@ class JadwalController extends Controller
         AuditLog::catat('Hapus Jadwal', "Hapus jadwal #{$jadwal->id}", $jadwal);
 
         return back()->with('success', 'Jadwal dihapus.');
+    }
+
+    /** Cek apakah jam jadwal ini numpuk sama jadwal MENGAJAR lain guru yang sama, hari yang sama. */
+    private function konflikJadwalGuru(array $data): ?string
+    {
+        $bentrok = Jadwal::with('kelas')
+            ->where('guru_id', $data['guru_id'])
+            ->where('hari', $data['hari'])
+            ->when($data['id'] ?? null, fn ($q, $id) => $q->whereKeyNot($id))
+            ->where('jam_ke_mulai', '<=', $data['jam_ke_selesai'])
+            ->where('jam_ke_selesai', '>=', $data['jam_ke_mulai'])
+            ->first();
+
+        if (! $bentrok) {
+            return null;
+        }
+
+        return "Guru ini udah punya jadwal lain di jam yang sama hari {$data['hari']}: {$bentrok->kelas->nama} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Satu guru nggak bisa ngajar 2 kelas sekaligus — ubah jamnya atau pilih guru lain.";
     }
 
     /** Cek apakah jam jadwal (jam ke-) bentrok dengan shift piket guru di hari yang sama. */

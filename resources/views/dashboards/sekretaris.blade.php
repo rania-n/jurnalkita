@@ -5,10 +5,27 @@
         ? \App\Models\Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
             ->where('status_verifikasi', 'pending')->count()
         : 0;
+
+    // K: dulu dasbor ini cuma 3 kotak menu doang -- ditambah jadwal hari ini
+    // biar pengurus kelas langsung lihat pelajaran mana yang gurunya sudah
+    // hadir/tugas luar/belum diisi tanpa buka menu lain dulu.
+    $hariIni = \App\Support\HariSekolah::hariIni();
+    $jadwalHariIni = $kelas && $hariIni
+        ? $kelas->jadwals()->with('mapel', 'guru')->where('hari', $hariIni)->orderBy('jam_ke_mulai')->get()
+        : collect();
+    $jurnalHariIni = $jadwalHariIni->isNotEmpty()
+        ? \App\Models\Jurnal::whereIn('jadwal_id', $jadwalHariIni->pluck('id'))->whereDate('tanggal', today())->get()->keyBy('jadwal_id')
+        : collect();
+    $labelStatusGuru = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
+    $toneStatusGuru = ['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha'];
 @endphp
 
 <x-layouts.app title="Beranda Pengurus Kelas" width="wide">
     <x-page-header title="Beranda" :subtitle="$kelas?->nama ?? 'Pengurus Kelas'" />
+
+    @if ($kelas)
+        <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
+    @endif
 
     @unless ($kelas)
         <x-alert type="warning">Akun ini bukan pengurus kelas atau belum terhubung ke kelas. Hubungi admin.</x-alert>
@@ -49,5 +66,30 @@
                 <x-icon name="chevron_right" :size="20" class="text-muted" />
             </a>
         </div>
+
+        <h2 class="mb-2 mt-6 text-sm font-bold text-ink">Jadwal Kelas Hari Ini</h2>
+        @if ($jadwalHariIni->isEmpty())
+            <x-ui.empty icon="event_busy" title="Tidak ada jadwal hari ini" />
+        @else
+            <x-ui.card-list>
+                @foreach ($jadwalHariIni as $j)
+                    @php $jr = $jurnalHariIni->get($j->id); @endphp
+                    <x-ui.list-card
+                        :title="$j->mapel->nama"
+                        :meta="['JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai . ' · ' . $j->guru->nama]"
+                    >
+                        <x-slot:badge>
+                            @if ($jr)
+                                <x-ui.status-badge :status="$toneStatusGuru[$jr->status_guru] ?? 'menunggu'">
+                                    {{ $labelStatusGuru[$jr->status_guru] ?? $jr->status_guru }}
+                                </x-ui.status-badge>
+                            @else
+                                <x-ui.status-badge status="menunggu">Belum Diisi</x-ui.status-badge>
+                            @endif
+                        </x-slot:badge>
+                    </x-ui.list-card>
+                @endforeach
+            </x-ui.card-list>
+        @endif
     @endunless
 </x-layouts.app>

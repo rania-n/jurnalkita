@@ -7,6 +7,9 @@
     $user = auth()->user();
     // Satu sumber nav dipakai bareng sama halaman oversight (lihat config/navigation.php).
     $nav = config('navigation.admin');
+
+    $notifikasiTerbaru = $user?->notifications()->latest()->limit(8)->get() ?? collect();
+    $jumlahBelumDibaca = $user?->unreadNotifications->count() ?? 0;
 @endphp
 
 <!DOCTYPE html>
@@ -92,10 +95,58 @@
                 <h1 class="text-lg font-bold text-ink">{{ $heading ?? $title }}</h1>
             </div>
             <div class="flex items-center gap-2">
-                <span class="hidden text-sm text-muted sm:block">{{ $user?->name }}</span>
-                <span class="rounded-md bg-surface-alt px-2 py-1 text-[11px] font-bold text-ink">Admin</span>
+                {{-- Format nama+role sama persis kayak shell non-admin (x-app-topbar) --
+                     dulu di sini nama disembunyikan di HP (hidden sm:block) & badge-nya
+                     hardcode "Admin", sekarang selalu kelihatan & pakai roleLabel(). --}}
+                <span class="flex flex-col items-end leading-tight">
+                    <span class="text-sm font-semibold text-ink">{{ $user?->name }}</span>
+                    <span class="text-[11px] font-bold text-muted">{{ $user?->roleLabel() }}</span>
+                </span>
+
+                <button type="button" data-modal-open="modal-notifikasi" class="relative ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-muted transition-colors hover:text-navy" aria-label="Notifikasi">
+                    <x-icon name="notifications" :size="20" />
+                    @if ($jumlahBelumDibaca > 0)
+                        <span class="absolute right-1 top-1 flex h-2.5 w-2.5 rounded-full bg-alpha ring-2 ring-card"></span>
+                    @endif
+                </button>
+
+                {{-- Logout juga di header (bukan cuma di sidebar) -- di HP sidebar
+                     ketutup hamburger, jadi keluar susah dicari kalau cuma di situ. --}}
+                <x-logout-button variant="icon" />
             </div>
         </header>
+
+        <x-ui.modal id="modal-notifikasi" title="Notifikasi" size="lg">
+            @if ($notifikasiTerbaru->isEmpty())
+                <x-ui.empty icon="notifications" title="Belum ada notifikasi" desc="Pemberitahuan akan muncul di sini." />
+            @else
+                <div class="flex flex-col gap-1.5">
+                    @foreach ($notifikasiTerbaru as $n)
+                        <a href="{{ route('notifikasi.buka', $n->id) }}" @class(['flex items-start gap-2.5 rounded-xl px-3 py-2.5 transition-colors hover:bg-surface-alt', 'bg-surface-alt' => is_null($n->read_at)])>
+                            @if (is_null($n->read_at))
+                                <span class="mt-1.5 flex h-2 w-2 shrink-0 rounded-full bg-alpha"></span>
+                            @else
+                                <span class="mt-1.5 h-2 w-2 shrink-0"></span>
+                            @endif
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-sm font-semibold text-ink">{{ $n->data['title'] ?? 'Notifikasi' }}</span>
+                                <span class="block truncate text-xs text-muted">{{ $n->data['body'] ?? '' }}</span>
+                                <span class="block text-[11px] text-muted-2">{{ $n->created_at->diffForHumans() }}</span>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+
+                @if ($jumlahBelumDibaca > 0)
+                    <form method="POST" action="{{ route('notifikasi.tandai-semua-dibaca') }}" class="mt-3 border-t border-surface-alt pt-3">
+                        @csrf
+                        <x-ui.button type="submit" variant="secondary" icon="done_all" class="w-full !h-10 !text-sm">Tandai Semua Dibaca</x-ui.button>
+                    </form>
+                @endif
+
+                <a href="{{ route('notifikasi.index') }}" class="mt-2 block text-center text-sm font-semibold text-navy hover:underline">Lihat semua notifikasi</a>
+            @endif
+        </x-ui.modal>
 
         <main class="w-full flex-1 px-5 py-6 sm:px-6 lg:px-10 lg:py-8 2xl:px-16">
             @foreach (['success', 'error', 'info'] as $key)
