@@ -56,16 +56,7 @@
             </div>
 
             <h2 class="mb-2 text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</h2>
-            <x-admin.table :head="['No', 'Nama', 'Status', 'Catatan']">
-                @foreach ($jurnal->absensis->sortBy('siswa.no_absen') as $a)
-                    <tr>
-                        <td class="px-4 py-2.5 text-muted">{{ $a->siswa->no_absen ?? '–' }}</td>
-                        <td class="px-4 py-2.5 font-semibold text-ink">{{ $a->siswa->nama }}</td>
-                        <td class="px-4 py-2.5"><x-ui.status-badge :status="$a->status" /></td>
-                        <td class="px-4 py-2.5 text-muted">{{ $a->catatan ?: '—' }}</td>
-                    </tr>
-                @endforeach
-            </x-admin.table>
+            <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" />
         </div>
     </div>
 </x-layouts.app>

@@ -2,6 +2,7 @@
     'id',
     'title' => '',
     'size' => 'md',   // md ~32rem | lg ~44rem
+    'errorBag' => 'default',
 ])
 
 @php $w = $size === 'lg' ? '44rem' : '32rem'; @endphp
@@ -31,6 +32,9 @@
     </div>
 </dialog>
 
-@if ($errors->any())
+@if ($errors->getBag($errorBag)->any())
+    {{-- errorBag spesifik (bukan $errors->any() polos) -- biar modal ini nggak
+         ikut kebuka kalau yang gagal validasi itu form modal LAIN di halaman
+         yang sama (lihat catatan yang sama di x-admin.modal). --}}
     <script>document.getElementById(@js($id))?.showModal();</script>
 @endif

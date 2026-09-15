@@ -50,7 +50,7 @@ class AkunTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post('/admin/akun', $this->akunPayload(['password' => 'x', 'password_confirmation' => 'y']))
-            ->assertSessionHasErrors('password');
+            ->assertSessionHasErrors('password', null, 'buatAkun');
 
         $this->assertDatabaseCount('users', 1); // hanya admin
     }
@@ -169,7 +169,7 @@ class AkunTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post('/admin/akun', $this->akunPayload(['role' => 'siswa', 'email' => 'x@s.test']))
-            ->assertSessionHasErrors(['kelas_id', 'nis']);
+            ->assertSessionHasErrors(['kelas_id', 'nis'], null, 'buatAkun');
     }
 
     public function test_kelas_yang_sudah_punya_pengurus_tidak_bisa_dibuatkan_akun_pengurus_lagi(): void
@@ -184,7 +184,7 @@ class AkunTest extends TestCase
             ->post('/admin/akun', $this->akunPayload([
                 'role' => 'siswa', 'email' => 'ketua-baru@s.test', 'kelas_id' => $kelas->id, 'nis' => '002',
             ]))
-            ->assertSessionHasErrors('kelas_id');
+            ->assertSessionHasErrors('kelas_id', null, 'buatAkun');
     }
 
     public function test_approve_dan_reject_pendaftaran(): void
@@ -216,7 +216,7 @@ class AkunTest extends TestCase
 
         $this->actingAs($this->admin())
             ->post('/admin/akun', $this->akunPayload(['role' => 'waka', 'email' => 'dobel@s.test']))
-            ->assertSessionHasErrors('email');
+            ->assertSessionHasErrors('email', null, 'buatAkun');
     }
 
     public function test_hapus_akun_melepas_kaitan_ke_data_guru(): void

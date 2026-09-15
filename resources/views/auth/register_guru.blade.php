@@ -17,7 +17,7 @@
         <x-ui.input label="Email" name="email" type="email" placeholder="Masukkan alamat email aktif" :value="old('email')" />
         <x-ui.input label="No. Telepon" name="telepon" inputmode="numeric" placeholder="Masukkan nomor WhatsApp aktif" :value="old('telepon')" />
 
-        <x-ui.input label="Password" name="password" type="password" id="reg-password" placeholder="Buat kata sandi baru">
+        <x-ui.input label="Password" name="password" type="password" id="reg-password" placeholder="Buat kata sandi baru" hint="Minimal 8 karakter.">
             <button type="button" data-toggle-password="#reg-password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan kata sandi">
                 <x-icon name="visibility" :size="20" />
             </button>

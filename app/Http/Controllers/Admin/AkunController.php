@@ -25,7 +25,11 @@ class AkunController extends Controller
      */
     public function save(Request $request): RedirectResponse
     {
-        $data = $request->validate([
+        // errorBag 'buatAkun' -- halaman Manajemen Akun punya 2 modal (Buat &
+        // Ubah Akun). Kalau pakai bag default, gagal validasi di sini bikin
+        // modal Ubah Akun (DAN modal notifikasi di header) ikut kebuka juga
+        // -- lihat catatan di x-admin.modal.
+        $data = $request->validateWithBag('buatAkun', [
             'role' => ['required', 'in:guru,siswa,waka,satpam'],
             'sumber' => ['nullable', 'string'],
             'nama' => ['required', 'string', 'max:255'],
@@ -64,7 +68,7 @@ class AkunController extends Controller
             $guru->save();
         } elseif ($data['role'] === 'siswa') {
             if (! $sumberId) {
-                $request->validate([
+                $request->validateWithBag('buatAkun', [
                     'kelas_id' => [
                         'required', 'exists:kelas,id',
                         // Data baru dari sini otomatis jadi pengurus kelas (akun kelas) --
@@ -102,7 +106,9 @@ class AkunController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
-        $data = $request->validate([
+        // errorBag 'ubahAkun' -- pasangan dari 'buatAkun' di save(), lihat
+        // catatan di sana.
+        $data = $request->validateWithBag('ubahAkun', [
             'id' => ['required', 'exists:users,id'],
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'lowercase', Rule::unique('users', 'email')->ignore($request->integer('id'))->withoutTrashed()],

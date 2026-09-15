@@ -44,10 +44,10 @@
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div class="sm:col-span-2">
-                            <x-ui.input label="Email" icon="mail" type="email" name="email" value="{{ old('email', $user->email) }}" required />
+                            <x-ui.input label="Email" icon="mail" type="email" name="email" value="{{ old('email', $user->email) }}" required errorBag="ubahAkun" />
                         </div>
                         <div class="sm:col-span-2">
-                            <x-ui.input label="No. WhatsApp" icon="call" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" />
+                            <x-ui.input label="No. WhatsApp" icon="call" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" errorBag="ubahAkun" />
                         </div>
                     </div>
                     
@@ -107,7 +107,7 @@
 
                     <x-ui.input type="password" name="current_password" id="current_password" placeholder="Kata sandi saat ini" required autocomplete="current-password" errorBag="updatePassword" />
                     
-                    <x-ui.input type="password" name="password" id="password" placeholder="Kata sandi baru" required autocomplete="new-password" errorBag="updatePassword" />
+                    <x-ui.input type="password" name="password" id="password" placeholder="Kata sandi baru" required autocomplete="new-password" errorBag="updatePassword" hint="Minimal 8 karakter." />
                     
                     <x-ui.input type="password" name="password_confirmation" id="password_confirmation" placeholder="Tulis ulang kata sandi baru" required autocomplete="new-password" errorBag="updatePassword" />
                 </form>

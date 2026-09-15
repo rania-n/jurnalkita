@@ -15,7 +15,12 @@ class JamPelajaranController extends Controller
     /** Simpan ulang seluruh baris untuk satu kategori (editor multi-baris). */
     public function save(Request $request): RedirectResponse
     {
-        $data = $request->validate([
+        // Bag beda tergantung modal yang disubmit (dibedain dari ada/nggaknya
+        // kategori_baru) -- 2 modal (Edit & Kategori Baru) share route ini, kalau
+        // pakai bag default gagal validasi di satu modal ikut mbukain modal lain.
+        $bag = $request->filled('kategori_baru') ? 'jpBaru' : 'jpEdit';
+
+        $data = $request->validateWithBag($bag, [
             // Bukan enum lagi -- boleh kategori baru (mis. "Ramadhan", "Ujian"), bukan
             // cuma senin_kamis/jumat/khusus bawaan. Salah satu wajib: kategori (pilih yang
             // sudah ada) atau kategori_baru (ketik nama baru, lihat modal "Kategori Baru").

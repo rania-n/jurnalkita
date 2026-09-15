@@ -31,17 +31,30 @@
     @if ($absensis->isEmpty())
         <x-ui.empty icon="event_busy" title="Belum ada riwayat kehadiran" desc="Siswa ini belum pernah muncul di jurnal manapun." />
     @else
-        <x-admin.table :head="['Tanggal', 'Mapel', 'Status', 'Catatan']">
+        <div class="hidden sm:block">
+            <x-admin.table :head="['Tanggal', 'Mapel', 'Status', 'Catatan']">
+                @foreach ($absensis as $a)
+                    <tr>
+                        <td class="px-4 py-2.5 text-muted">{{ $a->jurnal->tanggal->translatedFormat('d M Y') }}</td>
+                        <td class="px-4 py-2.5 text-ink">{{ $a->jurnal->jadwal?->mapel?->nama ?? '—' }}</td>
+                        <td class="px-4 py-2.5">
+                            <x-ui.status-badge :status="$a->status" />
+                        </td>
+                        <td class="px-4 py-2.5 text-muted">{{ $a->catatan ?: '—' }}</td>
+                    </tr>
+                @endforeach
+            </x-admin.table>
+        </div>
+
+        <div class="flex flex-col gap-2 sm:hidden">
             @foreach ($absensis as $a)
-                <tr>
-                    <td class="px-4 py-2.5 text-muted">{{ $a->jurnal->tanggal->translatedFormat('d M Y') }}</td>
-                    <td class="px-4 py-2.5 text-ink">{{ $a->jurnal->jadwal?->mapel?->nama ?? '—' }}</td>
-                    <td class="px-4 py-2.5">
-                        <x-ui.status-badge :status="$a->status" />
-                    </td>
-                    <td class="px-4 py-2.5 text-muted">{{ $a->catatan ?: '—' }}</td>
-                </tr>
+                <x-ui.list-card
+                    :title="$a->jurnal->jadwal?->mapel?->nama ?? '—'"
+                    :meta="array_filter([$a->jurnal->tanggal->translatedFormat('d M Y'), $a->catatan])"
+                >
+                    <x-slot:badge><x-ui.status-badge :status="$a->status" /></x-slot:badge>
+                </x-ui.list-card>
             @endforeach
-        </x-admin.table>
+        </div>
     @endif
 </x-layouts.app>

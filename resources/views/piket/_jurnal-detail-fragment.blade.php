@@ -38,17 +38,8 @@
         </div>
 
         @if ($jurnal->absensis->isNotEmpty())
-            <div class="max-h-[40vh] overflow-y-auto rounded-xl border border-surface-alt">
-                <x-admin.table :head="['No', 'Nama', 'Status', 'Catatan']">
-                    @foreach ($jurnal->absensis->sortBy('siswa.no_absen') as $a)
-                        <tr>
-                            <td class="px-4 py-2 text-muted">{{ $a->siswa->no_absen ?? '–' }}</td>
-                            <td class="px-4 py-2 font-semibold text-ink">{{ $a->siswa->nama }}</td>
-                            <td class="px-4 py-2"><x-ui.status-badge :status="$a->status" /></td>
-                            <td class="px-4 py-2 text-muted">{{ $a->catatan ?: '—' }}</td>
-                        </tr>
-                    @endforeach
-                </x-admin.table>
+            <div class="max-h-[40vh] overflow-y-auto rounded-xl border border-surface-alt sm:border-0">
+                <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" />
             </div>
         @endif
     </div>

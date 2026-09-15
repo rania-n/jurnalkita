@@ -57,18 +57,7 @@
         @endforeach
     </div>
 
-    <x-admin.table :head="['No', 'Nama', 'Status', 'Catatan']">
-        @foreach ($jurnal->absensis->sortBy('siswa.no_absen') as $a)
-            <tr>
-                <td class="px-4 py-2.5 text-muted">{{ $a->siswa->no_absen ?? '–' }}</td>
-                <td class="px-4 py-2.5 font-semibold text-ink">
-                    <a href="{{ route('guru.siswa.show', $a->siswa) }}" class="hover:text-navy hover:underline">{{ $a->siswa->nama }}</a>
-                </td>
-                <td class="px-4 py-2.5"><x-ui.status-badge :status="$a->status" /></td>
-                <td class="px-4 py-2.5 text-muted">{{ $a->catatan ?: '—' }}</td>
-            </tr>
-        @endforeach
-    </x-admin.table>
+    <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" link-siswa />
 
     {{-- Aksi -- taruh paling bawah, setelah presensi, biar urutannya: lihat dulu semuanya, baru ubah/hapus kalau perlu --}}
     @if ($bisaUbah)

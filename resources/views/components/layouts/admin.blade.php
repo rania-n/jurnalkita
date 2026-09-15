@@ -116,7 +116,10 @@
             </div>
         </header>
 
-        <x-ui.modal id="modal-notifikasi" title="Notifikasi" size="lg">
+        {{-- errorBag khusus (lihat catatan yang sama di app-topbar.blade.php) --
+             biar modal ini nggak ikut kebuka pas form LAIN di halaman admin
+             manapun gagal validasi (mis. Buat Akun di Manajemen Akun). --}}
+        <x-ui.modal id="modal-notifikasi" title="Notifikasi" size="lg" errorBag="tidak-dipakai">
             @if ($notifikasiTerbaru->isEmpty())
                 <x-ui.empty icon="notifications" title="Belum ada notifikasi" desc="Pemberitahuan akan muncul di sini." />
             @else

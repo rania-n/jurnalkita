@@ -2,6 +2,7 @@
     'id',
     'title' => '',
     'size' => 'md',   // md ~32rem | lg ~44rem
+    'errorBag' => 'default',
 ])
 
 @php $w = $size === 'lg' ? '44rem' : '32rem'; @endphp
@@ -28,11 +29,17 @@
     </div>
 </dialog>
 
-@if ($errors->any())
+@if ($errors->getBag($errorBag)->any())
     {{-- Submit gagal validasi -> balik ke halaman ini dengan dialog masih tertutup
          secara default (native <dialog> butuh showModal() eksplisit). Tanpa ini,
          pesan @error() di tiap field ketutup dialog dan admin cuma lihat halaman
          reload biasa -- kelihatan kayak "data ga masuk" padahal sebenarnya ketolak
-         validasi dan alasannya ada, cuma nggak kelihatan. --}}
+         validasi dan alasannya ada, cuma nggak kelihatan.
+
+         Dicek pakai errorBag SPESIFIK (bukan $errors->any() polos) -- kalau
+         halaman punya lebih dari satu modal/form (mis. "Buat Akun" & "Ubah
+         Akun"), $errors->any() bakal true buat SEMUA modal begitu SALAH SATU
+         form gagal validasi, jadi modal yang nggak disubmit ikut kebuka juga.
+         errorBag bikin tiap modal cuma bereaksi ke error punya form-nya sendiri. --}}
     <script>document.getElementById(@js($id))?.showModal();</script>
 @endif

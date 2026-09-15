@@ -104,7 +104,7 @@
     @endif
 
     {{-- ------------------------------------------------------------- Modal buat akun --}}
-    <x-admin.modal id="modal-akun" title="Buat Akun">
+    <x-admin.modal id="modal-akun" title="Buat Akun" errorBag="buatAkun">
         <form method="POST" action="{{ route('master.akun.save') }}" class="flex flex-col gap-4" id="form-akun">
             @csrf
 
@@ -129,14 +129,14 @@
                 </optgroup>
             </x-ui.select>
 
-            <x-ui.input label="Nama Lengkap" name="nama" id="akun-nama" />
-            <x-ui.input label="Email" name="email" type="email" placeholder="email@sekolah.sch.id" />
+            <x-ui.input label="Nama Lengkap" name="nama" id="akun-nama" errorBag="buatAkun" />
+            <x-ui.input label="Email" name="email" type="email" placeholder="email@sekolah.sch.id" errorBag="buatAkun" />
 
             {{-- guru baru & waka: NIP (siswa punya NIS sendiri di bawah, satpam tidak perlu) --}}
-            <x-ui.input label="NIP (opsional)" name="nip" data-grup="nip" />
+            <x-ui.input label="NIP (opsional)" name="nip" data-grup="nip" errorBag="buatAkun" />
 
             {{-- semua peran: no. WhatsApp, dipakai kirim link/notifikasi lewat WA --}}
-            <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" hint="Dipakai buat kirim link persetujuan/surat lewat WhatsApp." />
+            <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" hint="Dipakai buat kirim link persetujuan/surat lewat WhatsApp." errorBag="buatAkun" />
 
             {{-- khusus data pengurus kelas baru --}}
             <div data-grup="siswa-baru" class="flex flex-col gap-4">
@@ -144,19 +144,19 @@
                     <option value="" disabled selected hidden>Pilih kelas</option>
                     @foreach ($kelasList as $k)<option value="{{ $k->id }}">{{ $k->nama }}</option>@endforeach
                 </x-ui.select>
-                <x-ui.input label="NIS" name="nis" inputmode="numeric" />
+                <x-ui.input label="NIS" name="nis" inputmode="numeric" errorBag="buatAkun" />
                 <x-ui.select label="Jenis Kelamin" name="jenis_kelamin">
                     <option value="L">Laki-laki</option>
                     <option value="P">Perempuan</option>
                 </x-ui.select>
             </div>
 
-            <x-ui.input label="Password" name="password" type="password" id="akun-password" placeholder="Minimal 8 karakter">
+            <x-ui.input label="Password" name="password" type="password" id="akun-password" placeholder="Ketik password" hint="Minimal 8 karakter." errorBag="buatAkun">
                 <button type="button" data-toggle-password="#akun-password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan">
                     <x-icon name="visibility" :size="18" />
                 </button>
             </x-ui.input>
-            <x-ui.input label="Konfirmasi Password" name="password_confirmation" type="password" placeholder="Ulangi password" />
+            <x-ui.input label="Konfirmasi Password" name="password_confirmation" type="password" placeholder="Ulangi password" errorBag="buatAkun" />
 
             <p class="rounded-lg bg-izin-soft px-3 py-2 text-xs text-izin">Beri password ini ke yang bersangkutan. Nanti dia bisa reset sendiri lewat "Lupa Sandi".</p>
 
@@ -168,20 +168,20 @@
     </x-admin.modal>
 
     {{-- ------------------------------------------------------------- Modal ubah akun --}}
-    <x-admin.modal id="modal-akun-ubah" title="Ubah Akun">
+    <x-admin.modal id="modal-akun-ubah" title="Ubah Akun" errorBag="ubahAkun">
         <form method="POST" action="{{ route('master.akun.update') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.input label="Nama Lengkap" name="nama" />
-            <x-ui.input label="Email" name="email" type="email" />
-            <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" />
-            <x-ui.input label="NIP (opsional, khusus Waka)" name="nip" />
+            <x-ui.input label="Nama Lengkap" name="nama" errorBag="ubahAkun" />
+            <x-ui.input label="Email" name="email" type="email" errorBag="ubahAkun" />
+            <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" errorBag="ubahAkun" />
+            <x-ui.input label="NIP (opsional, khusus Waka)" name="nip" errorBag="ubahAkun" />
 
-            <x-ui.input label="Password Baru (opsional)" name="password" type="password" id="akun-ubah-password" placeholder="Kosongkan kalau tidak diganti">
+            <x-ui.input label="Password Baru (opsional)" name="password" type="password" id="akun-ubah-password" placeholder="Kosongkan kalau tidak diganti" hint="Kosongkan kalau tidak diganti. Kalau diisi, minimal 8 karakter." errorBag="ubahAkun">
                 <button type="button" data-toggle-password="#akun-ubah-password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan">
                     <x-icon name="visibility" :size="18" />
                 </button>
             </x-ui.input>
-            <x-ui.input label="Konfirmasi Password Baru" name="password_confirmation" type="password" placeholder="Ulangi kalau ganti password" />
+            <x-ui.input label="Konfirmasi Password Baru" name="password_confirmation" type="password" placeholder="Ulangi kalau ganti password" errorBag="ubahAkun" />
 
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan Perubahan</x-ui.button>

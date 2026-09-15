@@ -50,7 +50,12 @@
     </div>
 </header>
 
-<x-ui.modal id="modal-notifikasi" title="Notifikasi" size="lg">
+{{-- errorBag khusus yang nggak pernah dipakai form manapun -- form "tandai
+     semua dibaca" di dalam modal ini nggak divalidasi jadi nggak pernah
+     gagal, tapi kalau pakai bag default ($errors->any()), modal ini ikut
+     kebuka nggak diundang tiap kali ADA form lain (mis. Buat Akun) yang
+     gagal validasi di halaman yang sama. --}}
+<x-ui.modal id="modal-notifikasi" title="Notifikasi" size="lg" errorBag="tidak-dipakai">
     @if ($notifikasiTerbaru->isEmpty())
         <x-ui.empty icon="notifications" title="Belum ada notifikasi" desc="Pemberitahuan tentang jurnal & dispensasi Anda akan muncul di sini." />
     @else

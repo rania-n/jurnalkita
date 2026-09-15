@@ -57,7 +57,7 @@
     @endif
 
     {{-- Edit kategori yang lagi dipilih --}}
-    <x-admin.modal id="modal-jp" size="lg" title="Edit Jam Pelajaran">
+    <x-admin.modal id="modal-jp" size="lg" title="Edit Jam Pelajaran" errorBag="jpEdit">
         <form method="POST" action="{{ route('master.jam-pelajaran.save') }}" id="form-jp">
             @csrf
             <input type="hidden" name="kategori" value="{{ $set }}">
@@ -102,10 +102,10 @@
     </x-admin.modal>
 
     {{-- Kategori baru — sama persis, cuma nama kategorinya diketik manual --}}
-    <x-admin.modal id="modal-jp-baru" size="lg" title="Tambah Kategori Baru">
+    <x-admin.modal id="modal-jp-baru" size="lg" title="Tambah Kategori Baru" errorBag="jpBaru">
         <form method="POST" action="{{ route('master.jam-pelajaran.save') }}" id="form-jp-baru">
             @csrf
-            <x-ui.input label="Nama Kategori" name="kategori_baru" placeholder="Contoh: Ramadhan, Ujian" class="mb-3" />
+            <x-ui.input label="Nama Kategori" name="kategori_baru" placeholder="Contoh: Ramadhan, Ujian" class="mb-3" errorBag="jpBaru" />
 
             <div class="hidden gap-2 border-b border-surface-alt pb-2 text-xs font-bold uppercase tracking-wide text-muted-2 sm:flex">
                 <span class="w-8 shrink-0">JP</span><span class="w-28 shrink-0">Mulai</span><span class="w-28 shrink-0">Selesai</span><span class="flex-1">Keterangan</span><span class="w-8 shrink-0"></span>
