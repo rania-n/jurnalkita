@@ -19,8 +19,8 @@
 <x-layouts.admin title="Jam Pelajaran" heading="Jam Pelajaran">
     <x-admin.page title="Jam Pelajaran" subtitle="Rentang waktu tiap jam pelajaran">
         <x-slot:action>
-            <x-ui.button type="button" variant="secondary" icon="add" data-modal-open="modal-jp-baru" data-modal-title="Tambah Kategori Baru">Kategori Baru</x-ui.button>
-            <x-ui.button type="button" icon="edit" data-modal-open="modal-jp" data-modal-title="Edit Jam Pelajaran — {{ $labelSet }}">Edit</x-ui.button>
+            <x-ui.button type="button" variant="secondary" icon="add" data-modal-open="modal-jp-baru" data-modal-title="Tambah Kategori Baru" class="w-full sm:w-auto">Kategori Baru</x-ui.button>
+            <x-ui.button type="button" icon="edit" data-modal-open="modal-jp" data-modal-title="Edit Jam Pelajaran — {{ $labelSet }}" class="w-full sm:w-auto">Edit</x-ui.button>
         </x-slot:action>
     </x-admin.page>
 

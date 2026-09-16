@@ -16,7 +16,12 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'status', 'no_hp', 'nip'];
+    // email_verified_at ikut fillable -- dipakai AkunController buat nandain
+    // akun otomatis terverifikasi begitu dibuat/disetujui admin (SMTP belum
+    // ada, jadi verifikasi lewat klik link di email nggak akan pernah bisa
+    // jalan). Semua pemanggil create()/update() di app ini pakai array
+    // eksplisit (bukan $request->all() mentah), jadi aman ditambahin ke sini.
+    protected $fillable = ['name', 'email', 'password', 'role', 'status', 'no_hp', 'nip', 'email_verified_at'];
 
     protected $hidden = ['password', 'remember_token'];
 

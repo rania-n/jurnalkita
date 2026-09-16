@@ -26,9 +26,9 @@
     <x-admin.page title="Manajemen Akun" subtitle="{{ $users->count() }} akun aktif/ditolak">
         <x-slot:action>
             @if ($pendingCount > 0)
-                <x-ui.button :href="route('master.akun.persetujuan')" variant="secondary" icon="how_to_reg">Persetujuan ({{ $pendingCount }})</x-ui.button>
+                <x-ui.button :href="route('master.akun.persetujuan')" variant="secondary" icon="how_to_reg" class="w-full sm:w-auto">Persetujuan ({{ $pendingCount }})</x-ui.button>
             @endif
-            <x-ui.button type="button" icon="person_add" data-modal-open="modal-akun">Buat Akun</x-ui.button>
+            <x-ui.button type="button" icon="person_add" data-modal-open="modal-akun" class="w-full sm:w-auto">Buat Akun</x-ui.button>
         </x-slot:action>
     </x-admin.page>
 

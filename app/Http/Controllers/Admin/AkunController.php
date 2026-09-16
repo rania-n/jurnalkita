@@ -132,9 +132,18 @@ class AkunController extends Controller
         return back()->with('success', "Akun {$user->name} diperbarui.");
     }
 
+    /**
+     * Setujui pendaftaran mandiri (guru/pengurus kelas daftar sendiri lewat
+     * "Daftar Akun Baru"). email_verified_at ikut diisi di sini juga -- kalau
+     * nggak, akun tetap terkunci selamanya kena middleware 'verified' (minta
+     * klik link verifikasi di email), padahal SMTP belum ada jadi email itu
+     * nggak akan pernah terkirim. Persetujuan admin di sini SUDAH cukup jadi
+     * bukti identitasnya valid, nggak perlu verifikasi email terpisah lagi --
+     * sama seperti akun yang dibuat admin langsung lewat "Buat Akun".
+     */
     public function approve(User $user): RedirectResponse
     {
-        $user->update(['status' => 'approved']);
+        $user->update(['status' => 'approved', 'email_verified_at' => now()]);
         AuditLog::catat('Setujui Akun', "Setujui akun: {$user->email}", $user);
 
         return back()->with('success', "Akun {$user->name} disetujui.");

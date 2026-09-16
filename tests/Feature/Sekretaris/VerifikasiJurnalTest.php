@@ -154,7 +154,7 @@ class VerifikasiJurnalTest extends TestCase
         $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'tugas', 'materi' => 'Kerjakan LKS hal. 10',
+            'status_guru' => 'tugas', 'tugas_tambahan' => 'Kerjakan LKS hal. 10', 'alasan' => 'Rapat dinas luar kota',
             'presensi' => [
                 $ketua->id => ['status' => 'sakit'],
                 $anggota->id => ['status' => 'hadir'],

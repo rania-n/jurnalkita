@@ -7,11 +7,6 @@
 
     <x-alert type="info" class="mb-4">Hanya untuk status <strong>Tugas Luar</strong> atau <strong>Tidak Hadir</strong>. Jurnal ini otomatis terverifikasi.</x-alert>
 
-    @php
-        $statuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
-        $tones = ['hadir' => 'hadir', 'sakit' => 'sakit', 'izin' => 'izin', 'alpha' => 'alpha', 'dispensasi' => 'dispen'];
-    @endphp
-
     @if ($jadwals->isEmpty())
         <x-ui.empty icon="event_busy" title="Tidak ada jadwal kelas ini hari ini" />
     @else
@@ -45,39 +40,18 @@
                     :value="old('status_guru', 'tugas')"
                 />
 
-                <x-ui.textarea label="Materi / Tugas yang diberikan" name="materi" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengerjakan LKS halaman 12–15.">{{ old('materi') }}</x-ui.textarea>
-                <x-ui.textarea label="Tugas Tambahan (opsional)" name="tugas_tambahan" :rows="2" class="sm:col-span-2">{{ old('tugas_tambahan') }}</x-ui.textarea>
+                {{-- Sama kayak form Isi Jurnal punya Guru: buat status Tugas
+                     Luar/Tidak Hadir, yang diisi itu Tugas Tambahan (apa yang
+                     dikasih ke siswa) + Alasan (kenapa gurunya nggak hadir) --
+                     bukan "Materi" (itu khusus kalau gurunya beneran hadir). --}}
+                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengerjakan LKS halaman 12–15.">{{ old('tugas_tambahan') }}</x-ui.textarea>
+                <x-ui.textarea label="Alasan" name="alasan" :rows="2" class="sm:col-span-2" placeholder="Contoh: rapat dinas luar kota, izin sakit, dll.">{{ old('alasan') }}</x-ui.textarea>
             </div>
 
             {{-- Presensi diisi bareng jurnalnya -- kamu yang ada di kelas paling
                  tau siapa yang beneran nggak hadir hari ini, jadi jangan asal
                  ditandai hadir semua. --}}
-            <div class="mt-6">
-                <h2 class="mb-3 text-sm font-bold text-ink">Presensi ({{ $siswas->count() }} siswa)</h2>
-                <p class="-mt-2 mb-3 text-xs text-muted-2">Semua siswa awalnya <strong>Hadir</strong> — ketuk status buat ubah manual kalau ada yang sakit/izin/alpha/dispensasi.</p>
-
-                <div class="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-                    @foreach ($siswas as $s)
-                        <div class="flex flex-col gap-3 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]">
-                            <div class="flex items-center gap-2.5">
-                                <x-ui.avatar :label="$s->no_absen ?? '–'" :gender="$s->jenis_kelamin" />
-                                <div class="flex min-w-0 flex-col">
-                                    <span class="truncate text-sm font-semibold text-ink">{{ $s->nama }}</span>
-                                    <span class="text-[11px] font-semibold text-muted-2">NIS: {{ $s->nis }}</span>
-                                </div>
-                            </div>
-                            <x-ui.choice
-                                :name="'presensi[' . $s->id . '][status]'"
-                                :options="$statuses"
-                                :tones="$tones"
-                                value="hadir"
-                                size="sm"
-                            />
-                            <x-ui.input :name="'presensi[' . $s->id . '][catatan]'" placeholder="Catatan (opsional)" />
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            @include('sekretaris.jurnal._presensi-grid', ['siswas' => $siswas])
 
             <x-ui.sticky-bar>
                 <x-ui.button type="submit" block icon="save">Simpan Jurnal Pengganti</x-ui.button>

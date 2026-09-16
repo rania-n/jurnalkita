@@ -22,9 +22,10 @@
         <div class="flex flex-col gap-3">
             <x-ui.field-static label="Jam Pelajaran">JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
             <x-ui.field-static label="Status Kehadiran Guru">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
-            <x-ui.field-static label="Materi">{{ $jurnal->materi }}</x-ui.field-static>
+            <x-ui.field-static label="Materi">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
             <x-ui.field-static label="Metode">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
             <x-ui.field-static label="Tugas Tambahan">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
+            <x-ui.field-static label="Alasan">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
             @if ($jurnal->foto_bukti)
                 <div class="flex flex-col gap-1.5">
                     <x-ui.label>Foto Suasana Kelas</x-ui.label>

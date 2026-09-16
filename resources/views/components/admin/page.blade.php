@@ -17,7 +17,10 @@
         @endif
     </div>
 
+    {{-- flex-col di HP biar tombol yang lebih dari satu numpuk rapi & stretch
+         penuh (tombolnya sendiri butuh class w-full sm:w-auto, lihat halaman
+         yang makai), bukan berdempetan/wrap acak kayak sebelumnya. --}}
     @isset($action)
-        <div class="flex items-center gap-2">{{ $action }}</div>
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">{{ $action }}</div>
     @endisset
 </div>

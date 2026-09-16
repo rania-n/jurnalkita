@@ -11,10 +11,10 @@
         <x-admin.page title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
             <x-slot:action>
                 @if ($bolehEkspor)
-                    <x-ui.button :href="route('dispensasi.ekspor', request()->query())" variant="secondary" icon="download">Ekspor CSV</x-ui.button>
+                    <x-ui.button :href="route('dispensasi.ekspor', request()->query())" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor CSV</x-ui.button>
                 @endif
                 @if ($bolehAjukan)
-                    <x-ui.button :href="route('dispensasi.create')" icon="add">Ajukan Dispensasi</x-ui.button>
+                    <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full sm:w-auto">Ajukan Dispensasi</x-ui.button>
                 @endif
             </x-slot:action>
         </x-admin.page>
