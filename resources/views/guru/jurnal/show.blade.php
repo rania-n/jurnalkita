@@ -4,6 +4,7 @@
     $rekap = $jurnal->absensis->countBy('status');
     $bisaUbah = $jurnal->bisaDiubah();
     $vs = $jurnal->status_verifikasi;
+    $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp
 
 <x-layouts.app title="Detail Jurnal">
@@ -28,8 +29,12 @@
 
     {{-- Info jurnal -- tampilan aja, ubah lewat tombol "Ubah Jurnal" di bawah (popup) --}}
     <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <x-ui.field-static label="Jam ke- (mulai)" icon="schedule">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
-        <x-ui.field-static label="Jam ke- (selesai)" icon="schedule">Jam ke-{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
+        <x-ui.field-static label="Jam Pelajaran" icon="schedule" class="sm:col-span-2">
+            JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}
+            @if ($jamJurnal)
+                <span class="text-muted-2">· {{ $jamJurnal }}</span>
+            @endif
+        </x-ui.field-static>
         <x-ui.field-static label="Status Kehadiran Anda" class="sm:col-span-2">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
         <x-ui.field-static label="Materi" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
         <x-ui.field-static label="Metode">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>

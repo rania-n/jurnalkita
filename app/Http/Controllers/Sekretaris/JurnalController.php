@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\Jadwal;
+use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Notifications\JurnalPerluRevisi;
+use App\Support\PresensiDefault;
+use App\Support\Waktu;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -98,10 +101,23 @@ class JurnalController extends Controller
 
         // Pengurus kelas ADA di kelas itu, jadi dia yang paling tau siapa yang
         // beneran hadir/nggak hari ini -- presensinya diisi bareng, bukan asal
-        // ditandai hadir semua.
+        // ditandai hadir semua. Default-nya ikut PresensiDefault (dispensasi
+        // hari ini / presensi dari jurnal lain kelas ini hari ini / "Hadir")
+        // -- sama aturannya kayak form Isi Jurnal punya Guru. Jam mulai/selesai
+        // nggak dikasih di sini (belum tau jadwal mana yang bakal dipilih di
+        // form ini -- presensinya di-render sebelum jadwalnya kepilih), jadi
+        // dispensasi yang dicek sepanjang hari itu, bukan yang spesifik 1 JP.
         $siswas = $kelas->siswas()->orderBy('no_absen')->get();
+        $presensiAwal = PresensiDefault::untukKelas($siswas, $kelas->id, now()->toDateString());
 
-        return view('sekretaris.jurnal.pengganti', compact('kelas', 'jadwals', 'siswas'));
+        // Peta jam_ke -> mulai/selesai buat hari ini -- dikirim ke JS biar bisa
+        // nampilin "Waktunya 07:00-08:30" yang otomatis update tiap jam ke-
+        // dipilih/diubah manual (baik lewat jadwal maupun select JP langsung).
+        $jamPelajaranHariIni = JamPelajaran::where('kategori', Waktu::kategori())
+            ->get(['jam_ke', 'mulai', 'selesai'])
+            ->mapWithKeys(fn ($jp) => [$jp->jam_ke => ['mulai' => $jp->mulai->format('H:i'), 'selesai' => $jp->selesai->format('H:i')]]);
+
+        return view('sekretaris.jurnal.pengganti', compact('kelas', 'jadwals', 'siswas', 'presensiAwal', 'jamPelajaranHariIni'));
     }
 
     public function storePengganti(Request $request): RedirectResponse
@@ -142,7 +158,11 @@ class JurnalController extends Controller
                 ->with('info', 'Jurnal untuk jadwal ini hari ini sudah ada.');
         }
 
-        $jurnal = DB::transaction(function () use ($data, $jadwal) {
+        $presensiFallback = PresensiDefault::untukKelas(
+            $jadwal->kelas->siswas, $jadwal->kelas_id, now()->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
+        );
+
+        $jurnal = DB::transaction(function () use ($data, $jadwal, $presensiFallback) {
             $jurnal = Jurnal::create([
                 ...collect($data)->except('presensi')->all(),
                 'guru_id' => $jadwal->guru_id,
@@ -153,7 +173,7 @@ class JurnalController extends Controller
             ]);
 
             foreach ($jadwal->kelas->siswas as $siswa) {
-                $isi = $data['presensi'][$siswa->id] ?? ['status' => 'hadir', 'catatan' => null];
+                $isi = $data['presensi'][$siswa->id] ?? $presensiFallback[$siswa->id] ?? ['status' => 'hadir', 'catatan' => null];
                 Absensi::create([
                     'jurnal_id' => $jurnal->id,
                     'siswa_id' => $siswa->id,

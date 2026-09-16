@@ -17,8 +17,9 @@
                 <x-ui.select label="Mata Pelajaran (jadwal)" name="jadwal_id" id="jadwal_id" class="sm:col-span-2">
                     <option value="" disabled selected hidden>Pilih jadwal</option>
                     @foreach ($jadwals as $j)
+                        @php $jamOpsi = \App\Support\Waktu::rentangJam($j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
                         <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected(old('jadwal_id') == $j->id)>
-                            {{ $j->mapel->nama }} — {{ $j->guru->nama }} (JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }})
+                            {{ $j->mapel->nama }} — {{ $j->guru->nama }} (JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " · {$jamOpsi}" : '' }})
                         </option>
                     @endforeach
                 </x-ui.select>
@@ -51,7 +52,7 @@
             {{-- Presensi diisi bareng jurnalnya -- kamu yang ada di kelas paling
                  tau siapa yang beneran nggak hadir hari ini, jadi jangan asal
                  ditandai hadir semua. --}}
-            @include('sekretaris.jurnal._presensi-grid', ['siswas' => $siswas])
+            @include('sekretaris.jurnal._presensi-grid', ['siswas' => $siswas, 'presensiAwal' => $presensiAwal])
 
             <x-ui.sticky-bar>
                 <x-ui.button type="submit" block icon="save">Simpan Jurnal Pengganti</x-ui.button>
@@ -65,6 +66,17 @@
                     const selectMulai = document.getElementById('jam_ke_mulai');
                     const selectSelesai = document.getElementById('jam_ke_selesai');
                     const keterangan = document.getElementById('keterangan-jam');
+                    const jamPelajaran = @json($jamPelajaranHariIni);
+
+                    // Waktunya (mis. "07:00-08:30") dihitung ulang tiap kali JP mulai/
+                    // selesai berubah -- baik otomatis lewat pilih jadwal, maupun manual
+                    // lewat 2 select JP di bawahnya (jam di sini emang boleh diubah manual).
+                    function tampilkanWaktu() {
+                        const jpMulai = jamPelajaran[selectMulai.value];
+                        const jpSelesai = jamPelajaran[selectSelesai.value];
+                        const waktu = (jpMulai && jpSelesai) ? ` Waktunya ${jpMulai.mulai}–${jpSelesai.selesai}.` : '';
+                        keterangan.textContent = 'Jam otomatis ikut jadwal yang dipilih.' + waktu + ' Boleh diubah manual kalau perlu.';
+                    }
 
                     function sync() {
                         const opt = jadwal.selectedOptions[0];
@@ -74,10 +86,12 @@
 
                         selectMulai.value = mulai;
                         selectSelesai.value = selesai;
-                        keterangan.textContent = 'Jam otomatis ikut jadwal ini (JP ' + mulai + '–' + selesai + '). Boleh diubah manual kalau perlu.';
+                        tampilkanWaktu();
                     }
 
                     jadwal.addEventListener('change', sync);
+                    selectMulai.addEventListener('change', tampilkanWaktu);
+                    selectSelesai.addEventListener('change', tampilkanWaktu);
                     sync();
                 })();
             </script>

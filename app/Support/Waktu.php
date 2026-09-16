@@ -59,4 +59,40 @@ class Waktu
 
         return $mulai ? now()->copy()->setTimeFromTimeString($mulai) : null;
     }
+
+    /**
+     * Rentang jam beneran (mis. "07:00–08:30") buat satu JP atau rentang JP,
+     * dipakai nemenin label "JP 1–2" di halaman jurnal biar keliatan jam
+     * aslinya, bukan cuma nomor JP doang. Null kalau data jam pelajarannya
+     * nggak ketemu (mis. kategori custom yang belum diatur).
+     */
+    public static function rentangJam(int $jamKeMulai, ?int $jamKeSelesai = null, ?Carbon $tanggal = null): ?string
+    {
+        return self::rentangJamDenganKategori(self::kategori($tanggal), $jamKeMulai, $jamKeSelesai);
+    }
+
+    /**
+     * Sama kayak rentangJam(), tapi buat kasus yang cuma tau NAMA HARI
+     * (mis. 'selasa') bukan tanggal konkret -- dipakai di form Isi Jurnal
+     * pas milih jadwal dari dropdown, jadwalnya sendiri bisa dari hari
+     * apa saja terlepas dari hari ini beneran hari apa.
+     */
+    public static function rentangJamUntukHari(string $hari, int $jamKeMulai, ?int $jamKeSelesai = null): ?string
+    {
+        return self::rentangJamDenganKategori($hari === 'jumat' ? 'jumat' : 'senin_kamis', $jamKeMulai, $jamKeSelesai);
+    }
+
+    private static function rentangJamDenganKategori(string $kategori, int $jamKeMulai, ?int $jamKeSelesai = null): ?string
+    {
+        $awal = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jamKeMulai)->first();
+        $akhir = $jamKeSelesai && $jamKeSelesai !== $jamKeMulai
+            ? JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jamKeSelesai)->first()
+            : $awal;
+
+        if (! $awal || ! $akhir) {
+            return null;
+        }
+
+        return $awal->mulai->format('H:i').'–'.$akhir->selesai->format('H:i');
+    }
 }

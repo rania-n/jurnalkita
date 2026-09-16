@@ -22,9 +22,12 @@
     @else
         <x-ui.card-list>
             @foreach ($jurnals as $j)
+                @php
+                    $jamJurnal = \App\Support\Waktu::rentangJam($j->jam_ke_mulai, $j->jam_ke_selesai, $j->tanggal);
+                @endphp
                 <x-ui.list-card
                     :title="$j->jadwal->mapel->nama . ' — ' . $j->jadwal->kelas->nama"
-                    :meta="[$j->tanggal->translatedFormat('d M Y') . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai]"
+                    :meta="[$j->tanggal->translatedFormat('d M Y') . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai . ($jamJurnal ? ' (' . $jamJurnal . ')' : '')]"
                 >
                     <x-slot:badge>
                         <x-ui.status-badge :status="$statusLabel[$j->status_verifikasi] ?? 'menunggu'">

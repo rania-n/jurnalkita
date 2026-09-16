@@ -24,11 +24,16 @@
             @php
                 $mulaiAwal = $jadwalTerpilih->jam_ke_mulai ?? $jpSekarang;
                 $selesaiAwal = old('jam_ke_selesai', $jadwalTerpilih->jam_ke_selesai ?? $jpSekarang);
+                $hariJadwalTerpilih = $jadwalTerpilih->hari ?? \App\Support\HariSekolah::hariIni();
+                $jamAwal = $hariJadwalTerpilih ? \App\Support\Waktu::rentangJamUntukHari($hariJadwalTerpilih, $mulaiAwal, $selesaiAwal) : null;
             @endphp
 
             @if ($jadwalTerkunci)
                 <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" class="sm:col-span-2">
                     {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
+                    @if ($jamAwal)
+                        <span class="text-muted-2">({{ $jamAwal }})</span>
+                    @endif
                 </x-ui.field-static>
                 <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
                 <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Otomatis ikut jadwal Anda sekarang. Salah jadwal? Hubungi Admin.</p>
@@ -40,8 +45,9 @@
                 <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2">
                     <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
                     @foreach ($jadwals as $j)
+                        @php $jamOpsi = \App\Support\Waktu::rentangJamUntukHari($j->hari, $j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
                         <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected($jadwalTerpilih?->id === $j->id)>
-                            {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}
+                            {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " ({$jamOpsi})" : '' }}
                         </option>
                     @endforeach
                 </x-ui.select>
@@ -63,7 +69,10 @@
                 </x-ui.field-static>
                 <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">
             </div>
-            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">Jam mengajar otomatis mengikuti jadwal yang dipilih.</p>
+            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">
+                Jam mengajar otomatis mengikuti jadwal yang dipilih.
+                @if ($jamAwal) <span id="keterangan-jam-aktual">Waktunya {{ $jamAwal }}.</span> @endif
+            </p>
 
             <x-ui.choice
                 label="Status Kehadiran Anda"
@@ -131,8 +140,14 @@
                         const inputMulai = document.getElementById('jam_ke_mulai');
                         const tampilanSelesai = document.getElementById('tampilan-jam-selesai');
                         const inputSelesai = document.getElementById('jam_ke_selesai');
-                        const keterangan = document.getElementById('keterangan-jam');
 
+                        // Teks "keterangan-jam" (termasuk jam aktualnya, mis. "07:00–08:30")
+                        // udah di-render server sesuai jadwal yang kepilih -- nggak perlu
+                        // diutak-atik JS di sini. Ganti jadwal lewat dropdown SELALU muat
+                        // ulang halaman (lihat listener 'change' di bawah), jadi yang perlu
+                        // disinkron JS cuma buat kasus browser auto-select opsi tunggal TANPA
+                        // memicu 'change' -- dan di situ pun server udah render value yang
+                        // benar dari awal, sync() ini cuma jaga-jaga.
                         function sync() {
                             const opt = jadwal.selectedOptions[0];
                             const mulai = opt?.dataset.mulai;
@@ -143,7 +158,6 @@
                             inputMulai.value = mulai;
                             tampilanSelesai.textContent = 'Jam ke-' + selesai;
                             inputSelesai.value = selesai;
-                            keterangan.textContent = 'Jam mengajar otomatis mengikuti jadwal yang dipilih (Jam ke-' + mulai + '–' + selesai + ').';
                         }
 
                         // Ganti jadwal -> presensi kelas yang beda perlu dirender ulang

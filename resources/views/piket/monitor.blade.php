@@ -39,24 +39,6 @@
         <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" onchange="this.form.submit()" />
     </x-admin.filters>
 
-    {{-- Roster shift piket hari itu — guru piket TIDAK mengajar selama shiftnya.
-         Sempat kehapus pas gabung perubahan Fitra, dibalikin lagi karena ada
-         siswa/guru yang mengandalkan ini buat tau siapa yang piket hari ini. --}}
-    @if ($shiftPiket->isNotEmpty())
-        <div class="mb-3 rounded-xl border border-surface-alt bg-card p-3">
-            <p class="mb-1.5 text-xs font-bold text-ink">Petugas Piket Hari Ini</p>
-            <div class="flex flex-wrap gap-1.5">
-                @foreach ($shiftPiket as $p)
-                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-semibold text-ink">
-                        <x-icon name="badge" :size="13" class="text-navy" />
-                        {{ $p->guru->nama }}
-                        <span class="text-muted-2">· {{ $p->mulai?->format('H:i') ?? '00:00' }}–{{ $p->selesai?->format('H:i') ?? '23:59' }}</span>
-                    </span>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
     {{-- Bar pilih: kelompokkan per kelas atau per guru --}}
     <div class="mb-2 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach (['kelas' => 'Per Kelas', 'guru' => 'Per Guru'] as $key => $label)
@@ -144,6 +126,7 @@
                                         $lawan = $mode === 'kelas' ? $b['jadwal']->guru->nama : $b['jadwal']->kelas->nama;
                                         $cariBaris = str($g['label'].' '.$lawan.' '.$b['jadwal']->mapel->nama)->lower();
                                         $bisaDiklik = $b['jurnal'] !== null;
+                                        $jamBaris = \App\Support\Waktu::rentangJam($b['jadwal']->jam_ke_mulai, $b['jadwal']->jam_ke_selesai, $tanggal);
                                     @endphp
                                     <tr
                                         data-baris-monitor
@@ -160,7 +143,12 @@
                                             tabindex="0"
                                         @endif
                                     >
-                                        <td class="px-3 py-2 text-muted">JP {{ $b['jadwal']->jam_ke_mulai }}–{{ $b['jadwal']->jam_ke_selesai }}</td>
+                                        <td class="px-3 py-2 text-muted">
+                                            JP {{ $b['jadwal']->jam_ke_mulai }}–{{ $b['jadwal']->jam_ke_selesai }}
+                                            @if ($jamBaris)
+                                                <span class="block text-[11px] text-muted-2 sm:inline sm:text-inherit">{{ $jamBaris }}</span>
+                                            @endif
+                                        </td>
                                         <td class="px-3 py-2 text-ink">{{ $b['jadwal']->mapel->nama }}</td>
                                         <td class="px-3 py-2 text-muted">{{ $lawan }}</td>
                                         <td class="px-3 py-2">

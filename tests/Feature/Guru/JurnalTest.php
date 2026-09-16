@@ -240,4 +240,35 @@ class JurnalTest extends TestCase
         $this->actingAs($lain)->delete("/guru/jurnal/{$jurnal->id}")->assertForbidden();
         $this->assertNotSoftDeleted('jurnals', ['id' => $jurnal->id]);
     }
+
+    public function test_presensi_ikut_jurnal_lain_di_kelas_sama_hari_ini(): void
+    {
+        $siswaA = $this->jadwal->kelas->siswas()->where('nis', '001')->first();
+
+        // Jurnal pertama (JP 1-2): siswa A ditandai sakit.
+        $jurnal1 = Jurnal::create([
+            'jadwal_id' => $this->jadwal->id, 'guru_id' => $this->guru->id,
+            'tanggal' => today(), 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'x',
+        ]);
+        $jurnal1->absensis()->create(['siswa_id' => $siswaA->id, 'status' => 'sakit', 'catatan' => 'Demam']);
+        $jurnal1->absensis()->create([
+            'siswa_id' => $this->jadwal->kelas->siswas()->where('nis', '002')->value('id'),
+            'status' => 'hadir',
+        ]);
+
+        // Jadwal kedua, JP beda, kelas SAMA, guru SAMA (biar gampang di-akses lewat 1 user) -- form Isi Jurnal
+        // jadwal kedua ini harusnya nawarin siswa A sebagai "sakit" duluan, bukan "hadir" dari nol.
+        $jadwal2 = Jadwal::create([
+            'kelas_id' => $this->jadwal->kelas_id, 'mapel_id' => $this->jadwal->mapel_id, 'guru_id' => $this->guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 3, 'jam_ke_selesai' => 4,
+        ]);
+
+        $response = $this->actingAs($this->user)->get("/guru/jurnal/tambah?jadwal={$jadwal2->id}");
+
+        $response->assertOk();
+        $presensiAwal = $response->viewData('presensiAwal');
+        $this->assertSame('sakit', $presensiAwal[$siswaA->id]['status']);
+        $this->assertSame('Demam', $presensiAwal[$siswaA->id]['catatan']);
+    }
 }

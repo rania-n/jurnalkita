@@ -1,5 +1,6 @@
 @php
     $statusGuru = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
+    $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp
 
 <x-layouts.app title="Ubah Jurnal">
@@ -22,8 +23,12 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {{-- Jam mulai & selesai ikut jadwal, nggak bisa diedit manual (sama
                  kayak Form Jurnal baru). --}}
-            <x-ui.field-static label="Jam ke- (mulai)" icon="schedule">Jam ke-{{ $jurnal->jam_ke_mulai }}</x-ui.field-static>
-            <x-ui.field-static label="Jam ke- (selesai)" icon="schedule">Jam ke-{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
+            <x-ui.field-static label="Jam Pelajaran" icon="schedule" class="sm:col-span-2">
+                JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}
+                @if ($jamJurnal)
+                    <span class="text-muted-2">· {{ $jamJurnal }}</span>
+                @endif
+            </x-ui.field-static>
             <input type="hidden" name="jam_ke_selesai" value="{{ $jurnal->jam_ke_selesai }}">
 
             <x-ui.choice

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Jadwal;
-use App\Models\JadwalPiket;
 use App\Models\Jurnal;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -61,7 +60,6 @@ class PiketController extends Controller
             'mode' => $mode,
             'grup' => $grup,
             'rekapTotal' => $baris->countBy('status'),
-            'shiftPiket' => $this->shiftPiketHariItu($tanggal),
         ]);
     }
 
@@ -159,17 +157,6 @@ class PiketController extends Controller
         $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'guru', 'absensis.siswa');
 
         return view('piket._jurnal-detail-fragment', compact('jurnal'));
-    }
-
-    /** Roster guru piket hari itu (shift jam, bukan sehari penuh) — buat ditampilkan di atas Monitor Piket. */
-    private function shiftPiketHariItu(Carbon $tanggal): Collection
-    {
-        $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? null;
-        if (! $hari) {
-            return collect();
-        }
-
-        return JadwalPiket::where('hari', $hari)->with('guru')->orderBy('mulai')->get();
     }
 
     private function tanggal(Request $request): Carbon

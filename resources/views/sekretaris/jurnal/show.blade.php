@@ -2,6 +2,7 @@
     $statusGuru = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
     $rekap = $jurnal->absensis->countBy('status');
     $bisaVerifikasi = $jurnal->isPending();
+    $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp
 
 <x-layouts.app title="Periksa Jurnal">
@@ -20,7 +21,12 @@
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,28rem)_1fr] xl:gap-10">
         {{-- Kolom kiri: isi jurnal + aksi verifikasi --}}
         <div class="flex flex-col gap-3">
-            <x-ui.field-static label="Jam Pelajaran">JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}</x-ui.field-static>
+            <x-ui.field-static label="Jam Pelajaran">
+                JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}
+                @if ($jamJurnal)
+                    <span class="text-muted-2">· {{ $jamJurnal }}</span>
+                @endif
+            </x-ui.field-static>
             <x-ui.field-static label="Status Kehadiran Guru">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
             <x-ui.field-static label="Materi">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
             <x-ui.field-static label="Metode">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>

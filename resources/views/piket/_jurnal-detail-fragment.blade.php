@@ -2,12 +2,13 @@
     $statusGuru = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
     $statusAbsen = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
     $rekap = $jurnal->absensis->countBy('status');
+    $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp
 
 <div class="flex flex-col gap-3">
     <div class="flex flex-wrap items-center gap-2">
         <span class="text-sm font-bold text-ink">{{ $jurnal->jadwal->mapel->nama }}</span>
-        <span class="text-xs text-muted-2">· {{ $jurnal->jadwal->kelas->nama }} · JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}</span>
+        <span class="text-xs text-muted-2">· {{ $jurnal->jadwal->kelas->nama }} · JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}{{ $jamJurnal ? " · {$jamJurnal}" : '' }}</span>
     </div>
 
     <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">

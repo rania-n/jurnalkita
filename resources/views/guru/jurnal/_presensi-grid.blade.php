@@ -14,7 +14,7 @@
 
 <div class="mt-6">
     <h2 class="mb-1 text-sm font-bold text-ink">Presensi ({{ $siswas->count() }} siswa)</h2>
-    <p class="mb-3 text-xs text-muted-2">Semua siswa awalnya <strong>Hadir</strong> — siswa dengan dispensasi disetujui pada jam ini otomatis <strong>Dispensasi</strong>. Ketuk status buat ubah manual bila perlu.</p>
+    <p class="mb-3 text-xs text-muted-2">Status otomatis ikut jurnal lain hari ini di kelas ini (atau dispensasi yang disetujui) kalau ada, sisanya <strong>Hadir</strong>. Ketuk status buat ubah manual bila perlu.</p>
 
     <div class="flex h-11 items-center gap-2 rounded-xl bg-surface-alt px-4">
         <x-icon name="search" :size="18" class="shrink-0 text-muted" />
@@ -45,6 +45,7 @@
                     $statusAwal = old("presensi.{$s->id}.status", $isiAwal['status']);
                     $catatanAwal = old("presensi.{$s->id}.catatan", $isiAwal['catatan']);
                     $dariDispensasiOtomatis = $statusAwal === 'dispensasi' && str_starts_with((string) $catatanAwal, 'Dispensasi');
+                    $dariJurnalLain = ! $dariDispensasiOtomatis && $statusAwal !== 'hadir' && isset($presensiAwal[$s->id]);
                     $catatanId = 'catatan-'.$s->id;
                 @endphp
                 <div
@@ -61,6 +62,11 @@
                                 <span class="flex items-center gap-1 text-[11px] font-semibold text-dispen">
                                     <x-icon name="verified" :size="12" />
                                     Dispensasi disetujui untuk jam ini
+                                </span>
+                            @elseif ($dariJurnalLain)
+                                <span class="flex items-center gap-1 text-[11px] font-semibold text-dispen">
+                                    <x-icon name="verified" :size="12" />
+                                    Ikut jurnal lain hari ini di kelas ini
                                 </span>
                             @endif
                         </div>

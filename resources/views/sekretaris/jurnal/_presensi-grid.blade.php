@@ -9,7 +9,8 @@
         pernah pre-fill dari data dispensasi kayak punya Guru).
 
     Variabel yang wajib ada di scope pemanggil:
-      $siswas : Collection<Siswa>, urut no_absen
+      $siswas       : Collection<Siswa>, urut no_absen
+      $presensiAwal : array [siswa_id => ['status' => ..., 'catatan' => ...]] (opsional)
 --}}
 @php
     $statuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
@@ -18,7 +19,7 @@
 
 <div class="mt-6">
     <h2 class="mb-1 text-sm font-bold text-ink">Presensi ({{ $siswas->count() }} siswa)</h2>
-    <p class="mb-3 text-xs text-muted-2">Semua siswa awalnya <strong>Hadir</strong> — ketuk status buat ubah manual kalau ada yang sakit/izin/alpha/dispensasi.</p>
+    <p class="mb-3 text-xs text-muted-2">Status otomatis ikut jurnal lain hari ini di kelas ini (atau dispensasi yang disetujui) kalau ada, sisanya <strong>Hadir</strong> — ketuk status buat ubah manual kalau perlu.</p>
 
     <div class="flex h-11 items-center gap-2 rounded-xl bg-surface-alt px-4">
         <x-icon name="search" :size="18" class="shrink-0 text-muted" />
@@ -42,9 +43,18 @@
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             @foreach ($siswas as $s)
                 @php
-                    $statusAwal = old("presensi.{$s->id}.status", 'hadir');
-                    $catatanAwal = old("presensi.{$s->id}.catatan");
+                    $isiAwal = ($presensiAwal ?? [])[$s->id] ?? ['status' => 'hadir', 'catatan' => null];
+                    $statusAwal = old("presensi.{$s->id}.status", $isiAwal['status']);
+                    $catatanAwal = old("presensi.{$s->id}.catatan", $isiAwal['catatan']);
                     $catatanId = 'catatan-pengganti-'.$s->id;
+                    // Beri tahu asalnya kenapa status/catatan udah keisi duluan
+                    // (bukan "Hadir" polos) -- dispensasi ATAU ikutan jurnal lain
+                    // hari ini di kelas yang sama, lihat PresensiDefault.
+                    $keteranganAwal = match (true) {
+                        $statusAwal === 'dispensasi' && str_starts_with((string) $catatanAwal, 'Dispensasi') => 'Dispensasi disetujui hari ini',
+                        $statusAwal !== 'hadir' && isset(($presensiAwal ?? [])[$s->id]) => 'Ikut jurnal lain hari ini di kelas ini',
+                        default => null,
+                    };
                 @endphp
                 <div
                     class="flex flex-col gap-2.5 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]"
@@ -57,6 +67,12 @@
                         <div class="flex min-w-0 flex-col">
                             <span class="truncate text-sm font-semibold text-ink">{{ $s->nama }}</span>
                             <span class="text-[11px] font-semibold text-muted-2">NIS: {{ $s->nis }}</span>
+                            @if ($keteranganAwal)
+                                <span class="flex items-center gap-1 text-[11px] font-semibold text-dispen">
+                                    <x-icon name="verified" :size="12" />
+                                    {{ $keteranganAwal }}
+                                </span>
+                            @endif
                         </div>
                     </div>
 
