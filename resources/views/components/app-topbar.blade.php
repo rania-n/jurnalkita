@@ -45,8 +45,11 @@
         </button>
 
         {{-- Logout langsung di header -- dulu cuma bisa lewat Profil (guru bingung
-             nyarinya), sekarang bisa dari halaman mana pun tanpa muter dulu. --}}
-        <x-logout-button variant="icon" />
+             nyarinya), sekarang bisa dari halaman mana pun tanpa muter dulu.
+             Di desktop disembunyikan karena sidebar sudah punya tombol logout. --}}
+        <span class="lg:hidden">
+            <x-logout-button variant="icon" />
+        </span>
     </div>
 </header>
 
