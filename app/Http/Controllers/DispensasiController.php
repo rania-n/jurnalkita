@@ -75,12 +75,29 @@ class DispensasiController extends Controller
         $this->pastikanBolehLihat();
         $user = $request->user();
 
+        // Hitung jumlah per tab (tanpa filter tab, tapi ikut filter lain)
+        $baseQuery = fn() => Dispensasi::with('siswa.kelas', 'pengaju')
+            ->where('status_piket', 'approved')
+            ->when($request->filled('dari'), fn ($q) => $q->whereDate('tanggal', '>=', $request->date('dari')))
+            ->when($request->filled('sampai'), fn ($q) => $q->whereDate('tanggal', '<=', $request->date('sampai')))
+            ->when($request->filled('kelas_id'), fn ($q) => $q->whereHas('siswa', fn ($q2) => $q2->where('kelas_id', $request->integer('kelas_id'))))
+            ->when($request->filled('cari'), fn ($q) => $q->whereHas('siswa', fn ($q2) => $q2->where('nama', 'like', '%'.$request->string('cari').'%')->orWhere('nis', 'like', '%'.$request->string('cari').'%')));
+
+        $jumlahTab = [
+            'semua'      => $baseQuery()->count(),
+            'menunggu'   => $baseQuery()->where('status_akhir', 'pending')->count(),
+            'disetujui'  => $baseQuery()->masihBerlaku()->count(),
+            'kadaluarsa' => $baseQuery()->kadaluarsa()->count(),
+            'ditolak'    => $baseQuery()->where('status_akhir', 'rejected')->count(),
+        ];
+
         return view('dispensasi.index', [
             'items' => $this->terfilter($request)->paginate(15)->withQueryString(),
             'tab' => $request->get('tab', 'semua'),
             'bolehAjukan' => $user->isPiket(),
             'bolehEkspor' => in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
             'kelasList' => Kelas::orderBy('nama')->get(),
+            'jumlahTab' => $jumlahTab,
         ]);
     }
 

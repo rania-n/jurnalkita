@@ -160,6 +160,20 @@
         width: 100%;
     }
 
+    /* inline: label dan isi sejajar (horizontal), sangat menghemat ruang vertikal */
+    .responsive-table--inline tr {
+        gap: 0.5rem;
+    }
+    .responsive-table--inline td {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 0.75rem;
+    }
+    .responsive-table--inline td[data-label]::before {
+        flex-shrink: 0;
+        width: 3.5rem;
+    }
+
     /* dense: tabel yang kolomnya banyak tapi isinya pendek-pendek (rekap
        kehadiran dkk) -- daripada 7-9 baris tumpuk per siswa, field-nya
        disusun grid 3 kolom biar satu kartu nggak kepanjangan ke bawah. */

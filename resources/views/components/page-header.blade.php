@@ -2,6 +2,7 @@
     'title',
     'subtitle' => null,
     'back' => null,
+    'alwaysRow' => false,
 ])
 
 <div {{ $attributes->class('mb-5') }}>
@@ -18,8 +19,8 @@
     {{-- Judul panjang + tombol aksi gampang sesak berdempetan di layar sempit --
          susun ke bawah (judul dulu, tombol di bawahnya) di mobile, baru sejajar
          mulai `sm:`. --}}
-    <header class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start">
-        <div class="flex flex-1 flex-col gap-0.5">
+    <header class="flex {{ $alwaysRow ? 'flex-row items-start justify-between' : 'flex-col items-stretch sm:flex-row sm:items-start' }} gap-3">
+        <div class="flex flex-1 flex-col gap-0.5 min-w-0">
             <h1 class="text-[22px] font-bold leading-tight text-ink lg:text-[26px]">{{ $title }}</h1>
             @if ($subtitle)
                 <p class="text-sm leading-snug text-muted lg:text-[15px]">{{ $subtitle }}</p>
