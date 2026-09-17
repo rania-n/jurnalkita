@@ -75,6 +75,19 @@ class DispensasiController extends Controller
         $this->pastikanBolehLihat();
         $user = $request->user();
 
+        // Baru saja ngajuin (?kirim_wa=<id>, lihat store()) -> link WA-nya
+        // di-generate di sini & dibukakan otomatis lewat JS di view. Sengaja
+        // TIDAK redirect ke halaman detail buat ini (dulu gitu) -- meta-refresh
+        // ke wa.me nambah 2 entri history baru, jadi kalau piket pencet "back"
+        // abis batal kirim WA malah nyasar balik ke form kosong, bukan ke sini.
+        $waLinkAutoKirim = null;
+        if ($request->filled('kirim_wa')) {
+            $dispensasiBaru = Dispensasi::find($request->integer('kirim_wa'));
+            if ($dispensasiBaru && $dispensasiBaru->diajukan_oleh_id === $user->id) {
+                $waLinkAutoKirim = $this->waLinkUntukWaka($dispensasiBaru);
+            }
+        }
+
         // Hitung jumlah per tab (tanpa filter tab, tapi ikut filter lain)
         $baseQuery = fn () => Dispensasi::with('siswa.kelas', 'pengaju')
             ->where('status_piket', 'approved')
@@ -98,6 +111,7 @@ class DispensasiController extends Controller
             'bolehEkspor' => in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
             'kelasList' => Kelas::orderBy('nama')->get(),
             'jumlahTab' => $jumlahTab,
+            'waLinkAutoKirim' => $waLinkAutoKirim,
         ]);
     }
 
@@ -181,34 +195,44 @@ class DispensasiController extends Controller
             $waka->notify(new DispensasiBaru($dispensasi));
         }
 
-        // Langsung ke halaman detail dengan tanda "kirim=1" -> otomatis kebuka WhatsApp
-        // (lihat show()), jadi piket nggak perlu tap tombol "Kirim Link" secara terpisah.
-        return redirect()->route('dispensasi.show', [$dispensasi, 'kirim' => 1])
+        // Balik ke Riwayat (bukan halaman detail) -- link WA-nya dibukakan
+        // otomatis dari SANA (lihat index()), biar piket nggak perlu tap
+        // "Kirim Link" lagi TAPI juga nggak nyangkut di halaman detail/form
+        // kalau kirim WA-nya dibatalkan (lihat catatan di index()).
+        return redirect()->route('dispensasi.index', ['kirim_wa' => $dispensasi->id])
             ->with('success', 'Dispensasi diajukan. Menunggu persetujuan Waka Kesiswaan.');
     }
 
-    public function show(Request $request, Dispensasi $dispensasi): View
+    /** Link WA ke Waka yang bertugas hari ini buat minta persetujuan dispensasi ini. */
+    private function waLinkUntukWaka(Dispensasi $dispensasi): ?string
     {
-        $this->pastikanBolehLihat();
-        $user = auth()->user();
-
-        // Bukan lagi dibatasi kepemilikan (siapa yang mengajukan) -- tapi tetap
-        // dibatasi ranahnya piket+waka+admin lewat pastikanBolehLihat() di atas.
-
-        $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
+        if ($dispensasi->status_waka !== 'pending') {
+            return null;
+        }
 
         // Waka juga gantian shift per hari (kayak guru piket) -- link WA diarahkan ke
         // yang beneran bertugas hari ini, bukan asal Waka pertama di database.
         $waka = User::wakaUntukHariIni();
-        $waLinkWaka = null;
-        if ($dispensasi->status_waka === 'pending' && $waka) {
-            $tautan = SuratDispensasiController::tautanPersetujuan($dispensasi, $waka);
-            $waLinkWaka = WaLink::url($waka->no_hp, "Permohonan dispensasi siswa:\n\n"
-                ."Nama: {$dispensasi->siswa->nama}\n"
-                ."Kelas: {$dispensasi->siswa->kelas?->nama}\n"
-                ."Alasan: {$dispensasi->alasan}\n\n"
-                ."Setujui/tolak lewat tautan ini:\n{$tautan}");
+        if (! $waka) {
+            return null;
         }
+
+        $tautan = SuratDispensasiController::tautanPersetujuan($dispensasi, $waka);
+
+        return WaLink::url($waka->no_hp, "Permohonan dispensasi siswa:\n\n"
+            ."Nama: {$dispensasi->siswa->nama}\n"
+            ."Kelas: {$dispensasi->siswa->kelas?->nama}\n"
+            ."Alasan: {$dispensasi->alasan}\n\n"
+            ."Setujui/tolak lewat tautan ini:\n{$tautan}");
+    }
+
+    public function show(Dispensasi $dispensasi): View
+    {
+        $this->pastikanBolehLihat();
+        $user = auth()->user();
+
+        $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
+        $waLinkWaka = $this->waLinkUntukWaka($dispensasi);
 
         $waLinkSiswa = null;
         if ($dispensasi->status_akhir === 'approved' && $dispensasi->no_hp) {
@@ -224,11 +248,36 @@ class DispensasiController extends Controller
                 && $dispensasi->status_waka === 'pending',
             'waLinkWaka' => $waLinkWaka,
             'waLinkSiswa' => $waLinkSiswa,
-            // Baru saja diajukan (?kirim=1) -> langsung dibukakan WhatsApp-nya, piket
-            // nggak perlu tap tombol "Kirim Link" lagi. Tetap harus tap "Kirim" di
-            // dalam WhatsApp sendiri -- itu batasan wa.me, tidak bisa dikirim otomatis
-            // tanpa API berbayar.
-            'autoKirimWa' => $request->boolean('kirim') && $waLinkWaka,
+        ]);
+    }
+
+    /**
+     * Fragment HTML (bukan halaman penuh) buat popup "Detail" di Riwayat
+     * Dispensasi -- isinya sama kayak show(), cuma tanpa layout. Halaman
+     * show() biasa tetap ada buat akses langsung/fallback.
+     */
+    public function showFragment(Dispensasi $dispensasi): View
+    {
+        $this->pastikanBolehLihat();
+        $user = auth()->user();
+
+        $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
+        $waLinkWaka = $this->waLinkUntukWaka($dispensasi);
+
+        $waLinkSiswa = null;
+        if ($dispensasi->status_akhir === 'approved' && $dispensasi->no_hp) {
+            $tautanSurat = SuratDispensasiController::tautanSurat($dispensasi);
+            $waLinkSiswa = WaLink::url($dispensasi->no_hp, "Dispensasi kamu sudah *disetujui*.\n\n"
+                ."Tunjukkan surat ini ke satpam saat keluar sekolah:\n{$tautanSurat}");
+        }
+
+        return view('dispensasi._detail-fragment', [
+            'dispensasi' => $dispensasi,
+            'bisaWaka' => $user->role === 'waka' && $dispensasi->status_waka === 'pending',
+            'bisaBatal' => $dispensasi->diajukan_oleh_id === $user->id
+                && $dispensasi->status_waka === 'pending',
+            'waLinkWaka' => $waLinkWaka,
+            'waLinkSiswa' => $waLinkSiswa,
         ]);
     }
 

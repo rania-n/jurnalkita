@@ -236,9 +236,11 @@ class DispensasiTest extends TestCase
             'alasan' => 'Lomba',
         ]);
         $d = Dispensasi::firstOrFail();
-        $response->assertRedirect("/dispensasi/{$d->id}?kirim=1");
+        $response->assertRedirect("/dispensasi?kirim_wa={$d->id}");
 
-        // Halaman detailnya langsung nampilkan meta-refresh ke wa.me, bukan nunggu tap tombol.
+        // Riwayat-nya langsung nampilkan tautan wa.me yang di-klik otomatis via JS,
+        // bukan nunggu tap tombol -- dan bukan halaman detail/form (biar nggak
+        // nyangkut di situ kalau kirim WA-nya dibatalkan).
         $this->followRedirects($response)->assertSee('wa.me', false);
     }
 

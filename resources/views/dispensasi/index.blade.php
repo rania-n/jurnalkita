@@ -9,6 +9,26 @@
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Dispensasi" heading="Dispensasi Siswa" width="wide">
     @php $urlEkspor = route('dispensasi.ekspor', request()->query()); @endphp
 
+    @if ($waLinkAutoKirim)
+        {{-- Baru diajukan -> langsung dibukakan WhatsApp ke Waka lewat tautan
+             ini (di-klik otomatis via JS), biar piket nggak perlu tap "Kirim
+             Link" lagi. Tetap tampilkan tautannya kelihatan (bukan disembunyikan)
+             buat jaga-jaga kalau browser blokir auto-open-nya -- tinggal tap
+             manual. Sengaja DIBUKA DI SINI (Riwayat), BUKAN di halaman detail
+             -- biar kalau kirim WA-nya dibatalkan, baliknya ke daftar (netral),
+             bukan nyangkut di halaman form/detail. --}}
+        <x-alert type="info" class="mb-4">
+            Dispensasi diajukan —
+            <a href="{{ $waLinkAutoKirim }}" id="link-wa-auto-kirim" target="_blank" rel="noopener" class="font-bold underline">
+                buka WhatsApp buat kirim ke Waka
+            </a>
+            kalau nggak otomatis kebuka.
+        </x-alert>
+        @push('scripts')
+            <script>document.getElementById('link-wa-auto-kirim')?.click();</script>
+        @endpush
+    @endif
+
     @if ($admin)
         <x-admin.page title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
             <x-slot:action>
@@ -149,11 +169,24 @@
                         @endif
                     </x-slot:badge>
                     <x-slot:actions>
-                        <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.show', $d)" />
+                        <x-ui.action-button
+                            label="Detail"
+                            icon="badge"
+                            data-modal-open="modal-dispensasi-detail"
+                            data-modal-title="{{ $d->siswa->nama }}"
+                            data-ajax-url="{{ route('dispensasi.show.fragment', $d) }}"
+                        />
                     </x-slot:actions>
                 </x-ui.list-card>
             @endforeach
         </x-ui.card-list>
+
+        {{-- Popup detail -- isinya di-fetch AJAX per baris, lihat initModals()
+             di app.js. Satu modal dipakai bareng semua tombol "Detail". --}}
+        <x-ui.modal id="modal-dispensasi-detail" title="Detail Dispensasi" size="lg">
+            <div data-modal-ajax-target></div>
+        </x-ui.modal>
+
         <p id="dispen-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
             Tidak ada dispensasi yang cocok dengan pencarian.
         </p>
