@@ -24,7 +24,6 @@ class JurnalController extends Controller
         'praktik' => 'Praktik',
         'ulangan' => 'Ulangan/Tes',
         'presentasi' => 'Presentasi',
-        'tanya_jawab' => 'Tanya Jawab',
         'lainnya' => 'Lainnya',
     ];
 
