@@ -111,8 +111,11 @@
                 </button>
 
                 {{-- Logout juga di header (bukan cuma di sidebar) -- di HP sidebar
-                     ketutup hamburger, jadi keluar susah dicari kalau cuma di situ. --}}
-                <x-logout-button variant="icon" />
+                     ketutup hamburger, jadi keluar susah dicari kalau cuma di situ.
+                     Di desktop disembunyikan karena sidebar sudah ada tombol keluar. --}}
+                <span class="lg:hidden">
+                    <x-logout-button variant="icon" />
+                </span>
             </div>
         </header>
 
