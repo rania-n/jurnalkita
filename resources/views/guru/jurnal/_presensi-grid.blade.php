@@ -16,15 +16,7 @@
     <h2 class="mb-1 text-sm font-bold text-ink">Presensi ({{ $siswas->count() }} siswa)</h2>
     <p class="mb-3 text-xs text-muted-2">Status otomatis ikut jurnal lain hari ini di kelas ini (atau dispensasi yang disetujui) kalau ada, sisanya <strong>Hadir</strong>. Ketuk status buat ubah manual bila perlu.</p>
 
-    <div class="flex h-11 items-center gap-2 rounded-xl bg-surface-alt px-4">
-        <x-icon name="search" :size="18" class="shrink-0 text-muted" />
-        <input
-            type="text"
-            id="cari-siswa"
-            placeholder="Cari nama atau no. absen..."
-            class="w-full border-none bg-transparent text-sm text-ink outline-none placeholder:text-muted"
-        >
-    </div>
+    <x-ui.search-bar id="cari-siswa" placeholder="Cari nama atau no. absen..." />
 
     <div class="mt-2 flex items-center justify-between gap-2">
         <p class="text-xs text-muted-2" id="jumlah-tampil">Menampilkan {{ $siswas->count() }} dari {{ $siswas->count() }} siswa</p>

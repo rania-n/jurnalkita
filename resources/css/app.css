@@ -194,3 +194,13 @@
         display: none;
     }
 }
+
+/* Grid yang isinya bisa ganjil (field-static, kartu jadwal, dll) -- kalau
+   jumlah itemnya ganjil, item terakhir jadi sendirian nyisain kolom kosong
+   di sampingnya. Class ini bikin item terakhir itu stretch ngisi sisa lebar,
+   bukan nyisa kosong. */
+@utility grid-fill-last {
+    & > *:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+}

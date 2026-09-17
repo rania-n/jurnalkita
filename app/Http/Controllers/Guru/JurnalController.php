@@ -295,6 +295,19 @@ class JurnalController extends Controller
         return view('guru.jurnal.show', compact('jurnal'));
     }
 
+    /**
+     * Fragment HTML (bukan halaman penuh) buat popup "Lihat" di Riwayat
+     * Jurnal -- isinya sama kayak show(), cuma tanpa layout. Halaman show()
+     * biasa tetap ada buat akses langsung/fallback (link lama, dsb).
+     */
+    public function showFragment(Jurnal $jurnal): View
+    {
+        $this->milikSendiri($jurnal);
+        $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'absensis.siswa', 'verifikator');
+
+        return view('guru.jurnal._detail-fragment', compact('jurnal'));
+    }
+
     /** Hapus jurnal (soft delete). Hanya selama belum diverifikasi pengurus kelas. */
     public function destroy(Jurnal $jurnal): RedirectResponse
     {

@@ -44,7 +44,13 @@
                         </x-ui.status-badge>
                     </x-slot:badge>
                     <x-slot:actions>
-                        <x-ui.action-button label="Lihat" icon="visibility" :href="route('jurnal.show', $j)" />
+                        <x-ui.action-button
+                            label="Lihat"
+                            icon="visibility"
+                            data-modal-open="modal-jurnal-detail"
+                            data-modal-title="{{ $judul }}"
+                            data-ajax-url="{{ route('jurnal.show.fragment', $j) }}"
+                        />
                     </x-slot:actions>
                 </x-ui.list-card>
             @endforeach
@@ -55,6 +61,12 @@
 
         <div class="mt-4">{{ $jurnals->links() }}</div>
     @endif
+
+    {{-- Popup detail -- isinya di-fetch AJAX per baris, lihat initModals() di
+         app.js. Satu modal dipakai bareng semua tombol "Lihat". --}}
+    <x-ui.modal id="modal-jurnal-detail" title="Detail Jurnal" size="lg">
+        <div data-modal-ajax-target></div>
+    </x-ui.modal>
 
     @push('scripts')
         <script>

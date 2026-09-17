@@ -125,6 +125,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/guru/jurnal/tambah', [JurnalController::class, 'create'])->name('jurnal.create');
         Route::post('/guru/jurnal', [JurnalController::class, 'store'])->name('jurnal.store');
         Route::get('/guru/jurnal/{jurnal}', [JurnalController::class, 'show'])->name('jurnal.show');
+        Route::get('/guru/jurnal/{jurnal}/fragment', [JurnalController::class, 'showFragment'])->name('jurnal.show.fragment');
         Route::get('/guru/jurnal/{jurnal}/ubah', [JurnalController::class, 'edit'])->name('jurnal.edit');
         Route::post('/guru/jurnal/{jurnal}', [JurnalController::class, 'update'])->name('jurnal.update');
         Route::delete('/guru/jurnal/{jurnal}', [JurnalController::class, 'destroy'])->name('jurnal.destroy');

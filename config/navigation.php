@@ -17,7 +17,7 @@ return [
         // Label "Riwayat" (bukan "Jurnal") biar nggak ketuker sama tombol "Isi
         // Jurnal" (fab) di sebelahnya -- guru banyak yang kurang teknologi, dua
         // menu yang sama-sama kebaca "jurnal" bikin bingung mana yang mana.
-        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => ['jurnal.index', 'jurnal.show']],
         // 'fab' => tombol bulat lebih besar & beda warna di tengah bottom-nav mobile
         // (lihat components/bottom-nav.blade.php) -- biar aksi paling sering dipakai
         // (isi jurnal) langsung kelihatan, gak ketutup menu lain. Nggak dipakai
@@ -31,7 +31,7 @@ return [
     // Cuma dipakai kalau bukan hari piket (piket tetap prioritas, lihat 'guru-piket').
     'guru-wali' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
-        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => ['jurnal.index', 'jurnal.show']],
         ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Wali Kelas', 'icon' => 'groups', 'route' => 'guru.wali-kelas.index', 'match' => 'guru.wali-kelas.*'],
@@ -63,7 +63,7 @@ return [
     'waka' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'waka.dashboard'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
-        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => 'jurnal.*'],
+        ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => ['jurnal.index', 'jurnal.show']],
         ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],

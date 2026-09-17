@@ -65,7 +65,13 @@
 
                     @if ($guru)
                         <x-ui.field-static label="NIP" icon="badge">{{ $guru->nip ?: '—' }}</x-ui.field-static>
-                        <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
+                        {{-- No.WhatsApp+NIP+MapelUtama = 3 field 1-kolom -- ganjil, jadi
+                             yang terakhir (ini) selalu nyisa sendirian kalau nggak
+                             di-stretch. sm:col-span-2 di sini, bukan CSS generik,
+                             soalnya field opsional di bawah (Mapel Tambahan/Wali
+                             Kelas) sudah span-2 sendiri & bikin hitungan "genap/ganjil"
+                             DOM-order nggak nyambung sama posisi visualnya. --}}
+                        <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book" class="sm:col-span-2">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
                         @if ($guru->mapels->isNotEmpty())
                             <x-ui.field-static label="Mapel Tambahan" icon="library_books">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
                         @endif

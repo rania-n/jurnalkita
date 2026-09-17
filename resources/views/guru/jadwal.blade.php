@@ -24,7 +24,7 @@
 
                 <div>
                     <h2 class="mb-2 text-sm font-bold text-ink">{{ $label }}</h2>
-                    <x-ui.card-list>
+                    <x-ui.card-list class="grid-fill-last">
                         @if ($jadwalWakaPerHari->has($key))
                             <x-ui.list-card
                                 title="Piket Waka Kesiswaan"

@@ -78,9 +78,8 @@
             <x-ui.upload
                 :label="$jurnal->foto_bukti ? 'Ganti Foto Suasana Kelas (opsional)' : 'Foto Suasana Kelas'"
                 name="foto_bukti"
-                title="Ambil Foto Suasana Kelas"
+                title="Unggah Foto Suasana Kelas"
                 :hint="$jurnal->foto_bukti ? 'Opsional — biarin kosong kalau foto lama masih dipakai' : 'Wajib diisi — bukti pembelajaran sedang berlangsung'"
-                capture="environment"
                 :required="! $jurnal->foto_bukti"
             />
         </div>

@@ -111,12 +111,14 @@
                 @include('guru.jurnal._presensi-grid')
 
                 <div class="mt-4">
+                    {{-- Nggak dikunci ke kamera (capture) lagi -- guru bebas pilih
+                         foto dari galeri atau motret langsung, browser yang
+                         nawarin pilihannya. --}}
                     <x-ui.upload
                         label="Foto Suasana Kelas"
                         name="foto_bukti"
-                        title="Ambil Foto Suasana Kelas"
+                        title="Unggah Foto Suasana Kelas"
                         hint="Wajib diisi — bukti pembelajaran sedang berlangsung"
-                        capture="environment"
                         required
                     />
                 </div>
