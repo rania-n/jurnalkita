@@ -66,6 +66,14 @@ class AkunController extends Controller
             ]);
             $guru->user_id = $user->id;
             $guru->save();
+        } elseif ($data['role'] === 'waka') {
+            // Waka itu gabungan 2 peran: bisa isi jurnal ngajar sendiri KAYAK
+            // GURU (guru.jurnal.* route ngecek $user->guru), sekaligus otomatis
+            // kebagian akses fitur piket (Monitor Piket, Dispensasi) lewat
+            // middleware role -- nggak butuh JadwalPiket kayak guru piket
+            // biasa. Tanpa data Guru di sini, akun Waka ketolak 403 "Akun
+            // tidak terhubung ke data guru" begitu buka menu Jurnal.
+            Guru::create(['user_id' => $user->id, 'nama' => $data['nama'], 'nip' => $data['nip'] ?? null]);
         } elseif ($data['role'] === 'siswa') {
             if (! $sumberId) {
                 $request->validateWithBag('buatAkun', [

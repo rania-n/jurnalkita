@@ -24,7 +24,10 @@
         :back="route('dispensasi.index')"
     />
 
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    {{-- max-w-xl biar konsisten sama blok keputusan Waka & link WA di bawahnya
+         (dua-duanya udah dibatasi max-w-xl) -- dulu blok ini melebar penuh
+         container, jadi kelihatan lebar-lebar nggak nyambung di layar besar. --}}
+    <div class="grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
         <x-ui.field-static label="Jam">{{ $dispensasi->labelJam() }}</x-ui.field-static>
         <x-ui.field-static label="Diajukan oleh (guru piket)">{{ $dispensasi->pengaju->name }}</x-ui.field-static>
         <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $dispensasi->alasan }}</x-ui.field-static>

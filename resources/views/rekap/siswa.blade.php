@@ -16,12 +16,22 @@
         </x-page-header>
     @endif
 
-    <x-admin.filters :action="route('rekap.siswa.index')">
-        <x-admin.f-search placeholder="Nama atau NIS siswa..." />
+    {{-- Kelas & tanggal: server-side, langsung submit begitu diubah (otomatis,
+         nggak perlu tombol Cari lagi) -- sama kayak pola Monitor Piket.
+         Cari nama: client-side langsung filter baris yang sudah dimuat (data
+         di halaman ini nggak dipaginate, semua siswa yang cocok kelas/tanggal
+         udah ada), jadi nggak perlu reload cuma buat cari nama. --}}
+    <x-admin.filters :action="route('rekap.siswa.index')" hideButtons="true">
+        {{-- f-select udah auto-submit bawaan (this.form.requestSubmit() di
+             komponennya sendiri), nggak perlu ditambah apa-apa lagi. --}}
         <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua kelas" />
-        <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" />
-        <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" />
+        <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" onchange="this.form.submit()" />
+        <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" onchange="this.form.submit()" />
     </x-admin.filters>
+
+    <div class="mb-4">
+        <x-ui.search-bar id="cari-rekap" placeholder="Cari nama atau NIS siswa..." />
+    </div>
 
     @if ($totalAlphaTinggi > 0)
         <x-alert type="warning" class="mb-4">
@@ -39,7 +49,7 @@
             <x-admin.table :head="['Kelas', 'No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi', 'Terlambat']">
                 @foreach ($siswas as $s)
                     @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
-                    <tr @class(['bg-alpha-soft/30' => $alphaTinggi])>
+                    <tr data-baris-rekap data-cari="{{ strtolower($s->nama.' '.$s->nis) }}" @class(['bg-alpha-soft/30' => $alphaTinggi])>
                         <td class="px-4 py-2.5 text-muted">{{ $s->kelas?->nama ?? '—' }}</td>
                         <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
                         <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
@@ -60,6 +70,8 @@
                 @foreach ($siswas as $s)
                     @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
                     <x-ui.rekap-chip-card
+                        data-baris-rekap
+                        data-cari="{{ strtolower($s->nama.' '.$s->nis) }}"
                         :nama="$s->nama"
                         :meta="($s->kelas?->nama ?? '—') . ' · No. ' . ($s->no_absen ?? '—')"
                         :hadir="$r['hadir'] ?? 0"
@@ -73,6 +85,31 @@
                 @endforeach
             </div>
         </div>
+        <p id="rekap-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
+            Tidak ada siswa yang cocok dengan pencarian.
+        </p>
         <p class="mt-3 text-xs text-muted-2">Merah muda = alpha {{ $ambangAlpha }}x atau lebih pada rentang tanggal ini.</p>
     @endif
+
+    @push('scripts')
+        <script>
+            (function () {
+                const cari = document.getElementById('cari-rekap');
+                const rows = document.querySelectorAll('[data-baris-rekap]');
+                const kosong = document.getElementById('rekap-kosong');
+                if (!cari) return;
+
+                cari.addEventListener('input', () => {
+                    const q = cari.value.trim().toLowerCase();
+                    let ada = false;
+                    rows.forEach((row) => {
+                        const cocok = !q || row.dataset.cari.includes(q);
+                        row.hidden = !cocok;
+                        if (cocok) ada = true;
+                    });
+                    if (kosong) kosong.hidden = ada;
+                });
+            })();
+        </script>
+    @endpush
 </x-dynamic-component>

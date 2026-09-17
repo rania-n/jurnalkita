@@ -70,6 +70,16 @@ class DatabaseSeeder extends Seeder
             ['kode' => 'PWL', 'nama' => 'Pemrograman Web dan Perangkat Bergerak'],
         ])->map(fn ($m) => Mapel::create($m));
 
+        // Waka juga guru beneran (bisa isi jurnal ngajar sendiri, bukan cuma
+        // approve dispensasi) -- tanpa ini $waka->guru null, ketolak 403
+        // "Akun tidak terhubung ke data guru" begitu buka menu Jurnal. Sengaja
+        // TIDAK dikasih Jadwal manual di sini (biar nggak numpuk/bentrok sama
+        // jadwal asli 4 kelas demo yang diisi belakangan oleh DataAsliSeeder) --
+        // halaman Isi Jurnal sudah punya tampilan kosong yang layak kalau
+        // jadwal hari itu belum ada.
+        Guru::create(['user_id' => $waka->id, 'nama' => $waka->name, 'mapel_utama_id' => $mapels->firstWhere('kode', 'BIN')->id]);
+        Guru::create(['user_id' => $waka2->id, 'nama' => $waka2->name, 'mapel_utama_id' => $mapels->firstWhere('kode', 'MAT')->id]);
+
         // ----------------------------------------------------------------- Guru
         // Dulu ada 5 guru isian generik (Budi Santoso dkk) buat ngisi jadwal contoh
         // di 4 kelas demo -- udah dihapus, soalnya sekarang 4 kelas demo itu (X RPL
