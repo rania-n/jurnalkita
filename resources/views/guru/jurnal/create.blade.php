@@ -4,8 +4,21 @@
         subtitle="Isi jurnal mengajar dan kehadiran siswa dalam satu langkah"
     />
 
+    @if ($jumlahSudahDiisiHariIni > 0)
+        {{-- Jadwal yang udah ada jurnalnya hari ini nggak muncul lagi di
+             pilihan bawah -- baru bisa diisi ulang kalau jurnalnya dihapus. --}}
+        <x-alert type="success" class="mb-4">
+            {{ $jumlahSudahDiisiHariIni }} jadwal hari ini sudah Anda isi jurnalnya — nggak muncul lagi di pilihan bawah.
+            <a href="{{ route('jurnal.index') }}" class="font-bold underline">Lihat di Riwayat</a>.
+        </x-alert>
+    @endif
+
     @if ($jadwals->isEmpty())
-        <x-ui.empty icon="event_busy" title="Belum ada jadwal mengajar" desc="Hubungi admin untuk menambahkan jadwal Anda." />
+        <x-ui.empty
+            icon="event_busy"
+            :title="$jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi' : 'Belum ada jadwal mengajar'"
+            :desc="$jumlahSudahDiisiHariIni > 0 ? 'Mantap, kelar semua! Kalau ada yang perlu diubah, buka dari Riwayat.' : 'Hubungi admin untuk menambahkan jadwal Anda.'"
+        />
     @else
         <form method="POST" action="{{ route('jurnal.store') }}" enctype="multipart/form-data">
             @csrf

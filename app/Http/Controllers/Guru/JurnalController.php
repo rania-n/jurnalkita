@@ -63,6 +63,18 @@ class JurnalController extends Controller
         // Semua jadwal guru (fallback kalau tidak ada jadwal hari ini)
         $semuaJadwal = $guru->jadwals()->with('kelas', 'mapel')->orderBy('hari')->orderBy('jam_ke_mulai')->get();
 
+        // Jadwal yang HARI INI udah ada jurnalnya nggak boleh dipilih lagi dari
+        // sini -- backend (store()) juga nolak kalau dipaksa submit, tapi ini
+        // biar guru nggak keburu isi form panjang dulu baru ditolak pas submit.
+        // Baru bisa kepilih lagi kalau jurnalnya dihapus (lihat destroy()).
+        $idJadwalSudahDiisi = Jurnal::whereIn('jadwal_id', $semuaJadwal->pluck('id'))
+            ->whereDate('tanggal', now()->toDateString())
+            ->pluck('jadwal_id');
+        $jumlahSudahDiisiHariIni = $jadwals->whereIn('id', $idJadwalSudahDiisi)->count();
+
+        $jadwals = $jadwals->reject(fn ($j) => $idJadwalSudahDiisi->contains($j->id))->values();
+        $semuaJadwal = $semuaJadwal->reject(fn ($j) => $idJadwalSudahDiisi->contains($j->id))->values();
+
         $daftarJadwal = $jadwals->isNotEmpty() ? $jadwals : $semuaJadwal;
 
         $jpSekarang = Waktu::jpSekarang();
@@ -103,6 +115,7 @@ class JurnalController extends Controller
             'jadwals' => $daftarJadwal,
             'jadwalTerpilih' => $jadwalTerpilih,
             'jadwalTerkunci' => $jadwalTerkunci,
+            'jumlahSudahDiisiHariIni' => $jumlahSudahDiisiHariIni,
             'jpSekarang' => $jpSekarang,
             'jpMaks' => 13,
             'siswas' => $siswas,

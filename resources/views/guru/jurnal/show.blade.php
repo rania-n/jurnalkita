@@ -52,17 +52,15 @@
         </div>
     @endif
 
-    {{-- Presensi -- diubah bareng jurnal lewat tombol "Ubah Jurnal" di bawah,
-         satu halaman gabungan (bukan tombol terpisah lagi). --}}
+    {{-- Cuma rekap angka -- daftar nama satu-satu udah nggak perlu di sini,
+         itu bagian pas ISI jurnal (guru yang isi sendiri tau siapa aja). --}}
     <h2 class="mb-2 text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</h2>
 
-    <div class="mb-3 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
+    <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
         @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
             <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
         @endforeach
     </div>
-
-    <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" link-siswa />
 
     {{-- Aksi -- taruh paling bawah, setelah presensi, biar urutannya: lihat dulu semuanya, baru ubah/hapus kalau perlu --}}
     @if ($bisaUbah)
