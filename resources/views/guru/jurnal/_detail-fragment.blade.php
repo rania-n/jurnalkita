@@ -59,7 +59,7 @@
                 <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
             @endforeach
         </div>
-        <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" link-siswa />
+        <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" />
     </div>
 
     @if ($bisaUbah)

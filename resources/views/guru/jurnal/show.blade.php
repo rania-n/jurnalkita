@@ -60,7 +60,7 @@
         @endforeach
     </div>
 
-    <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" link-siswa />
+    <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" />
 
     {{-- Aksi -- taruh paling bawah, setelah presensi, biar urutannya: lihat dulu semuanya, baru ubah/hapus kalau perlu --}}
     @if ($bisaUbah)
