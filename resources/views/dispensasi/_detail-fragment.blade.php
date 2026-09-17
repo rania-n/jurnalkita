@@ -73,10 +73,13 @@
             </a>
         @endif
         @if ($dispensasi->status_akhir === 'approved')
-            <a href="{{ route('dispensasi.surat', $dispensasi) }}" target="_blank" rel="noopener"
-               class="press flex h-11 items-center justify-center gap-2 rounded-xl border border-surface-alt bg-card text-sm font-bold text-ink">
+            <button type="button"
+                data-modal-open="modal-surat-dispensasi"
+                data-modal-title="Surat Dispensasi"
+                data-ajax-url="{{ route('dispensasi.surat.fragment', $dispensasi) }}"
+                class="press flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-surface-alt bg-card text-sm font-bold text-ink">
                 <x-icon name="qr_code_2" :size="18" /> Lihat Surat + QR
-            </a>
+            </button>
         @endif
     </div>
 

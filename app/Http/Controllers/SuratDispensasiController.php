@@ -43,6 +43,36 @@ class SuratDispensasiController extends Controller
         ]);
     }
 
+    /**
+     * Fragment HTML (bukan halaman penuh) buat popup "Lihat Surat + QR" --
+     * cuma buat guru piket/waka/admin yang login & punya akses (BUKAN lewat
+     * tanda-tangan URL kayak show(), karena ini dipanggil dari dalam app
+     * yang udah ada sesi login). Link yang dikirim ke SISWA lewat WA tetap
+     * pakai show() (signed URL, halaman biasa) -- siswa belum punya sesi.
+     */
+    public function showFragment(Request $request, Dispensasi $dispensasi): View
+    {
+        $user = $request->user();
+        abort_unless(
+            in_array($user->role, ['waka', 'admin'], true) || $dispensasi->diajukan_oleh_id === $user->id,
+            403
+        );
+
+        $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
+
+        $qrUrl = null;
+        if ($dispensasi->status_akhir === 'approved' && $dispensasi->berlakuPada()) {
+            $token = QrDispensasi::token($dispensasi->id);
+            $tujuan = route('satpam.scan', ['id' => $dispensasi->id, 'token' => $token]);
+            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='.urlencode($tujuan);
+        }
+
+        return view('dispensasi._surat-fragment', [
+            'dispensasi' => $dispensasi,
+            'qrUrl' => $qrUrl,
+        ]);
+    }
+
     /** Buat piket: bikin tautan surat bertanda-tangan buat dibagikan ke siswa lewat WA. */
     public static function tautanSurat(Dispensasi $dispensasi): string
     {

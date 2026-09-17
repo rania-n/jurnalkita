@@ -159,6 +159,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dispensasi/ekspor', [DispensasiController::class, 'ekspor'])->name('dispensasi.ekspor');
         Route::get('/dispensasi/{dispensasi}', [DispensasiController::class, 'show'])->name('dispensasi.show');
         Route::get('/dispensasi/{dispensasi}/fragment', [DispensasiController::class, 'showFragment'])->name('dispensasi.show.fragment');
+        Route::get('/dispensasi/{dispensasi}/surat/fragment', [SuratDispensasiController::class, 'showFragment'])->name('dispensasi.surat.fragment');
     });
     Route::middleware('role:guru')->group(function () {
         Route::get('/dispensasi-ajukan/baru', [DispensasiController::class, 'create'])->name('dispensasi.create');

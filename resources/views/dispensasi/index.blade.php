@@ -187,6 +187,13 @@
             <div data-modal-ajax-target></div>
         </x-ui.modal>
 
+        {{-- Popup Surat + QR -- dipicu dari TOMBOL DI DALAM popup Detail di
+             atas (tombol "Lihat Surat + QR" ada di fragment yang di-inject ke
+             situ), tapi modalnya sendiri harus ada di sini (bukan ikut fragment). --}}
+        <x-ui.modal id="modal-surat-dispensasi" title="Surat Dispensasi">
+            <div data-modal-ajax-target></div>
+        </x-ui.modal>
+
         <p id="dispen-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
             Tidak ada dispensasi yang cocok dengan pencarian.
         </p>
