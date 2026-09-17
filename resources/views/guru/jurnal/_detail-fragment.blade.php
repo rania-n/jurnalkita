@@ -52,15 +52,14 @@
         </div>
     @endif
 
-    {{-- Cuma rekap angka -- daftar nama satu-satu udah nggak perlu di sini,
-         itu bagian pas ISI jurnal (guru yang isi sendiri tau siapa aja). --}}
     <div>
         <p class="mb-2 text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</p>
-        <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
+        <div class="mb-3 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
             @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
                 <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
             @endforeach
         </div>
+        <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" link-siswa />
     </div>
 
     @if ($bisaUbah)
