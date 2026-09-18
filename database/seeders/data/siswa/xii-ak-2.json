@@ -1,0 +1,179 @@
+{
+    "kelas": "XII AK 2",
+    "tingkat": "XII",
+    "jurusan": "AK",
+    "nomor": 2,
+    "wali_nama": "Siti Umiharsih, S.Pd",
+    "siswa": [
+        {
+            "nama": "Dewi Lailatus Zahra",
+            "jenis_kelamin": "P",
+            "nis": "239964891.102"
+        },
+        {
+            "nama": "Dewi Meinasari",
+            "jenis_kelamin": "P",
+            "nis": "239974892.102"
+        },
+        {
+            "nama": "Dewi Zyva Anastasya Pratama",
+            "jenis_kelamin": "P",
+            "nis": "239984893.102"
+        },
+        {
+            "nama": "Dinasty Laksmi Ayu Angganten",
+            "jenis_kelamin": "P",
+            "nis": "239994894.102"
+        },
+        {
+            "nama": "Dinda Elfiana Puspita Ayu",
+            "jenis_kelamin": "P",
+            "nis": "240004895.102"
+        },
+        {
+            "nama": "Eka Widyan Tantri",
+            "jenis_kelamin": "P",
+            "nis": "240014896.102"
+        },
+        {
+            "nama": "Enovelin Wilenza Deatama",
+            "jenis_kelamin": "P",
+            "nis": "240024897.102"
+        },
+        {
+            "nama": "Fanezia Julya Putri",
+            "jenis_kelamin": "P",
+            "nis": "240034898.102"
+        },
+        {
+            "nama": "Fernanda Angeliana Putri",
+            "jenis_kelamin": "P",
+            "nis": "240044899.102"
+        },
+        {
+            "nama": "Fhara Azkiya Nayla Putri",
+            "jenis_kelamin": "P",
+            "nis": "240054900.102"
+        },
+        {
+            "nama": "Frizilia Sintya Dewi",
+            "jenis_kelamin": "P",
+            "nis": "240064901.102"
+        },
+        {
+            "nama": "Gesit Gading Anugerah",
+            "jenis_kelamin": "L",
+            "nis": "240074902.102"
+        },
+        {
+            "nama": "Gladis Chanticka Andinata Pramesti",
+            "jenis_kelamin": "P",
+            "nis": "240084903.102"
+        },
+        {
+            "nama": "Gracia Nindya Pertiwi",
+            "jenis_kelamin": "P",
+            "nis": "240094904.102"
+        },
+        {
+            "nama": "Herliana Sukmawati Santoso",
+            "jenis_kelamin": "P",
+            "nis": "240104905.102"
+        },
+        {
+            "nama": "Icha Zaskya",
+            "jenis_kelamin": "P",
+            "nis": "240114906.102"
+        },
+        {
+            "nama": "Ike Fibrian Febryanti",
+            "jenis_kelamin": "P",
+            "nis": "240124907.102"
+        },
+        {
+            "nama": "Indah Mega Silvia",
+            "jenis_kelamin": "P",
+            "nis": "240134908.102"
+        },
+        {
+            "nama": "Indi Niswatul Sarofina",
+            "jenis_kelamin": "P",
+            "nis": "240144909.102"
+        },
+        {
+            "nama": "Inneke Alya Kamalin",
+            "jenis_kelamin": "P",
+            "nis": "240154910.102"
+        },
+        {
+            "nama": "Intan Maulana Zahrani",
+            "jenis_kelamin": "P",
+            "nis": "240164911.102"
+        },
+        {
+            "nama": "Javelin Sandrina Resty",
+            "jenis_kelamin": "P",
+            "nis": "240174912.102"
+        },
+        {
+            "nama": "Jayanti Aristawati",
+            "jenis_kelamin": "P",
+            "nis": "240184913.102"
+        },
+        {
+            "nama": "Juwita Mega Ayudia",
+            "jenis_kelamin": "P",
+            "nis": "240194914.102"
+        },
+        {
+            "nama": "Kana Kusnul Miati",
+            "jenis_kelamin": "P",
+            "nis": "240204915.102"
+        },
+        {
+            "nama": "Karina Atika Sari",
+            "jenis_kelamin": "P",
+            "nis": "240214916.102"
+        },
+        {
+            "nama": "Kayla Ayu Nisa",
+            "jenis_kelamin": "P",
+            "nis": "240224917.102"
+        },
+        {
+            "nama": "Keyla Ashalina Putri",
+            "jenis_kelamin": "P",
+            "nis": "240234918.102"
+        },
+        {
+            "nama": "Khoirun Nisak",
+            "jenis_kelamin": "P",
+            "nis": "240244919.102"
+        },
+        {
+            "nama": "Kiftiya Belinda Anastasya Putri",
+            "jenis_kelamin": "P",
+            "nis": "240254920.102"
+        },
+        {
+            "nama": "Lailatul Eka Rovina Sari",
+            "jenis_kelamin": "P",
+            "nis": "240264921.102"
+        },
+        {
+            "nama": "Lailatul Khoiriah",
+            "jenis_kelamin": "P",
+            "nis": "240274922.102"
+        },
+        {
+            "nama": "Linda Diana Kusumaningtiyas",
+            "jenis_kelamin": "P",
+            "nis": "240284923.102"
+        },
+        {
+            "nama": "Lusiana Yusmarani",
+            "jenis_kelamin": "P",
+            "nis": "240294924.102"
+        }
+    ]
+}

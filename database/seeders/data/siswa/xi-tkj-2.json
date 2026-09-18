@@ -1,0 +1,189 @@
+{
+    "kelas": "XI TKJ 2",
+    "tingkat": "XI",
+    "jurusan": "TKJ",
+    "nomor": 2,
+    "wali_nama": "Fitri Amaliyah, S.Pd",
+    "siswa": [
+        {
+            "nama": "Alfin Putra Hermawan",
+            "jenis_kelamin": "L",
+            "nis": "245431236.66"
+        },
+        {
+            "nama": "Alvan Firdaus Aldiano",
+            "jenis_kelamin": "L",
+            "nis": "245441237.66"
+        },
+        {
+            "nama": "Aprilia Nur Azizah",
+            "jenis_kelamin": "P",
+            "nis": "245451238.66"
+        },
+        {
+            "nama": "Arbas Arshavin Fakhryan",
+            "jenis_kelamin": "L",
+            "nis": "245461239.66"
+        },
+        {
+            "nama": "Azka Alodya Pawana",
+            "jenis_kelamin": "P",
+            "nis": "245471240.66"
+        },
+        {
+            "nama": "Chelsea Meilinda Isnaeni",
+            "jenis_kelamin": "P",
+            "nis": "245481241.66"
+        },
+        {
+            "nama": "Citra Puji Rahayu",
+            "jenis_kelamin": "P",
+            "nis": "245491242.66"
+        },
+        {
+            "nama": "Claudeea Noerputri Aryowati",
+            "jenis_kelamin": "P",
+            "nis": "245501243.66"
+        },
+        {
+            "nama": "Claudia Zahra Aulia",
+            "jenis_kelamin": "P",
+            "nis": "245511244.66"
+        },
+        {
+            "nama": "Dany Bagus Styawan",
+            "jenis_kelamin": "L",
+            "nis": "245521245.66"
+        },
+        {
+            "nama": "Dias Mahadika Permana",
+            "jenis_kelamin": "L",
+            "nis": "245531246.66"
+        },
+        {
+            "nama": "Dimas Bagus Satriyo Praswito",
+            "jenis_kelamin": "L",
+            "nis": "245541247.66"
+        },
+        {
+            "nama": "Dina Belklin Adevia",
+            "jenis_kelamin": "P",
+            "nis": "245551248.66"
+        },
+        {
+            "nama": "Ella Pramudita",
+            "jenis_kelamin": "P",
+            "nis": "245561249.66"
+        },
+        {
+            "nama": "Excelena Gavia Natari",
+            "jenis_kelamin": "P",
+            "nis": "245571250.66"
+        },
+        {
+            "nama": "Febricha Dwicahaya Nashwana Sunwa Ranfika",
+            "jenis_kelamin": "P",
+            "nis": "245581251.66"
+        },
+        {
+            "nama": "Hafiid Khoiru Alfadli",
+            "jenis_kelamin": "L",
+            "nis": "245591252.66"
+        },
+        {
+            "nama": "Hilcen Prastyo Shauqii",
+            "jenis_kelamin": "L",
+            "nis": "245601253.66"
+        },
+        {
+            "nama": "Iqbal Rezai Kurniawan",
+            "jenis_kelamin": "L",
+            "nis": "245611254.66"
+        },
+        {
+            "nama": "Kartika Ayu Dewantari",
+            "jenis_kelamin": "P",
+            "nis": "245621255.66"
+        },
+        {
+            "nama": "Lutvia Zahra Talita Putri",
+            "jenis_kelamin": "P",
+            "nis": "245631256.66"
+        },
+        {
+            "nama": "Mochammad Meyza Farel F",
+            "jenis_kelamin": "L",
+            "nis": "245641257.66"
+        },
+        {
+            "nama": "Muhammad Aji Agung Prasasti",
+            "jenis_kelamin": "L",
+            "nis": "245651258.66"
+        },
+        {
+            "nama": "Nadia Trisna Bela",
+            "jenis_kelamin": "P",
+            "nis": "245661259.66"
+        },
+        {
+            "nama": "Oktaviyan Arjuna Pandika",
+            "jenis_kelamin": "L",
+            "nis": "245671260.66"
+        },
+        {
+            "nama": "Putri Natasya Aulia Mayasari",
+            "jenis_kelamin": "P",
+            "nis": "245681261.66"
+        },
+        {
+            "nama": "Rama Putra Ardiniata",
+            "jenis_kelamin": "L",
+            "nis": "245691262.66"
+        },
+        {
+            "nama": "Rara Nurdiyanto",
+            "jenis_kelamin": "P",
+            "nis": "245701263.66"
+        },
+        {
+            "nama": "Rizky Putra Rahmadani",
+            "jenis_kelamin": "L",
+            "nis": "245711264.66"
+        },
+        {
+            "nama": "Rizky Said Abdullah",
+            "jenis_kelamin": "L",
+            "nis": "245721265.66"
+        },
+        {
+            "nama": "Salsabiilaa Tazkiya Zahro",
+            "jenis_kelamin": "P",
+            "nis": "245731266.66"
+        },
+        {
+            "nama": "Shinta Dian Rahayu",
+            "jenis_kelamin": "P",
+            "nis": "245741267.66"
+        },
+        {
+            "nama": "Tiara Firliza Febiani",
+            "jenis_kelamin": "P",
+            "nis": "245751268.66"
+        },
+        {
+            "nama": "Yulfi Lailatul Zanna",
+            "jenis_kelamin": "P",
+            "nis": "245761269.66"
+        },
+        {
+            "nama": "Zaskia Khumaira",
+            "jenis_kelamin": "P",
+            "nis": "245771270.66"
+        },
+        {
+            "nama": "Zidan Albi Basya Satria",
+            "jenis_kelamin": "L",
+            "nis": "245781271.66"
+        }
+    ]
+}

@@ -1,0 +1,189 @@
+{
+    "kelas": "XI AN 1",
+    "tingkat": "XI",
+    "jurusan": "AN",
+    "nomor": 1,
+    "wali_nama": "Dhuana Putri Puspitasary, S.Pd",
+    "siswa": [
+        {
+            "nama": "Abdurrazaan Wahid Putra Albantani",
+            "jenis_kelamin": "L",
+            "nis": "251540654.127"
+        },
+        {
+            "nama": "Adhesta Sabtya Sari",
+            "jenis_kelamin": "P",
+            "nis": "251550655.127"
+        },
+        {
+            "nama": "Ahmad Muzamil",
+            "jenis_kelamin": "L",
+            "nis": "251560656.127"
+        },
+        {
+            "nama": "Ailsa Viviana Shierley",
+            "jenis_kelamin": "P",
+            "nis": "251570657.127"
+        },
+        {
+            "nama": "Anggi Saphira Fitri Wibowo",
+            "jenis_kelamin": "P",
+            "nis": "251580658.127"
+        },
+        {
+            "nama": "Anggun Citra Rhimarizky",
+            "jenis_kelamin": "P",
+            "nis": "251590659.127"
+        },
+        {
+            "nama": "Anshar Abdullah",
+            "jenis_kelamin": "L",
+            "nis": "251600660.127"
+        },
+        {
+            "nama": "Anugrah Suci Nur Azizah",
+            "jenis_kelamin": "P",
+            "nis": "251610661.127"
+        },
+        {
+            "nama": "Arva Sinatriya Dananjaya",
+            "jenis_kelamin": "L",
+            "nis": "251620662.127"
+        },
+        {
+            "nama": "Aulia Chendy",
+            "jenis_kelamin": "P",
+            "nis": "251630663.127"
+        },
+        {
+            "nama": "Aulia Kharisma Putri",
+            "jenis_kelamin": "P",
+            "nis": "251640664.127"
+        },
+        {
+            "nama": "Aurel Vero Anastasya",
+            "jenis_kelamin": "P",
+            "nis": "251650665.127"
+        },
+        {
+            "nama": "Aurelsa Liski Firnanza",
+            "jenis_kelamin": "P",
+            "nis": "251660666.127"
+        },
+        {
+            "nama": "Aziz Ega Saputra",
+            "jenis_kelamin": "L",
+            "nis": "251670667.127"
+        },
+        {
+            "nama": "Belinda Zayyan Attaya Putri",
+            "jenis_kelamin": "P",
+            "nis": "251680668.127"
+        },
+        {
+            "nama": "Berlin Hardiyanti Purnama",
+            "jenis_kelamin": "P",
+            "nis": "251690669.127"
+        },
+        {
+            "nama": "Bima Saharsa Wijaya",
+            "jenis_kelamin": "L",
+            "nis": "251700670.127"
+        },
+        {
+            "nama": "Bimo Bayu Anggoro Putro",
+            "jenis_kelamin": "L",
+            "nis": "251710671.127"
+        },
+        {
+            "nama": "Cahayanur",
+            "jenis_kelamin": "P",
+            "nis": "251720672.127"
+        },
+        {
+            "nama": "Daton Pande Bekti",
+            "jenis_kelamin": "L",
+            "nis": "251730673.127"
+        },
+        {
+            "nama": "Defira Nur Latifah",
+            "jenis_kelamin": "P",
+            "nis": "251740674.127"
+        },
+        {
+            "nama": "Eka Yuliana Putri",
+            "jenis_kelamin": "P",
+            "nis": "251750675.127"
+        },
+        {
+            "nama": "Eny Nova Anggreini Puspitasari",
+            "jenis_kelamin": "P",
+            "nis": "251760676.127"
+        },
+        {
+            "nama": "Fara Agustina Fauzana",
+            "jenis_kelamin": "P",
+            "nis": "251770677.127"
+        },
+        {
+            "nama": "Felix Fernando Putra Pradana",
+            "jenis_kelamin": "L",
+            "nis": "251780678.127"
+        },
+        {
+            "nama": "Habib Abdul Rouf",
+            "jenis_kelamin": "L",
+            "nis": "251790679.127"
+        },
+        {
+            "nama": "Hanisha Aprilia Putri",
+            "jenis_kelamin": "P",
+            "nis": "251800680.127"
+        },
+        {
+            "nama": "Ibra Fajar Danendra",
+            "jenis_kelamin": "L",
+            "nis": "251810681.127"
+        },
+        {
+            "nama": "Ik Lil Dhiyaul Auliya",
+            "jenis_kelamin": "P",
+            "nis": "251820682.127"
+        },
+        {
+            "nama": "Ivan Dananjaya Hermawan Putra",
+            "jenis_kelamin": "L",
+            "nis": "251830683.127"
+        },
+        {
+            "nama": "Jelita Rachel Azzahra",
+            "jenis_kelamin": "P",
+            "nis": "251840684.127"
+        },
+        {
+            "nama": "Jethro Rangga Saputra",
+            "jenis_kelamin": "L",
+            "nis": "251850685.127"
+        },
+        {
+            "nama": "Jonathan Budi Santoso",
+            "jenis_kelamin": "L",
+            "nis": "251860686.127"
+        },
+        {
+            "nama": "Khansa Athifa Maila Hana",
+            "jenis_kelamin": "P",
+            "nis": "251870687.127"
+        },
+        {
+            "nama": "Khofifah Auliya Nabila",
+            "jenis_kelamin": "P",
+            "nis": "251880688.127"
+        },
+        {
+            "nama": "Lailatul Anindya Rizqika Putri",
+            "jenis_kelamin": "P",
+            "nis": "251890689.127"
+        }
+    ]
+}

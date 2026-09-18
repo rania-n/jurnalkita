@@ -1,0 +1,189 @@
+{
+    "kelas": "XI DKV 2",
+    "tingkat": "XI",
+    "jurusan": "DKV",
+    "nomor": 2,
+    "wali_nama": "Khoyrotun Hisani, S.Sn",
+    "siswa": [
+        {
+            "nama": "Lutfiyah Rara Trismia Putri",
+            "jenis_kelamin": "P",
+            "nis": "250460778.111"
+        },
+        {
+            "nama": "Marcelo Rahardian Utomo",
+            "jenis_kelamin": "L",
+            "nis": "250470779.111"
+        },
+        {
+            "nama": "Mochamad Fahri Rizky Saputra",
+            "jenis_kelamin": "L",
+            "nis": "250480780.111"
+        },
+        {
+            "nama": "Moh Daffa Akmal Ashari",
+            "jenis_kelamin": "L",
+            "nis": "250490781.111"
+        },
+        {
+            "nama": "Mohammad Azzam Aryadinanta",
+            "jenis_kelamin": "L",
+            "nis": "250500782.111"
+        },
+        {
+            "nama": "Monica Adi Wibowo",
+            "jenis_kelamin": "P",
+            "nis": "250510783.111"
+        },
+        {
+            "nama": "Muhamad Bowo Nur Kolis",
+            "jenis_kelamin": "L",
+            "nis": "250520784.111"
+        },
+        {
+            "nama": "Muhammad Aldy Fauzi Firmansyah",
+            "jenis_kelamin": "L",
+            "nis": "250530785.111"
+        },
+        {
+            "nama": "Muhammad Fajar Dwi Sanjaya",
+            "jenis_kelamin": "L",
+            "nis": "250540786.111"
+        },
+        {
+            "nama": "Muhammad Faris Abqori",
+            "jenis_kelamin": "L",
+            "nis": "250550787.111"
+        },
+        {
+            "nama": "Muhammad Romzy Syahputra",
+            "jenis_kelamin": "L",
+            "nis": "250560788.111"
+        },
+        {
+            "nama": "Muhammad Saiful Huda",
+            "jenis_kelamin": "L",
+            "nis": "250570789.111"
+        },
+        {
+            "nama": "Najwa Salsabilla",
+            "jenis_kelamin": "P",
+            "nis": "250580790.111"
+        },
+        {
+            "nama": "Namira Bethania",
+            "jenis_kelamin": "P",
+            "nis": "250590791.111"
+        },
+        {
+            "nama": "Nanca Lisdiana Febriana",
+            "jenis_kelamin": "P",
+            "nis": "250600792.111"
+        },
+        {
+            "nama": "Naufal Hafizh Raditya Pratama",
+            "jenis_kelamin": "L",
+            "nis": "250610793.111"
+        },
+        {
+            "nama": "Nazifa Nur Amalia Zayani Fitri",
+            "jenis_kelamin": "P",
+            "nis": "250620794.111"
+        },
+        {
+            "nama": "Nia Kusumarahayu",
+            "jenis_kelamin": "P",
+            "nis": "250630795.111"
+        },
+        {
+            "nama": "Raka Adi Prasetya",
+            "jenis_kelamin": "L",
+            "nis": "250640796.111"
+        },
+        {
+            "nama": "Reven Afdal Panjalu",
+            "jenis_kelamin": "L",
+            "nis": "250650797.111"
+        },
+        {
+            "nama": "Rosaninda Trisna Putri",
+            "jenis_kelamin": "P",
+            "nis": "250660798.111"
+        },
+        {
+            "nama": "Ryan Putra Anggara",
+            "jenis_kelamin": "L",
+            "nis": "250670799.111"
+        },
+        {
+            "nama": "Sabilla Deasy Nurayni Syaputri",
+            "jenis_kelamin": "P",
+            "nis": "250680800.111"
+        },
+        {
+            "nama": "Safa Aulia Rahmaputri",
+            "jenis_kelamin": "P",
+            "nis": "250690801.111"
+        },
+        {
+            "nama": "Shafaatun Nur Fatima",
+            "jenis_kelamin": "P",
+            "nis": "250700802.111"
+        },
+        {
+            "nama": "Sheyva Aurelia Savira",
+            "jenis_kelamin": "P",
+            "nis": "250710803.111"
+        },
+        {
+            "nama": "Styvent David Geraldo",
+            "jenis_kelamin": "L",
+            "nis": "250720804.111"
+        },
+        {
+            "nama": "Syanada Neva Putri Henuarta",
+            "jenis_kelamin": "P",
+            "nis": "250730805.111"
+        },
+        {
+            "nama": "Talitha Fatwa Rahima",
+            "jenis_kelamin": "P",
+            "nis": "250740806.111"
+        },
+        {
+            "nama": "Umi Fadilah",
+            "jenis_kelamin": "P",
+            "nis": "250750807.111"
+        },
+        {
+            "nama": "Valentino Febri Setyawan",
+            "jenis_kelamin": "L",
+            "nis": "250760808.111"
+        },
+        {
+            "nama": "Vico Putra Ananta",
+            "jenis_kelamin": "L",
+            "nis": "250770809.111"
+        },
+        {
+            "nama": "Viona Aulia Novita Permadhani",
+            "jenis_kelamin": "P",
+            "nis": "250780810.111"
+        },
+        {
+            "nama": "Vizza Agustina Ramadhani",
+            "jenis_kelamin": "P",
+            "nis": "250790811.111"
+        },
+        {
+            "nama": "Yusva Ester Ayu Vernanda",
+            "jenis_kelamin": "P",
+            "nis": "250800812.111"
+        },
+        {
+            "nama": "Zulfa Nur Azizah",
+            "jenis_kelamin": "P",
+            "nis": "250810813.111"
+        }
+    ]
+}

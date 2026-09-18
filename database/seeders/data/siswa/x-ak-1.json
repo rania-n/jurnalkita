@@ -1,0 +1,153 @@
+{
+    "kelas": "X AK 1",
+    "tingkat": "X",
+    "jurusan": "AK",
+    "nomor": 1,
+    "wali_nama": "Atih Wilupi, Se, M.Pd",
+    "siswa": [
+        {
+            "nama": "Abdurrahman Putra Satuhu",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Adinda Hanik Lailatus Syarifah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Adinda Mega Ayu Lestari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Adinda Meryana Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aditya Indra Kurniawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Agnes Rizki Junaida",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Agustina Faysa Maharany",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ahmad Sanjuang Naldam Alfredo",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ainayya Fathiyyaturahma Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aini Fiqra Qotrunada",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aisyatul Qorisyah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ajeng Arianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alena Dwi Suciati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alifa Zivara Husna Athiroh",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aliz Zahara Faradista",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amanda Latiifa Eka Febriana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amelia Tri Rusdiana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Angelina Yulica Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Anindia Sinta Dewi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ardhelia Carent Silvyna",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aryo Wicaksono",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ashafira Ashafa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Askila Nur Azizah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Asti Windari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Atika Balqis Azizah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Audry Della Nabila Azmi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aura Dinar Pinasti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Avida Melati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ayko Brendont Alberaldo Armentoress",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Azahra Kenya Veryzocta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Bagas Nur Ilham",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Belinda Wulan Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Cantika Yuri Agrifina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chaesa Octavia Ardiningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Cinta Zivilia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dea Ayu Pratiwi",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

@@ -1,0 +1,184 @@
+{
+    "kelas": "XII AN 2",
+    "tingkat": "XII",
+    "jurusan": "AN",
+    "nomor": 2,
+    "wali_nama": "Siti Khoiriyah, S.Pd",
+    "siswa": [
+        {
+            "nama": "Mohammad Syafiq Taufikul Hakim",
+            "jenis_kelamin": "L",
+            "nis": "243270617.127"
+        },
+        {
+            "nama": "Muhamad Jovan Dwi Falevi",
+            "jenis_kelamin": "L",
+            "nis": "243280618.127"
+        },
+        {
+            "nama": "Muhammad Maulana Saka Wibisono",
+            "jenis_kelamin": "L",
+            "nis": "243300620.127"
+        },
+        {
+            "nama": "Nadil Ulum Annafis",
+            "jenis_kelamin": "L",
+            "nis": "243310621.127"
+        },
+        {
+            "nama": "Najma Aulia Mufida",
+            "jenis_kelamin": "P",
+            "nis": "243320622.127"
+        },
+        {
+            "nama": "Naysila Raisya Putri Hartatik",
+            "jenis_kelamin": "P",
+            "nis": "243330623.127"
+        },
+        {
+            "nama": "Nazril Ilhami An Nurdin",
+            "jenis_kelamin": "L",
+            "nis": "243340624.127"
+        },
+        {
+            "nama": "Nia Savira",
+            "jenis_kelamin": "P",
+            "nis": "243350625.127"
+        },
+        {
+            "nama": "Nihayatuz Zayyanal Husna",
+            "jenis_kelamin": "P",
+            "nis": "243360626.127"
+        },
+        {
+            "nama": "Prasetyo Hardi Wirawan",
+            "jenis_kelamin": "L",
+            "nis": "243370627.127"
+        },
+        {
+            "nama": "Prigel Anggara Kasih",
+            "jenis_kelamin": "L",
+            "nis": "243380628.127"
+        },
+        {
+            "nama": "Rafi Maulana Al Qowiyaini",
+            "jenis_kelamin": "L",
+            "nis": "243400630.127"
+        },
+        {
+            "nama": "Ramadhana Jiharani",
+            "jenis_kelamin": "L",
+            "nis": "243410631.127"
+        },
+        {
+            "nama": "Ramadhani Jiharta",
+            "jenis_kelamin": "L",
+            "nis": "243420632.127"
+        },
+        {
+            "nama": "Raras Denok Kinanti",
+            "jenis_kelamin": "P",
+            "nis": "243430633.127"
+        },
+        {
+            "nama": "Raya Azkiya Arrahmani",
+            "jenis_kelamin": "P",
+            "nis": "243440634.127"
+        },
+        {
+            "nama": "Reihan Satrio Adiadmoko",
+            "jenis_kelamin": "L",
+            "nis": "243450635.127"
+        },
+        {
+            "nama": "Renita Cahyaningtyas",
+            "jenis_kelamin": "P",
+            "nis": "243460636.127"
+        },
+        {
+            "nama": "Reyhan Bayu Saputra",
+            "jenis_kelamin": "L",
+            "nis": "243470637.127"
+        },
+        {
+            "nama": "Rido Febrian Saputra",
+            "jenis_kelamin": "L",
+            "nis": "243480638.127"
+        },
+        {
+            "nama": "Satya Prawira Kusuma Efendi",
+            "jenis_kelamin": "L",
+            "nis": "243490639.127"
+        },
+        {
+            "nama": "Shilviana Aulia Putri",
+            "jenis_kelamin": "P",
+            "nis": "243500640.127"
+        },
+        {
+            "nama": "Siti Fakhriyah Arfa",
+            "jenis_kelamin": "P",
+            "nis": "243510641.127"
+        },
+        {
+            "nama": "Syafira Kurniawan Dewi",
+            "jenis_kelamin": "P",
+            "nis": "243520642.127"
+        },
+        {
+            "nama": "Tabita Balqis Aulia Rahma",
+            "jenis_kelamin": "P",
+            "nis": "243530643.127"
+        },
+        {
+            "nama": "Tisa Talitha Rizky Cahyati",
+            "jenis_kelamin": "P",
+            "nis": "243540644.127"
+        },
+        {
+            "nama": "Titah Ayu Ratu Jagad",
+            "jenis_kelamin": "P",
+            "nis": "243550645.127"
+        },
+        {
+            "nama": "Verdi Ardiansyah",
+            "jenis_kelamin": "L",
+            "nis": "243560646.127"
+        },
+        {
+            "nama": "Vilovy Keyza Aulia",
+            "jenis_kelamin": "P",
+            "nis": "243570647.127"
+        },
+        {
+            "nama": "Welen Ramadhan Pujangga",
+            "jenis_kelamin": "L",
+            "nis": "243580648.127"
+        },
+        {
+            "nama": "Yesika Fitria Anjani",
+            "jenis_kelamin": "P",
+            "nis": "243590649.127"
+        },
+        {
+            "nama": "Yolanda",
+            "jenis_kelamin": "P",
+            "nis": "243600650.127"
+        },
+        {
+            "nama": "Yulianta Bima Nugraha",
+            "jenis_kelamin": "L",
+            "nis": "243610651.127"
+        },
+        {
+            "nama": "Zahra Habibatun Nasihah",
+            "jenis_kelamin": "P",
+            "nis": "243620652.127"
+        },
+        {
+            "nama": "Zahra Muhimmatul Muyasaroh",
+            "jenis_kelamin": "P",
+            "nis": "243630653.127"
+        }
+    ]
+}

@@ -1,0 +1,153 @@
+{
+    "kelas": "X MP 2",
+    "tingkat": "X",
+    "jurusan": "MP",
+    "nomor": 2,
+    "wali_nama": "Peni Wulandari, S.Pd",
+    "siswa": [
+        {
+            "nama": "Chila Yuliananda Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Clarisa Laila Fitriana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Daivi Nadya Arsinta Nasheh",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Danyssa Fairuzzatus Zakiya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Deva Dwi Yuliana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Diah Ayu Oktavia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dinda Nuril Aulia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Divanora Pranata",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Echa Luffiana Salsabela",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Elistya Puspitaningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Eliza Putri Rahmadani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Elvila Nur Fadila Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Eno Bunga Krissandhi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Evelyn Keisya Hastari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Evriliana Gizela Fandini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fadilus Zenita",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Faradila Nindya Yuana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Farha Unzila Nur Faiza",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Farisa Adenia Wahyuning Tiyas",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Febby Sunarti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Felista Indriana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Feyta Wahyu Riyanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fifink Alviolita Oktavia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Filza Isnataini Salsabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Franda Elsinorita Stefani Azzahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Frandanika Surya Hartaningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fricilia Valentina Febrianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Gheeta Akila Nazwa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Hafiza Pramudita",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Hanum Imroatul Maghfiroh",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Hanum Nindya Pramesti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Haura Zahriana Salsabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Hellen Mellyana Veronica",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Herfina Frenika Ziza Hanariyanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Humayra Titis El Qoyyumi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Imas Rahma Silfia",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

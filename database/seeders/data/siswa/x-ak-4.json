@@ -1,0 +1,149 @@
+{
+    "kelas": "X AK 4",
+    "tingkat": "X",
+    "jurusan": "AK",
+    "nomor": 4,
+    "wali_nama": "Astra Bela Flamboyan, S.Psi",
+    "siswa": [
+        {
+            "nama": "Nindi Sefira Feliz Nurdina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nur Cahyati Salsabil",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nursyifa Wardani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nurvita Liniardi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Pungki Hana Febyola",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Puri Indah Pertiwi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putri Ade Khairunnisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putri Hana Kosy Rohima Nurhidayah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Qudrotul Salsa Billa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Queenshya Ayu Natthasya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rambu Gendhis Ayu Zakarya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rena Afikqa Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Risma Arum Ferdiansyah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rofiunnaim",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rohimah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rokhim Matul Sukma Wahyu Nursela",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Salma Athaya Nazhifa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Silfia Permata Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Siti Annisa Dzakiyah Sholihah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syafina Mariatul Husna",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sylvia Zainatul Qiftiyah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Talitha Humaira Zahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Taufik Hidayat",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Tiara Ayu Wandira",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vania Ratna Duhita",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Via De Villa Kusuma Firdaus",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vianissa Putri Febriani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vinza Mayga Salsabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Wafazaahidatuz Zahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Wildhan Zikrul Danisyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Zahra Shazia Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zamrotul Fatimatuz Zahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zee Zee Zandova",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zhifara Arizta Meivia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zuniyar Sholihatul Hilwa",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

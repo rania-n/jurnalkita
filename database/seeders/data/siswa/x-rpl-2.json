@@ -1,0 +1,149 @@
+{
+    "kelas": "X RPL 2",
+    "tingkat": "X",
+    "jurusan": "RPL",
+    "nomor": 2,
+    "wali_nama": "Umi Kulsum, S.Pd",
+    "siswa": [
+        {
+            "nama": "Mohamad Rifgi Fadhillah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mohammad Zain Fauz Akbar",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhamad Najwan Taftazani Awali Zulhilmi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Alvino Kurniawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Fadil Faizul",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Fajrul Hakam Khusni",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Hafizhan Izdihar",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Langgeng Arza Putra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Nizar Arifin",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Rasya Habibi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Syauqi Anas",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mukhammad Sakhi Azka",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Nakula Cleosa Andromeda Susila",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Natasya Meisya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naura Auni Aprillia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nazwa Alea Putri Rivani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Neshya Rizkia Ramadani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Oktavio Fahri Wijaya",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Pradipa Arvin Riyanto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Qalesya Alia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Qayyim Ikhwanul Shahara Putra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Qonita Lutfiah Atmariani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Quinna Rapita Juneyta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Raffasya Rasendriya Aqil",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Rahmatdani Aji Prastyo",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ramdan Adiasa Wiguna",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ramdhani Adi Saputra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Reihan Nur Fahtul Aziz",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Rizki Febriyanto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Sakha Arju Wicaksana",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Shofa Salsabila Rusdianto",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sukma Arum Setia Asih",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ulima Athaya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Viona Rachel Agustyani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Xavier Hafuza Ferdin",
+            "jenis_kelamin": "L"
+        }
+    ]
+}

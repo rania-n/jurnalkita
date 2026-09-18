@@ -1,0 +1,153 @@
+{
+    "kelas": "X TKI 2",
+    "tingkat": "X",
+    "jurusan": "TKI",
+    "nomor": 2,
+    "wali_nama": "Sri Kusumastuti, S.Pd",
+    "siswa": [
+        {
+            "nama": "Meizha Primastia Habsari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Melandri Amalia Kusuma",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Meylinda Puspita Rini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Muhammad Rozaq Shobirul Hidayat",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Nabila Cinta Santiagoes",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nabillah Choirun Nisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nadila Mutiara Zahrani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Natasya Enjelina Prastika",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nikolen Ayuningtyas",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nilam Puspita Dwi Arini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nisrina Ulfa Salsabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Oliviea Ristiani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Pajar Sito Resmi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Puan Naja Kirana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putri Rizqina Sekar Setyaningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Radella Ardhiani Pramudita",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rahma Aulia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rayswa Septiandica",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Reyhan Wira Prayoga Purnomo",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Risma Aulia Oktaviana Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ryanda Bilqiz Arum Falarani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sastya Sinara Fatimatuzahroh",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Satria Panji Widjaksono",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Selfa Nur Aulia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shaci Calysta Candani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Silvia Rania Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sindi Kurnia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Titis Dwi Naryati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tiurma Raysha Arby",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vanesa Septiana Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vanesya Citra Margaretha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vitri Oliviya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Yasmin Nuril Afriyani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zaafarani Dhia Novelyta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zamika Angel Prantisa Anjani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ziera Putri Firdianti",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

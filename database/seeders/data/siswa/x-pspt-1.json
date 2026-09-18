@@ -1,0 +1,153 @@
+{
+    "kelas": "X PSPT 1",
+    "tingkat": "X",
+    "jurusan": "PSPT",
+    "nomor": 1,
+    "wali_nama": "Benny Mamora, S.Kom",
+    "siswa": [
+        {
+            "nama": "Ade Vito Bagus Dwi Prasetyo",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ahmad Arfian Erlangga",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ahmad Jose Rianto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Akaza Khoirun Nisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alfi Agnessifa Rahmadani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Annisa Aulia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Anugrah Kumara Lazuar Soehartanto",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aurel Lady Kusumaningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Azizan Dwi Adinata",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Azizul Love Ner Syaifika",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Bagus Andika Saputra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bagus Satrio Henanto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bayu Anggoro",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bella Cintya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Billy Nanda Syahputra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bunga Putri Wulandari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chandryka Iva Milany Bintary",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chrisnadia Ervita Alkeysha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Daffa Dwi Nurfauzi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Daiva Aurelia Azizah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Devan Bagus Setiabudi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Dimas Hafiid Aldiansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Dinda Febrianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ega Ferlinasari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fadiya Isna Arofatus Syiam",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Faiq Abyansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Faiq Ibni Bahiywafi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Faizatu Azza Ayuni",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fidini Ainunnajwa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Firdaus Julian Saputra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Isma Fadilatun Ramadanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Isna Syafiatu Rohmah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jefha Moza Alzahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Juvita Eka Septia Pasha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kesya Adjeng Regina Cecillya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kirana Wisesa Amnestya",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

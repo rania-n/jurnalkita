@@ -1,0 +1,199 @@
+{
+    "kelas": "XII TKI 1",
+    "tingkat": "XII",
+    "jurusan": "TKI",
+    "nomor": 1,
+    "wali_nama": "Rifkotin Na'imah, S.Pd",
+    "siswa": [
+        {
+            "nama": "Adhelin Marsarena",
+            "jenis_kelamin": "P",
+            "nis": "234770674.43"
+        },
+        {
+            "nama": "Afifah Nur Faridatul Agustin",
+            "jenis_kelamin": "P",
+            "nis": "234780675.43"
+        },
+        {
+            "nama": "Afiva Husna Devika",
+            "jenis_kelamin": "P",
+            "nis": "234790676.43"
+        },
+        {
+            "nama": "Aisah Nur Rahma",
+            "jenis_kelamin": "P",
+            "nis": "234800677.43"
+        },
+        {
+            "nama": "Alicia Putri Vernanda Novita Sari",
+            "jenis_kelamin": "P",
+            "nis": "234810678.43"
+        },
+        {
+            "nama": "Andi Bagus Prasetiyo",
+            "jenis_kelamin": "L",
+            "nis": "234820679.43"
+        },
+        {
+            "nama": "Asyafa Tyas Damayanti",
+            "jenis_kelamin": "P",
+            "nis": "234830680.43"
+        },
+        {
+            "nama": "Atika Ayatin Nuzula",
+            "jenis_kelamin": "P",
+            "nis": "234840681.43"
+        },
+        {
+            "nama": "Atiya Yuliana",
+            "jenis_kelamin": "P",
+            "nis": "234850682.43"
+        },
+        {
+            "nama": "Aulidiya Rensi Milano",
+            "jenis_kelamin": "P",
+            "nis": "234860683.43"
+        },
+        {
+            "nama": "Aurin Vrisel Amelda",
+            "jenis_kelamin": "P",
+            "nis": "234870684.43"
+        },
+        {
+            "nama": "Ayu Salsabella Anggraeni",
+            "jenis_kelamin": "P",
+            "nis": "234880685.43"
+        },
+        {
+            "nama": "Ayudya Neyla Triasevilla",
+            "jenis_kelamin": "P",
+            "nis": "234890686.43"
+        },
+        {
+            "nama": "Bella Fitriani",
+            "jenis_kelamin": "P",
+            "nis": "234900687.43"
+        },
+        {
+            "nama": "Berlian Cahyaningrum Furaihah",
+            "jenis_kelamin": "P",
+            "nis": "234910688.43"
+        },
+        {
+            "nama": "Bunga Raya Aji Setyaning",
+            "jenis_kelamin": "P",
+            "nis": "234920689.43"
+        },
+        {
+            "nama": "Checillia Putri Azzahra",
+            "jenis_kelamin": "P",
+            "nis": "234930690.43"
+        },
+        {
+            "nama": "Cheyla Aura Kusneia",
+            "jenis_kelamin": "P",
+            "nis": "234940691.43"
+        },
+        {
+            "nama": "Cheysarani Mulyaningtyas",
+            "jenis_kelamin": "P",
+            "nis": "234950692.43"
+        },
+        {
+            "nama": "Claura Shinta Bella",
+            "jenis_kelamin": "P",
+            "nis": "234960693.43"
+        },
+        {
+            "nama": "Dea Ayu Rahmadani",
+            "jenis_kelamin": "P",
+            "nis": "234970694.43"
+        },
+        {
+            "nama": "Devi Ardiani Putri",
+            "jenis_kelamin": "P",
+            "nis": "234980695.43"
+        },
+        {
+            "nama": "Dianto Dimas Aditia Putra",
+            "jenis_kelamin": "L",
+            "nis": "234990696.43"
+        },
+        {
+            "nama": "Elvicra Aishareta",
+            "jenis_kelamin": "P",
+            "nis": "235000697.43"
+        },
+        {
+            "nama": "Evan Aldiansyah",
+            "jenis_kelamin": "L",
+            "nis": "235010698.43"
+        },
+        {
+            "nama": "Febi Dwi Anggita",
+            "jenis_kelamin": "P",
+            "nis": "235020699.43"
+        },
+        {
+            "nama": "Ferna Linggarti",
+            "jenis_kelamin": "P",
+            "nis": "235030700.43"
+        },
+        {
+            "nama": "Fiorenza Salsabila",
+            "jenis_kelamin": "P",
+            "nis": "235040701.43"
+        },
+        {
+            "nama": "Galang Ramadhan Putra Prastya",
+            "jenis_kelamin": "L",
+            "nis": "235050702.43"
+        },
+        {
+            "nama": "Izzatul Anggi Lutfiana",
+            "jenis_kelamin": "P",
+            "nis": "235060703.43"
+        },
+        {
+            "nama": "Kaila Naysilla Andwi Widi Syah Putri",
+            "jenis_kelamin": "P",
+            "nis": "235070704.43"
+        },
+        {
+            "nama": "Keren Febriana",
+            "jenis_kelamin": "P",
+            "nis": "235080705.43"
+        },
+        {
+            "nama": "Kharisma Oktavia Putri",
+            "jenis_kelamin": "P",
+            "nis": "235090706.43"
+        },
+        {
+            "nama": "Kharizma Fitri Octavia",
+            "jenis_kelamin": "P",
+            "nis": "235100707.43"
+        },
+        {
+            "nama": "Kirana Ningkat Ramadhani",
+            "jenis_kelamin": "P",
+            "nis": "235110708.43"
+        },
+        {
+            "nama": "Liliana Putri Anggreini",
+            "jenis_kelamin": "P",
+            "nis": "235120709.43"
+        },
+        {
+            "nama": "Luthfi Saffa Ramadhanti",
+            "jenis_kelamin": "P",
+            "nis": "235130710.43"
+        },
+        {
+            "nama": "Williana Alivia Khalista",
+            "jenis_kelamin": "P",
+            "nis": "235450742.43"
+        }
+    ]
+}

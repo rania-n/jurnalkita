@@ -1,0 +1,189 @@
+{
+    "kelas": "XI PSPT 2",
+    "tingkat": "XI",
+    "jurusan": "PSPT",
+    "nomor": 2,
+    "wali_nama": "Benny Mamora, S.Kom",
+    "siswa": [
+        {
+            "nama": "Lucky Rifani Mirza",
+            "jenis_kelamin": "L",
+            "nis": "251180438.125"
+        },
+        {
+            "nama": "Lusy Dewi Kristina",
+            "jenis_kelamin": "P",
+            "nis": "251190439.125"
+        },
+        {
+            "nama": "Marta Tiur",
+            "jenis_kelamin": "P",
+            "nis": "251200440.125"
+        },
+        {
+            "nama": "Maura Regina Saputri",
+            "jenis_kelamin": "P",
+            "nis": "251210441.125"
+        },
+        {
+            "nama": "Mila Rahmawati",
+            "jenis_kelamin": "P",
+            "nis": "251220442.125"
+        },
+        {
+            "nama": "Mohamad Mukhlas Syaputra",
+            "jenis_kelamin": "L",
+            "nis": "251230443.125"
+        },
+        {
+            "nama": "Mohamad Reval Ghaisani Mustafid Ahyan",
+            "jenis_kelamin": "L",
+            "nis": "251240444.125"
+        },
+        {
+            "nama": "Mohammad Rizaldi Romadhoni",
+            "jenis_kelamin": "L",
+            "nis": "251250445.125"
+        },
+        {
+            "nama": "Money Putri Prihatin",
+            "jenis_kelamin": "P",
+            "nis": "251260446.125"
+        },
+        {
+            "nama": "Muhammad Bintang Maulana Akbar",
+            "jenis_kelamin": "L",
+            "nis": "251270447.125"
+        },
+        {
+            "nama": "Muhammad Fayruz Devianto",
+            "jenis_kelamin": "L",
+            "nis": "251280448.125"
+        },
+        {
+            "nama": "Muhammad Hadri Fauzan",
+            "jenis_kelamin": "L",
+            "nis": "251290449.125"
+        },
+        {
+            "nama": "Muhammad Rizqi Aghitsul Kirom",
+            "jenis_kelamin": "L",
+            "nis": "251300450.125"
+        },
+        {
+            "nama": "Muhhamad Satria Ali Fikri",
+            "jenis_kelamin": "L",
+            "nis": "251310451.125"
+        },
+        {
+            "nama": "Nabila Husna Syifa",
+            "jenis_kelamin": "P",
+            "nis": "251320452.125"
+        },
+        {
+            "nama": "Nadia Zhahrotul Amalia",
+            "jenis_kelamin": "P",
+            "nis": "251330453.125"
+        },
+        {
+            "nama": "Nadya Intan Elvarisha Yunandria",
+            "jenis_kelamin": "P",
+            "nis": "251340454.125"
+        },
+        {
+            "nama": "Najwa Naylal Ashfiya",
+            "jenis_kelamin": "P",
+            "nis": "251350455.125"
+        },
+        {
+            "nama": "Namira Puspania",
+            "jenis_kelamin": "P",
+            "nis": "251360456.125"
+        },
+        {
+            "nama": "Natasha Maharani Novian",
+            "jenis_kelamin": "P",
+            "nis": "251370457.125"
+        },
+        {
+            "nama": "Natasya Amelia Saraswati",
+            "jenis_kelamin": "P",
+            "nis": "251380458.125"
+        },
+        {
+            "nama": "Neiza Putri Winata",
+            "jenis_kelamin": "P",
+            "nis": "251390459.125"
+        },
+        {
+            "nama": "Novarina Nurkemala",
+            "jenis_kelamin": "P",
+            "nis": "251400460.125"
+        },
+        {
+            "nama": "Novita Ayu Sekar Marlina",
+            "jenis_kelamin": "P",
+            "nis": "251410461.125"
+        },
+        {
+            "nama": "Nur  Widiyaningsih",
+            "jenis_kelamin": "P",
+            "nis": "251420462.125"
+        },
+        {
+            "nama": "Nuraini Tri Hapsari",
+            "jenis_kelamin": "P",
+            "nis": "251430463.125"
+        },
+        {
+            "nama": "Putra Raja Diarta",
+            "jenis_kelamin": "L",
+            "nis": "251440464.125"
+        },
+        {
+            "nama": "Rafa Januar Prasetyo",
+            "jenis_kelamin": "L",
+            "nis": "251450465.125"
+        },
+        {
+            "nama": "Rahma Aulia Zalsabila",
+            "jenis_kelamin": "P",
+            "nis": "251460466.125"
+        },
+        {
+            "nama": "Rico Bagus Saputra",
+            "jenis_kelamin": "L",
+            "nis": "251470467.125"
+        },
+        {
+            "nama": "Shafira Hayfa Aqilla Zahra",
+            "jenis_kelamin": "P",
+            "nis": "251480468.125"
+        },
+        {
+            "nama": "Shobir Abdul Aziz",
+            "jenis_kelamin": "L",
+            "nis": "251490469.125"
+        },
+        {
+            "nama": "Tria Mila Rahma Wati",
+            "jenis_kelamin": "P",
+            "nis": "251500470.125"
+        },
+        {
+            "nama": "Ulfa Rizkita Ridwantina",
+            "jenis_kelamin": "P",
+            "nis": "251510471.125"
+        },
+        {
+            "nama": "Zahra Putri Azalea",
+            "jenis_kelamin": "P",
+            "nis": "251520472.125"
+        },
+        {
+            "nama": "Zulfa Eka Setyaningsih",
+            "jenis_kelamin": "P",
+            "nis": "251530473.125"
+        }
+    ]
+}

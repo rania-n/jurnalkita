@@ -1,0 +1,189 @@
+{
+    "kelas": "XII PSPT 2",
+    "tingkat": "XII",
+    "jurusan": "PSPT",
+    "nomor": 2,
+    "wali_nama": "Mufatiroh, S.Ag",
+    "siswa": [
+        {
+            "nama": "Imroatus Sholihah",
+            "jenis_kelamin": "P",
+            "nis": "242530366.125"
+        },
+        {
+            "nama": "Indi Nuraini Verisca",
+            "jenis_kelamin": "P",
+            "nis": "242540367.125"
+        },
+        {
+            "nama": "Irsyad Zaki Ramadhan",
+            "jenis_kelamin": "L",
+            "nis": "242550368.125"
+        },
+        {
+            "nama": "Jonathan Alinskie Winata",
+            "jenis_kelamin": "L",
+            "nis": "242560369.125"
+        },
+        {
+            "nama": "Karina Zahro'atus Saudah",
+            "jenis_kelamin": "P",
+            "nis": "242570370.125"
+        },
+        {
+            "nama": "Kenzi Lai",
+            "jenis_kelamin": "L",
+            "nis": "242580371.125"
+        },
+        {
+            "nama": "Maghfir Fitran Kariim",
+            "jenis_kelamin": "L",
+            "nis": "242590372.125"
+        },
+        {
+            "nama": "Marcel Andrian Pratama",
+            "jenis_kelamin": "L",
+            "nis": "242600373.125"
+        },
+        {
+            "nama": "Meyka Aurelliza",
+            "jenis_kelamin": "P",
+            "nis": "242610374.125"
+        },
+        {
+            "nama": "Muhammad Fadli Ardiansyah",
+            "jenis_kelamin": "L",
+            "nis": "242620375.125"
+        },
+        {
+            "nama": "Muhammad Fahrurrozi",
+            "jenis_kelamin": "L",
+            "nis": "242630376.125"
+        },
+        {
+            "nama": "Muhammad Khulud Bellamy",
+            "jenis_kelamin": "L",
+            "nis": "242640377.125"
+        },
+        {
+            "nama": "Mutiara Gita Krisdana",
+            "jenis_kelamin": "P",
+            "nis": "242650378.125"
+        },
+        {
+            "nama": "Nadia Nazilatul Maghfiroh",
+            "jenis_kelamin": "P",
+            "nis": "242660379.125"
+        },
+        {
+            "nama": "Niha Agustiana Syifa'ul Azwa",
+            "jenis_kelamin": "P",
+            "nis": "242670380.125"
+        },
+        {
+            "nama": "Novita Lutfi Pranasya",
+            "jenis_kelamin": "P",
+            "nis": "242680381.125"
+        },
+        {
+            "nama": "Nuraini Lavinayya",
+            "jenis_kelamin": "P",
+            "nis": "242690382.125"
+        },
+        {
+            "nama": "Obed Aldiansyah Kause",
+            "jenis_kelamin": "L",
+            "nis": "242700383.125"
+        },
+        {
+            "nama": "Panji Saputro Wibisono",
+            "jenis_kelamin": "L",
+            "nis": "242710384.125"
+        },
+        {
+            "nama": "Pasha Dwi Ratna Wati",
+            "jenis_kelamin": "P",
+            "nis": "242720385.125"
+        },
+        {
+            "nama": "Prastya Andini",
+            "jenis_kelamin": "P",
+            "nis": "242730386.125"
+        },
+        {
+            "nama": "Raendy Aditya Putra Ramadhan",
+            "jenis_kelamin": "L",
+            "nis": "242740387.125"
+        },
+        {
+            "nama": "Ratitya Maulida Purbararas",
+            "jenis_kelamin": "P",
+            "nis": "242750388.125"
+        },
+        {
+            "nama": "Rema Riyangga",
+            "jenis_kelamin": "P",
+            "nis": "242760389.125"
+        },
+        {
+            "nama": "Rijal Taufiqul Muzayyin",
+            "jenis_kelamin": "L",
+            "nis": "242770390.125"
+        },
+        {
+            "nama": "Riska Ayu Vebriani",
+            "jenis_kelamin": "P",
+            "nis": "242780391.125"
+        },
+        {
+            "nama": "Rohmatul Amelia",
+            "jenis_kelamin": "P",
+            "nis": "242790392.125"
+        },
+        {
+            "nama": "Saka Atma Adiyaksa",
+            "jenis_kelamin": "L",
+            "nis": "242800393.125"
+        },
+        {
+            "nama": "Salwa Nur Azizah",
+            "jenis_kelamin": "P",
+            "nis": "242810394.125"
+        },
+        {
+            "nama": "Selvy Purwantari",
+            "jenis_kelamin": "P",
+            "nis": "242820395.125"
+        },
+        {
+            "nama": "Siti Naimada Rahmawati",
+            "jenis_kelamin": "P",
+            "nis": "242830396.125"
+        },
+        {
+            "nama": "Teddy Sena Putra",
+            "jenis_kelamin": "L",
+            "nis": "242840397.125"
+        },
+        {
+            "nama": "Tesalonica Divana Dwi Putri",
+            "jenis_kelamin": "P",
+            "nis": "242850398.125"
+        },
+        {
+            "nama": "Valentyo Samuel Putra Widodo",
+            "jenis_kelamin": "L",
+            "nis": "242860399.125"
+        },
+        {
+            "nama": "Venus Aura Zahra Santoso",
+            "jenis_kelamin": "P",
+            "nis": "242870400.125"
+        },
+        {
+            "nama": "Wardah Arum Purwaning Mukti",
+            "jenis_kelamin": "P",
+            "nis": "242880401.125"
+        }
+    ]
+}

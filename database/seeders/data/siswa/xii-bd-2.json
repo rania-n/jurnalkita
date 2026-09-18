@@ -1,0 +1,194 @@
+{
+    "kelas": "XII BD 2",
+    "tingkat": "XII",
+    "jurusan": "BD",
+    "nomor": 2,
+    "wali_nama": "Luluk Munfarida, S.Pd",
+    "siswa": [
+        {
+            "nama": "Laura Putri Awiansari",
+            "jenis_kelamin": "P",
+            "nis": "237381481.96"
+        },
+        {
+            "nama": "Lina Nurdiana",
+            "jenis_kelamin": "P",
+            "nis": "237391482.96"
+        },
+        {
+            "nama": "Lisa Retno Wulandari",
+            "jenis_kelamin": "P",
+            "nis": "237401483.96"
+        },
+        {
+            "nama": "Luluk Istifadah",
+            "jenis_kelamin": "P",
+            "nis": "237411484.96"
+        },
+        {
+            "nama": "Luthfiana Syifa Azzahro",
+            "jenis_kelamin": "P",
+            "nis": "237421485.96"
+        },
+        {
+            "nama": "Luthfiyyah Nur Abidah",
+            "jenis_kelamin": "P",
+            "nis": "237431486.96"
+        },
+        {
+            "nama": "Monica Wahyu Tri Widyastuti",
+            "jenis_kelamin": "P",
+            "nis": "237441487.96"
+        },
+        {
+            "nama": "Nabilla Octavia Rahmadhani",
+            "jenis_kelamin": "P",
+            "nis": "237451488.96"
+        },
+        {
+            "nama": "Nadita Kusuma Wardani",
+            "jenis_kelamin": "P",
+            "nis": "237461489.96"
+        },
+        {
+            "nama": "Nova Fatma Rani",
+            "jenis_kelamin": "P",
+            "nis": "237471490.96"
+        },
+        {
+            "nama": "Novita Eka Putri Permatasari",
+            "jenis_kelamin": "P",
+            "nis": "237481491.96"
+        },
+        {
+            "nama": "Nurul Lestari Putri",
+            "jenis_kelamin": "P",
+            "nis": "237491492.96"
+        },
+        {
+            "nama": "Oktaviola Najwa Cantika",
+            "jenis_kelamin": "P",
+            "nis": "237501493.96"
+        },
+        {
+            "nama": "Olivia Vega Verdiana",
+            "jenis_kelamin": "P",
+            "nis": "237511494.96"
+        },
+        {
+            "nama": "Putri Aprilia",
+            "jenis_kelamin": "P",
+            "nis": "237521495.96"
+        },
+        {
+            "nama": "Rahma Indah Putri Arita",
+            "jenis_kelamin": "P",
+            "nis": "237531496.96"
+        },
+        {
+            "nama": "Rani Aprillia",
+            "jenis_kelamin": "P",
+            "nis": "237541497.96"
+        },
+        {
+            "nama": "Reffa Maya Yusifa",
+            "jenis_kelamin": "P",
+            "nis": "237551498.96"
+        },
+        {
+            "nama": "Renita Fatma Aulia",
+            "jenis_kelamin": "P",
+            "nis": "237561499.96"
+        },
+        {
+            "nama": "Rivaldo Anggara",
+            "jenis_kelamin": "L",
+            "nis": "237571500.96"
+        },
+        {
+            "nama": "Rouna Ananda Sucipto",
+            "jenis_kelamin": "P",
+            "nis": "237581501.96"
+        },
+        {
+            "nama": "Sabrina Mazaya Maulida",
+            "jenis_kelamin": "P",
+            "nis": "237591502.96"
+        },
+        {
+            "nama": "Sarrwa Claresta Kinanty Sujarwo",
+            "jenis_kelamin": "P",
+            "nis": "237601503.96"
+        },
+        {
+            "nama": "Saskia Fitria Ramadani",
+            "jenis_kelamin": "P",
+            "nis": "237611504.96"
+        },
+        {
+            "nama": "Septia Leyla Ramadhani",
+            "jenis_kelamin": "P",
+            "nis": "237621505.96"
+        },
+        {
+            "nama": "Serlina Akmila",
+            "jenis_kelamin": "P",
+            "nis": "237631506.96"
+        },
+        {
+            "nama": "Serlyna Ratna Sari",
+            "jenis_kelamin": "P",
+            "nis": "237641507.96"
+        },
+        {
+            "nama": "Sheren Putry Anastasya",
+            "jenis_kelamin": "P",
+            "nis": "237651508.96"
+        },
+        {
+            "nama": "Sintya Ayu Fusyanti",
+            "jenis_kelamin": "P",
+            "nis": "237661509.96"
+        },
+        {
+            "nama": "Siti Holip Pit",
+            "jenis_kelamin": "P",
+            "nis": "237671510.96"
+        },
+        {
+            "nama": "Sofiatul Tiara Dewi",
+            "jenis_kelamin": "P",
+            "nis": "237681511.96"
+        },
+        {
+            "nama": "Syalom Natalie Makayla Saputri",
+            "jenis_kelamin": "P",
+            "nis": "237691512.96"
+        },
+        {
+            "nama": "Tiara Amalia Nabila",
+            "jenis_kelamin": "P",
+            "nis": "237701513.96"
+        },
+        {
+            "nama": "Velyn Clarista",
+            "jenis_kelamin": "P",
+            "nis": "237711514.96"
+        },
+        {
+            "nama": "Vera Widhi Ramadhani",
+            "jenis_kelamin": "P",
+            "nis": "237721515.96"
+        },
+        {
+            "nama": "Wahyu Laila Ramadani",
+            "jenis_kelamin": "P",
+            "nis": "237731516.96"
+        },
+        {
+            "nama": "Widya Abela Briliantara",
+            "jenis_kelamin": "P",
+            "nis": "237741517.96"
+        }
+    ]
+}

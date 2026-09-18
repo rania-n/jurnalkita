@@ -1,0 +1,153 @@
+{
+    "kelas": "X ULW",
+    "tingkat": "X",
+    "jurusan": "ULW",
+    "nomor": null,
+    "wali_nama": "Dwi Nova Setyandari, S.Pd",
+    "siswa": [
+        {
+            "nama": "Adinda Zalza Putri Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ahmad A Raffi Badali",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Aisyah Nabilla Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alea Safira Cahyono Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aulia Aisha Farah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Clara Sasti Firlita Andari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Diana Putri Wardani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Evan Javier Dastian Wicaksono",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Farida Nur Ainy",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Galuh Dwi Suryaningsih",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Galuh Sofia Fitri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Imelda Salsabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jagad Aura Pradana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jesika Rosalina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kamila Dewi Zulfa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kamila Nuril Elisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kharisa Dhebi Savana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Marsya Aulia Karunia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Muhamad Fajar Kurniawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Nabila Salsa Sefilia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nabilah Nur Aisyah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nadya Aurora Karunia Ramadhanty",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nasywa Auly Agustyn",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Natasya Sabilyla",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nazla Zaskia Khoirun Nisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Oktavia Wulan Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putri Nur Azizah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rahma Gysela Oktaviani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rahma Madya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Refa Adelya Caltwin",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Salsa Anggelita Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shima Ratri Paringsih",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syafina Azzahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syifa Arzaqina Wachidatul Mufidza",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Veyra Zhilviana Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zeline Julia Fauziara",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

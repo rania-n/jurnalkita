@@ -1,0 +1,153 @@
+{
+    "kelas": "X AN 2",
+    "tingkat": "X",
+    "jurusan": "AN",
+    "nomor": 2,
+    "wali_nama": "Rika Okta Maulida, S.Ds",
+    "siswa": [
+        {
+            "nama": "Khansa Ega Arjana",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Khanza Kirana Panji",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Krisna Latief Noviandoko Adi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Lintang Sunu Efendi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Marsya Nabila Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Marsyarellya Maharani Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Meishella Rosanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Moch Avanza Aprillio Ardiansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Moch Raffa Ubaidillah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mohammad Gazza Alghozy",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mohammad Hasyim Djatmiko",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Dirga Cahya Aryadzan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Reyhan Fadlillah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Zainul Ilham Arifin",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Zibran Mujahhidin Putra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Nadiya Riski Rahmawati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nararya Danish Nandra Putra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Natasya Aprilia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naya Widigda Sunan Mustofa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Novan Putra Andika",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Olivia Alvina Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Qutratuain Hidayah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rahmandika Deswantara",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Reza Afriyansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Rischa Novisa Destiani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rista Oktavia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rizky Agung Putra Pratama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Salsalia Syafarunimah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shin Sien Cicillia Antika Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syah Quitta Aqila Rosyadha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Velisca Tria Sandrianova",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Viona Cristalia Frilianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Wita Dwi Saputri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Yosua Rio Irdiyanto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Zaidan Rizky Pratama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Zhaki Zhakaria Jordan",
+            "jenis_kelamin": "L"
+        }
+    ]
+}

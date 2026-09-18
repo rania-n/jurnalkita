@@ -1,0 +1,189 @@
+{
+    "kelas": "XI AK 2",
+    "tingkat": "XI",
+    "jurusan": "AK",
+    "nomor": 2,
+    "wali_nama": "Pipit Ambarwati, S.Pd",
+    "siswa": [
+        {
+            "nama": "Bryan Ardiatama Prasaja",
+            "jenis_kelamin": "L",
+            "nis": "248665035.102"
+        },
+        {
+            "nama": "Bunga Pryta Andina",
+            "jenis_kelamin": "P",
+            "nis": "248675036.102"
+        },
+        {
+            "nama": "Callysta Nuria Mahesti",
+            "jenis_kelamin": "P",
+            "nis": "248685037.102"
+        },
+        {
+            "nama": "Candy Salvia Aksany",
+            "jenis_kelamin": "P",
+            "nis": "248695038.102"
+        },
+        {
+            "nama": "Cantika Ammira Yasmine",
+            "jenis_kelamin": "P",
+            "nis": "248705039.102"
+        },
+        {
+            "nama": "Chika Wahyunita Pratiwi",
+            "jenis_kelamin": "P",
+            "nis": "248715040.102"
+        },
+        {
+            "nama": "Cindy Ayu Ningtyas",
+            "jenis_kelamin": "P",
+            "nis": "248725041.102"
+        },
+        {
+            "nama": "Citra Dewantari",
+            "jenis_kelamin": "P",
+            "nis": "248735042.102"
+        },
+        {
+            "nama": "Danisha Fahma Sania Nabila",
+            "jenis_kelamin": "P",
+            "nis": "248745043.102"
+        },
+        {
+            "nama": "Dayu Shinta Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "248755044.102"
+        },
+        {
+            "nama": "Dewi Faza Nur Maysaroh",
+            "jenis_kelamin": "P",
+            "nis": "248765045.102"
+        },
+        {
+            "nama": "Dhiya Sylvia Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "248775046.102"
+        },
+        {
+            "nama": "Dilfa Rahmanicha Oktavia",
+            "jenis_kelamin": "P",
+            "nis": "248785047.102"
+        },
+        {
+            "nama": "Dinar Kusuma Wardani",
+            "jenis_kelamin": "P",
+            "nis": "248795048.102"
+        },
+        {
+            "nama": "Dita Nada Aulia",
+            "jenis_kelamin": "P",
+            "nis": "248805049.102"
+        },
+        {
+            "nama": "Ditian Helena Safa",
+            "jenis_kelamin": "P",
+            "nis": "248815050.102"
+        },
+        {
+            "nama": "Elen Silviana Saputri",
+            "jenis_kelamin": "P",
+            "nis": "248825051.102"
+        },
+        {
+            "nama": "Elmira Ananda Herna Putri",
+            "jenis_kelamin": "P",
+            "nis": "248835052.102"
+        },
+        {
+            "nama": "Elzami Naila Nurus Shafa",
+            "jenis_kelamin": "P",
+            "nis": "248845053.102"
+        },
+        {
+            "nama": "Erika Putri Ramadhani",
+            "jenis_kelamin": "P",
+            "nis": "248855054.102"
+        },
+        {
+            "nama": "Fachma Fitria Hamidah",
+            "jenis_kelamin": "P",
+            "nis": "248865055.102"
+        },
+        {
+            "nama": "Fad Maisya Kaltsum An Najwa",
+            "jenis_kelamin": "P",
+            "nis": "248875056.102"
+        },
+        {
+            "nama": "Farena Hayuningtyas",
+            "jenis_kelamin": "P",
+            "nis": "248885057.102"
+        },
+        {
+            "nama": "Faridha Priska Asysifa",
+            "jenis_kelamin": "P",
+            "nis": "248895058.102"
+        },
+        {
+            "nama": "Fauziyah Aura Syifa",
+            "jenis_kelamin": "P",
+            "nis": "248905059.102"
+        },
+        {
+            "nama": "Febri Sintya Rahayu",
+            "jenis_kelamin": "P",
+            "nis": "248915060.102"
+        },
+        {
+            "nama": "Galyncia Luthfiasari",
+            "jenis_kelamin": "P",
+            "nis": "248925061.102"
+        },
+        {
+            "nama": "Gita Retno Oktavia",
+            "jenis_kelamin": "P",
+            "nis": "248935062.102"
+        },
+        {
+            "nama": "Hanna Chintya Putri",
+            "jenis_kelamin": "P",
+            "nis": "248945063.102"
+        },
+        {
+            "nama": "Hanum Rose Fitriandanu",
+            "jenis_kelamin": "P",
+            "nis": "248955064.102"
+        },
+        {
+            "nama": "Helena Valentyas Fibry",
+            "jenis_kelamin": "P",
+            "nis": "248965065.102"
+        },
+        {
+            "nama": "Hilda Maya Sari",
+            "jenis_kelamin": "P",
+            "nis": "248975066.102"
+        },
+        {
+            "nama": "Himalini",
+            "jenis_kelamin": "P",
+            "nis": "248985067.102"
+        },
+        {
+            "nama": "Hiwa Ais Asyafiiyah",
+            "jenis_kelamin": "P",
+            "nis": "248995068.102"
+        },
+        {
+            "nama": "Ilmira Maulida Rosida Islami",
+            "jenis_kelamin": "P",
+            "nis": "249005069.102"
+        },
+        {
+            "nama": "Imroatussolikah",
+            "jenis_kelamin": "P",
+            "nis": "249015070.102"
+        }
+    ]
+}

@@ -1,0 +1,189 @@
+{
+    "kelas": "XI PSPT 1",
+    "tingkat": "XI",
+    "jurusan": "PSPT",
+    "nomor": 1,
+    "wali_nama": "Winarsih, S.Pd, M.Pd",
+    "siswa": [
+        {
+            "nama": "Abela Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "250820402.125"
+        },
+        {
+            "nama": "Achmad Faiz Al Farizy",
+            "jenis_kelamin": "L",
+            "nis": "250830403.125"
+        },
+        {
+            "nama": "Adinda Bunga Junita",
+            "jenis_kelamin": "P",
+            "nis": "250840404.125"
+        },
+        {
+            "nama": "Adinda Sellyma Wildan Hary",
+            "jenis_kelamin": "P",
+            "nis": "250850405.125"
+        },
+        {
+            "nama": "Ajeng Maulida",
+            "jenis_kelamin": "P",
+            "nis": "250860406.125"
+        },
+        {
+            "nama": "Alvito Akbar Sanjaya",
+            "jenis_kelamin": "L",
+            "nis": "250870407.125"
+        },
+        {
+            "nama": "Ame Fadilla Oktavia",
+            "jenis_kelamin": "P",
+            "nis": "250880408.125"
+        },
+        {
+            "nama": "Ananda Nursyafa Yuningtyas",
+            "jenis_kelamin": "P",
+            "nis": "250890409.125"
+        },
+        {
+            "nama": "Annice Septya Rahmadani",
+            "jenis_kelamin": "P",
+            "nis": "250900410.125"
+        },
+        {
+            "nama": "Ardira Tribuono Firda Sari",
+            "jenis_kelamin": "P",
+            "nis": "250910411.125"
+        },
+        {
+            "nama": "Aulia Riski Febrianti",
+            "jenis_kelamin": "P",
+            "nis": "250920412.125"
+        },
+        {
+            "nama": "Caldera Candra Caysano",
+            "jenis_kelamin": "L",
+            "nis": "250930413.125"
+        },
+        {
+            "nama": "Cheyndi Arum Anggraeni",
+            "jenis_kelamin": "P",
+            "nis": "250940414.125"
+        },
+        {
+            "nama": "Cinta Dwintya Zahra",
+            "jenis_kelamin": "P",
+            "nis": "250950415.125"
+        },
+        {
+            "nama": "Delvin Eka Dinarta",
+            "jenis_kelamin": "L",
+            "nis": "250960416.125"
+        },
+        {
+            "nama": "Dinda Cahaya Putri",
+            "jenis_kelamin": "P",
+            "nis": "250970417.125"
+        },
+        {
+            "nama": "Dinda Permata Sari",
+            "jenis_kelamin": "P",
+            "nis": "250980418.125"
+        },
+        {
+            "nama": "Divia Alimatul Kleynea",
+            "jenis_kelamin": "P",
+            "nis": "250990419.125"
+        },
+        {
+            "nama": "Fachryan Adyaksa Prayoga",
+            "jenis_kelamin": "L",
+            "nis": "251000420.125"
+        },
+        {
+            "nama": "Fadhila Noor Aini",
+            "jenis_kelamin": "P",
+            "nis": "251010421.125"
+        },
+        {
+            "nama": "Fadli Muzaki",
+            "jenis_kelamin": "L",
+            "nis": "251020422.125"
+        },
+        {
+            "nama": "Fanni Qurhota As Syifa",
+            "jenis_kelamin": "P",
+            "nis": "251030423.125"
+        },
+        {
+            "nama": "Finza Aurelia Febriarima Putri",
+            "jenis_kelamin": "P",
+            "nis": "251040424.125"
+        },
+        {
+            "nama": "Galeh Cahyo Budi Setiawan",
+            "jenis_kelamin": "L",
+            "nis": "251050425.125"
+        },
+        {
+            "nama": "Gandes Lintang Maheswari",
+            "jenis_kelamin": "P",
+            "nis": "251060426.125"
+        },
+        {
+            "nama": "Gita Putri Pradana",
+            "jenis_kelamin": "P",
+            "nis": "251070427.125"
+        },
+        {
+            "nama": "Gugus Priabudi",
+            "jenis_kelamin": "L",
+            "nis": "251080428.125"
+        },
+        {
+            "nama": "Icha Widhi Lestari",
+            "jenis_kelamin": "P",
+            "nis": "251090429.125"
+        },
+        {
+            "nama": "Imelda Puspitasari Asmi Pamuji",
+            "jenis_kelamin": "P",
+            "nis": "251100430.125"
+        },
+        {
+            "nama": "Intan Dwi Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "251110431.125"
+        },
+        {
+            "nama": "Isnurizka Zahrani Putri Arianto",
+            "jenis_kelamin": "P",
+            "nis": "251120432.125"
+        },
+        {
+            "nama": "Kanaya Novitasari",
+            "jenis_kelamin": "P",
+            "nis": "251130433.125"
+        },
+        {
+            "nama": "Kayla Anggraini",
+            "jenis_kelamin": "P",
+            "nis": "251140434.125"
+        },
+        {
+            "nama": "Kayla Nur Afani Putri",
+            "jenis_kelamin": "P",
+            "nis": "251150435.125"
+        },
+        {
+            "nama": "Keyzha Aluna Napasha",
+            "jenis_kelamin": "P",
+            "nis": "251160436.125"
+        },
+        {
+            "nama": "Khayla Maysalwa",
+            "jenis_kelamin": "P",
+            "nis": "251170437.125"
+        }
+    ]
+}

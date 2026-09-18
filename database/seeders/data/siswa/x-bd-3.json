@@ -1,0 +1,153 @@
+{
+    "kelas": "X BD 3",
+    "tingkat": "X",
+    "jurusan": "BD",
+    "nomor": 3,
+    "wali_nama": "Retno Widiyastuti, S.Pd",
+    "siswa": [
+        {
+            "nama": "Nor Falihc Rahcma Afni Sania",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nur Alif Fadilla",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putri Kalimatul Fitriani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putty Paola Sandio Riva",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rachel Olivia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rafa Bisma Arkananta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rafid Arkana Setiawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Rahma Enjelina Cahaya Saputri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ratu Ayu Pujaning Arum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Reva Avelia Wibowo",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sabrina Revin Anastasya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Safira Apriliana Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Salfa Regina Aura Shifa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Salsa Billa Angelica",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sevira Ramadani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shinta Adilah Karmia Dewi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shiva Ayunda Syahrini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Silvia Dwi Mayomi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sinta Dwi Sahwa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sonya Nisa Exstrada",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Suci Kholifahtul Afifah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syafira Dyadmika Putri Nurgivelisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syello Nia Leydista",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syifa Dwi Cahyani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syntia Febrianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tiara Citra Lestari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tibra Awahita",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tisya Nurrizkha Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vaneezha Wika Az Zahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vanesa Sindi Klaudia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Widya Naila Nikmah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Yolanda Synta Dewi Pramesti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahra Ayu Sharasta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahra Azizatul Afifah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahra Salsabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zifana Maulida Perdana",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

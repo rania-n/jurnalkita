@@ -1,0 +1,153 @@
+{
+    "kelas": "X TKI 1",
+    "tingkat": "X",
+    "jurusan": "TKI",
+    "nomor": 1,
+    "wali_nama": "Muashofah, M.Pd",
+    "siswa": [
+        {
+            "nama": "Adinda Putri Yunika",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ahmad Anis Arifiansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ainun Karomah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ajeng Dwiky Sivinias",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alena Regina Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alfira Zalfaa Herwiarta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alisca Pricilya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amellia Alya Adriana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Andara Shantika Dewi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Arum Dwi Widiarti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Asyifa Ashara Rochahyani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aulia Dewi Tsursyina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aura Cindy Afriliati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aurel Aelga Fivdiana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aurellia Juliana Clarissa Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Azza Benry Agustina Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Cintia Putri Eka Febiani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dandung Ramadya Putra Krisna Yuda",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Dzakira Rizqullah Adibah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ezhika Budian Alzahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fhita Tria Lestari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fiara Fedya Jelila Pratista",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fitri Agustin Nurmala Kusumadewi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Flora Nazima Ramadani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Gabriella Ardi Anggraini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Gema Fajar Pratama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Hafizar Rafka Affandi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Hanifa Aurelia Rachmafadilla",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Indriani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Karina Yuniar Rahmania",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ken Dayu Rayyana Puty Zaenal",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khanifa Qurroti Ayunina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kinan Aulia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kristina Enjelia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Laila Aulia Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mandala Louis Mustofa",
+            "jenis_kelamin": "L"
+        }
+    ]
+}

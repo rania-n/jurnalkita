@@ -1,0 +1,153 @@
+{
+    "kelas": "X BD 1",
+    "tingkat": "X",
+    "jurusan": "BD",
+    "nomor": 1,
+    "wali_nama": "Ratih Dian Irawati, S.E",
+    "siswa": [
+        {
+            "nama": "Adinda Rialisa Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ajeng Desvika Fajrin",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alfiana Chiela Nuraini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amelia Meidiani Nursyafa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Arini Izzatun Alira",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Arini Wulandari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Arinun Saffanahzah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Asifa Aini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Asyifa Qutratuain Anson Umamah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aura Putri Aryani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aura Putri Maharani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Avrilia Ashafa Nurhabibah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Azizah Jihanun Nisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Azmi Nailah Khoirunnisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Belicia Elvaretta Arkenzi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Calista Ardina Meyshafa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Cantika Berliana Oktaviani Prambayun",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Celcia Agustina Ramadani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chelsea Rahmadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chyka Early Claurinda",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Danica Niken Nur Alicia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Destika Puteri Oktaviana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dewiana Putri Cahyati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dhea Cantika Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Diana Putri Alexa Rahmadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Diva Lina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Diva Liya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dona Tria Prahesti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Eka Putri Fauziyah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Eka Putri Qoirunnisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Elvya Monica Patricia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Fatimah Az Zahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Faza Diny Fitria",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Firman Adi Wiguna",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Gizca Caniezya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Gizella Endang Anastasya",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

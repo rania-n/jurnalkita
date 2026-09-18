@@ -1,0 +1,184 @@
+{
+    "kelas": "XI MP 4",
+    "tingkat": "XI",
+    "jurusan": "MP",
+    "nomor": 4,
+    "wali_nama": "Mega Mahardika, S.Pd",
+    "siswa": [
+        {
+            "nama": "Rifalina Fitri Anggraini",
+            "jenis_kelamin": "P",
+            "nis": "247942054.98"
+        },
+        {
+            "nama": "Rizka Nanda Valentina",
+            "jenis_kelamin": "P",
+            "nis": "247952055.98"
+        },
+        {
+            "nama": "Safa Kameela Putri",
+            "jenis_kelamin": "P",
+            "nis": "247962056.98"
+        },
+        {
+            "nama": "Salsabela Syipana Putri",
+            "jenis_kelamin": "P",
+            "nis": "247972057.98"
+        },
+        {
+            "nama": "Salsabila Nailatuzzahrok",
+            "jenis_kelamin": "P",
+            "nis": "247982058.98"
+        },
+        {
+            "nama": "Salsabila Oktavia Nur Fadhillah",
+            "jenis_kelamin": "P",
+            "nis": "247992059.98"
+        },
+        {
+            "nama": "Salwa Enggal Zalfatony",
+            "jenis_kelamin": "P",
+            "nis": "248002060.98"
+        },
+        {
+            "nama": "Selvi Ariani",
+            "jenis_kelamin": "P",
+            "nis": "248012061.98"
+        },
+        {
+            "nama": "Serina Yelistya Putri",
+            "jenis_kelamin": "P",
+            "nis": "248022062.98"
+        },
+        {
+            "nama": "Shaniva Rein Mawasti",
+            "jenis_kelamin": "P",
+            "nis": "248032063.98"
+        },
+        {
+            "nama": "Shifa Lutfiana Ardita",
+            "jenis_kelamin": "P",
+            "nis": "248042064.98"
+        },
+        {
+            "nama": "Shifra Ellia Gunarti",
+            "jenis_kelamin": "P",
+            "nis": "248052065.98"
+        },
+        {
+            "nama": "Shinta Nur Rachmah",
+            "jenis_kelamin": "P",
+            "nis": "248062066.98"
+        },
+        {
+            "nama": "Sifana Alfiani",
+            "jenis_kelamin": "P",
+            "nis": "248072067.98"
+        },
+        {
+            "nama": "Silvia Al Maira",
+            "jenis_kelamin": "P",
+            "nis": "248082068.98"
+        },
+        {
+            "nama": "Sinta Siti Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "248092069.98"
+        },
+        {
+            "nama": "Siti Wachidatus Solichah",
+            "jenis_kelamin": "P",
+            "nis": "248102070.98"
+        },
+        {
+            "nama": "Suci Selvia Angraini",
+            "jenis_kelamin": "P",
+            "nis": "248112071.98"
+        },
+        {
+            "nama": "Syahrini Aulia Nurasri",
+            "jenis_kelamin": "P",
+            "nis": "248122072.98"
+        },
+        {
+            "nama": "Sylvia Indah Mekar Sari",
+            "jenis_kelamin": "P",
+            "nis": "248142074.98"
+        },
+        {
+            "nama": "Talitha Amadea Ayu Qatrunada",
+            "jenis_kelamin": "P",
+            "nis": "248152075.98"
+        },
+        {
+            "nama": "Tasya Junieva Children Novitri",
+            "jenis_kelamin": "P",
+            "nis": "248162076.98"
+        },
+        {
+            "nama": "Tri Suci Firdaningrum",
+            "jenis_kelamin": "P",
+            "nis": "248172077.98"
+        },
+        {
+            "nama": "Tyara Aisyah Izzati",
+            "jenis_kelamin": "P",
+            "nis": "248182078.98"
+        },
+        {
+            "nama": "Viola Valentya Putri",
+            "jenis_kelamin": "P",
+            "nis": "248192079.98"
+        },
+        {
+            "nama": "Vita Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "248202080.98"
+        },
+        {
+            "nama": "Vrila Geisha Setiani",
+            "jenis_kelamin": "P",
+            "nis": "248212081.98"
+        },
+        {
+            "nama": "Widya Zalfa Ayu Sahira",
+            "jenis_kelamin": "P",
+            "nis": "248222082.98"
+        },
+        {
+            "nama": "Yayang Sulis Asmara",
+            "jenis_kelamin": "P",
+            "nis": "248232083.98"
+        },
+        {
+            "nama": "Yofiana Reva Aulia Ahmad",
+            "jenis_kelamin": "P",
+            "nis": "248242084.98"
+        },
+        {
+            "nama": "Yuniar Eka Almira",
+            "jenis_kelamin": "P",
+            "nis": "248252085.98"
+        },
+        {
+            "nama": "Zahra Nur Asa Tanquilina",
+            "jenis_kelamin": "P",
+            "nis": "248262086.98"
+        },
+        {
+            "nama": "Zahra Putri Salist Nur Aulia",
+            "jenis_kelamin": "P",
+            "nis": "248272087.98"
+        },
+        {
+            "nama": "Zeshinta Nuria Maulida",
+            "jenis_kelamin": "P",
+            "nis": "248282088.98"
+        },
+        {
+            "nama": "Zora Haiyu Aurellia",
+            "jenis_kelamin": "P",
+            "nis": "248292089.98"
+        }
+    ]
+}

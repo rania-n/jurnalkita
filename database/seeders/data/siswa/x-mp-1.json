@@ -1,0 +1,153 @@
+{
+    "kelas": "X MP 1",
+    "tingkat": "X",
+    "jurusan": "MP",
+    "nomor": 1,
+    "wali_nama": "Tutut Sriatin, S.Pd",
+    "siswa": [
+        {
+            "nama": "Adelia Ayu Rahmahdani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Adelia Sekar Purbaningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Adinda Ladies Maulidya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aisyah Rizky Ayu Febriani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ajeng Ayu Sulistyo Wati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aldea Labiba",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alfrilia Dinda Quennara Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alieffhesa Putri Ayuna",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alifia Indrialestari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alika Apriska Wintari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alisha Zulfa Winanda",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Altycha  Angel Meisya Dea Putri Prameswary",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alvia Nur Safa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alya Dewi Aprilia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amanda Meiza Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amelia Listi Aviani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amelia Widya Maretha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amelina Mia Ari Lestari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Anatasya Desire Putri Agustin",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Anifa Putri Sholikah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Anna Althafunnisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Annisa Habibatus Sholihah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Arista Diana Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Athalita Cheryl Zerlina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Atmariani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aulia Zifa Mahendra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Azzahra Nabila Zulfa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Bella Oktavia Dwi Saputri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Bimo Syahru Romadhon",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bintang Putri Arimbi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Carissa Harmelia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Celsy Regina Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chairunnisa Nur Anjani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chenen Nur Aziizah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Cherrel Keyzha Evellyn Ardyandha Pratama",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chesyllia Putri Renda Ramadani",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

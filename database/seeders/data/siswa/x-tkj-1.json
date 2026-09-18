@@ -1,0 +1,153 @@
+{
+    "kelas": "X TKJ 1",
+    "tingkat": "X",
+    "jurusan": "TKJ",
+    "nomor": 1,
+    "wali_nama": "Listyana Hartati, S.Kom., M.Pd",
+    "siswa": [
+        {
+            "nama": "Adham Hilmi Amrullah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ahmad Haykal Kautsar",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ahmad Juliyas Firmansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Alfero Rehansa",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Alvino Geovanni",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "An Nysa Fitri Wahyuni",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Andara Sakti",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Annisa Dharma Mutia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Arjuna Rafael Prastyo",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Azzara Lella Iwanka",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Bagas Nauval Permana",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bilqis Nasyabila Pranyoto",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Brian Ardana Rori",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Danish Firdaus",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Dinda Ayu Tsabitul Azmi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dreyvant Quchicho Nurain",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dwi Rahma Wati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Eldasyach Fatikha Imama",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Galang Fahriz Ramadhan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Hafizah Anggi Masrori",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Iqbal Maulana",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Irfando Farel Elvano Pujianto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Javier Joy Bahtian",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Khareen Andianitra Ningtyas",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Lilis Susanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mayla Novita Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Melisa Novianti Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Meylani Puspitasari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mochamad Arkhab Gian Wiguna",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mochammad Alfa Choirul Ikhsan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mochammad Keynda Aghata Akbar",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhamad Yusuf Rofingi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Abdul Malik",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Abhinaya Panatagama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Damai Islami Al Khayyu",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Dimas Rahmatdani",
+            "jenis_kelamin": "L"
+        }
+    ]
+}

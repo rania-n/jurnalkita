@@ -1,0 +1,149 @@
+{
+    "kelas": "X DKV 2",
+    "tingkat": "X",
+    "jurusan": "DKV",
+    "nomor": 2,
+    "wali_nama": "Khoyrotun Hisani, S.Sn",
+    "siswa": [
+        {
+            "nama": "Lia Sabila Juanita",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mayang Widyaningsih",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Meisa Kusumawardani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Melani Indriani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mochammad Varis Yusuf Afandi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muchammad Udyana Achsan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Arief Anhar",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Dany Tryyo Nugroho",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Hisyam Maulana Azzahid",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Isagha Faeyza",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Krishna Dwi Saputro",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Raditya Faizal",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammadanil Mujtaba",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Nadhifa Almaira Lubna Qolbi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nadia Fitri Salsabilla",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Natasha Arabella Putri Rolanda",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nurmala Cahyaningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putri Meysa Dhuwi Ariyanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Raaida Iqlima Ramadhini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Raditya Teguh Wikannoto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Refi Rona Raditya",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Rendy Dwi Setiawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Revan Cahya Janata",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Safa Felysia Zasmina Nur Azizah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Safa Yusy Maydina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shilvia Alkhansa Ariatussholiha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Thalitha Arum Adiasari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Umi Maysaroh",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vanesha Griseila Ardika Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Wafiq Aulia Ullailli",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Yeni Anggraini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Yolanda Eksa Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Yuniar Dini Widyaning Galih",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zabrina Aliyyah Retno Arthanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahrina Elisya",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

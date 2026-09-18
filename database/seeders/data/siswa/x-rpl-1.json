@@ -1,0 +1,149 @@
+{
+    "kelas": "X RPL 1",
+    "tingkat": "X",
+    "jurusan": "RPL",
+    "nomor": 1,
+    "wali_nama": "Indriati, S.Pd",
+    "siswa": [
+        {
+            "nama": "Agna Widya Tama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ahmad Fadhil Firmansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ahmad Farosy Muzakki",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ahmad Hayyin Nurani",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ahmad Syakkran",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Akmal Balakosa Setiawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Anindya Ramadhan Banowati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Anjani Mega Arianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aprilia Putri Nuraini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Atmajaya Widhi Kusuma",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Azra Azelia Azura",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Azzaki Ganendra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bima Ageng Pranata",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bumi Bravenda",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Clarisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Devan Kiano Alfreda",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Dio Putra Permana",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Elmyra Azalia Wardhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Erlin Agustina Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Evandaffa Lanang Novardyandhi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Fadia Nursyahira Permata",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Farrel Regan Syahreza",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Faza Ihsan Abdilah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Haykal Tutit Verdiansah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Jabbarudin Habibyan Al Syafii",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Jasson Charisma Taufandi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Karina Kasih Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kenzie Rasydan Ahnaf",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Khamidatun Nabiluz Zahro",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khayyun Nawa Wirahadi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Lanang Ditra Dwi Ardingga",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Lintang Maulid Daning Kinanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Misael Dwi Prasetyo",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mochamad Galang Arfian Widodo",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mochamad Roziq Rifai",
+            "jenis_kelamin": "L"
+        }
+    ]
+}

@@ -1,0 +1,153 @@
+{
+    "kelas": "X PSPT 2",
+    "tingkat": "X",
+    "jurusan": "PSPT",
+    "nomor": 2,
+    "wali_nama": "Muto'atul Khosi'ah, S.Pd",
+    "siswa": [
+        {
+            "nama": "Kurniawan Hadinata",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Laila Nahwah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Lutfiana Cahya Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Marsa Syauqi Aprilia Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mayla Prastika Zahrotus Syiva",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Milan Faqih Saktiawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muh Aizar Adhiprayata Cahyasa Putra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Fauzan Rafa Putra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Jhovan Quintino Lefran",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Rizky Ramadhani",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Najwa Rahma Nabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Novela Senandung Nacita",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nurrahma Prestiana Wilujeng",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Oktavia Dwi Wulandari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Princessa Jeyanida",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Puja Kennya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putri Erdina Solehatul Ngiza",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rahma Ayu Michella Febrianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rara Dyah Charisma",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Reyno Sbastyan Hariyanto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Rischa Nur Efida Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ryani Restu Pertiwi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sabrina Eka Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sabrina Zulfa Quinn",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sakhila Ega Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shifa Az Zahroh",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sinta Laras Sati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Siti Istiqomah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Thalita Marsyafira",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tristan Helga Belva Wijaya",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Tsabbytna Assaadata Miqraja",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Velindira Wanda Novema",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Yulis Nataliya Agustin",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahra Amelia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zaskia Rina Amelianisti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zilva Atinaceca",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

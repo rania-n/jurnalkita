@@ -1,0 +1,189 @@
+{
+    "kelas": "XII MP 2",
+    "tingkat": "XII",
+    "jurusan": "MP",
+    "nomor": 2,
+    "wali_nama": "Dra. Susakti Yuharini",
+    "siswa": [
+        {
+            "nama": "Deva Rivatul Khotifah",
+            "jenis_kelamin": "P",
+            "nis": "238481835.98"
+        },
+        {
+            "nama": "Diah Ayu Setiani",
+            "jenis_kelamin": "P",
+            "nis": "238491836.98"
+        },
+        {
+            "nama": "Dimas Satrio Santoso",
+            "jenis_kelamin": "L",
+            "nis": "238501837.98"
+        },
+        {
+            "nama": "Dinda Aprilya Kania Dewi",
+            "jenis_kelamin": "P",
+            "nis": "238511838.98"
+        },
+        {
+            "nama": "Dinda Ayu Clara Mustika",
+            "jenis_kelamin": "P",
+            "nis": "238521839.98"
+        },
+        {
+            "nama": "Diva Cahya Pramudita",
+            "jenis_kelamin": "P",
+            "nis": "238531840.98"
+        },
+        {
+            "nama": "Dwi Zalsa Nabila Widianata",
+            "jenis_kelamin": "P",
+            "nis": "238541841.98"
+        },
+        {
+            "nama": "Ellisyana Pradita",
+            "jenis_kelamin": "P",
+            "nis": "238551842.98"
+        },
+        {
+            "nama": "Ellys Mulia Wardani",
+            "jenis_kelamin": "P",
+            "nis": "238561843.98"
+        },
+        {
+            "nama": "Elyta Dwi Yulianti",
+            "jenis_kelamin": "P",
+            "nis": "238571844.98"
+        },
+        {
+            "nama": "Eprilya Putri Zuwanita",
+            "jenis_kelamin": "P",
+            "nis": "238581845.98"
+        },
+        {
+            "nama": "Fadhillatul 'Ilma Zuyyina",
+            "jenis_kelamin": "P",
+            "nis": "238591846.98"
+        },
+        {
+            "nama": "Fadya Az-zahra Humairasti",
+            "jenis_kelamin": "P",
+            "nis": "238601847.98"
+        },
+        {
+            "nama": "Fara Gita Agustina",
+            "jenis_kelamin": "P",
+            "nis": "238611848.98"
+        },
+        {
+            "nama": "Fauzan Miko Riyanto",
+            "jenis_kelamin": "L",
+            "nis": "238621849.98"
+        },
+        {
+            "nama": "Fauzia Rininta Hernantya",
+            "jenis_kelamin": "P",
+            "nis": "238631850.98"
+        },
+        {
+            "nama": "Fidela Manda Alodia",
+            "jenis_kelamin": "P",
+            "nis": "238641851.98"
+        },
+        {
+            "nama": "Hasiana Lubis",
+            "jenis_kelamin": "P",
+            "nis": "238661853.98"
+        },
+        {
+            "nama": "Hibah Arum Lestari",
+            "jenis_kelamin": "P",
+            "nis": "238671854.98"
+        },
+        {
+            "nama": "Intan Nur Cahaya Qoirun Nikmah",
+            "jenis_kelamin": "P",
+            "nis": "238681855.98"
+        },
+        {
+            "nama": "Jasica Ayu Annastasya",
+            "jenis_kelamin": "P",
+            "nis": "238691856.98"
+        },
+        {
+            "nama": "Jessica Earlene Ariini",
+            "jenis_kelamin": "P",
+            "nis": "238701857.98"
+        },
+        {
+            "nama": "Kanza Aninda Bunga Zahwara",
+            "jenis_kelamin": "P",
+            "nis": "238711858.98"
+        },
+        {
+            "nama": "Kayla Dwi Ottoluwa",
+            "jenis_kelamin": "P",
+            "nis": "238721859.98"
+        },
+        {
+            "nama": "Keisha Jihan Syafira",
+            "jenis_kelamin": "P",
+            "nis": "238731860.98"
+        },
+        {
+            "nama": "Khairun Nisa Az Zahra",
+            "jenis_kelamin": "P",
+            "nis": "238741861.98"
+        },
+        {
+            "nama": "Kharisa Septi Ramadani",
+            "jenis_kelamin": "P",
+            "nis": "238751862.98"
+        },
+        {
+            "nama": "Kirana Victorya Indarto",
+            "jenis_kelamin": "P",
+            "nis": "238761863.98"
+        },
+        {
+            "nama": "Lefi Falida",
+            "jenis_kelamin": "P",
+            "nis": "238771864.98"
+        },
+        {
+            "nama": "Lindya Jenyka Arnelita Putri Ananda",
+            "jenis_kelamin": "P",
+            "nis": "238781865.98"
+        },
+        {
+            "nama": "Madina Ayu Putri Iskandar",
+            "jenis_kelamin": "P",
+            "nis": "238791866.98"
+        },
+        {
+            "nama": "Maghfira Izzani Aulia",
+            "jenis_kelamin": "P",
+            "nis": "238801867.98"
+        },
+        {
+            "nama": "Mareta Putri Asmorokhim",
+            "jenis_kelamin": "P",
+            "nis": "238811868.98"
+        },
+        {
+            "nama": "Marsanda Raysa Putri",
+            "jenis_kelamin": "P",
+            "nis": "238821869.98"
+        },
+        {
+            "nama": "Martha Awalun Najma",
+            "jenis_kelamin": "P",
+            "nis": "238831870.98"
+        },
+        {
+            "nama": "Maya Salwa Salsabila",
+            "jenis_kelamin": "P",
+            "nis": "238841871.98"
+        }
+    ]
+}

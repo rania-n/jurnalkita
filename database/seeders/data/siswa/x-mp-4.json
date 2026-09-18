@@ -1,0 +1,153 @@
+{
+    "kelas": "X MP 4",
+    "tingkat": "X",
+    "jurusan": "MP",
+    "nomor": 4,
+    "wali_nama": "Rindang Rejeki, S.Pd",
+    "siswa": [
+        {
+            "nama": "Radita Nawa Aidila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ranisa Deta Tiyara",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Reni Wahyuni",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Revana Syafira Sanjaya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ria Dewi Anggraini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rihadatul Ngaisa Roosyidah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rosita Putri Maharani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Saadatul Asmaul Husna",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Saskia Meidira Saputri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sazkya Amellia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sellina Cahaya Haiska",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Septia Balqis Kairunisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shabrina Miftaqul Nisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Shalsabilla Falensya Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Silvanur Ayusty",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Silvia Purnamasari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sinta Oktavia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sintya Putri Cahyani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Siti Latifah Nuraini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Siti Muthiah Fadhilah Ash Zahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sofie Achi Setiahati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syakira Ghina Faliha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syaza Husna Salsabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tiara Novia Andarini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tiyas Arum Nareswari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tiyas Mei Wulan Sary",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tri Wahyuni",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Umi Sarmila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Violny Zaneta Zahrani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Yanida Gika Kusuma Wardani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zafira Meyca Ananayya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahra Hanan Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahra Nuraini Mutmainah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahra Putri Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahrotu Farhania Nabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Zahwa Sania Putri",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

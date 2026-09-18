@@ -1,41 +1,189 @@
 {
     "kelas": "XI RPL 2",
+    "tingkat": "XI",
+    "jurusan": "RPL",
+    "nomor": 2,
+    "wali_nama": "Winartin, S.Pd",
     "siswa": [
-        {"nama": "Marvel Maulana Saputra", "jenis_kelamin": "L"},
-        {"nama": "Marwa Rizqiani Putri", "jenis_kelamin": "P"},
-        {"nama": "Maulana Qubro Alghozali", "jenis_kelamin": "L"},
-        {"nama": "Mochamad Rafi Nur Alfan", "jenis_kelamin": "L"},
-        {"nama": "Mochammad Wildan Septiano Prasetyo", "jenis_kelamin": "L"},
-        {"nama": "Mohammad Reisya Aprilliawan", "jenis_kelamin": "L"},
-        {"nama": "Muhamad Bagus Prasetiyo", "jenis_kelamin": "L"},
-        {"nama": "Muhammad Adip Sofiyulloh", "jenis_kelamin": "L"},
-        {"nama": "Muhammad Albyan Aulia", "jenis_kelamin": "L"},
-        {"nama": "Muhammad Dude Fahrezi", "jenis_kelamin": "L"},
-        {"nama": "Muhammad Fuad Hasan", "jenis_kelamin": "L"},
-        {"nama": "Muhammad Ilham Nashrullah", "jenis_kelamin": "L"},
-        {"nama": "Muhammad Rafa Azryello Farishutama", "jenis_kelamin": "L"},
-        {"nama": "Muhammad Raffi Arkhan", "jenis_kelamin": "L"},
-        {"nama": "Muhammad Saifuddin", "jenis_kelamin": "L"},
-        {"nama": "Nanda Aurelia Khoirunnisaa", "jenis_kelamin": "P"},
-        {"nama": "Naswa Putri Bintang Febriana", "jenis_kelamin": "P"},
-        {"nama": "Nazwa Afifah Anwar", "jenis_kelamin": "P"},
-        {"nama": "Nita Dwi Larasati", "jenis_kelamin": "P"},
-        {"nama": "Pratama Rezkiansyah Widianto", "jenis_kelamin": "L"},
-        {"nama": "Putri Lianasari", "jenis_kelamin": "P"},
-        {"nama": "Putri Zahwa Rusdiana", "jenis_kelamin": "P"},
-        {"nama": "Raga Syahputra Arifin", "jenis_kelamin": "L"},
-        {"nama": "Rania Nurillah", "jenis_kelamin": "P"},
-        {"nama": "Ririn Sri Wahyuni", "jenis_kelamin": "P"},
-        {"nama": "Seren Khanzaa Azyla", "jenis_kelamin": "P"},
-        {"nama": "Sevia Dwi Novitasari", "jenis_kelamin": "P"},
-        {"nama": "Shalsabilla Putri Nuraini", "jenis_kelamin": "P"},
-        {"nama": "Skandinavia", "jenis_kelamin": "P"},
-        {"nama": "Syafiqi Erdansyah Ramadan", "jenis_kelamin": "L"},
-        {"nama": "Vanessa Floris", "jenis_kelamin": "P"},
-        {"nama": "Vanissa Dewi Putri Rianto", "jenis_kelamin": "P"},
-        {"nama": "Varadita Apriliandini", "jenis_kelamin": "P"},
-        {"nama": "Wildan Ramadhan Zulkarnaen", "jenis_kelamin": "L"},
-        {"nama": "Zhefitra Ananda Wijaya", "jenis_kelamin": "L"},
-        {"nama": "Salma Fikriatul Azizah", "jenis_kelamin": "P"}
+        {
+            "nama": "Marvel Maulana Saputra",
+            "jenis_kelamin": "L",
+            "nis": "244711110.63"
+        },
+        {
+            "nama": "Marwa Rizqiani Putri",
+            "jenis_kelamin": "P",
+            "nis": "244721111.63"
+        },
+        {
+            "nama": "Maulana Qubro Alghozali",
+            "jenis_kelamin": "L",
+            "nis": "244731112.63"
+        },
+        {
+            "nama": "Mochamad Rafi Nur Alfan",
+            "jenis_kelamin": "L",
+            "nis": "244741113.63"
+        },
+        {
+            "nama": "Mochammad Wildan Septiano Prasetyo",
+            "jenis_kelamin": "L",
+            "nis": "244751114.63"
+        },
+        {
+            "nama": "Mohammad Reisya Aprilliawan",
+            "jenis_kelamin": "L",
+            "nis": "244761115.63"
+        },
+        {
+            "nama": "Muhamad Bagus Prasetiyo",
+            "jenis_kelamin": "L",
+            "nis": "244771116.63"
+        },
+        {
+            "nama": "Muhammad Adip Sofiyulloh",
+            "jenis_kelamin": "L",
+            "nis": "244781117.63"
+        },
+        {
+            "nama": "Muhammad Albyan Aulia",
+            "jenis_kelamin": "L",
+            "nis": "244791118.63"
+        },
+        {
+            "nama": "Muhammad Dude Fahrezi",
+            "jenis_kelamin": "L",
+            "nis": "244801119.63"
+        },
+        {
+            "nama": "Muhammad Fuad Hasan",
+            "jenis_kelamin": "L",
+            "nis": "244811120.63"
+        },
+        {
+            "nama": "Muhammad Ilham Nashrullah",
+            "jenis_kelamin": "L",
+            "nis": "244821121.63"
+        },
+        {
+            "nama": "Muhammad Rafa Azryello Farishutama",
+            "jenis_kelamin": "L",
+            "nis": "244831122.63"
+        },
+        {
+            "nama": "Muhammad Raffi Arkhan",
+            "jenis_kelamin": "L",
+            "nis": "244841123.63"
+        },
+        {
+            "nama": "Muhammad Saifuddin",
+            "jenis_kelamin": "L",
+            "nis": "244851124.63"
+        },
+        {
+            "nama": "Nanda Aurelia Khoirunnisaa",
+            "jenis_kelamin": "P",
+            "nis": "244861125.63"
+        },
+        {
+            "nama": "Naswa Putri Bintang Febriana",
+            "jenis_kelamin": "P",
+            "nis": "244871126.63"
+        },
+        {
+            "nama": "Nazwa Afifah Anwar",
+            "jenis_kelamin": "P",
+            "nis": "244881127.63"
+        },
+        {
+            "nama": "Nita Dwi Larasati",
+            "jenis_kelamin": "P",
+            "nis": "244891128.63"
+        },
+        {
+            "nama": "Pratama Rezkiansyah Widianto",
+            "jenis_kelamin": "L",
+            "nis": "244901129.63"
+        },
+        {
+            "nama": "Putri Lianasari",
+            "jenis_kelamin": "P",
+            "nis": "244911130.63"
+        },
+        {
+            "nama": "Putri Zahwa Rusdiana",
+            "jenis_kelamin": "P",
+            "nis": "244921131.63"
+        },
+        {
+            "nama": "Raga Syahputra Arifin",
+            "jenis_kelamin": "L",
+            "nis": "244931132.63"
+        },
+        {
+            "nama": "Rania Nurillah",
+            "jenis_kelamin": "P",
+            "nis": "244941133.63"
+        },
+        {
+            "nama": "Ririn Sri Wahyuni",
+            "jenis_kelamin": "P",
+            "nis": "244951134.63"
+        },
+        {
+            "nama": "Seren Khanzaa Azyla",
+            "jenis_kelamin": "P",
+            "nis": "244971136.63"
+        },
+        {
+            "nama": "Sevia Dwi Novitasari",
+            "jenis_kelamin": "P",
+            "nis": "244981137.63"
+        },
+        {
+            "nama": "Shalsabilla Putri Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "244991138.63"
+        },
+        {
+            "nama": "Skandinavia",
+            "jenis_kelamin": "P",
+            "nis": "245001139.63"
+        },
+        {
+            "nama": "Syafiqi Erdansyah Ramadan",
+            "jenis_kelamin": "L",
+            "nis": "245011140.63"
+        },
+        {
+            "nama": "Vanessa Floris",
+            "jenis_kelamin": "P",
+            "nis": "245021141.63"
+        },
+        {
+            "nama": "Vanissa Dewi Putri Rianto",
+            "jenis_kelamin": "P",
+            "nis": "245031142.63"
+        },
+        {
+            "nama": "Varadita Apriliandini",
+            "jenis_kelamin": "P",
+            "nis": "245041143.63"
+        },
+        {
+            "nama": "Wildan Ramadhan Zulkarnaen",
+            "jenis_kelamin": "L",
+            "nis": "245051144.63"
+        },
+        {
+            "nama": "Zhefitra Ananda Wijaya",
+            "jenis_kelamin": "L",
+            "nis": "245061145.63"
+        },
+        {
+            "nama": "Salma Fikriatul Azizah",
+            "jenis_kelamin": "P",
+            "nis": "252261146.63"
+        }
     ]
 }

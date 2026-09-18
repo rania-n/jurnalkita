@@ -1,0 +1,194 @@
+{
+    "kelas": "XII DKV 1",
+    "tingkat": "XII",
+    "jurusan": "DKV",
+    "nomor": 1,
+    "wali_nama": "Fajar Wahyu Pratiwi, S.S",
+    "siswa": [
+        {
+            "nama": "Ade Bastian",
+            "jenis_kelamin": "L",
+            "nis": "241420668.111"
+        },
+        {
+            "nama": "Adela Zessica Pratama",
+            "jenis_kelamin": "P",
+            "nis": "241430669.111"
+        },
+        {
+            "nama": "Age Dipta Goutama",
+            "jenis_kelamin": "L",
+            "nis": "241440670.111"
+        },
+        {
+            "nama": "Ahmad Naufal Baydaruddin",
+            "jenis_kelamin": "L",
+            "nis": "241450671.111"
+        },
+        {
+            "nama": "Ahmad Nur Alfi",
+            "jenis_kelamin": "L",
+            "nis": "241460672.111"
+        },
+        {
+            "nama": "Aiko Andriana Dewi",
+            "jenis_kelamin": "P",
+            "nis": "241470673.111"
+        },
+        {
+            "nama": "Akaila Fanni Myfanwy",
+            "jenis_kelamin": "P",
+            "nis": "241480674.111"
+        },
+        {
+            "nama": "Amelia Nur Shakila",
+            "jenis_kelamin": "P",
+            "nis": "241490675.111"
+        },
+        {
+            "nama": "Annisa Mutiara Kurniasari",
+            "jenis_kelamin": "P",
+            "nis": "241500676.111"
+        },
+        {
+            "nama": "Ardaffa Irsyad Razaan",
+            "jenis_kelamin": "L",
+            "nis": "241510677.111"
+        },
+        {
+            "nama": "Avisa Vina Khumaira",
+            "jenis_kelamin": "P",
+            "nis": "241520678.111"
+        },
+        {
+            "nama": "Azizah Afina Fasya",
+            "jenis_kelamin": "P",
+            "nis": "241530679.111"
+        },
+        {
+            "nama": "Azzahra Eka Pradisti",
+            "jenis_kelamin": "P",
+            "nis": "241540680.111"
+        },
+        {
+            "nama": "Azzahra Nur Aila",
+            "jenis_kelamin": "P",
+            "nis": "241550681.111"
+        },
+        {
+            "nama": "Bagas Dwi Wibowo",
+            "jenis_kelamin": "L",
+            "nis": "241560682.111"
+        },
+        {
+            "nama": "Bima Sanjaya",
+            "jenis_kelamin": "L",
+            "nis": "241570683.111"
+        },
+        {
+            "nama": "Chelsea Adelia Anastasya",
+            "jenis_kelamin": "P",
+            "nis": "241580684.111"
+        },
+        {
+            "nama": "Citra Ayu Lestari",
+            "jenis_kelamin": "P",
+            "nis": "241590685.111"
+        },
+        {
+            "nama": "Dianing Arum Ardinar Hendra Purnama",
+            "jenis_kelamin": "P",
+            "nis": "241600686.111"
+        },
+        {
+            "nama": "Dinda Ayu Rahma Sinta",
+            "jenis_kelamin": "P",
+            "nis": "241610687.111"
+        },
+        {
+            "nama": "Earlyta Annora Nadiya Kamila",
+            "jenis_kelamin": "P",
+            "nis": "241620688.111"
+        },
+        {
+            "nama": "Fadiya Sefira Aprilia Putri",
+            "jenis_kelamin": "P",
+            "nis": "241630689.111"
+        },
+        {
+            "nama": "Faizzatu Immamah",
+            "jenis_kelamin": "P",
+            "nis": "241640690.111"
+        },
+        {
+            "nama": "Fajar Dwi Wicaksono",
+            "jenis_kelamin": "L",
+            "nis": "241650691.111"
+        },
+        {
+            "nama": "Farel Fahresi",
+            "jenis_kelamin": "L",
+            "nis": "241660692.111"
+        },
+        {
+            "nama": "Farel Hadi Indra Pratama",
+            "jenis_kelamin": "L",
+            "nis": "241670693.111"
+        },
+        {
+            "nama": "Fariz Bastian Habib",
+            "jenis_kelamin": "L",
+            "nis": "241680694.111"
+        },
+        {
+            "nama": "Galih Suko Abdussalam",
+            "jenis_kelamin": "L",
+            "nis": "241690695.111"
+        },
+        {
+            "nama": "Gaza Ervinka Santio",
+            "jenis_kelamin": "L",
+            "nis": "241700696.111"
+        },
+        {
+            "nama": "Hayyu Rakha Al Hakim",
+            "jenis_kelamin": "L",
+            "nis": "241710697.111"
+        },
+        {
+            "nama": "Herni Seftia Rahmadhani",
+            "jenis_kelamin": "P",
+            "nis": "241720698.111"
+        },
+        {
+            "nama": "Hilma Riffa Iasha",
+            "jenis_kelamin": "P",
+            "nis": "241730699.111"
+        },
+        {
+            "nama": "Indah Izza Azzahra",
+            "jenis_kelamin": "P",
+            "nis": "241740700.111"
+        },
+        {
+            "nama": "Innaki Nadiatul Husna",
+            "jenis_kelamin": "P",
+            "nis": "241750701.111"
+        },
+        {
+            "nama": "Intan Zahra Qolbi Sari",
+            "jenis_kelamin": "P",
+            "nis": "241760702.111"
+        },
+        {
+            "nama": "Isma Suci Nur Aini",
+            "jenis_kelamin": "P",
+            "nis": "241770703.111"
+        },
+        {
+            "nama": "Jesica Wahyu Eliana",
+            "jenis_kelamin": "P",
+            "nis": "241780704.111"
+        }
+    ]
+}

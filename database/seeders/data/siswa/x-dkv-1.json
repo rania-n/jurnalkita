@@ -1,0 +1,153 @@
+{
+    "kelas": "X DKV 1",
+    "tingkat": "X",
+    "jurusan": "DKV",
+    "nomor": 1,
+    "wali_nama": "Rulik Indrawati, S.Pd",
+    "siswa": [
+        {
+            "nama": "Adriyan Maulana Fatchur Rozi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Alfino Giovany Citra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Alfreda Quenby Clearesta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Alqiano Khafkha Yuskemdi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Alvira Sasi Kirana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amanda Dzuwika Junita Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Amna Durrotul Jinan",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Andi Kurniawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ardelia Levina Maheswari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Arsya Afriza Nur Afida",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Arum Pusponingsih",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Axel Yovanza Mahendra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Chelsyta Imaniar Afidatul Ilhami",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Chica Avril Aurelia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Cifandra Dhany Nuriawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "David Bayu Lestiawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Davin Favian Nur Basuki",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Devina Citra Amelia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Diajeng Putri Nawangsari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Faizal Ardhiansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Fajar Wirahadi Surya Perkasa",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Febri Setyawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Feisya Chila Febrianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Femas Radia Putra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Galuh Suci Nur Aini Khoirun Nisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Gendhis Sofiana Aghitsnaa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ghefira Sahira Shofa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ghenio Raehan Junianta",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Hanisa Dwi Nasukha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Hening Bapuri Kirana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Isma Meyfirda Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kanaya Tsamrotul Ilmi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kania Putri Syakinah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khilda Tsarwah Lucyani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khuliqa Rayfan Nurtazaka",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Kristi Nurhaliza",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

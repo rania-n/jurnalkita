@@ -1,0 +1,184 @@
+{
+    "kelas": "XI BD 2",
+    "tingkat": "XI",
+    "jurusan": "BD",
+    "nomor": 2,
+    "wali_nama": "Erna Rinawati, S.Pd",
+    "siswa": [
+        {
+            "nama": "Latifa Indah Kurnia",
+            "jenis_kelamin": "P",
+            "nis": "246151591.96"
+        },
+        {
+            "nama": "Latifah Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "246161592.96"
+        },
+        {
+            "nama": "Leiva Yuliani Saputri",
+            "jenis_kelamin": "P",
+            "nis": "246171593.96"
+        },
+        {
+            "nama": "Lusi Yuliana",
+            "jenis_kelamin": "P",
+            "nis": "246181594.96"
+        },
+        {
+            "nama": "Maya Indah Kristina",
+            "jenis_kelamin": "P",
+            "nis": "246191595.96"
+        },
+        {
+            "nama": "Mazaya Amira Isna Nursabrina",
+            "jenis_kelamin": "P",
+            "nis": "246201596.96"
+        },
+        {
+            "nama": "Mochamad Aswar Anas",
+            "jenis_kelamin": "L",
+            "nis": "246211597.96"
+        },
+        {
+            "nama": "Muhammad Lukman Nurhakim",
+            "jenis_kelamin": "L",
+            "nis": "246221598.96"
+        },
+        {
+            "nama": "Nabila Oktavia Vidilia Putri",
+            "jenis_kelamin": "P",
+            "nis": "246231599.96"
+        },
+        {
+            "nama": "Nadifna Ataya Sofinisa",
+            "jenis_kelamin": "P",
+            "nis": "246241600.96"
+        },
+        {
+            "nama": "Nadin Rahma Adiya Sari",
+            "jenis_kelamin": "P",
+            "nis": "246251601.96"
+        },
+        {
+            "nama": "Najma Putri Salsabila",
+            "jenis_kelamin": "P",
+            "nis": "246261602.96"
+        },
+        {
+            "nama": "Nicky Ardyanti",
+            "jenis_kelamin": "P",
+            "nis": "246271603.96"
+        },
+        {
+            "nama": "Nur Aini Hidayatul Khasanah",
+            "jenis_kelamin": "P",
+            "nis": "246281604.96"
+        },
+        {
+            "nama": "Puri Galuh Rahmawati",
+            "jenis_kelamin": "P",
+            "nis": "246291605.96"
+        },
+        {
+            "nama": "Radita Dwi Prasetiya",
+            "jenis_kelamin": "P",
+            "nis": "246301606.96"
+        },
+        {
+            "nama": "Raisa Meylani Bunga Anggraini",
+            "jenis_kelamin": "P",
+            "nis": "246311607.96"
+        },
+        {
+            "nama": "Reffi Ayu Meileni",
+            "jenis_kelamin": "P",
+            "nis": "246321608.96"
+        },
+        {
+            "nama": "Ricsa Ayu Pramudya",
+            "jenis_kelamin": "P",
+            "nis": "246331609.96"
+        },
+        {
+            "nama": "Rizka Amelia Septiani",
+            "jenis_kelamin": "P",
+            "nis": "246341610.96"
+        },
+        {
+            "nama": "Rizqi Nafisatun Nisa",
+            "jenis_kelamin": "P",
+            "nis": "246351611.96"
+        },
+        {
+            "nama": "Rizqi Nurhalizah Putri Mujiono",
+            "jenis_kelamin": "P",
+            "nis": "246361612.96"
+        },
+        {
+            "nama": "Sela Lily Astrantia Yasmin",
+            "jenis_kelamin": "P",
+            "nis": "246371613.96"
+        },
+        {
+            "nama": "Selly Fidiana Putri",
+            "jenis_kelamin": "P",
+            "nis": "246381614.96"
+        },
+        {
+            "nama": "Selviya Viola Putri",
+            "jenis_kelamin": "P",
+            "nis": "246391615.96"
+        },
+        {
+            "nama": "Siti Aminatul Mahmudah",
+            "jenis_kelamin": "P",
+            "nis": "246401616.96"
+        },
+        {
+            "nama": "Telon Mawar Muji Rahayu",
+            "jenis_kelamin": "P",
+            "nis": "246411617.96"
+        },
+        {
+            "nama": "Trisna Okta Sari",
+            "jenis_kelamin": "P",
+            "nis": "246421618.96"
+        },
+        {
+            "nama": "Velyta Siti Narsyani",
+            "jenis_kelamin": "P",
+            "nis": "246431619.96"
+        },
+        {
+            "nama": "Vindi Rahmaika",
+            "jenis_kelamin": "P",
+            "nis": "246441620.96"
+        },
+        {
+            "nama": "Vira Ami Natasya",
+            "jenis_kelamin": "P",
+            "nis": "246451621.96"
+        },
+        {
+            "nama": "Viviana Aqliya",
+            "jenis_kelamin": "P",
+            "nis": "246461622.96"
+        },
+        {
+            "nama": "Wahyu Putri Hikmatul Maula",
+            "jenis_kelamin": "P",
+            "nis": "246471623.96"
+        },
+        {
+            "nama": "Yuris Tri Jeti",
+            "jenis_kelamin": "P",
+            "nis": "246481624.96"
+        },
+        {
+            "nama": "Zahra Filzania",
+            "jenis_kelamin": "P",
+            "nis": "246491625.96"
+        }
+    ]
+}

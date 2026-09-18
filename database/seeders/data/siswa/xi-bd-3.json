@@ -1,0 +1,189 @@
+{
+    "kelas": "XI BD 3",
+    "tingkat": "XI",
+    "jurusan": "BD",
+    "nomor": 3,
+    "wali_nama": "Karminah, S.Pd",
+    "siswa": [
+        {
+            "nama": "Agustina Seventeen Putri Jazzica",
+            "jenis_kelamin": "P",
+            "nis": "246501626.96"
+        },
+        {
+            "nama": "Almira Zahratus Shifa",
+            "jenis_kelamin": "P",
+            "nis": "246511627.96"
+        },
+        {
+            "nama": "Alya Noura Maulida",
+            "jenis_kelamin": "P",
+            "nis": "246521628.96"
+        },
+        {
+            "nama": "Anisa Khofifatul Wulandari",
+            "jenis_kelamin": "P",
+            "nis": "246531629.96"
+        },
+        {
+            "nama": "Arvino Heza Permana",
+            "jenis_kelamin": "L",
+            "nis": "246541630.96"
+        },
+        {
+            "nama": "Aulia",
+            "jenis_kelamin": "P",
+            "nis": "246551631.96"
+        },
+        {
+            "nama": "Aura Putri Cahaya",
+            "jenis_kelamin": "P",
+            "nis": "246561632.96"
+        },
+        {
+            "nama": "Aurel Novelia Maharani",
+            "jenis_kelamin": "P",
+            "nis": "246571633.96"
+        },
+        {
+            "nama": "Bilqist Layza Nahazilkha",
+            "jenis_kelamin": "P",
+            "nis": "246581634.96"
+        },
+        {
+            "nama": "Bunga Putri Nur Danya",
+            "jenis_kelamin": "P",
+            "nis": "246591635.96"
+        },
+        {
+            "nama": "Cinta Ayu Nur Aini",
+            "jenis_kelamin": "P",
+            "nis": "246601636.96"
+        },
+        {
+            "nama": "Delia Fitri Puspita Arum",
+            "jenis_kelamin": "P",
+            "nis": "246611637.96"
+        },
+        {
+            "nama": "Elsa Eka Nuraini",
+            "jenis_kelamin": "P",
+            "nis": "246621638.96"
+        },
+        {
+            "nama": "Emilda Suci Lestari",
+            "jenis_kelamin": "P",
+            "nis": "246631639.96"
+        },
+        {
+            "nama": "Faddilah Naila Alifah",
+            "jenis_kelamin": "P",
+            "nis": "246641640.96"
+        },
+        {
+            "nama": "Faris Dwi Santosa",
+            "jenis_kelamin": "L",
+            "nis": "246651641.96"
+        },
+        {
+            "nama": "Firzana Risti Yuanita",
+            "jenis_kelamin": "P",
+            "nis": "246661642.96"
+        },
+        {
+            "nama": "Helend Mega Cahyati",
+            "jenis_kelamin": "P",
+            "nis": "246671643.96"
+        },
+        {
+            "nama": "Hilya Fairuuz Annabila",
+            "jenis_kelamin": "P",
+            "nis": "246681644.96"
+        },
+        {
+            "nama": "Keysa Putri Wulandari",
+            "jenis_kelamin": "P",
+            "nis": "246691645.96"
+        },
+        {
+            "nama": "Meyla Candra Putri Herdiyanti",
+            "jenis_kelamin": "P",
+            "nis": "246701646.96"
+        },
+        {
+            "nama": "Muhammad Alfian Rojaudin",
+            "jenis_kelamin": "L",
+            "nis": "246711647.96"
+        },
+        {
+            "nama": "Muhammad Ihsan Rahmatullah",
+            "jenis_kelamin": "L",
+            "nis": "246721648.96"
+        },
+        {
+            "nama": "Muhammad Sarif Hidayatulloh",
+            "jenis_kelamin": "L",
+            "nis": "246731649.96"
+        },
+        {
+            "nama": "Nayla Fahreta Agniqueena",
+            "jenis_kelamin": "P",
+            "nis": "246741650.96"
+        },
+        {
+            "nama": "Nayla Okta Nikmatu Rosidah",
+            "jenis_kelamin": "P",
+            "nis": "246751651.96"
+        },
+        {
+            "nama": "Nindita Alkhila Khumaira",
+            "jenis_kelamin": "P",
+            "nis": "246761652.96"
+        },
+        {
+            "nama": "Rahma Anastasya Putri",
+            "jenis_kelamin": "P",
+            "nis": "246771653.96"
+        },
+        {
+            "nama": "Richa Aprila Cartikasari",
+            "jenis_kelamin": "P",
+            "nis": "246781654.96"
+        },
+        {
+            "nama": "Rosilia Chalisa Pembayun",
+            "jenis_kelamin": "P",
+            "nis": "246791655.96"
+        },
+        {
+            "nama": "Shafa Sagita Pradana",
+            "jenis_kelamin": "P",
+            "nis": "246801656.96"
+        },
+        {
+            "nama": "Shahla Uliya Pertiwi",
+            "jenis_kelamin": "P",
+            "nis": "246811657.96"
+        },
+        {
+            "nama": "Siti Nurin Rachmawati",
+            "jenis_kelamin": "P",
+            "nis": "246821658.96"
+        },
+        {
+            "nama": "Tira Ayu Andini",
+            "jenis_kelamin": "P",
+            "nis": "246831659.96"
+        },
+        {
+            "nama": "Yuken Risma Melati",
+            "jenis_kelamin": "P",
+            "nis": "246841660.96"
+        },
+        {
+            "nama": "Yuyun Septya Maharani",
+            "jenis_kelamin": "P",
+            "nis": "246851661.96"
+        }
+    ]
+}

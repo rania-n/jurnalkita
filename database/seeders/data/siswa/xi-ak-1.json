@@ -1,0 +1,189 @@
+{
+    "kelas": "XI AK 1",
+    "tingkat": "XI",
+    "jurusan": "AK",
+    "nomor": 1,
+    "wali_nama": "Dra. Anik Indriani",
+    "siswa": [
+        {
+            "nama": "Abellia Alinsky Margareta",
+            "jenis_kelamin": "P",
+            "nis": "248304999.102"
+        },
+        {
+            "nama": "Aera Anindyata Radisty",
+            "jenis_kelamin": "P",
+            "nis": "248315000.102"
+        },
+        {
+            "nama": "Afriza Firdatul Yuniarti",
+            "jenis_kelamin": "P",
+            "nis": "248325001.102"
+        },
+        {
+            "nama": "Agata Nur Aini",
+            "jenis_kelamin": "P",
+            "nis": "248335002.102"
+        },
+        {
+            "nama": "Agizza Marvelyani Kasyansya",
+            "jenis_kelamin": "P",
+            "nis": "248345003.102"
+        },
+        {
+            "nama": "Aira Purita Devi",
+            "jenis_kelamin": "P",
+            "nis": "248355004.102"
+        },
+        {
+            "nama": "Aisha Risma Agustina",
+            "jenis_kelamin": "P",
+            "nis": "248365005.102"
+        },
+        {
+            "nama": "Aisya Kartika Fitri",
+            "jenis_kelamin": "P",
+            "nis": "248375006.102"
+        },
+        {
+            "nama": "Alika Jihan Pangestu",
+            "jenis_kelamin": "P",
+            "nis": "248385007.102"
+        },
+        {
+            "nama": "Allysia Marcelly Kristanti",
+            "jenis_kelamin": "P",
+            "nis": "248395008.102"
+        },
+        {
+            "nama": "Alvinda Aulia Subiyanti",
+            "jenis_kelamin": "P",
+            "nis": "248405009.102"
+        },
+        {
+            "nama": "Alyaa Nur Azizah",
+            "jenis_kelamin": "P",
+            "nis": "248415010.102"
+        },
+        {
+            "nama": "Amelia Aisyah Putri",
+            "jenis_kelamin": "P",
+            "nis": "248425011.102"
+        },
+        {
+            "nama": "Amelia Farhatul Akmala",
+            "jenis_kelamin": "P",
+            "nis": "248435012.102"
+        },
+        {
+            "nama": "Amelia Novitasari",
+            "jenis_kelamin": "P",
+            "nis": "248445013.102"
+        },
+        {
+            "nama": "Amelia Nur Hasanah",
+            "jenis_kelamin": "P",
+            "nis": "248455014.102"
+        },
+        {
+            "nama": "Ananda Endriana",
+            "jenis_kelamin": "P",
+            "nis": "248465015.102"
+        },
+        {
+            "nama": "Andinin Ayu Finata",
+            "jenis_kelamin": "P",
+            "nis": "248475016.102"
+        },
+        {
+            "nama": "Angel Lianaputri",
+            "jenis_kelamin": "P",
+            "nis": "248485017.102"
+        },
+        {
+            "nama": "Angela Brigitha Nabila",
+            "jenis_kelamin": "P",
+            "nis": "248495018.102"
+        },
+        {
+            "nama": "Anggun Indah Pratiwi",
+            "jenis_kelamin": "P",
+            "nis": "248505019.102"
+        },
+        {
+            "nama": "Anindya Sabrina Putri",
+            "jenis_kelamin": "P",
+            "nis": "248515020.102"
+        },
+        {
+            "nama": "Anita Tri Cahyani",
+            "jenis_kelamin": "P",
+            "nis": "248525021.102"
+        },
+        {
+            "nama": "Aprilia Wulandari",
+            "jenis_kelamin": "P",
+            "nis": "248535022.102"
+        },
+        {
+            "nama": "Arinda Noviya Anjelica",
+            "jenis_kelamin": "P",
+            "nis": "248545023.102"
+        },
+        {
+            "nama": "Ariqotul Fadiyah",
+            "jenis_kelamin": "P",
+            "nis": "248555024.102"
+        },
+        {
+            "nama": "Arsha Ananda Putri",
+            "jenis_kelamin": "P",
+            "nis": "248565025.102"
+        },
+        {
+            "nama": "Atina Farkha Faiza",
+            "jenis_kelamin": "P",
+            "nis": "248575026.102"
+        },
+        {
+            "nama": "Aulia Adira Arfiana",
+            "jenis_kelamin": "P",
+            "nis": "248585027.102"
+        },
+        {
+            "nama": "Aulia Putri Novita Sari",
+            "jenis_kelamin": "P",
+            "nis": "248595028.102"
+        },
+        {
+            "nama": "Auliya Rizki Pratita",
+            "jenis_kelamin": "P",
+            "nis": "248605029.102"
+        },
+        {
+            "nama": "Aura Diva Decilia",
+            "jenis_kelamin": "P",
+            "nis": "248615030.102"
+        },
+        {
+            "nama": "Ayu Kusuma Wardana",
+            "jenis_kelamin": "P",
+            "nis": "248625031.102"
+        },
+        {
+            "nama": "Azizah Dwi Monica",
+            "jenis_kelamin": "P",
+            "nis": "248635032.102"
+        },
+        {
+            "nama": "Azzahra Zafa Prianti",
+            "jenis_kelamin": "P",
+            "nis": "248645033.102"
+        },
+        {
+            "nama": "Balqis Batrisiya",
+            "jenis_kelamin": "P",
+            "nis": "248655034.102"
+        }
+    ]
+}

@@ -1,0 +1,153 @@
+{
+    "kelas": "X AK 3",
+    "tingkat": "X",
+    "jurusan": "AK",
+    "nomor": 3,
+    "wali_nama": "Ista Nofasari, S.Pd",
+    "siswa": [
+        {
+            "nama": "Irdina Mufidah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Irma Aulia Miftahul Husna",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Itsna Sintya Devi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jacklin Maulidafa Aninda",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jesica Febrian Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jheny Mifta Hestya Ananta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Keyla Istialetha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Keyla Novelia Fatma",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khairunnisa Salsabila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khavia Laylatul Aynur Rohma",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kiesya Aprilia Eka Saputri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kunnita Tazkhiyatul Muna",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Lutfita Kirana Octafia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Maiza Putri Narista",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Marsha Olivia Risky",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Marwa Adinda Erlina Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Maylin Azsifa Tara Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Medyna Cahya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mefira Ayudya Meika",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mei Artika Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Melysa Cahya Valensa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mochamad Asad Irsyaad",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mochamad Fardhan Zanuar",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Moh Bagus Akhsanul Hafizd",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mohamad Arifin Subianto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mohammad Aditia Pratama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Nazzalul Ramadhan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mutiara Nasywa Fiorenza Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nabika Ulinnuha Zakianisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nadya Rega Rismadi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naila Febryani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naswa Rifatus Sulaiman",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Natasya Okitavia Ningsih",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nayaka Yuwana Nuraditya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nazwa Yepitadinar",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nikitasari Mustofa",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

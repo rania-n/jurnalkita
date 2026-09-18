@@ -1,0 +1,153 @@
+{
+    "kelas": "X BD 2",
+    "tingkat": "X",
+    "jurusan": "BD",
+    "nomor": 2,
+    "wali_nama": "Erna Qoriah, S.Pd",
+    "siswa": [
+        {
+            "nama": "Goevindha Gauethama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Hilfa Dwi Cahyanti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ica Rismawati",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Intan Novita Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Irma Rizkia Valentina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Isna Cintya Aulia Nur Aini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jesika Oktavianus Wulandari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jianina Miftachul Syifa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jihan Makaila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kaila Fifi Nuraisah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kalila Alvina Fitriasari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kayla Amanda Raisha",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Keyza Regina Susika Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kheila Febri Lutviananta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khirana Arnelita Lestary",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khoirul Afni Afifah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Latifa Putri Puspita Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Lufi Anugrah Oktaviani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Lutfiana Nuri Antika",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Marsel Eka Sanjaya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Maulidiyanu Jesquenda Ernes Fibriani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Maura Fertaliza Pratiwi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Melati Izza Azka Aulia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mufida Ummul Fadhila",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nabila Oktavia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nabila Tasya Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naddin Imroatuzzakiyah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nadira Dea Ananta",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naila Luthfitah Negarawan",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naila Nadira Rahma Noviani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Najwa Tieresya Heriany",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nanda Mareta Kunthi Pangesti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naomi Putri Davina Rahmadita",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Natasya Putri Nuraini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naura Dwi Azzahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naya Fahima Nur Ilmi",
+            "jenis_kelamin": "P"
+        }
+    ]
+}

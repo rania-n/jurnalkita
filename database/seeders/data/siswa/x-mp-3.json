@@ -1,0 +1,153 @@
+{
+    "kelas": "X MP 3",
+    "tingkat": "X",
+    "jurusan": "MP",
+    "nomor": 3,
+    "wali_nama": "Yustin Febrini, S.Pd",
+    "siswa": [
+        {
+            "nama": "Indri Suci Nurul Laily",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Inneke Alya Kamalia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Irma Qorriatul Aina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Irma Yulianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jacinda Ivenna Sindi Pramesti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Jihan Aufa Jauhara",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khamida Zuhdiyyah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kharisma Septi Maharani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Khoiriza Ainun Yufada",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Kurnia Ning Tiwi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Lailatul Putri Ramadhani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Layla Putri Asyifa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Leandra Jevira Valerie Raihanah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mahartika Aurany Fadillah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Maria Natalie Permata Putri Irawan",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Marsha Putri Aulia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Mayasha Putri Ossa Prasetya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Moza Mailinda",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Muhammad Almas Maulana",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Bima Syahrevi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mutiara Dwi Febrianti Prayitno",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nabilla Mey Alfiona",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nadila Kofifah Rahayu",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nadira Filkhiya Renata",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naira Sifa Isabela",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naswa Marsya Sahira",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Natasya Ardelia Shafa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naura Putri Kamadia",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naura Usailata Hasna Fitra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Neisya Adelia Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Neylla Desvinta Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nia Imroatuzzahro",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Novia Ulfi Dwi Cahyani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Nurin Azkiya Jasinda",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Olivia Febrianti",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Prawira Kefin Alviano Saputra",
+            "jenis_kelamin": "L"
+        }
+    ]
+}

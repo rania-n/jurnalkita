@@ -1,0 +1,189 @@
+{
+    "kelas": "XI MP 2",
+    "tingkat": "XI",
+    "jurusan": "MP",
+    "nomor": 2,
+    "wali_nama": "Sunarti, S.Pd",
+    "siswa": [
+        {
+            "nama": "Devianti Kusumawati",
+            "jenis_kelamin": "P",
+            "nis": "247221982.98"
+        },
+        {
+            "nama": "Diandra Nur Ramadhani",
+            "jenis_kelamin": "P",
+            "nis": "247231983.98"
+        },
+        {
+            "nama": "Dinda Aulia",
+            "jenis_kelamin": "P",
+            "nis": "247241984.98"
+        },
+        {
+            "nama": "Divanza Syahrani Putri",
+            "jenis_kelamin": "P",
+            "nis": "247251985.98"
+        },
+        {
+            "nama": "Diyah Ayu Wulandari",
+            "jenis_kelamin": "P",
+            "nis": "247261986.98"
+        },
+        {
+            "nama": "Dizzha Shavyona",
+            "jenis_kelamin": "P",
+            "nis": "247271987.98"
+        },
+        {
+            "nama": "Effel Gresilea Fatalanie",
+            "jenis_kelamin": "P",
+            "nis": "247281988.98"
+        },
+        {
+            "nama": "Eka Ratna Wulandari",
+            "jenis_kelamin": "P",
+            "nis": "247291989.98"
+        },
+        {
+            "nama": "Elysia Putri",
+            "jenis_kelamin": "P",
+            "nis": "247301990.98"
+        },
+        {
+            "nama": "Faiqotus Silvia Yuniar",
+            "jenis_kelamin": "P",
+            "nis": "247311991.98"
+        },
+        {
+            "nama": "Faiz Ayudya Prasista",
+            "jenis_kelamin": "P",
+            "nis": "247321992.98"
+        },
+        {
+            "nama": "Feby Ana Mauludya Sekar Asih",
+            "jenis_kelamin": "P",
+            "nis": "247331993.98"
+        },
+        {
+            "nama": "Felicia Azarin Putri Rivani",
+            "jenis_kelamin": "P",
+            "nis": "247341994.98"
+        },
+        {
+            "nama": "Fiora Rachel Qabita",
+            "jenis_kelamin": "P",
+            "nis": "247351995.98"
+        },
+        {
+            "nama": "Gadiszha Ayu Maulida",
+            "jenis_kelamin": "P",
+            "nis": "247361996.98"
+        },
+        {
+            "nama": "Galih Adi Prastyo",
+            "jenis_kelamin": "L",
+            "nis": "247371997.98"
+        },
+        {
+            "nama": "Geabrilla Napa Gita Eprilia",
+            "jenis_kelamin": "P",
+            "nis": "247381998.98"
+        },
+        {
+            "nama": "Hasna Khairunnisa",
+            "jenis_kelamin": "P",
+            "nis": "247391999.98"
+        },
+        {
+            "nama": "Helsi Meyzakia Karin",
+            "jenis_kelamin": "P",
+            "nis": "247402000.98"
+        },
+        {
+            "nama": "Heni Agustina",
+            "jenis_kelamin": "P",
+            "nis": "247412001.98"
+        },
+        {
+            "nama": "Ika Aprillia Kinanthi",
+            "jenis_kelamin": "P",
+            "nis": "247422002.98"
+        },
+        {
+            "nama": "Imelia Eva Ainun Nissa",
+            "jenis_kelamin": "P",
+            "nis": "247432003.98"
+        },
+        {
+            "nama": "Imroathul Azizah",
+            "jenis_kelamin": "P",
+            "nis": "247442004.98"
+        },
+        {
+            "nama": "Inaya Putri Permata Sari",
+            "jenis_kelamin": "P",
+            "nis": "247452005.98"
+        },
+        {
+            "nama": "Jessicca Alifa Tsurayya",
+            "jenis_kelamin": "P",
+            "nis": "247462006.98"
+        },
+        {
+            "nama": "Juwanita Keyla Sari",
+            "jenis_kelamin": "P",
+            "nis": "247472007.98"
+        },
+        {
+            "nama": "Keysha Erina Oktaviani",
+            "jenis_kelamin": "P",
+            "nis": "247482008.98"
+        },
+        {
+            "nama": "Khaylila Citra Az Zahwa",
+            "jenis_kelamin": "P",
+            "nis": "247492009.98"
+        },
+        {
+            "nama": "Kirana Gabrillia Putri",
+            "jenis_kelamin": "P",
+            "nis": "247502010.98"
+        },
+        {
+            "nama": "Ladinda Viona Kusuma Fradana",
+            "jenis_kelamin": "P",
+            "nis": "247512011.98"
+        },
+        {
+            "nama": "Laili Izzati Aida Bambang",
+            "jenis_kelamin": "P",
+            "nis": "247522012.98"
+        },
+        {
+            "nama": "Laura Ananda Tita Ramadhani",
+            "jenis_kelamin": "P",
+            "nis": "247532013.98"
+        },
+        {
+            "nama": "Loveta Farera Putri",
+            "jenis_kelamin": "P",
+            "nis": "247542014.98"
+        },
+        {
+            "nama": "Mahda Retta Zona Arrum",
+            "jenis_kelamin": "P",
+            "nis": "247552015.98"
+        },
+        {
+            "nama": "Maybella Putri Joana",
+            "jenis_kelamin": "P",
+            "nis": "247562016.98"
+        },
+        {
+            "nama": "Maycella Eka Amelia",
+            "jenis_kelamin": "P",
+            "nis": "247572017.98"
+        }
+    ]
+}

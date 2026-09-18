@@ -1,0 +1,149 @@
+{
+    "kelas": "X TKJ 2",
+    "tingkat": "X",
+    "jurusan": "TKJ",
+    "nomor": 2,
+    "wali_nama": "Muhammad Fajar Assidiqi, S.Pd",
+    "siswa": [
+        {
+            "nama": "Muhammad Fahreza Kurniawan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Fathur Rosyid Assidiq",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Ferdian Dwi Syahputra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Hilmi Fadhil",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Muhammad Nata Zakaria",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mukhamad Tegar Al Farikhi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Mustika Tri Rahayu",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Naila Sifa Nafadira",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Putra Aji Pangestu",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Qori Muyasaroh",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Raditya Daffa Abrory",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Rangga Aldryan Firdaus",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Revita Cahya Anggraini",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ridho Putra Pratama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Rista Enggar Febri Fatma Alifa Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Rizqi Saefudin",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Safara Aulia Sabrina",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Salsa Dwi Novita Sari",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Saskia Nata Safira",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Satrio Bagus Kusuma",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Sofia Rahmania",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Sukma Citra Ayu Pratiwi",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syifa Aulia Zahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Syifa Ayuni Al Thafun Nisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Tegar Arlan Cahya Pratama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Tegar Indra Kusuma",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Tia Marshanda",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Vania Widya Ningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Wedhar Ratri Puspaningdyah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Weldianta Firman Zaki",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Wildan Rezky Aditama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Yohanes Sinartria Ockta Riadi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Zaldy Octav Sabanna Putra",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Zifan Awfa Putra Arriyadli",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Zufan Asyfaq Izzudin Purwari",
+            "jenis_kelamin": "L"
+        }
+    ]
+}

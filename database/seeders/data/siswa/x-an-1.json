@@ -1,0 +1,153 @@
+{
+    "kelas": "X AN 1",
+    "tingkat": "X",
+    "jurusan": "AN",
+    "nomor": 1,
+    "wali_nama": "Dhuana Putri Puspitasary, S.Pd",
+    "siswa": [
+        {
+            "nama": "Abiel Vebgar Januarta",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Adinda Zahrotun Nisa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Aditya Candra Ihsan Rosiyan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Aditya Rama Daniswara",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Aisyah Rahima Widi Sriarumni",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Ajeng Hafizha Adara",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Akmal Faqri Aldiansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Alvaro Raynor Yusuf Ramadhan",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Amelia Fristania Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Anang Fahrudin",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Anindya Salsabila Kirana",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Apta Rafifdianto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ardian Putra Bumi",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Ayu Nurmasikin",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Bekti Dwi Pramono",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Bella Vania Alexandra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Berliant Cinta Agusetya",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Briyant Trisna Putra Pratama",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Cheril Laetisya Finanda",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Daniar Azzahra",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Desy Andhini Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Devi Dwi Yuliani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Devika Vaneza Mistha Putri",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Dimas Cahyo Tristanto",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Dira Ayu Natasa",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Elang Putra Bimantara",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Eza Wira Ramadhana Rizaldy",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Fahmi Amaludin Akbar",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Faundra Frizzy Desta Wijaya",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Femas Raditya Evriano",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Firman Ardyansyah",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Galuh Ananta Putri Ningrum",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Grandika Destian Primadani",
+            "jenis_kelamin": "L"
+        },
+        {
+            "nama": "Hafizah Putri Rakhmad Syah",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Hanifa Fitriani",
+            "jenis_kelamin": "P"
+        },
+        {
+            "nama": "Keanu Aldriano Pratama",
+            "jenis_kelamin": "L"
+        }
+    ]
+}

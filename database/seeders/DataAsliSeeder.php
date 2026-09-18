@@ -81,15 +81,29 @@ class DataAsliSeeder extends Seeder
      * daftar absen asli baru dari user. Absen #1 di tiap file otomatis jadi
      * pengurus kelas (akun login dibuat) -- konvensi yang sama dipakai di
      * seluruh app buat pengurus kelas.
+     *
+     * File yang kelasnya BELUM ada di DB (mis. kelas XII -- nggak ikut
+     * jadwal-asli.json karena XII lagi PKL jadi nggak punya jadwal) otomatis
+     * dibuatkan Kelas-nya sendiri dari metadata di JSON ini (tingkat/jurusan/
+     * nomor/wali_nama). Wali dicocokkan by name ke Guru yang udah ada --
+     * nggak bikin akun Guru baru di sini, biar nggak nambah akun yang nggak
+     * ada dasarnya (kalau nggak ketemu, wali_id dibiarkan null).
      */
-    private function seedSiswaAsli(): void
+    public function seedSiswaAsli(): void
     {
         foreach (glob(__DIR__.'/data/siswa/*.json') as $path) {
             $data = json_decode(file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
 
             $kelas = Kelas::where('nama', $data['kelas'])->first();
             if (! $kelas) {
-                throw new RuntimeException("Kelas '{$data['kelas']}' (dari {$path}) tidak ditemukan.");
+                $kelas = Kelas::create([
+                    'nama' => $data['kelas'],
+                    'tingkat' => $data['tingkat'],
+                    'jurusan' => $data['jurusan'],
+                    'nomor' => $data['nomor'] ?? null,
+                    'wali_id' => ! empty($data['wali_nama']) ? $this->cariGuruByNama($data['wali_nama']) : null,
+                    'tahun_ajaran_id' => TahunAjaran::aktif()?->id,
+                ]);
             }
 
             // Idempoten -- kalau kelas ini udah ada siswanya (mis. dari re-run
@@ -112,7 +126,11 @@ class DataAsliSeeder extends Seeder
                 Siswa::create([
                     'user_id' => $user?->id,
                     'kelas_id' => $kelas->id,
-                    'nis' => fake()->unique()->numerify('2025########'),
+                    // NIS asli (dari NISS di data sekolah, BUKAN NISN -- dua
+                    // nomor itu beda) kalau ada -- fallback nomor acak unik
+                    // cuma buat siswa yang NIS-nya belum diterbitkan sekolah
+                    // (biasanya kelas X yang baru masuk).
+                    'nis' => ! empty($s['nis']) ? $s['nis'] : fake()->unique()->numerify('2025########'),
                     'nama' => $s['nama'],
                     'jenis_kelamin' => $s['jenis_kelamin'],
                     'no_absen' => $noAbsen,
@@ -120,6 +138,46 @@ class DataAsliSeeder extends Seeder
                 ]);
             }
         }
+    }
+
+    /**
+     * Wali kelas dari data/siswa/*.json (CSV presensi terbaru) ditulis beda
+     * ejaan tipis (1-2 huruf) atau beda format gelar akademik ("S.E" vs "SE"
+     * vs "S. E") dibanding nama Guru yang sama persis di tabel guru (dari
+     * jadwal-asli.json, sumber lain) -- sama persis kasusnya kayak "5 nama
+     * disatukan manual" yang udah didokumentasikan di atas buat guru/piket.
+     * Dicek satu-satu manual pas import data siswa (2026-09).
+     */
+    private const ALIAS_WALI = [
+        'Erna Qoriah, S.Pd' => 'Erna Qoriah, S.E.',
+        'Retno Widiyastuti,S.Pd' => 'Retno Widyastuti, S.Pd., M.Pd',
+        'Astra Bela Flamboyan, S.Psi' => 'Astra Bella Flamboyan, S.Psi',
+        'Diana Hartanti, S.T' => 'Diana Hartanti, S.T., M.Pd',
+        'Arvia Rienitasary, S.Pd' => 'Arvia Rienetasary, S.Pd',
+        'Risqi Nur Imama, S.ST,Par' => 'Risqi Nur Imana, S.Tr.Par',
+        'Indayah, S.Pd' => 'Indayah, S.Pd., M.Pd',
+        'Elysa Yuli Nuraini, S.Si' => "Elysa Yuli Nur'aini, S.Si",
+        'Fitria Dyah Ayu Hartati, S.Pd' => 'Fitria Diah Ayu Hartati, S.Pd',
+        'Siswanti Purwaningsih, St' => 'Siswanti Purwaningsih, S.T., M.Pd',
+        'Fitria Renytasari, S.Pd' => 'Fitria Renyasari, S.Pd',
+        // "Karminah, S.Pd" (wali XI BD 3 di CSV) SENGAJA nggak ada aliasnya --
+        // nggak ada guru dengan nama itu/mirip sama sekali di tabel guru,
+        // biarin wali_id null daripada nebak salah.
+    ];
+
+    /**
+     * Cocokkan nama guru longgar -- nggak peduli kapital, dan titik/koma/
+     * spasi dibuang SEPENUHNYA (bukan cuma dirapikan), soalnya gelar
+     * akademik ditulis beda-beda banget formatnya antar sumber data
+     * ("S.E" vs "SE" vs "S. E" vs "S,E"). Alias di atas dicek duluan buat
+     * nama yang ejaan intinya (bukan cuma gelar) beda tipis.
+     */
+    private function cariGuruByNama(string $nama): ?int
+    {
+        $normal = fn (string $s) => mb_strtolower(preg_replace('/[.,\s]+/u', '', $s));
+        $target = $normal(self::ALIAS_WALI[$nama] ?? $nama);
+
+        return Guru::all()->first(fn ($g) => $normal($g->nama) === $target)?->id;
     }
 
     private function seedMapel(array $mapelsNew): void
