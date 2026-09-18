@@ -33,8 +33,8 @@ class PresensiDefault
         $presensiSebelumnya = self::presensiTerakhirHariIni($kelasId, $tanggal);
 
         return $siswas->mapWithKeys(function ($s) use ($siswaDispensasi, $presensiSebelumnya) {
-            if ($siswaDispensasi->contains($s->id)) {
-                return [$s->id => ['status' => 'dispensasi', 'catatan' => 'Dispensasi (otomatis dari sistem)']];
+            if ($siswaDispensasi->has($s->id)) {
+                return [$s->id => ['status' => 'dispensasi', 'catatan' => $siswaDispensasi[$s->id] ?: 'Dispensasi (otomatis dari sistem)']];
             }
 
             return [$s->id => $presensiSebelumnya[$s->id] ?? ['status' => 'hadir', 'catatan' => null]];
@@ -42,7 +42,8 @@ class PresensiDefault
     }
 
     /**
-     * ID siswa yang punya dispensasi disetujui pada tanggal tsb. Kalau
+     * Alasan dispensasi (buat dijadikan catatan otomatis) keyed by siswa_id,
+     * buat siswa yang punya dispensasi disetujui pada tanggal tsb. Kalau
      * $jamMulai/$jamSelesai diisi, dipersempit ke jam itu (dispensasi tanpa
      * jam_ke = "sepanjang hari" tetap ikut). Kalau dikosongkan (mis. form
      * Pengganti yang presensinya dirender sebelum jadwal dipilih), ambil
@@ -57,7 +58,7 @@ class PresensiDefault
                 fn ($q2) => $q2->whereNull('jam_ke_mulai')
                     ->orWhere(fn ($q3) => $q3->where('jam_ke_mulai', '<=', $jamSelesai)->where('jam_ke_selesai', '>=', $jamMulai))
             ))
-            ->pluck('siswa_id');
+            ->pluck('alasan', 'siswa_id');
     }
 
     /** Presensi siswa dari jurnal TERAKHIR yang sudah diisi hari ini di kelas yang sama. */

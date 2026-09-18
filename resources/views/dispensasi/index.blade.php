@@ -75,25 +75,7 @@
     {{-- Filter & status -- mirip monitor piket --}}
     <div class="mb-4 flex flex-col gap-2">
         {{-- Search bar -- filter langsung di DOM, tanpa reload (seperti monitor) --}}
-        <div class="flex h-10 items-center gap-2 rounded-lg border border-surface-alt bg-card px-3">
-            <x-icon name="search" :size="16" class="shrink-0 text-muted" />
-            <input
-                id="input-cari-dispen"
-                type="text"
-                value="{{ request('cari') }}"
-                placeholder="Nama atau NIS siswa..."
-                class="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted"
-                autocomplete="off"
-            >
-            <button
-                id="btn-clear-dispen"
-                type="button"
-                class="{{ request('cari') ? '' : 'hidden' }} shrink-0 text-muted hover:text-ink"
-                aria-label="Hapus pencarian"
-            >
-                <x-icon name="close" :size="16" />
-            </button>
-        </div>
+        <x-ui.search-bar id="input-cari-dispen" value="{{ request('cari') }}" placeholder="Nama atau NIS siswa..." autocomplete="off" />
 
         {{-- Tombol filter status (berwarna) --}}
         @php
@@ -204,7 +186,6 @@
         <script>
             (function () {
                 const input    = document.getElementById('input-cari-dispen');
-                const btnClear = document.getElementById('btn-clear-dispen');
                 const kartuList = document.querySelectorAll('[data-dispen-card]');
                 const kosong   = document.getElementById('dispen-kosong');
                 if (!input) return;
@@ -218,17 +199,9 @@
                         if (cocok) ada = true;
                     });
                     if (kosong) kosong.hidden = ada;
-                    btnClear?.classList.toggle('hidden', !input.value);
                 }
 
                 input.addEventListener('input', terapkan);
-
-                // Tombol X: kosongkan dan filter ulang
-                btnClear?.addEventListener('click', function () {
-                    input.value = '';
-                    terapkan();
-                    input.focus();
-                });
 
                 // Jalankan sekali saat load (kalau ada nilai dari server)
                 terapkan();

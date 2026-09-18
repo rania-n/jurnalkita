@@ -23,7 +23,7 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {{-- Jam mulai & selesai ikut jadwal, nggak bisa diedit manual (sama
                  kayak Form Jurnal baru). --}}
-            <x-ui.field-static label="Jam Pelajaran" icon="schedule" class="sm:col-span-2">
+            <x-ui.field-static label="Jam Pelajaran" icon="schedule" tone="muted" class="sm:col-span-2">
                 JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}
                 @if ($jamJurnal)
                     <span class="text-muted-2">· {{ $jamJurnal }}</span>

@@ -144,7 +144,7 @@ class Dispensasi extends Model
                         }
                     }
                 })
-                ->update(['status' => 'dispensasi', 'catatan' => 'Dispensasi (disetujui)']);
+                ->update(['status' => 'dispensasi', 'catatan' => $this->alasan ?: 'Dispensasi (disetujui)']);
         }
     }
 }

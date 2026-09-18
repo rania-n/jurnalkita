@@ -19,6 +19,21 @@
             :title="$jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi' : 'Belum ada jadwal mengajar'"
             :desc="$jumlahSudahDiisiHariIni > 0 ? 'Mantap, kelar semua! Kalau ada yang perlu diubah, buka dari Riwayat.' : 'Hubungi admin untuk menambahkan jadwal Anda.'"
         />
+    @elseif ($jurnalDiblokirIstirahat)
+        {{-- Lagi istirahat/pergantian jam (masih dalam rentang jam sekolah,
+             tapi nggak ada jadwal yang beneran lagi berlangsung buat guru
+             ini) -- sengaja nggak dikasih akses milih jadwal lain di sini,
+             biar nggak ada celah isi jurnal buat jam yang belum/nggak
+             beneran dijalani. Baru bebas milih lagi begitu jam pelajaran
+             berikutnya mulai. Akses bebas pilih jadwal DI LUAR jam sekolah
+             tetap ada di jadwalBolehDiisi() (buat testing), tapi sengaja
+             nggak disebut di teks ini -- jangan dikasih tau ke guru, nanti
+             jadi celah buat "ngisi jurnal" jam yang nggak beneran dijalani. --}}
+        <x-ui.empty
+            icon="hourglass_empty"
+            title="Belum waktunya isi jurnal"
+            desc="Sedang di luar jam pelajaran (istirahat/pergantian jam). Coba lagi begitu jam pelajaran Anda mulai."
+        />
     @else
         <form method="POST" action="{{ route('jurnal.store') }}" enctype="multipart/form-data">
             @csrf
@@ -42,7 +57,7 @@
             @endphp
 
             @if ($jadwalTerkunci)
-                <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" class="sm:col-span-2">
+                <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" tone="muted" class="sm:col-span-2">
                     {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
                     @if ($jamAwal)
                         <span class="text-muted-2">({{ $jamAwal }})</span>
@@ -71,13 +86,13 @@
                  itu udah ditentuin jadwalnya. Pas jadwal diganti lewat dropdown di
                  atas, dua-duanya ikut kesinkron otomatis (lihat sync() di bawah). --}}
             <div>
-                <x-ui.field-static label="Jam ke- (mulai)" icon="schedule">
+                <x-ui.field-static label="Jam ke- (mulai)" icon="schedule" tone="muted">
                     <span id="tampilan-jam-mulai">Jam ke-{{ $mulaiAwal }}</span>
                 </x-ui.field-static>
                 <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
             </div>
             <div>
-                <x-ui.field-static label="Jam ke- (selesai)" icon="schedule">
+                <x-ui.field-static label="Jam ke- (selesai)" icon="schedule" tone="muted">
                     <span id="tampilan-jam-selesai">Jam ke-{{ $selesaiAwal }}</span>
                 </x-ui.field-static>
                 <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">

@@ -14,10 +14,10 @@
     <button
         type="button"
         data-admin-search-clear
-        class="{{ request()->query($name) ? '' : 'hidden' }} shrink-0 text-muted hover:text-ink"
-        aria-label="Hapus pencarian"
+        class="{{ request()->query($name) ? '' : 'hidden' }} flex shrink-0 items-center gap-1 text-xs font-semibold text-muted hover:text-alpha"
     >
-        <x-icon name="close" :size="16" />
+        <x-icon name="close" :size="13" class="shrink-0" />
+        Reset
     </button>
 </div>
 
