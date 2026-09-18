@@ -10,9 +10,7 @@ class JurnalPerluRevisi extends Notification
 {
     use Queueable;
 
-    public function __construct(private Jurnal $jurnal)
-    {
-    }
+    public function __construct(private Jurnal $jurnal) {}
 
     /**
      * @return array<int, string>
@@ -31,7 +29,10 @@ class JurnalPerluRevisi extends Notification
             'title' => 'Jurnal perlu direvisi',
             'body' => ($this->jurnal->jadwal->mapel->nama ?? 'Jurnal').' — '.($this->jurnal->jadwal->kelas->nama ?? '')
                 .': '.($this->jurnal->catatan_verifikasi ?: 'Pengurus kelas minta perbaikan.'),
-            'url' => route('jurnal.show', $this->jurnal),
+            // Langsung ke halaman Ubah (bukan sekadar lihat) -- itu jelas
+            // maksudnya guru klik notif ini, jadi nggak perlu 1 klik ekstra
+            // "Ubah" lagi dari halaman detail.
+            'url' => route('jurnal.edit', $this->jurnal),
         ];
     }
 }

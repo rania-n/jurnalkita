@@ -10,9 +10,7 @@ class DispensasiDiputuskan extends Notification
 {
     use Queueable;
 
-    public function __construct(private Dispensasi $dispensasi)
-    {
-    }
+    public function __construct(private Dispensasi $dispensasi) {}
 
     /**
      * @return array<int, string>
@@ -33,7 +31,7 @@ class DispensasiDiputuskan extends Notification
             'title' => $disetujui ? 'Dispensasi disetujui' : 'Dispensasi ditolak',
             'body' => 'Dispensasi '.($this->dispensasi->siswa->nama ?? 'siswa')
                 .' '.($disetujui ? 'disetujui' : 'ditolak').' oleh Waka Kesiswaan.',
-            'url' => route('dispensasi.show', $this->dispensasi),
+            'url' => route('dispensasi.index', ['lihat' => $this->dispensasi->id]),
         ];
     }
 }

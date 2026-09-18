@@ -5,7 +5,7 @@
         :back="route('sekretaris.jurnal.index')"
     />
 
-    <x-alert type="info" class="mb-4">Hanya untuk status <strong>Tugas Luar</strong> atau <strong>Tidak Hadir</strong>. Jurnal ini otomatis terverifikasi.</x-alert>
+    <x-alert type="info" class="mb-4">Hanya untuk guru yang <strong>Tidak Hadir</strong> dan tidak sempat mengisi sendiri. Jurnal ini otomatis terverifikasi.</x-alert>
 
     @if ($jadwals->isEmpty())
         <x-ui.empty icon="event_busy" title="Tidak ada jadwal kelas ini hari ini" />
@@ -32,19 +32,12 @@
                 </x-ui.select>
                 <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">Pilih jadwal dulu — jam mulai & selesai otomatis mengikuti jadwal itu. Boleh diubah manual kalau perlu.</p>
 
-                <x-ui.choice
-                    label="Status Kehadiran Guru"
-                    name="status_guru"
-                    class="sm:col-span-2"
-                    :options="['tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir']"
-                    :tones="['tugas' => 'izin', 'tidak_hadir' => 'alpha']"
-                    :value="old('status_guru', 'tugas')"
-                />
-
-                {{-- Sama kayak form Isi Jurnal punya Guru: buat status Tugas
-                     Luar/Tidak Hadir, yang diisi itu Tugas Tambahan (apa yang
-                     dikasih ke siswa) + Alasan (kenapa gurunya nggak hadir) --
-                     bukan "Materi" (itu khusus kalau gurunya beneran hadir). --}}
+                {{-- status_guru nggak lagi dipilih di sini -- pengganti = guru
+                     nggak hadir, jadi server selalu simpen 'tidak_hadir'
+                     (lihat Sekretaris\JurnalController::storePengganti()).
+                     Yang diisi itu Tugas Tambahan (apa yang dikasih ke siswa)
+                     + Alasan (kenapa gurunya nggak hadir), bukan "Materi"
+                     (itu khusus kalau gurunya beneran hadir). --}}
                 <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengerjakan LKS halaman 12–15.">{{ old('tugas_tambahan') }}</x-ui.textarea>
                 <x-ui.textarea label="Alasan" name="alasan" :rows="2" class="sm:col-span-2" placeholder="Contoh: rapat dinas luar kota, izin sakit, dll.">{{ old('alasan') }}</x-ui.textarea>
             </div>

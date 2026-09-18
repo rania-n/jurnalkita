@@ -49,7 +49,7 @@ class SmokeAllRoutesTest extends TestCase
 
         $jurnal = Jurnal::where('guru_id', $guru->guru->id)->first();
         if ($jurnal) {
-            $this->actingAs($guru)->get("/guru/jurnal/{$jurnal->id}")->assertOk();
+            $this->actingAs($guru)->get("/guru/jurnal/{$jurnal->id}/fragment")->assertOk();
             $this->actingAs($guru)->get("/guru/jurnal/{$jurnal->id}/ubah")->assertOk();
         }
     }
@@ -77,7 +77,7 @@ class SmokeAllRoutesTest extends TestCase
 
         $disp = Dispensasi::where('status_piket', 'approved')->first();
         if ($disp) {
-            $this->actingAs($waka)->get("/dispensasi/{$disp->id}")->assertOk();
+            $this->actingAs($waka)->get("/dispensasi/{$disp->id}/fragment")->assertOk();
         }
     }
 }

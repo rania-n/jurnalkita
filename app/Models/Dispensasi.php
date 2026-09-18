@@ -94,9 +94,15 @@ class Dispensasi extends Model
             ->whereRaw('coalesce(tanggal_selesai, tanggal) >= ?', [today()->toDateString()]);
     }
 
+    /**
+     * withTrashed() -- dispensasi itu CATATAN SEJARAH, harus tetap kebaca
+     * utuh walau siswanya belakangan di-soft-delete (pindah/keluar/data
+     * diganti data asli, dsb). Tanpa ini, dispensasi lama yang nyantol ke
+     * siswa yang udah dihapus bakal error null pas ditampilin.
+     */
     public function siswa(): BelongsTo
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsTo(Siswa::class)->withTrashed();
     }
 
     public function pengaju(): BelongsTo

@@ -104,6 +104,15 @@ class DispensasiController extends Controller
             'ditolak' => $baseQuery()->where('status_akhir', 'rejected')->count(),
         ];
 
+        // Halaman detail dispensasi (dispensasi.show) udah dihapus -- semua
+        // "lihat detail" sekarang lewat popup di halaman ini. Tempat lain
+        // yang dulu redirect/link ke situ (habis keputusan Waka, notifikasi,
+        // dst) sekarang ke sini bawa ?lihat=<id>, popup-nya kebuka otomatis
+        // -- nggak peduli dispensasinya ada di halaman pagination yang mana.
+        $lihatDispensasi = $request->filled('lihat')
+            ? Dispensasi::with('siswa')->find($request->integer('lihat'))
+            : null;
+
         return view('dispensasi.index', [
             'items' => $this->terfilter($request)->paginate(15)->withQueryString(),
             'tab' => $request->get('tab', 'semua'),
@@ -112,6 +121,7 @@ class DispensasiController extends Controller
             'kelasList' => Kelas::orderBy('nama')->get(),
             'jumlahTab' => $jumlahTab,
             'waLinkAutoKirim' => $waLinkAutoKirim,
+            'lihatDispensasi' => $lihatDispensasi,
         ]);
     }
 
@@ -226,35 +236,11 @@ class DispensasiController extends Controller
             ."Setujui/tolak lewat tautan ini:\n{$tautan}");
     }
 
-    public function show(Dispensasi $dispensasi): View
-    {
-        $this->pastikanBolehLihat();
-        $user = auth()->user();
-
-        $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
-        $waLinkWaka = $this->waLinkUntukWaka($dispensasi);
-
-        $waLinkSiswa = null;
-        if ($dispensasi->status_akhir === 'approved' && $dispensasi->no_hp) {
-            $tautanSurat = SuratDispensasiController::tautanSurat($dispensasi);
-            $waLinkSiswa = WaLink::url($dispensasi->no_hp, "Dispensasi kamu sudah *disetujui*.\n\n"
-                ."Tunjukkan surat ini ke satpam saat keluar sekolah:\n{$tautanSurat}");
-        }
-
-        return view('dispensasi.show', [
-            'dispensasi' => $dispensasi,
-            'bisaWaka' => $user->role === 'waka' && $dispensasi->status_waka === 'pending',
-            'bisaBatal' => $dispensasi->diajukan_oleh_id === $user->id
-                && $dispensasi->status_waka === 'pending',
-            'waLinkWaka' => $waLinkWaka,
-            'waLinkSiswa' => $waLinkSiswa,
-        ]);
-    }
-
     /**
-     * Fragment HTML (bukan halaman penuh) buat popup "Detail" di Riwayat
-     * Dispensasi -- isinya sama kayak show(), cuma tanpa layout. Halaman
-     * show() biasa tetap ada buat akses langsung/fallback.
+     * Detail dispensasi -- SELALU popup (fragment HTML tanpa layout), dibuka
+     * dari Riwayat Dispensasi lewat AJAX. Nggak ada lagi halaman penuh buat
+     * ini -- sengaja dihapus (dulu ada, masih bisa diakses langsung lewat
+     * URL walau harusnya cuma popup, bikin bingung).
      */
     public function showFragment(Dispensasi $dispensasi): View
     {
@@ -334,7 +320,7 @@ class DispensasiController extends Controller
             }
         }
 
-        return redirect()->route('dispensasi.index')->with(
+        return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])->with(
             'success',
             $dispensasi->status_akhir === 'approved'
                 ? 'Dispensasi disetujui. Presensi siswa otomatis diperbarui.'

@@ -128,16 +128,18 @@ class JurnalController extends Controller
             'jadwal_id' => ['required', 'exists:jadwals,id'],
             'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:15'],
             'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
-            'status_guru' => ['required', 'in:tugas,tidak_hadir'],   // pengganti tidak boleh "hadir"
-            // Sama kayak Guru\JurnalController: buat status tugas/tidak_hadir,
-            // yang wajib itu Tugas Tambahan + Alasan (bukan Materi -- itu
-            // khusus status hadir, nggak relevan di sini).
+            // Sama kayak Guru\JurnalController: yang wajib Tugas Tambahan +
+            // Alasan (bukan Materi -- itu khusus status hadir, nggak relevan
+            // di sini). status_guru sendiri nggak lagi dipilih dari form --
+            // pengganti = guru nggak hadir, jadi SELALU 'tidak_hadir' (lihat
+            // di bawah).
             'tugas_tambahan' => ['required', 'string'],
             'alasan' => ['required', 'string'],
             'presensi' => ['required', 'array'],
             'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
         ]);
+        $data['status_guru'] = 'tidak_hadir';
 
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
         abort_unless($jadwal->kelas_id === $kelas->id, 403);

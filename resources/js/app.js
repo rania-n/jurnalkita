@@ -33,6 +33,79 @@ function initUploadPreview() {
     });
 }
 
+/* <x-ui.upload-kamera> -- wajib jepret foto langsung dari kamera perangkat
+ * (BUKAN pilih dari galeri/file), jalan di HP maupun desktop/laptop. Atribut
+ * HTML "capture" cuma ngaruh di browser mobile, jadi di sini dibikin manual
+ * pakai getUserMedia() + <video> live + jepret ke <canvas>, hasilnya
+ * disuntikkan balik ke <input type=file> asli lewat DataTransfer -- validasi
+ * & submit form-nya nggak berubah sama sekali, cuma CARA ngisi file-nya.
+ */
+function initKameraWajib() {
+    document.querySelectorAll('[data-kamera-wrap]').forEach((wrap) => {
+        const dialog = wrap.querySelector('[data-modal-open]')
+            ? document.getElementById(wrap.querySelector('[data-modal-open]').dataset.modalOpen)
+            : null;
+        const video = wrap.querySelector('[data-kamera-video]');
+        const canvas = wrap.querySelector('[data-kamera-canvas]');
+        const pesanError = wrap.querySelector('[data-kamera-error]');
+        const tombolJepret = wrap.querySelector('[data-kamera-jepret]');
+        const tombolBuka = wrap.querySelectorAll('[data-kamera-buka]');
+        const tombolUlang = wrap.querySelector('[data-kamera-ulang]');
+        const input = wrap.querySelector('[data-kamera-input]');
+        const img = wrap.querySelector('[data-kamera-img]');
+        const placeholder = wrap.querySelector('[data-kamera-placeholder]');
+        if (!dialog || !video || !canvas || !input) return;
+
+        let stream = null;
+
+        async function bukaKamera() {
+            pesanError.hidden = true;
+            video.hidden = false;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+                video.srcObject = stream;
+                await video.play();
+            } catch (err) {
+                video.hidden = true;
+                pesanError.hidden = false;
+            }
+        }
+
+        function tutupKamera() {
+            if (stream) {
+                stream.getTracks().forEach((track) => track.stop());
+                stream = null;
+            }
+            video.srcObject = null;
+        }
+
+        tombolBuka.forEach((btn) => btn.addEventListener('click', bukaKamera));
+        dialog.addEventListener('close', tutupKamera);
+
+        tombolJepret.addEventListener('click', () => {
+            if (!stream) return;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                const file = new File([blob], 'foto-suasana-kelas.jpg', { type: 'image/jpeg' });
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                input.files = dt.files;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+
+                img.src = URL.createObjectURL(blob);
+                img.hidden = false;
+                placeholder.hidden = true;
+                tombolUlang.hidden = false;
+
+                dialog.close();
+            }, 'image/jpeg', 0.85);
+        });
+    });
+}
+
 /* Konfirmasi sebelum aksi merusak (hapus). Pakai pada <form> atau <a>:
  *   <button data-confirm="Yakin hapus data ini?">Hapus</button>          (di dalam form)
  *   <a href="..." data-confirm="Yakin hapus?">Hapus</a>
@@ -194,6 +267,7 @@ function initJamSekarang() {
 function init() {
     initPasswordToggles();
     initUploadPreview();
+    initKameraWajib();
     initConfirm();
     initModals();
     initNavGroups();

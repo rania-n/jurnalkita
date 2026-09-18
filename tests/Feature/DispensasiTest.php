@@ -61,7 +61,7 @@ class DispensasiTest extends TestCase
         $d->segarkanStatusAkhir();
 
         $this->actingAs($this->waka)->get('/dispensasi')->assertOk()->assertSee('Budi');
-        $this->actingAs($this->waka)->get("/dispensasi/{$d->id}")->assertOk()->assertSee('Setujui');
+        $this->actingAs($this->waka)->get("/dispensasi/{$d->id}/fragment")->assertOk()->assertSee('Setujui');
         $this->actingAs($this->waka)->get('/waka')->assertOk()->assertSee('Antrean Dispensasi');
     }
 
@@ -105,7 +105,7 @@ class DispensasiTest extends TestCase
         $d = Dispensasi::first();
 
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved'])
-            ->assertRedirect('/dispensasi');
+            ->assertRedirect("/dispensasi?lihat={$d->id}");
 
         $d->refresh();
         $this->assertSame('approved', $d->status_akhir);
@@ -147,7 +147,7 @@ class DispensasiTest extends TestCase
             'tanggal' => today(), 'alasan' => 'X', 'status_piket' => 'approved',
         ]);
 
-        $this->actingAs($this->piket)->get("/dispensasi/{$milikOrang->id}")->assertOk();
+        $this->actingAs($this->piket)->get("/dispensasi/{$milikOrang->id}/fragment")->assertOk();
         $this->actingAs($this->piket)->get('/dispensasi')->assertOk()->assertSee('Budi');
     }
 
@@ -159,7 +159,7 @@ class DispensasiTest extends TestCase
         ]);
 
         $guruBukanPiket = User::factory()->role('guru')->create();
-        $this->actingAs($guruBukanPiket)->get("/dispensasi/{$d->id}")->assertForbidden();
+        $this->actingAs($guruBukanPiket)->get("/dispensasi/{$d->id}/fragment")->assertForbidden();
         $this->actingAs($guruBukanPiket)->get('/dispensasi')->assertForbidden();
     }
 

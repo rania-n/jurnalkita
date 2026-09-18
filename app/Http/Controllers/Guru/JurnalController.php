@@ -7,6 +7,8 @@ use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
+use App\Models\Kelas;
+use App\Models\Mapel;
 use App\Notifications\JurnalPerluDiperiksa;
 use App\Support\PresensiDefault;
 use App\Support\Waktu;
@@ -57,14 +59,46 @@ class JurnalController extends Controller
     public function index(Request $request): View
     {
         $status = $request->query('status', 'semua');
+        $dari = $request->query('dari');
+        $sampai = $request->query('sampai');
 
-        $jurnals = $this->guru()->jurnals()
+        // "Dari" diisi tapi "Sampai" kosong -> anggap nyari HARI ITU doang
+        // (bukan "dari tanggal itu sampai sekarang"). Ini backup di sisi
+        // server -- JS di view juga langsung ngisi field "Sampai"-nya biar
+        // kelihatan di form, tapi validasi/query yang beneran dipakai tetap
+        // di sini.
+        if ($dari && ! $sampai) {
+            $sampai = $dari;
+        }
+
+        $guru = $this->guru();
+
+        // Pilihan dropdown Kelas & Mapel cuma yang PERNAH diajar guru ini
+        // (dari jadwalnya), bukan semua kelas/mapel sekolah -- nggak ada
+        // gunanya nawarin kelas yang dia sendiri nggak pernah pegang.
+        $kelasList = Kelas::whereIn('id', $guru->jadwals()->distinct()->pluck('kelas_id'))->orderBy('nama')->get();
+        $mapelList = Mapel::whereIn('id', $guru->jadwals()->distinct()->pluck('mapel_id'))->orderBy('nama')->get();
+
+        $jurnals = $guru->jurnals()
             ->with('jadwal.kelas', 'jadwal.mapel')
             ->when($status !== 'semua', fn ($q) => $q->where('status_verifikasi', $status))
+            ->when($dari, fn ($q) => $q->whereDate('tanggal', '>=', $dari))
+            ->when($sampai, fn ($q) => $q->whereDate('tanggal', '<=', $sampai))
+            ->when($request->filled('kelas_id'), fn ($q) => $q->whereHas('jadwal', fn ($q2) => $q2->where('kelas_id', $request->query('kelas_id'))))
+            ->when($request->filled('mapel_id'), fn ($q) => $q->whereHas('jadwal', fn ($q2) => $q2->where('mapel_id', $request->query('mapel_id'))))
             ->latest('tanggal')->latest('id')
             ->paginate(15)->withQueryString();
 
-        return view('guru.jurnal.index', compact('jurnals', 'status'));
+        // Halaman detail jurnal (jurnal.show) udah dihapus -- semua "lihat
+        // detail" sekarang lewat popup di halaman ini. Tempat lain yang dulu
+        // redirect/link ke jurnal.show (habis submit, notifikasi revisi,
+        // dst) sekarang ke sini bawa ?lihat=<id>, popup-nya kebuka otomatis
+        // -- nggak peduli jurnalnya ada di halaman pagination yang mana.
+        $lihatJurnal = $request->filled('lihat')
+            ? $guru->jurnals()->with('jadwal.kelas', 'jadwal.mapel')->find($request->query('lihat'))
+            : null;
+
+        return view('guru.jurnal.index', compact('jurnals', 'status', 'dari', 'sampai', 'kelasList', 'mapelList', 'lihatJurnal'));
     }
 
     /* ------------------------------------------------------------ Form baru */
@@ -160,12 +194,12 @@ class JurnalController extends Controller
         $data = $request->validate([
             'jadwal_id' => ['required', 'exists:jadwals,id'],
             'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15'],
-            'status_guru' => ['required', 'in:hadir,tugas,tidak_hadir'],
+            'status_guru' => ['required', 'in:hadir,tidak_hadir'],
             'materi' => ['required_if:status_guru,hadir', 'nullable', 'string'],
             'metode_pilihan' => ['nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
             'metode_custom' => ['nullable', 'string', 'max:255'],
-            'tugas_tambahan' => ['required_if:status_guru,tugas,tidak_hadir', 'nullable', 'string'],
-            'alasan' => ['required_if:status_guru,tugas,tidak_hadir', 'nullable', 'string'],
+            'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
+            'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
             'presensi' => ['nullable', 'array'],
             'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
@@ -189,7 +223,7 @@ class JurnalController extends Controller
             ->whereDate('tanggal', now()->toDateString())
             ->first();
         if ($sudahAda) {
-            return redirect()->route('jurnal.show', $sudahAda)
+            return redirect()->route('jurnal.index', ['lihat' => $sudahAda->id])
                 ->with('info', 'Jurnal untuk jadwal ini hari ini sudah dibuat.');
         }
 
@@ -233,7 +267,7 @@ class JurnalController extends Controller
 
         $jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal));
 
-        return redirect()->route('jurnal.show', $jurnal)
+        return redirect()->route('jurnal.index', ['lihat' => $jurnal->id])
             ->with('success', 'Jurnal & presensi tersimpan.');
     }
 
@@ -280,12 +314,12 @@ class JurnalController extends Controller
 
         $data = $request->validate([
             'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
-            'status_guru' => ['required', 'in:hadir,tugas,tidak_hadir'],
+            'status_guru' => ['required', 'in:hadir,tidak_hadir'],
             'materi' => ['required_if:status_guru,hadir', 'nullable', 'string'],
             'metode_pilihan' => ['nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
             'metode_custom' => ['nullable', 'string', 'max:255'],
-            'tugas_tambahan' => ['required_if:status_guru,tugas,tidak_hadir', 'nullable', 'string'],
-            'alasan' => ['required_if:status_guru,tugas,tidak_hadir', 'nullable', 'string'],
+            'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
+            'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
             'presensi' => ['nullable', 'array'],
             'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
@@ -324,22 +358,14 @@ class JurnalController extends Controller
             $jurnal->jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal, hasilRevisi: true));
         }
 
-        return redirect()->route('jurnal.show', $jurnal)->with('success', 'Jurnal & presensi diperbarui.');
-    }
-
-    /* ---------------------------------------------------------------- Detail */
-    public function show(Jurnal $jurnal): View
-    {
-        $this->milikSendiri($jurnal);
-        $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'absensis.siswa', 'verifikator');
-
-        return view('guru.jurnal.show', compact('jurnal'));
+        return redirect()->route('jurnal.index', ['lihat' => $jurnal->id])->with('success', 'Jurnal & presensi diperbarui.');
     }
 
     /**
-     * Fragment HTML (bukan halaman penuh) buat popup "Lihat" di Riwayat
-     * Jurnal -- isinya sama kayak show(), cuma tanpa layout. Halaman show()
-     * biasa tetap ada buat akses langsung/fallback (link lama, dsb).
+     * Detail jurnal -- SELALU popup (fragment HTML tanpa layout), dibuka dari
+     * Riwayat Jurnal lewat AJAX. Nggak ada lagi halaman penuh buat ini --
+     * sengaja dihapus (dulu ada, masih bisa diakses langsung lewat URL
+     * walau harusnya cuma popup, bikin bingung).
      */
     public function showFragment(Jurnal $jurnal): View
     {

@@ -10,9 +10,7 @@ class SiswaDispensasiDiKelasAnda extends Notification
 {
     use Queueable;
 
-    public function __construct(private Dispensasi $dispensasi)
-    {
-    }
+    public function __construct(private Dispensasi $dispensasi) {}
 
     /**
      * @return array<int, string>
@@ -31,7 +29,7 @@ class SiswaDispensasiDiKelasAnda extends Notification
             'title' => 'Siswa dispensasi di jam Anda mengajar',
             'body' => $this->dispensasi->siswa->nama.' ('.($this->dispensasi->siswa->kelas?->nama ?? '—').') dispensasi '
                 .$this->dispensasi->labelTanggal().' · '.$this->dispensasi->labelJam(),
-            'url' => route('dispensasi.show', $this->dispensasi),
+            'url' => route('dispensasi.index', ['lihat' => $this->dispensasi->id]),
         ];
     }
 }

@@ -106,8 +106,8 @@
                 label="Status Kehadiran Anda"
                 name="status_guru"
                 class="sm:col-span-2"
-                :options="['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir']"
-                :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
+                :options="['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir']"
+                :tones="['hadir' => 'hadir', 'tidak_hadir' => 'alpha']"
                 :value="old('status_guru', 'hadir')"
             />
             </div>
@@ -132,20 +132,19 @@
 
             <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
                 <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman...">{{ old('tugas_tambahan') }}</x-ui.textarea>
-                <x-ui.textarea label="Alasan" name="alasan" :rows="2" placeholder="Alasan tidak hadir / tugas luar...">{{ old('alasan') }}</x-ui.textarea>
+                <x-ui.textarea label="Alasan" name="alasan" :rows="2" placeholder="Alasan tidak hadir...">{{ old('alasan') }}</x-ui.textarea>
             </div>
 
             @if ($jadwalTerpilih)
                 @include('guru.jurnal._presensi-grid')
 
                 <div class="mt-4">
-                    {{-- Nggak dikunci ke kamera (capture) lagi -- guru bebas pilih
-                         foto dari galeri atau motret langsung, browser yang
-                         nawarin pilihannya. --}}
-                    <x-ui.upload
+                    {{-- Wajib jepret langsung dari kamera (nggak boleh unggah dari
+                         galeri) -- biar beneran bukti sedang di kelas, bukan foto
+                         lama. Jalan di HP maupun PC/laptop (lihat komponennya). --}}
+                    <x-ui.upload-kamera
                         label="Foto Suasana Kelas"
                         name="foto_bukti"
-                        title="Unggah Foto Suasana Kelas"
                         hint="Wajib diisi — bukti pembelajaran sedang berlangsung"
                         required
                     />

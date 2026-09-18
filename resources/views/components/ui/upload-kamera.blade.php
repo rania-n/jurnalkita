@@ -1,0 +1,71 @@
+@props([
+    'label' => null,
+    'name' => 'lampiran',
+    'hint' => null,
+    'placeholder' => 'Wajib buka kamera',
+    'required' => false,
+    'errorBag' => 'default',
+])
+
+@php
+    $id = $attributes->get('id', $name);
+    $modalId = 'modal-kamera-'.$id;
+@endphp
+
+{{--
+    Beda dari x-ui.upload biasa -- ini MAKSA buka kamera (getUserMedia), bukan
+    file-picker/galeri, dan jalan sama di HP MAUPUN desktop/laptop (atribut
+    HTML "capture" cuma ngaruh di browser mobile, di desktop nggak ada efeknya
+    sama sekali -- makanya di sini dibikin manual pakai kamera live + jepret).
+    File hasil jepretan tetap disuntikkan ke <input type=file> asli lewat
+    DataTransfer, jadi validasi & submit form-nya nggak berubah sama sekali.
+--}}
+<div {{ $attributes->only('class')->class('flex flex-col gap-1.5') }} data-kamera-wrap>
+    @if ($label)
+        <x-ui.label :for="$id">{{ $label }}</x-ui.label>
+    @endif
+
+    <input type="file" name="{{ $name }}" id="{{ $id }}" accept="image/*" class="sr-only" data-kamera-input @if ($required) required @endif>
+
+    <div @class([
+        'flex min-h-40 w-full flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed bg-card px-5 py-6 text-center',
+        'border-[#B8C4D9]' => ! $errors->has($name, $errorBag),
+        '!border-alpha' => $errors->has($name, $errorBag),
+    ])>
+        <img data-kamera-img hidden alt="Pratinjau foto suasana kelas" class="max-h-56 w-full rounded-lg object-cover">
+
+        <div data-kamera-placeholder class="flex flex-col items-center gap-1.5">
+            <x-icon name="photo_camera" :size="28" class="text-navy" />
+            <span class="text-xs font-semibold text-navy">{{ $placeholder }}</span>
+            @if ($hint)
+                <span class="text-[11px] text-muted-2">{{ $hint }}</span>
+            @endif
+            <button type="button" data-modal-open="{{ $modalId }}" data-kamera-buka class="press mt-2 inline-flex items-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-bold text-card">
+                <x-icon name="photo_camera" :size="15" /> Buka Kamera
+            </button>
+        </div>
+
+        <button type="button" data-modal-open="{{ $modalId }}" data-kamera-buka data-kamera-ulang hidden class="press mt-2 inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-3.5 py-2 text-xs font-bold text-ink">
+            <x-icon name="refresh" :size="15" /> Ambil Ulang
+        </button>
+    </div>
+
+    @error($name, $errorBag)
+        <p class="text-xs font-medium text-alpha">{{ $message }}</p>
+    @enderror
+
+    <x-ui.modal :id="$modalId" title="Ambil Foto Suasana Kelas">
+        <div class="flex flex-col gap-3">
+            <div class="relative overflow-hidden rounded-xl bg-ink">
+                <video data-kamera-video hidden autoplay playsinline muted class="aspect-[4/3] w-full object-cover"></video>
+                <canvas data-kamera-canvas hidden></canvas>
+                <p data-kamera-error hidden class="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 px-6 text-center text-sm font-semibold text-card">
+                    Nggak bisa buka kamera. Pastikan izin kamera diaktifkan buat browser ini, lalu coba lagi.
+                </p>
+            </div>
+            <button type="button" data-kamera-jepret class="press flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-navy text-sm font-bold text-card">
+                <x-icon name="photo_camera" :size="18" /> Jepret
+            </button>
+        </div>
+    </x-ui.modal>
+</div>

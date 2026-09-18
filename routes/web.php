@@ -124,7 +124,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/guru/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
         Route::get('/guru/jurnal/tambah', [JurnalController::class, 'create'])->name('jurnal.create');
         Route::post('/guru/jurnal', [JurnalController::class, 'store'])->name('jurnal.store');
-        Route::get('/guru/jurnal/{jurnal}', [JurnalController::class, 'show'])->name('jurnal.show');
         Route::get('/guru/jurnal/{jurnal}/fragment', [JurnalController::class, 'showFragment'])->name('jurnal.show.fragment');
         Route::get('/guru/jurnal/{jurnal}/ubah', [JurnalController::class, 'edit'])->name('jurnal.edit');
         Route::post('/guru/jurnal/{jurnal}', [JurnalController::class, 'update'])->name('jurnal.update');
@@ -157,7 +156,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:guru,waka,admin')->group(function () {
         Route::get('/dispensasi', [DispensasiController::class, 'index'])->name('dispensasi.index');
         Route::get('/dispensasi/ekspor', [DispensasiController::class, 'ekspor'])->name('dispensasi.ekspor');
-        Route::get('/dispensasi/{dispensasi}', [DispensasiController::class, 'show'])->name('dispensasi.show');
         Route::get('/dispensasi/{dispensasi}/fragment', [DispensasiController::class, 'showFragment'])->name('dispensasi.show.fragment');
         Route::get('/dispensasi/{dispensasi}/surat/fragment', [SuratDispensasiController::class, 'showFragment'])->name('dispensasi.surat.fragment');
     });

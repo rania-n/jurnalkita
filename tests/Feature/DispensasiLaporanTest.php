@@ -60,7 +60,7 @@ class DispensasiLaporanTest extends TestCase
         $d = Dispensasi::first();
 
         $this->actingAs($admin)->get('/dispensasi')->assertOk()->assertSee('Budi');
-        $this->actingAs($admin)->get("/dispensasi/{$d->id}")->assertOk()
+        $this->actingAs($admin)->get("/dispensasi/{$d->id}/fragment")->assertOk()
             ->assertDontSee('name="keputusan" value="approved"', false);
     }
 

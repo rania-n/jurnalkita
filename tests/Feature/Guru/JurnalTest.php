@@ -160,7 +160,7 @@ class JurnalTest extends TestCase
                 $siswaB->id => ['status' => 'hadir'],
             ],
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
-        ])->assertRedirect("/guru/jurnal/{$jurnal->id}");
+        ])->assertRedirect("/guru/jurnal?lihat={$jurnal->id}");
 
         $jurnal->refresh();
         $this->assertSame('materi baru', $jurnal->materi);
@@ -181,7 +181,7 @@ class JurnalTest extends TestCase
         $lain = User::factory()->role('guru')->create();
         Guru::create(['user_id' => $lain->id, 'nama' => 'Guru Lain']);
 
-        $this->actingAs($lain)->get("/guru/jurnal/{$jurnal->id}")->assertForbidden();
+        $this->actingAs($lain)->get("/guru/jurnal/{$jurnal->id}/fragment")->assertForbidden();
     }
 
     public function test_jurnal_terverifikasi_tidak_bisa_diubah(): void

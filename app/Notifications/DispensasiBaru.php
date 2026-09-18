@@ -10,9 +10,7 @@ class DispensasiBaru extends Notification
 {
     use Queueable;
 
-    public function __construct(private Dispensasi $dispensasi)
-    {
-    }
+    public function __construct(private Dispensasi $dispensasi) {}
 
     /**
      * @return array<int, string>
@@ -31,7 +29,7 @@ class DispensasiBaru extends Notification
             'title' => 'Dispensasi baru menunggu persetujuan',
             'body' => $this->dispensasi->siswa->nama.' ('.($this->dispensasi->siswa->kelas?->nama ?? '—').') — '
                 .str($this->dispensasi->alasan)->limit(60),
-            'url' => route('dispensasi.show', $this->dispensasi),
+            'url' => route('dispensasi.index', ['lihat' => $this->dispensasi->id]),
         ];
     }
 }

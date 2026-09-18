@@ -1,5 +1,5 @@
 @php
-    $statusGuru = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
+    $statusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
     $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp
 
@@ -7,7 +7,7 @@
     <x-page-header
         :title="'Ubah ' . $jurnal->jadwal->mapel->nama"
         :subtitle="$jurnal->jadwal->kelas->nama . ' · ' . $jurnal->tanggal->translatedFormat('d M Y')"
-        :back="route('jurnal.show', $jurnal)"
+        :back="route('jurnal.index', ['lihat' => $jurnal->id])"
     />
 
     @if ($jurnal->status_verifikasi === 'revisi')
@@ -36,7 +36,7 @@
                 name="status_guru"
                 class="sm:col-span-2"
                 :options="$statusGuru"
-                :tones="['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha']"
+                :tones="['hadir' => 'hadir', 'tidak_hadir' => 'alpha']"
                 :value="old('status_guru', $jurnal->status_guru)"
             />
         </div>
@@ -75,10 +75,10 @@
                     </a>
                 </div>
             @endif
-            <x-ui.upload
+            <x-ui.upload-kamera
                 :label="$jurnal->foto_bukti ? 'Ganti Foto Suasana Kelas (opsional)' : 'Foto Suasana Kelas'"
                 name="foto_bukti"
-                title="Unggah Foto Suasana Kelas"
+                :placeholder="$jurnal->foto_bukti ? 'Buka kamera buat ganti foto' : 'Wajib buka kamera'"
                 :hint="$jurnal->foto_bukti ? 'Opsional — biarin kosong kalau foto lama masih dipakai' : 'Wajib diisi — bukti pembelajaran sedang berlangsung'"
                 :required="! $jurnal->foto_bukti"
             />

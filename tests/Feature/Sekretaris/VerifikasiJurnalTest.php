@@ -136,25 +136,19 @@ class VerifikasiJurnalTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_jurnal_pengganti_hanya_tugas_atau_tidak_hadir(): void
+    public function test_jurnal_pengganti_selalu_tidak_hadir(): void
     {
         $ketua = Siswa::where('nis', '001')->firstOrFail();
         $anggota = Siswa::where('nis', '002')->firstOrFail();
-        $presensi = [
-            $ketua->id => ['status' => 'hadir'],
-            $anggota->id => ['status' => 'hadir'],
-        ];
 
+        // status_guru bukan lagi field yang divalidasi/dipilih dari form --
+        // jurnal pengganti = guru nggak hadir, jadi server SELALU simpen
+        // 'tidak_hadir', nggak peduli inputnya (di sini sengaja dikirim
+        // 'hadir' buat mastiin server nggak asal percaya input klien).
         $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'x', 'presensi' => $presensi,
-        ])->assertSessionHasErrors('status_guru');
-
-        $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
-            'jadwal_id' => $this->jadwal->id,
-            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'tugas', 'tugas_tambahan' => 'Kerjakan LKS hal. 10', 'alasan' => 'Rapat dinas luar kota',
+            'status_guru' => 'hadir', 'tugas_tambahan' => 'Kerjakan LKS hal. 10', 'alasan' => 'Rapat dinas luar kota',
             'presensi' => [
                 $ketua->id => ['status' => 'sakit'],
                 $anggota->id => ['status' => 'hadir'],
@@ -162,6 +156,7 @@ class VerifikasiJurnalTest extends TestCase
         ])->assertRedirect();
 
         $jurnal = Jurnal::first();
+        $this->assertSame('tidak_hadir', $jurnal->status_guru);
         $this->assertTrue($jurnal->diisi_oleh_pengurus);
         $this->assertSame('terverifikasi', $jurnal->status_verifikasi);
         $this->assertCount(2, $jurnal->absensis);

@@ -1,10 +1,12 @@
 {{--
-    Isi popup "Detail" di Riwayat Dispensasi -- sama persis kontennya kayak
-    dispensasi/show.blade.php (halaman penuh, tetap ada buat akses langsung/
-    fallback), cuma tanpa layout & page-header karena ini nempel di dalam
-    modal (judulnya udah dari data-modal-title). Nggak ada logic auto-kirim
-    WA di sini -- itu udah kejadian sekali pas baru ngajuin, ditrigger dari
-    Riwayat (lihat DispensasiController::index()), bukan pas buka detail.
+    Isi popup "Detail" di Riwayat Dispensasi -- ini SATU-SATUNYA cara lihat
+    detail dispensasi sekarang, nggak ada lagi halaman penuh terpisah
+    (dispensasi.show) buat ini -- sengaja dihapus, dulu bikin bingung karena
+    bisa diakses langsung padahal harusnya cuma popup. Nggak ada layout &
+    page-header di sini karena ini nempel di dalam modal (judulnya udah dari
+    data-modal-title). Nggak ada logic auto-kirim WA di sini -- itu udah
+    kejadian sekali pas baru ngajuin, ditrigger dari Riwayat (lihat
+    DispensasiController::index()), bukan pas buka detail.
 
     Variabel yang wajib ada di scope pemanggil:
       $dispensasi, $bisaWaka, $bisaBatal, $waLinkWaka, $waLinkSiswa

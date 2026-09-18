@@ -10,12 +10,30 @@
 
     <div class="mb-2 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
-            <a href="{{ route('jurnal.index', $key === 'semua' ? [] : ['status' => $key]) }}"
+            <a href="{{ route('jurnal.index', array_merge(request()->except('status', 'page'), $key === 'semua' ? [] : ['status' => $key])) }}"
                @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $status === $key, 'text-muted-2 hover:text-ink' => $status !== $key])>
                 {{ $label }}
             </a>
         @endforeach
     </div>
+
+    {{-- Rentang tanggal & dropdown Kelas/Mapel -- server-side (auto-submit),
+         sama kayak pola filter di Rekap/Monitor Piket/Dispensasi. --}}
+    <x-admin.filters :action="route('jurnal.index')">
+        <input type="hidden" name="status" value="{{ $status }}">
+
+        <div class="flex w-full gap-2">
+            <div class="flex-1">
+                <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" onchange="this.form.submit()" />
+            </div>
+            <div class="flex-1">
+                <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" onchange="this.form.submit()" />
+            </div>
+        </div>
+
+        <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua kelas" />
+        <x-admin.f-select name="mapel_id" label="Mata Pelajaran" :options="$mapelList->pluck('nama', 'id')" all="Semua mapel" />
+    </x-admin.filters>
 
     {{-- Cari mapel/kelas -- langsung filter baris yang sudah dimuat di halaman
          ini (tanpa reload), sama kayak pola di Monitor Piket/Rekap. --}}
@@ -67,6 +85,32 @@
     <x-ui.modal id="modal-jurnal-detail" title="Detail Jurnal" size="lg">
         <div data-modal-ajax-target></div>
     </x-ui.modal>
+
+    @if ($lihatJurnal)
+        {{-- Dibuka lewat ?lihat=<id> (habis submit/redirect dari tempat lain
+             -- lihat JurnalController@index) -- tombol tersembunyi ini di-klik
+             otomatis sekali lewat JS, biar popup-nya kebuka walau jurnalnya
+             nggak ada di halaman pagination yang lagi tampil. --}}
+        @php $judulLihat = $lihatJurnal->jadwal->mapel->nama . ' — ' . $lihatJurnal->jadwal->kelas->nama; @endphp
+        <button
+            type="button"
+            hidden
+            data-auto-open-jurnal
+            data-modal-open="modal-jurnal-detail"
+            data-modal-title="{{ $judulLihat }}"
+            data-ajax-url="{{ route('jurnal.show.fragment', $lihatJurnal) }}"
+        ></button>
+        @push('scripts')
+            <script>
+                // window "load" (BUKAN cuma taruh <script> di bawah body) --
+                // initModals() baru pasang event listener-nya pas DOMContentLoaded
+                // dari app.js (dimuat sebagai module, ke-defer ke belakang), jadi
+                // klik yang ditembak lebih awal dari itu nggak kena tangkap sama
+                // sekali (modal-nya nggak kebuka).
+                window.addEventListener('load', () => document.querySelector('[data-auto-open-jurnal]')?.click());
+            </script>
+        @endpush
+    @endif
 
     @push('scripts')
         <script>

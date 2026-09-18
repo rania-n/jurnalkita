@@ -8,7 +8,7 @@
 
     // K: dulu dasbor ini cuma 3 kotak menu doang -- ditambah jadwal hari ini
     // biar pengurus kelas langsung lihat pelajaran mana yang gurunya sudah
-    // hadir/tugas luar/belum diisi tanpa buka menu lain dulu.
+    // hadir/tidak hadir/belum diisi tanpa buka menu lain dulu.
     $hariIni = \App\Support\HariSekolah::hariIni();
     $jadwalHariIni = $kelas && $hariIni
         ? $kelas->jadwals()->with('mapel', 'guru')->where('hari', $hariIni)->orderBy('jam_ke_mulai')->get()
@@ -16,8 +16,8 @@
     $jurnalHariIni = $jadwalHariIni->isNotEmpty()
         ? \App\Models\Jurnal::whereIn('jadwal_id', $jadwalHariIni->pluck('id'))->whereDate('tanggal', today())->get()->keyBy('jadwal_id')
         : collect();
-    $labelStatusGuru = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
-    $toneStatusGuru = ['hadir' => 'hadir', 'tugas' => 'izin', 'tidak_hadir' => 'alpha'];
+    $labelStatusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
+    $toneStatusGuru = ['hadir' => 'hadir', 'tidak_hadir' => 'alpha'];
 @endphp
 
 <x-layouts.app title="Beranda Pengurus Kelas" width="wide">
@@ -50,7 +50,7 @@
                 </span>
                 <div class="flex-1">
                     <p class="text-sm font-bold text-ink">Isi Jurnal Pengganti</p>
-                    <p class="text-xs text-muted">Untuk guru tugas luar / tidak hadir yang memberi tugas via WA</p>
+                    <p class="text-xs text-muted">Untuk guru tidak hadir yang memberi tugas via WA</p>
                 </div>
                 <x-icon name="chevron_right" :size="20" class="text-muted" />
             </a>

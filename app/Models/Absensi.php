@@ -19,8 +19,14 @@ class Absensi extends Model
         return $this->belongsTo(Jurnal::class);
     }
 
+    /**
+     * withTrashed() -- presensi itu CATATAN SEJARAH, harus tetap kebaca utuh
+     * walau siswanya belakangan di-soft-delete (pindah/keluar/data diganti
+     * data asli, dsb). Tanpa ini, jurnal lama yang presensinya nyantol ke
+     * siswa yang udah dihapus bakal error null pas ditampilin.
+     */
     public function siswa(): BelongsTo
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsTo(Siswa::class)->withTrashed();
     }
 }

@@ -176,6 +176,31 @@
             <div data-modal-ajax-target></div>
         </x-ui.modal>
 
+        @if ($lihatDispensasi)
+            {{-- Dibuka lewat ?lihat=<id> (habis keputusan Waka/notifikasi/dll --
+                 lihat DispensasiController@index) -- tombol tersembunyi ini
+                 di-klik otomatis sekali lewat JS, biar popup-nya kebuka walau
+                 dispensasinya nggak ada di halaman pagination yang lagi tampil. --}}
+            <button
+                type="button"
+                hidden
+                data-auto-open-dispensasi
+                data-modal-open="modal-dispensasi-detail"
+                data-modal-title="{{ $lihatDispensasi->siswa->nama }}"
+                data-ajax-url="{{ route('dispensasi.show.fragment', $lihatDispensasi) }}"
+            ></button>
+            @push('scripts')
+                <script>
+                    // window "load" (BUKAN cuma taruh <script> di bawah body) --
+                    // initModals() baru pasang event listener-nya pas DOMContentLoaded
+                    // dari app.js (dimuat sebagai module, ke-defer ke belakang), jadi
+                    // klik yang ditembak lebih awal dari itu nggak kena tangkap sama
+                    // sekali (modal-nya nggak kebuka).
+                    window.addEventListener('load', () => document.querySelector('[data-auto-open-dispensasi]')?.click());
+                </script>
+            @endpush
+        @endif
+
         <p id="dispen-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
             Tidak ada dispensasi yang cocok dengan pencarian.
         </p>

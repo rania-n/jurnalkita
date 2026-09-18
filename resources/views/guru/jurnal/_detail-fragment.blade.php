@@ -1,13 +1,14 @@
 {{--
-    Isi popup "Lihat" di Riwayat Jurnal -- sama persis kontennya kayak
-    guru/jurnal/show.blade.php (halaman penuh, tetap ada buat akses langsung/
-    fallback), cuma tanpa layout & page-header karena ini nempel di dalam
-    modal (judulnya udah dari data-modal-title).
+    Isi popup "Lihat" di Riwayat Jurnal -- ini SATU-SATUNYA cara lihat detail
+    jurnal sekarang, nggak ada lagi halaman penuh terpisah (jurnal.show)
+    buat ini -- sengaja dihapus, dulu bikin bingung karena bisa diakses
+    langsung padahal harusnya cuma popup. Nggak ada layout & page-header di
+    sini karena ini nempel di dalam modal (judulnya udah dari data-modal-title).
 
     Variabel yang wajib ada di scope pemanggil: $jurnal
 --}}
 @php
-    $statusGuru = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
+    $statusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
     $statusAbsen = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
     $rekap = $jurnal->absensis->countBy('status');
     $bisaUbah = $jurnal->bisaDiubah();

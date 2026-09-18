@@ -1,7 +1,6 @@
 @php
     $tone = [
         'hadir' => 'bg-hadir-soft text-hadir',
-        'tugas' => 'bg-izin-soft text-izin',
         'tidak_hadir' => 'bg-alpha-soft text-alpha',
         'belum_diisi' => 'bg-sakit-soft text-sakit',
     ];
@@ -64,7 +63,6 @@
             </button>
             @foreach ([
                 'hadir' => ['Hadir', 'bg-hadir text-card', 'bg-hadir-soft text-hadir'],
-                'tugas' => ['Tugas Luar', 'bg-izin text-card', 'bg-izin-soft text-izin'],
                 'tidak_hadir' => ['Tidak Hadir', 'bg-alpha text-card', 'bg-alpha-soft text-alpha'],
                 'belum_diisi' => ['Belum Diisi', 'bg-sakit text-card', 'bg-sakit-soft text-sakit'],
             ] as $key => [$label, $classAktif, $classNonaktif])

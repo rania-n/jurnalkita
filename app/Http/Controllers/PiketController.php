@@ -15,12 +15,12 @@ use Illuminate\View\View;
 /**
  * Monitor Piket — bukan jadwal piket pribadi (lihat guru/piket.blade.php),
  * tapi pantauan guru piket: hari ini, tiap jam pelajaran di tiap kelas,
- * gurunya masuk/tugas luar/tidak hadir, atau jurnalnya belum diisi sama sekali.
+ * gurunya masuk/tidak hadir, atau jurnalnya belum diisi sama sekali.
  * Dikelompokkan per kelas ATAU per guru (bar pilih, bukan filter dropdown).
  */
 class PiketController extends Controller
 {
-    private const LABEL_STATUS = ['hadir' => 'Hadir', 'tugas' => 'Tugas Luar', 'tidak_hadir' => 'Tidak Hadir'];
+    private const LABEL_STATUS = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
 
     private function pastikanBolehLihat(): void
     {

@@ -69,7 +69,7 @@ class PagesRenderTest extends TestCase
         ]);
         $jurnal->absensis()->create(['siswa_id' => Siswa::first()->id, 'status' => 'hadir']);
 
-        $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}")->assertOk()->assertSee('Kurang lengkap');
+        $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}/fragment")->assertOk()->assertSee('Kurang lengkap');
         $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}/ubah")->assertOk();
     }
 

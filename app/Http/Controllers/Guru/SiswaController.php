@@ -9,9 +9,8 @@ use App\Models\Siswa;
 use Illuminate\View\View;
 
 /**
- * Detail satu siswa dari sisi guru -- dipicu dari klik nama siswa di tabel presensi
- * (lihat guru/jurnal/_presensi-grid.blade.php & guru/jurnal/show.blade.php). Cuma
- * rekap kehadiran (read-only), bukan CRUD -- sama semangatnya kayak WaliKelasController.
+ * Detail satu siswa dari sisi guru -- cuma rekap kehadiran (read-only), bukan
+ * CRUD -- sama semangatnya kayak WaliKelasController.
  */
 class SiswaController extends Controller
 {

@@ -59,7 +59,7 @@ class JadwalWakaTest extends TestCase
             'tanggal' => today(), 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
 
-        $response = $this->actingAs($piket)->get("/dispensasi/{$d->id}");
+        $response = $this->actingAs($piket)->get("/dispensasi/{$d->id}/fragment");
         $response->assertOk()->assertSee('6281111111111', false)->assertDontSee('6282222222222', false);
     }
 
@@ -83,7 +83,7 @@ class JadwalWakaTest extends TestCase
 
         // Sabtu -> nggak ada yang "bertugas" (hari sekolah cuma senin-jumat), tapi
         // link WA tetap kebuat, jangan sampai fitur mati total di akhir pekan.
-        $this->actingAs($piket)->get("/dispensasi/{$d->id}")->assertOk()->assertSee('6281111111111', false);
+        $this->actingAs($piket)->get("/dispensasi/{$d->id}/fragment")->assertOk()->assertSee('6281111111111', false);
     }
 
     public function test_admin_bisa_atur_jadwal_waka(): void

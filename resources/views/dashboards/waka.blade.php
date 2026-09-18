@@ -145,7 +145,10 @@
                         @endif
                     </x-slot:badge>
                     <x-slot:actions>
-                        <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.show', $d)" />
+                        {{-- Ke Riwayat Dispensasi bawa ?lihat=<id> -- popup detailnya
+                             kebuka otomatis di sana (nggak ada lagi halaman detail
+                             yang berdiri sendiri, lihat DispensasiController@index). --}}
+                        <x-ui.action-button label="Detail" icon="badge" :href="route('dispensasi.index', ['lihat' => $d->id])" />
                     </x-slot:actions>
                 </x-ui.list-card>
             @endforeach

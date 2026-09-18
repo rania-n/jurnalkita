@@ -21,9 +21,10 @@ class CatatanTerlambat extends Model
         ];
     }
 
+    /** withTrashed() -- sama alasannya kayak Absensi::siswa()/Dispensasi::siswa(). */
     public function siswa(): BelongsTo
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsTo(Siswa::class)->withTrashed();
     }
 
     public function dicatatOleh(): BelongsTo

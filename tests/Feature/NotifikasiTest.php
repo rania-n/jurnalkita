@@ -81,7 +81,7 @@ class NotifikasiTest extends TestCase
         Notification::fake();
 
         $this->actingAs($waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved'])
-            ->assertRedirect('/dispensasi');
+            ->assertRedirect("/dispensasi?lihat={$d->id}");
 
         Notification::assertSentTo($piket, DispensasiDiputuskan::class);
     }
@@ -135,7 +135,7 @@ class NotifikasiTest extends TestCase
         Notification::fake();
 
         $this->actingAs($waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved'])
-            ->assertRedirect('/dispensasi');
+            ->assertRedirect("/dispensasi?lihat={$d->id}");
 
         Notification::assertSentTo($guruMapelUser, SiswaDispensasiDiKelasAnda::class);
     }
