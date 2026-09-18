@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\JadwalWaka;
+use App\Support\HariSekolah;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -43,6 +44,8 @@ class JadwalController extends Controller
             $jadwalWakaPerHari = $jadwalWakaPerHari->filter(fn ($v, $k) => $k === $hari);
         }
 
-        return view('guru.jadwal', compact('jadwalPerHari', 'piketPerHari', 'jadwalWakaPerHari', 'hari'));
+        $hariIni = HariSekolah::hariIni();
+
+        return view('guru.jadwal', compact('jadwalPerHari', 'piketPerHari', 'jadwalWakaPerHari', 'hari', 'hariIni'));
     }
 }

@@ -49,7 +49,7 @@
                     <div class="flex items-center gap-2.5">
                         <x-ui.avatar :label="$s->no_absen ?? '–'" :gender="$s->jenis_kelamin" />
                         <div class="flex min-w-0 flex-col">
-                            <a href="{{ route('guru.siswa.show', $s) }}" class="truncate text-sm font-semibold text-ink hover:text-navy hover:underline">{{ $s->nama }}</a>
+                            <span class="truncate text-sm font-semibold text-ink">{{ $s->nama }}</span>
                             @if ($dariDispensasiOtomatis)
                                 <span class="flex items-center gap-1 text-[11px] font-semibold text-dispen">
                                     <x-icon name="verified" :size="12" />

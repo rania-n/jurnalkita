@@ -1,6 +1,12 @@
 @php
     $hariLabel = config('akademik.hari');
     $tabsHari = ['semua' => 'Semua'] + $hariLabel;
+
+    // Hari ini ditaruh paling atas (biar langsung kelihatan tanpa scroll),
+    // sisanya tetap urut Senin-Jumat kayak biasa.
+    $urutanHari = $hariIni && isset($hariLabel[$hariIni])
+        ? [$hariIni => $hariLabel[$hariIni]] + $hariLabel
+        : $hariLabel;
 @endphp
 
 <x-layouts.app title="Jadwal Mengajar Saya" width="wide">
@@ -19,11 +25,16 @@
         <x-ui.empty icon="event_busy" title="Belum ada jadwal" desc="Hubungi admin untuk menambahkan jadwal Anda." />
     @else
         <div class="flex flex-col gap-6">
-            @foreach ($hariLabel as $key => $label)
+            @foreach ($urutanHari as $key => $label)
                 @continue (! $jadwalPerHari->has($key) && ! $piketPerHari->has($key) && ! $jadwalWakaPerHari->has($key))
 
                 <div>
-                    <h2 class="mb-2 text-sm font-bold text-ink">{{ $label }}</h2>
+                    <h2 class="mb-2 flex items-center gap-2 text-sm font-bold text-ink">
+                        {{ $label }}
+                        @if ($key === $hariIni)
+                            <span class="rounded-md bg-navy px-1.5 py-0.5 text-[10px] font-bold text-card">Hari Ini</span>
+                        @endif
+                    </h2>
                     <x-ui.card-list class="grid-fill-last">
                         @if ($jadwalWakaPerHari->has($key))
                             <x-ui.list-card
@@ -51,10 +62,24 @@
 
                         @if ($jadwalPerHari->has($key))
                             @foreach ($jadwalPerHari[$key] as $j)
+                                @php
+                                    // Status jam (Sudah Lewat/Berlangsung/Belum Mulai) cuma
+                                    // relevan buat hari ini -- hari lain nggak ada "sekarang"
+                                    // buat dibandingin.
+                                    $statusJam = $key === $hariIni
+                                        ? \App\Support\Waktu::statusJpHariIni($j->jam_ke_mulai, $j->jam_ke_selesai)
+                                        : null;
+                                @endphp
                                 <x-ui.list-card
                                     :title="$j->mapel->nama"
                                     :meta="[$j->kelas->nama . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai, 'Ruang ' . ($j->ruang ?? '-')]"
-                                />
+                                >
+                                    @if ($statusJam)
+                                        <x-slot:badge>
+                                            <x-ui.status-badge :status="$statusJam" />
+                                        </x-slot:badge>
+                                    @endif
+                                </x-ui.list-card>
                             @endforeach
                         @endif
                     </x-ui.card-list>

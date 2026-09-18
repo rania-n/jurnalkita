@@ -15,6 +15,10 @@
         'pending' => ['bg-sakit-soft text-sakit', 'Menunggu'],
         'terverifikasi' => ['bg-hadir-soft text-hadir', 'Terverifikasi'],
         'revisi' => ['bg-alpha-soft text-alpha', 'Revisi'],
+        'lewat' => ['bg-surface-alt text-muted', 'Sudah Lewat'],
+        'berlangsung' => ['bg-hadir-soft text-hadir', 'Berlangsung'],
+        'istirahat' => ['bg-sakit-soft text-sakit', 'Jeda Istirahat'],
+        'belum' => ['bg-izin-soft text-izin', 'Belum Mulai'],
     ];
     [$cls, $label] = $map[$key] ?? ['bg-surface-alt text-muted', ucfirst($key)];
 @endphp

@@ -183,12 +183,12 @@ function initJamSekarang() {
     if (!els.length) return;
 
     const tulis = () => {
-        const teks = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        const teks = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         els.forEach((el) => { el.textContent = teks; });
     };
 
     tulis();
-    setInterval(tulis, 15000);
+    setInterval(tulis, 1000);
 }
 
 function init() {

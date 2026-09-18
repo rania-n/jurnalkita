@@ -37,6 +37,22 @@ class JurnalController extends Controller
         abort_unless($jurnal->guru_id === $this->guru()->id, 403);
     }
 
+    /**
+     * Boleh isi jurnal buat jadwal ini SEKARANG? Sama persis aturannya kayak
+     * yang nentuin $jurnalDiblokirIstirahat di create() -- dicek ulang di
+     * sini (bukan cuma di tampilan) biar nggak bisa dibobol lewat request
+     * manual pas istirahat/jam yang bukan jadwalnya.
+     */
+    private function jadwalBolehDiisi(Jadwal $jadwal): bool
+    {
+        $jpAktif = Waktu::jpAktifSekarang();
+        if ($jpAktif !== null && $jadwal->jam_ke_mulai <= $jpAktif && $jadwal->jam_ke_selesai >= $jpAktif) {
+            return true;
+        }
+
+        return ! Waktu::dalamJamSekolah();
+    }
+
     /* --------------------------------------------------------------- Riwayat */
     public function index(Request $request): View
     {
@@ -91,15 +107,25 @@ class JurnalController extends Controller
             : collect();
         $jadwalTerkunci = ! $request->filled('jadwal') && $jadwalJpIni->count() === 1;
 
-        $jadwalTerpilih = $request->filled('jadwal')
-            ? $semuaJadwal->firstWhere('id', (int) $request->jadwal)
-            : ($jadwalTerkunci
-                ? $jadwalJpIni->first()
-                // Cuma ada 1 opsi -> browser otomatis milih itu (placeholder "Pilih
-                // jadwal" disembunyikan) walau URL nggak bawa ?jadwal=. Server ikut
-                // anggap terpilih dari awal, biar presensinya langsung kelihatan
-                // tanpa guru harus "milih ulang" jadwal yang sebenarnya cuma satu.
-                : ($daftarJadwal->count() === 1 ? $daftarJadwal->first() : null));
+        // Di luar jam yang beneran cocok jadi jadwal SENDIRI (istirahat, atau
+        // jam ini emang bukan jadwal dia), tapi MASIH dalam rentang jam sekolah
+        // (jam ke-1 s/d jam terakhir) -> jangan kasih akses milih jadwal lain,
+        // itu celah buat isi jurnal jam yang belum/nggak beneran dijalani. Baru
+        // bebas milih (buat susulan/testing) kalau BENERAN udah di luar jam
+        // sekolah (pulang sekolah, atau sebelum jam ke-1 mulai).
+        $jurnalDiblokirIstirahat = Waktu::dalamJamSekolah() && $jadwalJpIni->count() !== 1;
+
+        $jadwalTerpilih = $jurnalDiblokirIstirahat
+            ? null
+            : ($request->filled('jadwal')
+                ? $semuaJadwal->firstWhere('id', (int) $request->jadwal)
+                : ($jadwalTerkunci
+                    ? $jadwalJpIni->first()
+                    // Cuma ada 1 opsi -> browser otomatis milih itu (placeholder "Pilih
+                    // jadwal" disembunyikan) walau URL nggak bawa ?jadwal=. Server ikut
+                    // anggap terpilih dari awal, biar presensinya langsung kelihatan
+                    // tanpa guru harus "milih ulang" jadwal yang sebenarnya cuma satu.
+                    : ($daftarJadwal->count() === 1 ? $daftarJadwal->first() : null)));
 
         $siswas = collect();
         $presensiAwal = [];
@@ -115,6 +141,7 @@ class JurnalController extends Controller
             'jadwals' => $daftarJadwal,
             'jadwalTerpilih' => $jadwalTerpilih,
             'jadwalTerkunci' => $jadwalTerkunci,
+            'jurnalDiblokirIstirahat' => $jurnalDiblokirIstirahat,
             'jumlahSudahDiisiHariIni' => $jumlahSudahDiisiHariIni,
             'jpSekarang' => $jpSekarang,
             'jpMaks' => 13,
@@ -149,6 +176,7 @@ class JurnalController extends Controller
 
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
         abort_unless($jadwal->guru_id === $guru->id, 403);
+        abort_unless($this->jadwalBolehDiisi($jadwal), 403, 'Belum waktunya isi jurnal untuk jadwal ini -- tunggu jam pelajarannya berlangsung.');
 
         // Jam mulai & selesai SELALU ikut jadwal yang dipilih (bukan input klien) --
         // ini yang beneran dijadwalkan, guru nggak bisa ngarang jam sendiri lewat

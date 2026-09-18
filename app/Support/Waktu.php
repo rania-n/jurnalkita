@@ -52,6 +52,73 @@ class Waktu
             ->value('jam_ke');
     }
 
+    /**
+     * True kalau sekarang masih dalam rentang jam sekolah hari ini -- dari
+     * mulainya JP pertama sampai selesainya JP terakhir (termasuk jam
+     * istirahat di antaranya). Dipakai buat nentuin kapan guru BOLEH bebas
+     * pilih jadwal lain buat isi jurnal (susulan/testing): cuma kalau
+     * BENERAN di luar jam sekolah (belum masuk, atau udah pulang) -- bukan
+     * pas istirahat, yang tetep dihitung "masih jam sekolah" walau nggak
+     * ada JP yang aktif.
+     */
+    public static function dalamJamSekolah(): bool
+    {
+        $kategori = self::kategori();
+        $mulaiPertama = JamPelajaran::where('kategori', $kategori)->min('mulai');
+        $selesaiTerakhir = JamPelajaran::where('kategori', $kategori)->max('selesai');
+
+        if (! $mulaiPertama || ! $selesaiTerakhir) {
+            return false;
+        }
+
+        $sekarang = now()->format('H:i:s');
+
+        return $sekarang >= $mulaiPertama && $sekarang <= $selesaiTerakhir;
+    }
+
+    /**
+     * Status satu JP (atau rentang JP, mis. "JP 8-10") HARI INI dibanding
+     * jam sekarang -- 'lewat' | 'berlangsung' | 'istirahat' | 'belum'. Null
+     * kalau data jam pelajarannya nggak ketemu. Dipakai buat badge di daftar
+     * jadwal hari ini.
+     *
+     * 'istirahat' khusus buat jadwal rentang beberapa JP (mis. JP 8-10) yang
+     * di antara JP-JP penyusunnya ada jeda istirahat, dan detik ini pas lagi
+     * di jeda itu -- BUKAN 'berlangsung' (nggak ada JP yang beneran aktif),
+     * tapi juga bukan 'lewat'/'belum' (sebagian rentangnya udah/belum
+     * kejalani). Match langsung sama jpAktifSekarang() (dipakai juga buat
+     * ngunci/ngeblokir form Isi Jurnal), biar badge-nya nggak pernah bilang
+     * "Berlangsung" padahal tombol "Isi Jurnal"-nya bakal keblokir.
+     */
+    public static function statusJpHariIni(int $jamKeMulai, ?int $jamKeSelesai = null): ?string
+    {
+        $jamKeSelesai ??= $jamKeMulai;
+        $kategori = self::kategori();
+        $awal = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jamKeMulai)->value('mulai');
+        $akhir = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jamKeSelesai)->value('selesai');
+
+        if (! $awal || ! $akhir) {
+            return null;
+        }
+
+        // $awal/$akhir kecast 'datetime:H:i' oleh model (Carbon, bukan string) --
+        // format eksplisit dulu ke 'H:i' sebelum dibandingin, jangan langsung
+        // dibandingin ke string now(), soalnya perbandingan objek-vs-string di
+        // PHP nggak sama hasilnya kayak niatnya.
+        $sekarang = now()->format('H:i');
+
+        if ($sekarang < $awal->format('H:i')) {
+            return 'belum';
+        }
+        if ($sekarang > $akhir->format('H:i')) {
+            return 'lewat';
+        }
+
+        $jpAktif = self::jpAktifSekarang();
+
+        return ($jpAktif !== null && $jamKeMulai <= $jpAktif && $jamKeSelesai >= $jpAktif) ? 'berlangsung' : 'istirahat';
+    }
+
     /** Jam mulai (hari ini, sebagai Carbon lengkap) buat JP tertentu. Null kalau JP-nya tidak ada. */
     public static function mulaiJpHariIni(int $jamKe): ?Carbon
     {

@@ -8,14 +8,20 @@
     $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     $tanggalIndo = $hariIndo[now()->dayOfWeek].', '.now()->day.' '.$bulanIndo[now()->month].' '.now()->year;
+
+    // Nggak ada JP aktif bukan berarti udah di luar jam sekolah -- bisa juga
+    // lagi istirahat (di antara 2 JP). Bedain labelnya biar guru nggak salah
+    // kira udah pulang padahal cuma lagi jeda.
+    $dalamJamSekolah = \App\Support\Waktu::dalamJamSekolah();
 @endphp
 
 {{--
     Widget waktu sekarang -- ditaruh di atas tiap dasbor biar nggak cuma
     kotak-kotak statistik doang, guru/waka/dll langsung lihat ini lagi jam
     berapa & lagi JP berapa tanpa harus lirik jam device sendiri. Jamnya
-    jalan tiap detik lewat JS (initJamSekarang() di app.js); JP-nya dihitung
-    sekali pas render (cukup, halaman biasa dibuka ulang tiap beberapa menit).
+    (jam:menit:detik) jalan tiap detik lewat JS (initJamSekarang() di
+    app.js); JP-nya dihitung sekali pas render (cukup, halaman biasa dibuka
+    ulang tiap beberapa menit).
 --}}
 <div class="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-navy px-4 py-3.5 text-card">
     <div class="flex items-center gap-2.5">
@@ -24,10 +30,10 @@
         </span>
         <div>
             <p class="text-xs text-card/70">{{ $tanggalIndo }}</p>
-            <p class="text-lg font-bold tabular-nums leading-tight" data-jam-sekarang>{{ now()->format('H:i') }}</p>
+            <p class="text-lg font-bold tabular-nums leading-tight" data-jam-sekarang>{{ now()->format('H:i:s') }}</p>
         </div>
     </div>
     <span class="shrink-0 rounded-lg bg-white/15 px-3 py-1.5 text-right text-xs font-bold">
-        {{ $jpSekarang ? 'Sedang JP '.$jpSekarang : 'Di luar jam pelajaran' }}
+        {{ $jpSekarang ? 'Sedang JP '.$jpSekarang : ($dalamJamSekolah ? 'Waktu Istirahat' : 'Di luar jam pelajaran') }}
     </span>
 </div>

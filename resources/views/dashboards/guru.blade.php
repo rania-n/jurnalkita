@@ -114,10 +114,16 @@
         @else
             <x-ui.card-list>
                 @foreach ($jadwalHariIni as $j)
+                    @php $statusJam = \App\Support\Waktu::statusJpHariIni($j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
                     <x-ui.list-card
                         :title="$j->mapel->nama"
                         :meta="[$j->kelas->nama . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai, 'Ruang ' . ($j->ruang ?? '-')]"
                     >
+                        @if ($statusJam)
+                            <x-slot:badge>
+                                <x-ui.status-badge :status="$statusJam" />
+                            </x-slot:badge>
+                        @endif
                         <x-slot:actions>
                             @if (in_array($j->id, $sudahDiisi))
                                 <x-ui.action-button label="Sudah diisi" icon="check_circle" variant="success" href="{{ route('jurnal.index') }}" />
