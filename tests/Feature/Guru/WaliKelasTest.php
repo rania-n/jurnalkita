@@ -39,7 +39,7 @@ class WaliKelasTest extends TestCase
         $this->assertTrue($wali->isWali());
 
         $this->actingAs($wali)->get('/guru/wali-kelas')->assertOk()
-            ->assertSee('Budi')->assertSee('text-sakit">1</td>', false);
+            ->assertSee('Budi')->assertSee('text-sakit">1</span>', false);
     }
 
     public function test_guru_biasa_bukan_wali_tidak_bisa_akses(): void
@@ -86,6 +86,6 @@ class WaliKelasTest extends TestCase
         ]);
 
         $this->actingAs($wali)->get('/guru/wali-kelas')
-            ->assertOk()->assertSee('text-navy">1</td>', false);
+            ->assertOk()->assertSee('text-navy">1</span>', false);
     }
 }

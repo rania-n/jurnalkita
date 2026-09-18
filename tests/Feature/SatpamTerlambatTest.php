@@ -109,6 +109,6 @@ class SatpamTerlambatTest extends TestCase
 
         $waka = User::factory()->role('waka')->create();
         $this->actingAs($waka)->get('/rekap/siswa')
-            ->assertOk()->assertSee('text-navy">1</td>', false);
+            ->assertOk()->assertSee('text-navy">1</span>', false);
     }
 }

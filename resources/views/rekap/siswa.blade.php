@@ -53,12 +53,12 @@
                         <td class="px-4 py-2.5 text-muted">{{ $s->kelas?->nama ?? '—' }}</td>
                         <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
                         <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
-                        <td class="px-4 py-2.5 text-hadir">{{ $r['hadir'] ?? 0 }}</td>
-                        <td class="px-4 py-2.5 text-sakit">{{ $r['sakit'] ?? 0 }}</td>
-                        <td class="px-4 py-2.5 text-izin">{{ $r['izin'] ?? 0 }}</td>
-                        <td class="px-4 py-2.5 font-bold {{ $alphaTinggi ? 'text-alpha' : 'text-alpha/70' }}">{{ $r['alpha'] ?? 0 }}</td>
-                        <td class="px-4 py-2.5 text-dispen">{{ $r['dispensasi'] ?? 0 }}</td>
-                        <td class="px-4 py-2.5 font-semibold text-navy">{{ $terlambat[$s->id] ?? 0 }}</td>
+                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="hadir">{{ $r['hadir'] ?? 0 }}</x-ui.rekap-badge></td>
+                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="sakit">{{ $r['sakit'] ?? 0 }}</x-ui.rekap-badge></td>
+                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="izin">{{ $r['izin'] ?? 0 }}</x-ui.rekap-badge></td>
+                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="alpha" :class="$alphaTinggi ? 'ring-2 ring-alpha' : ''">{{ $r['alpha'] ?? 0 }}</x-ui.rekap-badge></td>
+                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="dispensasi">{{ $r['dispensasi'] ?? 0 }}</x-ui.rekap-badge></td>
+                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="terlambat">{{ $terlambat[$s->id] ?? 0 }}</x-ui.rekap-badge></td>
                     </tr>
                 @endforeach
             </x-admin.table>

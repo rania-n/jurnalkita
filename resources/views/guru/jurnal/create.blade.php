@@ -4,11 +4,28 @@
         subtitle="Isi jurnal mengajar dan kehadiran siswa dalam satu langkah"
     />
 
+    @if ($modeJurnal === 'bebas_kemarin')
+        {{-- Cuma muncul kalau admin udah ngizinin mode "bebas isi hari ini +
+             kemarin" -- lihat Admin\PengaturanJurnalController. Ganti tab
+             muat ulang halaman (bukan AJAX), biar semua data (jadwal, status
+             udah-diisi, dll) kerender ulang dari server sesuai tanggalnya. --}}
+        <div class="mb-4 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">
+            <a href="{{ route('jurnal.create') }}"
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold transition-colors', 'bg-navy text-card' => ! $pakaiKemarin, 'text-muted-2 hover:text-ink' => $pakaiKemarin])>
+                Hari Ini
+            </a>
+            <a href="{{ route('jurnal.create', ['hari' => 'kemarin']) }}"
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold transition-colors', 'bg-navy text-card' => $pakaiKemarin, 'text-muted-2 hover:text-ink' => ! $pakaiKemarin])>
+                Kemarin (Susulan)
+            </a>
+        </div>
+    @endif
+
     @if ($jumlahSudahDiisiHariIni > 0)
-        {{-- Jadwal yang udah ada jurnalnya hari ini nggak muncul lagi di
+        {{-- Jadwal yang udah ada jurnalnya di tanggal ini nggak muncul lagi di
              pilihan bawah -- baru bisa diisi ulang kalau jurnalnya dihapus. --}}
         <x-alert type="success" class="mb-4">
-            {{ $jumlahSudahDiisiHariIni }} jadwal hari ini sudah Anda isi jurnalnya — nggak muncul lagi di pilihan bawah.
+            {{ $jumlahSudahDiisiHariIni }} jadwal {{ $pakaiKemarin ? 'kemarin' : 'hari ini' }} sudah Anda isi jurnalnya — nggak muncul lagi di pilihan bawah.
             <a href="{{ route('jurnal.index') }}" class="font-bold underline">Lihat di Riwayat</a>.
         </x-alert>
     @endif
@@ -46,7 +63,10 @@
             </div>
             <div class="flex items-center gap-2 rounded-xl bg-surface-alt px-3.5 py-3">
                 <x-icon name="calendar_month" :size="18" class="text-navy" />
-                <span class="text-sm font-semibold text-ink">{{ now()->translatedFormat('d M Y') }}</span>
+                <span class="text-sm font-semibold text-ink">
+                    {{ $tanggalAktif->translatedFormat('d M Y') }}
+                    @if ($pakaiKemarin) <span class="text-xs font-normal text-muted-2">(Kemarin)</span> @endif
+                </span>
             </div>
 
             @php

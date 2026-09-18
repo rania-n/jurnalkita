@@ -125,8 +125,8 @@ class KelasTest extends TestCase
 
         $response->assertOk()->assertSee('Ketua Kelas');
         // 1 sakit bulan ini kehitung, alpha 2 bulan lalu TIDAK ikut kehitung.
-        $response->assertSee('text-sakit">1</td>', false);
-        $response->assertSee('text-alpha">0</td>', false);
+        $response->assertSee('text-sakit">1</span>', false);
+        $response->assertSee('text-alpha">0</span>', false);
     }
 
     public function test_bukan_pengurus_kelas_tidak_bisa_akses(): void

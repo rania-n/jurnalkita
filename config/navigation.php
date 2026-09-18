@@ -112,6 +112,10 @@ return [
             ['label' => 'Tahun Ajaran', 'icon' => 'event_repeat', 'route' => 'master.tahun-ajaran.index'],
         ]],
 
+        ['group' => 'Pengaturan', 'icon' => 'tune', 'items' => [
+            ['label' => 'Isi Jurnal Guru', 'icon' => 'lock_clock', 'route' => 'master.pengaturan-jurnal.index'],
+        ]],
+
         // Oversight kesiswaan — lihat saja, aksi (approve/tolak) tetap milik piket/waka.
         ['group' => 'Kesiswaan', 'icon' => 'fact_check', 'items' => [
             ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],

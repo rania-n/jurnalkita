@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\JadwalWakaController;
 use App\Http\Controllers\Admin\JamPelajaranController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MapelController;
+use App\Http\Controllers\Admin\PengaturanJurnalController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\DispensasiController;
@@ -76,6 +77,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin/tahun-ajaran', 'admin.tahun-ajaran.index')->name('master.tahun-ajaran.index');
         Route::get('/admin/backup', [BackupController::class, 'index'])->name('master.backup.index');
         Route::get('/admin/backup/unduh', [BackupController::class, 'download'])->name('master.backup.download');
+        Route::get('/admin/pengaturan-jurnal', [PengaturanJurnalController::class, 'index'])->name('master.pengaturan-jurnal.index');
+        Route::post('/admin/pengaturan-jurnal', [PengaturanJurnalController::class, 'save'])->name('master.pengaturan-jurnal.save');
 
         /* Manajemen akun */
         Route::post('/admin/akun', [AkunController::class, 'save'])->name('master.akun.save');

@@ -5,13 +5,16 @@ namespace Tests\Feature\Guru;
 use App\Models\Dispensasi;
 use App\Models\Guru;
 use App\Models\Jadwal;
+use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\Mapel;
+use App\Models\PengaturanJurnal;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -270,5 +273,72 @@ class JurnalTest extends TestCase
         $presensiAwal = $response->viewData('presensiAwal');
         $this->assertSame('sakit', $presensiAwal[$siswaA->id]['status']);
         $this->assertSame('Demam', $presensiAwal[$siswaA->id]['catatan']);
+    }
+
+    /* ---------------------- Pengaturan mode isi jurnal (Admin\PengaturanJurnalController) --------------------- */
+
+    public function test_mode_disiplin_default_diblokir_pas_istirahat(): void
+    {
+        $this->travelTo(Carbon::parse('next monday 09:30:00'));
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '09:00']);
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '09:40', 'selesai' => '10:20']);
+
+        Storage::fake('public');
+
+        // Default (belum ada baris PengaturanJurnal sama sekali) -> 'disiplin'.
+        $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
+        ])->assertForbidden();
+    }
+
+    public function test_mode_bebas_hari_ini_boleh_isi_pas_istirahat(): void
+    {
+        $this->travelTo(Carbon::parse('next monday 09:30:00'));
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '09:00']);
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '09:40', 'selesai' => '10:20']);
+        PengaturanJurnal::ambil()->update(['mode' => 'bebas_hari_ini']);
+
+        Storage::fake('public');
+
+        $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
+        ])->assertRedirect();
+
+        $jurnal = Jurnal::where('jadwal_id', $this->jadwal->id)->firstOrFail();
+        $this->assertTrue($jurnal->tanggal->isSameDay(today()));
+    }
+
+    public function test_mode_bebas_kemarin_boleh_isi_susulan_jadwal_kemarin(): void
+    {
+        // $this->jadwal hari-nya 'senin' -- pindah ke SELASA biar "kemarin" = senin.
+        $this->travelTo(Carbon::parse('next tuesday 10:00:00'));
+        PengaturanJurnal::ambil()->update(['mode' => 'bebas_kemarin']);
+
+        Storage::fake('public');
+
+        $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Susulan kemarin',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
+        ])->assertRedirect();
+
+        $jurnal = Jurnal::where('jadwal_id', $this->jadwal->id)->firstOrFail();
+        $this->assertTrue($jurnal->tanggal->isSameDay(Carbon::yesterday()));
+    }
+
+    public function test_form_isi_jurnal_kemarin_render_pas_mode_bebas_kemarin(): void
+    {
+        $this->travelTo(Carbon::parse('next tuesday 10:00:00'));
+        PengaturanJurnal::ambil()->update(['mode' => 'bebas_kemarin']);
+
+        $this->actingAs($this->user)->get('/guru/jurnal/tambah?hari=kemarin')
+            ->assertOk()->assertSee('Kemarin');
     }
 }
