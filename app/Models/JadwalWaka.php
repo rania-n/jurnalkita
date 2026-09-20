@@ -13,8 +13,9 @@ class JadwalWaka extends Model
 
     protected $fillable = ['user_id', 'hari'];
 
+    /** withTrashed() -- jadwal shift lama tetap harus kebaca nama waka-nya walau akunnya belakangan dihapus admin. */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 }

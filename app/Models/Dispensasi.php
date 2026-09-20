@@ -105,19 +105,20 @@ class Dispensasi extends Model
         return $this->belongsTo(Siswa::class)->withTrashed();
     }
 
+    /** withTrashed() -- dispensasi lama tetap harus kebaca siapa yang ajukan/proses walau akunnya belakangan dihapus admin. */
     public function pengaju(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'diajukan_oleh_id');
+        return $this->belongsTo(User::class, 'diajukan_oleh_id')->withTrashed();
     }
 
     public function piket(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'piket_id');
+        return $this->belongsTo(User::class, 'piket_id')->withTrashed();
     }
 
     public function waka(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'waka_id');
+        return $this->belongsTo(User::class, 'waka_id')->withTrashed();
     }
 
     /** Hitung ulang status akhir; jika disetujui, terapkan ke presensi siswa. */

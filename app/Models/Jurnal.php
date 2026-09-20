@@ -30,14 +30,15 @@ class Jurnal extends Model
         ];
     }
 
+    /** withTrashed() -- jurnal itu CATATAN SEJARAH, jadwal/gurunya bisa saja belakangan dihapus admin. */
     public function jadwal(): BelongsTo
     {
-        return $this->belongsTo(Jadwal::class);
+        return $this->belongsTo(Jadwal::class)->withTrashed();
     }
 
     public function guru(): BelongsTo
     {
-        return $this->belongsTo(Guru::class);
+        return $this->belongsTo(Guru::class)->withTrashed();
     }
 
     public function verifikator(): BelongsTo

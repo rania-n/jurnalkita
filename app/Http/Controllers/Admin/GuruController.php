@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Guru;
+use App\Models\Jadwal;
+use App\Models\JadwalPiket;
+use App\Models\Kelas;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -45,11 +48,47 @@ class GuruController extends Controller
 
     public function destroy(Guru $guru): RedirectResponse
     {
+        if ($pesan = $this->alasanTidakBolehDihapus($guru)) {
+            return back()->with('error', $pesan);
+        }
+
         $nama = $guru->nama;
         $guru->delete();
 
         AuditLog::catat('Hapus Guru', "Hapus data guru: {$nama}", $guru);
 
         return back()->with('success', 'Data guru dihapus.');
+    }
+
+    /**
+     * Guru soft-delete doang -- FK cascadeOnDelete/nullOnDelete di migration nggak
+     * pernah kepicu (itu cuma jalan pas hard delete beneran). Jadi kalau guru yang
+     * masih ngajar/piket/jadi wali langsung dihapus, jadwal/kelas terkait diam-diam
+     * nyantol ke guru "hantu" -- harus dibereskan admin dulu sebelum boleh dihapus.
+     */
+    private function alasanTidakBolehDihapus(Guru $guru): ?string
+    {
+        $masalah = [];
+
+        $ngajar = Jadwal::where('guru_id', $guru->id)->orWhere('guru_pendamping_id', $guru->id)->count();
+        if ($ngajar > 0) {
+            $masalah[] = "masih punya {$ngajar} jadwal mengajar";
+        }
+
+        $piket = JadwalPiket::where('guru_id', $guru->id)->count();
+        if ($piket > 0) {
+            $masalah[] = "masih punya {$piket} jadwal piket";
+        }
+
+        $kelasWali = Kelas::where('wali_id', $guru->id)->pluck('nama');
+        if ($kelasWali->isNotEmpty()) {
+            $masalah[] = 'masih jadi wali kelas '.$kelasWali->implode(', ');
+        }
+
+        if (empty($masalah)) {
+            return null;
+        }
+
+        return "Guru {$guru->nama} belum bisa dihapus: ".implode('; ', $masalah).'. Ubah/hapus dulu jadwal & status wali kelasnya sebelum menghapus data guru ini.';
     }
 }

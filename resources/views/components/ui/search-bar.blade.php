@@ -6,7 +6,13 @@
 {{-- Putih + border (bukan abu-abu polos) biar kelihatan jelas ini kolom input,
      bukan sekadar dekorasi -- dan h-10 (bukan h-11) biar nggak kebesaran.
      type="text" (bukan "search") biar nggak muncul tombol silang bawaan
-     browser dobel sama tombol Reset kita sendiri di bawah. --}}
+     browser dobel sama tombol X kita sendiri di bawah.
+
+     Tombol clear di sini SENGAJA cuma ikon X polos, BUKAN dilabeli "Reset"
+     -- kata "Reset" dipakai khusus buat x-admin.filters (reset dropdown/
+     tanggal). Kalau dua-duanya ada di halaman yang sama & labelnya sama
+     "Reset", jadi keliatan dobel padahal fungsinya beda (yang satu cuma
+     ngosongin teks cari, yang satu reset semua filter). --}}
 <div class="flex h-10 items-center gap-2 rounded-lg border border-surface-alt bg-card px-3" data-search-bar>
     <x-icon name="search" :size="16" class="shrink-0 text-muted" />
     <input
@@ -20,10 +26,10 @@
         type="button"
         data-search-reset
         hidden
-        class="flex shrink-0 items-center gap-1 text-xs font-semibold text-muted hover:text-alpha"
+        class="flex shrink-0 items-center text-muted hover:text-alpha"
+        aria-label="Hapus pencarian"
     >
-        <x-icon name="close" :size="13" class="shrink-0" />
-        Reset
+        <x-icon name="close" :size="16" class="shrink-0" />
     </button>
 </div>
 

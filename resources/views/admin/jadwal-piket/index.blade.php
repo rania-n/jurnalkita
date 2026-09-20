@@ -30,7 +30,9 @@
         @endforeach
     </div>
 
-    <x-admin.filters :action="route('master.jadwal-piket.index')">
+    {{-- hideButtons -- reset hari udah ada di tab "Semua" di atas, di sini
+         cuma search doang, jangan dobel sama tombol X di search-nya sendiri. --}}
+    <x-admin.filters :action="route('master.jadwal-piket.index')" hideButtons="true">
         <input type="hidden" name="hari" value="{{ $hari }}">
         <x-admin.f-search placeholder="Cari nama guru..." />
     </x-admin.filters>

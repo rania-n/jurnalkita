@@ -11,13 +11,16 @@
         autocomplete="off"
         class="w-full border-none bg-transparent text-sm text-ink outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:hidden"
     >
+    {{-- Cuma ikon X polos, BUKAN dilabeli "Reset" -- "Reset" dipakai khusus
+         buat x-admin.filters (reset dropdown/tanggal), biar nggak keliatan
+         dobel kalau dua-duanya nongol di halaman yang sama. --}}
     <button
         type="button"
         data-admin-search-clear
-        class="{{ request()->query($name) ? '' : 'hidden' }} flex shrink-0 items-center gap-1 text-xs font-semibold text-muted hover:text-alpha"
+        class="{{ request()->query($name) ? '' : 'hidden' }} flex shrink-0 items-center text-muted hover:text-alpha"
+        aria-label="Hapus pencarian"
     >
-        <x-icon name="close" :size="13" class="shrink-0" />
-        Reset
+        <x-icon name="close" :size="16" class="shrink-0" />
     </button>
 </div>
 

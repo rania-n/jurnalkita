@@ -20,9 +20,10 @@ class Guru extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** withTrashed() -- mapel_utama_id bisa nyantol ke mapel yang belakangan dihapus admin. */
     public function mapelUtama(): BelongsTo
     {
-        return $this->belongsTo(Mapel::class, 'mapel_utama_id');
+        return $this->belongsTo(Mapel::class, 'mapel_utama_id')->withTrashed();
     }
 
     /** Mapel tambahan yang juga diajar guru ini. */

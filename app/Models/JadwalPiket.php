@@ -21,8 +21,9 @@ class JadwalPiket extends Model
         ];
     }
 
+    /** withTrashed() -- jadwal piket lama bisa tetap nyantol ke guru yang belakangan dihapus admin. */
     public function guru(): BelongsTo
     {
-        return $this->belongsTo(Guru::class);
+        return $this->belongsTo(Guru::class)->withTrashed();
     }
 }

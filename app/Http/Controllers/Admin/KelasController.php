@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Jadwal;
 use App\Models\Kelas;
+use App\Models\Siswa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -59,6 +61,16 @@ class KelasController extends Controller
 
     public function destroy(Kelas $kelas): RedirectResponse
     {
+        $jumlahSiswa = Siswa::where('kelas_id', $kelas->id)->count();
+        if ($jumlahSiswa > 0) {
+            return back()->with('error', "Kelas {$kelas->nama} masih punya {$jumlahSiswa} siswa. Pindahkan atau hapus dulu data siswanya sebelum menghapus kelas ini.");
+        }
+
+        $jumlahJadwal = Jadwal::where('kelas_id', $kelas->id)->count();
+        if ($jumlahJadwal > 0) {
+            return back()->with('error', "Kelas {$kelas->nama} masih punya {$jumlahJadwal} jadwal pelajaran. Hapus dulu jadwalnya sebelum menghapus kelas ini.");
+        }
+
         $nama = $kelas->nama;
         $kelas->delete();
 

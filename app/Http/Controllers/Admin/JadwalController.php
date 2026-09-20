@@ -39,6 +39,13 @@ class JadwalController extends Controller
             return back()->with('error', $pesan)->withInput();
         }
 
+        // Satu kelas fisiknya juga cuma bisa punya 1 mapel dalam satu waktu --
+        // cegah 2 jadwal numpuk buat KELAS yang sama di jam yang sama (dulu
+        // nggak dicek sama sekali -- cuma bentrok guru yang divalidasi).
+        if ($pesan = $this->konflikJadwalKelas($data)) {
+            return back()->with('error', $pesan)->withInput();
+        }
+
         $jadwal = $request->filled('id') ? Jadwal::findOrFail($data['id']) : new Jadwal;
         $baru = ! $jadwal->exists;
 
@@ -74,6 +81,24 @@ class JadwalController extends Controller
         }
 
         return "Guru ini udah punya jadwal lain di jam yang sama hari {$data['hari']}: {$bentrok->kelas->nama} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Satu guru nggak bisa ngajar 2 kelas sekaligus — ubah jamnya atau pilih guru lain.";
+    }
+
+    /** Cek apakah jam jadwal ini numpuk sama jadwal MAPEL LAIN di kelas yang sama, hari yang sama. */
+    private function konflikJadwalKelas(array $data): ?string
+    {
+        $bentrok = Jadwal::with('mapel', 'guru')
+            ->where('kelas_id', $data['kelas_id'])
+            ->where('hari', $data['hari'])
+            ->when($data['id'] ?? null, fn ($q, $id) => $q->whereKeyNot($id))
+            ->where('jam_ke_mulai', '<=', $data['jam_ke_selesai'])
+            ->where('jam_ke_selesai', '>=', $data['jam_ke_mulai'])
+            ->first();
+
+        if (! $bentrok) {
+            return null;
+        }
+
+        return "Kelas ini udah ada jadwal lain di jam yang sama hari {$data['hari']}: {$bentrok->mapel->nama} — {$bentrok->guru->nama} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Satu kelas nggak bisa 2 mapel sekaligus — ubah jamnya atau hapus/ubah jadwal yang lama dulu.";
     }
 
     /** Cek apakah jam jadwal (jam ke-) bentrok dengan shift piket guru di hari yang sama. */

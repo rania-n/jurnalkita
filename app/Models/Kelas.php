@@ -22,9 +22,10 @@ class Kelas extends Model
         return config("akademik.jurusan.{$this->jurusan}", $this->jurusan ?? '—');
     }
 
+    /** withTrashed() -- wali_id bisa nyantol ke guru yang belakangan dihapus admin. */
     public function wali(): BelongsTo
     {
-        return $this->belongsTo(Guru::class, 'wali_id');
+        return $this->belongsTo(Guru::class, 'wali_id')->withTrashed();
     }
 
     public function tahunAjaran(): BelongsTo

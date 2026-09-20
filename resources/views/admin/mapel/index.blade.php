@@ -11,7 +11,9 @@
         </x-slot:action>
     </x-admin.page>
 
-    <x-admin.filters :action="route('master.mapel.index')">
+    {{-- hideButtons -- di sini cuma ada search, gaada dropdown/tanggal buat
+         "Reset" beneran, nanti malah dobel sama tombol X di search-nya sendiri. --}}
+    <x-admin.filters :action="route('master.mapel.index')" hideButtons="true">
         <x-admin.f-search placeholder="Kode atau nama..." />
     </x-admin.filters>
 

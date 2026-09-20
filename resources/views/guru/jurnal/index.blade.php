@@ -19,7 +19,7 @@
 
     {{-- Rentang tanggal & dropdown Kelas/Mapel -- server-side (auto-submit),
          sama kayak pola filter di Rekap/Monitor Piket/Dispensasi. --}}
-    <x-admin.filters :action="route('jurnal.index')">
+    <x-admin.filters :action="route('jurnal.index')" ignore="status">
         <input type="hidden" name="status" value="{{ $status }}">
 
         <div class="flex w-full gap-2">

@@ -25,6 +25,18 @@
     $ruangList = collect(config('akademik.ruangan'))->mapWithKeys(fn ($r) => [$r => $r]);
     $jpList = collect(range(1, 13))->mapWithKeys(fn ($i) => [$i => "Jam ke-{$i}"]);
     $queryTanpaHari = request()->except('page', 'hari');
+
+    // Modal Tambah/Ubah Jadwal -- Kelas dipilih DULUAN (bukan Hari), biar begitu
+    // kelasnya diketahui, hari yang buat kelas itu JP-nya udah penuh semua bisa
+    // langsung dikunci di dropdown Hari (nggak ngasih celah bikin jadwal yang
+    // jelas-jelas bakal bentrok). Ganti Kelas nge-reload halaman (bukan AJAX) --
+    // sengaja gitu, biar itungan "hari penuh"-nya seger dari server, bukan JS.
+    // Dibaca dari 'kelas_id' -- SAMA PERSIS sama nama field select-nya di modal
+    // (lihat onchange di bawah, cuma nge-set 1 param ini doang, bukan submit
+    // seluruh form, biar field lain yang masih kosong nggak ikut kebawa jadi
+    // query string & bikin salah kefilter di tabel atas).
+    $kelasDipilih = request()->query('kelas_id');
+    $hariPenuh = $kelasDipilih ? \App\Models\Jadwal::hariPenuhUntukKelas((int) $kelasDipilih) : [];
 @endphp
 
 <x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran">
@@ -82,18 +94,40 @@
     @endif
 
     <x-admin.modal id="modal-jadwal" title="Tambah Jadwal">
+        {{-- Kelas dipilih DULUAN -- ganti nilainya nge-reload halaman ini (GET,
+             bukan submit beneran) biar server bisa itung ulang hari mana yang
+             buat kelas itu udah penuh (lihat $hariPenuh di atas), lalu modal
+             kebuka lagi otomatis (data-auto-open-jadwal di bawah) dengan Kelas
+             udah kepilih & opsi Hari yang penuh otomatis kekunci. --}}
         <form method="POST" action="{{ route('master.jadwal-pelajaran.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.select label="Hari" name="hari">
-                <option value="" disabled selected hidden>Pilih hari</option>
-                @foreach ($hariLabel as $v => $l)
-                    <option value="{{ $v }}">{{ $l }}</option>
+            <x-ui.select
+                label="Kelas"
+                name="kelas_id"
+                onchange="location.href='{{ route('master.jadwal-pelajaran.index') }}?kelas_id=' + this.value"
+            >
+                <option value="" disabled hidden @selected(! $kelasDipilih)>Pilih kelas</option>
+                @foreach ($kelasList as $k)
+                    <option value="{{ $k->id }}" @selected((string) $kelasDipilih === (string) $k->id)>{{ $k->nama }}</option>
                 @endforeach
             </x-ui.select>
-            <x-ui.select label="Kelas" name="kelas_id">
-                <option value="" disabled selected hidden>Pilih kelas</option>
-                @foreach ($kelasList as $k)<option value="{{ $k->id }}">{{ $k->nama }}</option>@endforeach
-            </x-ui.select>
+            <div class="flex flex-col gap-1.5">
+                <x-ui.select label="Hari" name="hari">
+                    <option value="" disabled selected hidden>Pilih hari</option>
+                    @foreach ($hariLabel as $v => $l)
+                        <option value="{{ $v }}" @disabled(in_array($v, $hariPenuh, true))>{{ $l }}{{ in_array($v, $hariPenuh, true) ? ' (Penuh)' : '' }}</option>
+                    @endforeach
+                </x-ui.select>
+                @if ($kelasDipilih)
+                    <p class="text-xs text-muted-2">
+                        @if (count($hariPenuh) > 0)
+                            Hari yang ditandai "(Penuh)" udah nggak ada celah JP kosong buat kelas ini.
+                        @else
+                            Semua hari masih ada celah JP kosong buat kelas ini.
+                        @endif
+                    </p>
+                @endif
+            </div>
             <x-ui.select label="Mata Pelajaran" name="mapel_id">
                 <option value="" disabled selected hidden>Pilih mapel</option>
                 @foreach ($mapelList as $m)<option value="{{ $m->id }}">{{ $m->nama }}</option>@endforeach
@@ -124,4 +158,19 @@
             </div>
         </form>
     </x-admin.modal>
+
+    @if ($kelasDipilih)
+        {{-- Abis reload gara-gara ganti Kelas (lihat onchange di atas) -- buka
+             lagi modalnya otomatis, jangan nyangkut balik ke tabel biasa. --}}
+        <button
+            type="button"
+            hidden
+            data-auto-open-jadwal
+            data-modal-open="modal-jadwal"
+            data-modal-title="Tambah Jadwal"
+        ></button>
+        @push('scripts')
+            <script>window.addEventListener('load', () => document.querySelector('[data-auto-open-jadwal]')?.click());</script>
+        @endpush
+    @endif
 </x-layouts.admin>

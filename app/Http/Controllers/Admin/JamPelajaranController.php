@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Jadwal;
 use App\Models\JamPelajaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,6 +64,23 @@ class JamPelajaranController extends Controller
     /** Hapus 1 kategori beserta semua jamnya (dipakai buat kategori custom yang salah bikin). */
     public function destroyKategori(string $kategori): RedirectResponse
     {
+        // 'senin_kamis' & 'jumat' itu 2 kategori bawaan yang jadi acuan SEMUA jadwal
+        // pelajaran (lihat Jadwal::hariPenuhUntukKelas()) -- kalau masih ada jadwal
+        // yang makai hari terkait, hapus kategori ini bakal bikin jam pelajarannya
+        // "hilang" di semua jadwal itu (materi jam ke berapa jadi nggak diketahui).
+        $hariTerkait = match ($kategori) {
+            'senin_kamis' => ['senin', 'selasa', 'rabu', 'kamis'],
+            'jumat' => ['jumat'],
+            default => [],
+        };
+
+        if (! empty($hariTerkait)) {
+            $jumlahJadwal = Jadwal::whereIn('hari', $hariTerkait)->count();
+            if ($jumlahJadwal > 0) {
+                return back()->with('error', "Kategori ini masih dipakai {$jumlahJadwal} jadwal pelajaran (hari ".implode(', ', $hariTerkait).'). Hapus/pindahkan dulu jadwalnya sebelum menghapus kategori jam ini.');
+            }
+        }
+
         JamPelajaran::where('kategori', $kategori)->delete();
 
         AuditLog::catat('Hapus Kategori Jam Pelajaran', "Hapus kategori {$kategori}");

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Guru;
+use App\Models\Jadwal;
 use App\Models\Mapel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,6 +57,27 @@ class MapelController extends Controller
 
     public function destroy(Mapel $mapel): RedirectResponse
     {
+        $masalah = [];
+
+        $jumlahJadwal = Jadwal::where('mapel_id', $mapel->id)->count();
+        if ($jumlahJadwal > 0) {
+            $masalah[] = "dipakai {$jumlahJadwal} jadwal pelajaran";
+        }
+
+        $jumlahGuruUtama = Guru::where('mapel_utama_id', $mapel->id)->count();
+        if ($jumlahGuruUtama > 0) {
+            $masalah[] = "jadi mapel utama {$jumlahGuruUtama} guru";
+        }
+
+        $jumlahGuruTambahan = $mapel->gurus()->count();
+        if ($jumlahGuruTambahan > 0) {
+            $masalah[] = "jadi mapel tambahan {$jumlahGuruTambahan} guru";
+        }
+
+        if (! empty($masalah)) {
+            return back()->with('error', "Mapel {$mapel->nama} belum bisa dihapus: masih ".implode('; ', $masalah).'.');
+        }
+
         $nama = $mapel->nama;
         $mapel->delete();
 
