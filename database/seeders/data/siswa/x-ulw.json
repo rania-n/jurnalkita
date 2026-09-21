@@ -7,147 +7,183 @@
     "siswa": [
         {
             "nama": "Adinda Zalza Putri Ramadhani",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202561356019"
         },
         {
             "nama": "Ahmad A Raffi Badali",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202525652841"
         },
         {
             "nama": "Aisyah Nabilla Putri",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202547823779"
         },
         {
             "nama": "Alea Safira Cahyono Putri",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202506930494"
         },
         {
             "nama": "Aulia Aisha Farah",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202501717645"
         },
         {
             "nama": "Clara Sasti Firlita Andari",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202570409077"
         },
         {
             "nama": "Diana Putri Wardani",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202581595815"
         },
         {
             "nama": "Evan Javier Dastian Wicaksono",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202556406740"
         },
         {
             "nama": "Farida Nur Ainy",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202586551287"
         },
         {
             "nama": "Galuh Dwi Suryaningsih",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202530732480"
         },
         {
             "nama": "Galuh Sofia Fitri",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202592318899"
         },
         {
             "nama": "Imelda Salsabila",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202598665874"
         },
         {
             "nama": "Jagad Aura Pradana",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202565205210"
         },
         {
             "nama": "Jesika Rosalina",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202595223461"
         },
         {
             "nama": "Kamila Dewi Zulfa",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202599108807"
         },
         {
             "nama": "Kamila Nuril Elisa",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202528225975"
         },
         {
             "nama": "Kharisa Dhebi Savana",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202586323898"
         },
         {
             "nama": "Marsya Aulia Karunia Putri",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202582503972"
         },
         {
             "nama": "Muhamad Fajar Kurniawan",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202563616162"
         },
         {
             "nama": "Nabila Salsa Sefilia",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202578625480"
         },
         {
             "nama": "Nabilah Nur Aisyah",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202559489091"
         },
         {
             "nama": "Nadya Aurora Karunia Ramadhanty",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202530993828"
         },
         {
             "nama": "Nasywa Auly Agustyn",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202561389984"
         },
         {
             "nama": "Natasya Sabilyla",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202572206323"
         },
         {
             "nama": "Nazla Zaskia Khoirun Nisa",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202504840942"
         },
         {
             "nama": "Oktavia Wulan Sari",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202566713640"
         },
         {
             "nama": "Putri Nur Azizah",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202528900315"
         },
         {
             "nama": "Rahma Gysela Oktaviani",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202577595327"
         },
         {
             "nama": "Rahma Madya Putri",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202550155010"
         },
         {
             "nama": "Refa Adelya Caltwin",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202500945966"
         },
         {
             "nama": "Salsa Anggelita Putri",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202503793287"
         },
         {
             "nama": "Shima Ratri Paringsih",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202547348546"
         },
         {
             "nama": "Syafina Azzahra",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202554676495"
         },
         {
             "nama": "Syifa Arzaqina Wachidatul Mufidza",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202552102295"
         },
         {
             "nama": "Veyra Zhilviana Putri",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202530503592"
         },
         {
             "nama": "Zeline Julia Fauziara",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202546677256"
         }
     ]
 }

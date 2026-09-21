@@ -7,143 +7,178 @@
     "siswa": [
         {
             "nama": "Agna Widya Tama",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202548597312"
         },
         {
             "nama": "Ahmad Fadhil Firmansyah",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202528454737"
         },
         {
             "nama": "Ahmad Farosy Muzakki",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202503768249"
         },
         {
             "nama": "Ahmad Hayyin Nurani",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202566586176"
         },
         {
             "nama": "Ahmad Syakkran",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202550001629"
         },
         {
             "nama": "Akmal Balakosa Setiawan",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202578435601"
         },
         {
             "nama": "Anindya Ramadhan Banowati",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202595540214"
         },
         {
             "nama": "Anjani Mega Arianti",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202510005334"
         },
         {
             "nama": "Aprilia Putri Nuraini",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202514157671"
         },
         {
             "nama": "Atmajaya Widhi Kusuma",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202556836536"
         },
         {
             "nama": "Azra Azelia Azura",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202502531179"
         },
         {
             "nama": "Azzaki Ganendra",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202590225751"
         },
         {
             "nama": "Bima Ageng Pranata",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202546363690"
         },
         {
             "nama": "Bumi Bravenda",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202546013980"
         },
         {
             "nama": "Clarisa",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202598783133"
         },
         {
             "nama": "Devan Kiano Alfreda",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202584629780"
         },
         {
             "nama": "Dio Putra Permana",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202566331259"
         },
         {
             "nama": "Elmyra Azalia Wardhani",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202585543443"
         },
         {
             "nama": "Erlin Agustina Ramadhani",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202578537898"
         },
         {
             "nama": "Evandaffa Lanang Novardyandhi",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202530045096"
         },
         {
             "nama": "Fadia Nursyahira Permata",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202598543794"
         },
         {
             "nama": "Farrel Regan Syahreza",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202554474973"
         },
         {
             "nama": "Faza Ihsan Abdilah",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202508386121"
         },
         {
             "nama": "Haykal Tutit Verdiansah",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202527661196"
         },
         {
             "nama": "Jabbarudin Habibyan Al Syafii",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202576860409"
         },
         {
             "nama": "Jasson Charisma Taufandi",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202504808085"
         },
         {
             "nama": "Karina Kasih Ramadhani",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202513472474"
         },
         {
             "nama": "Kenzie Rasydan Ahnaf",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202575610557"
         },
         {
             "nama": "Khamidatun Nabiluz Zahro",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202588608715"
         },
         {
             "nama": "Khayyun Nawa Wirahadi",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202555064492"
         },
         {
             "nama": "Lanang Ditra Dwi Ardingga",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202597742545"
         },
         {
             "nama": "Lintang Maulid Daning Kinanti",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202524842521"
         },
         {
             "nama": "Misael Dwi Prasetyo",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202596446934"
         },
         {
             "nama": "Mochamad Galang Arfian Widodo",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202573785466"
         },
         {
             "nama": "Mochamad Roziq Rifai",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202546598049"
         }
     ]
 }

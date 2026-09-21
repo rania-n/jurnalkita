@@ -7,143 +7,178 @@
     "siswa": [
         {
             "nama": "Muhammad Fahreza Kurniawan",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202529452706"
         },
         {
             "nama": "Muhammad Fathur Rosyid Assidiq",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202521066925"
         },
         {
             "nama": "Muhammad Ferdian Dwi Syahputra",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202560441327"
         },
         {
             "nama": "Muhammad Hilmi Fadhil",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202571964237"
         },
         {
             "nama": "Muhammad Nata Zakaria",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202568521892"
         },
         {
             "nama": "Mukhamad Tegar Al Farikhi",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202552074091"
         },
         {
             "nama": "Mustika Tri Rahayu",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202543392757"
         },
         {
             "nama": "Naila Sifa Nafadira",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202534314789"
         },
         {
             "nama": "Putra Aji Pangestu",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202587386160"
         },
         {
             "nama": "Qori Muyasaroh",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202516997964"
         },
         {
             "nama": "Raditya Daffa Abrory",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202545130115"
         },
         {
             "nama": "Rangga Aldryan Firdaus",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202526047333"
         },
         {
             "nama": "Revita Cahya Anggraini",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202582583756"
         },
         {
             "nama": "Ridho Putra Pratama",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202585141668"
         },
         {
             "nama": "Rista Enggar Febri Fatma Alifa Sari",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202578207359"
         },
         {
             "nama": "Rizqi Saefudin",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202514904690"
         },
         {
             "nama": "Safara Aulia Sabrina",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202590209889"
         },
         {
             "nama": "Salsa Dwi Novita Sari",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202579982073"
         },
         {
             "nama": "Saskia Nata Safira",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202589798007"
         },
         {
             "nama": "Satrio Bagus Kusuma",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202503593537"
         },
         {
             "nama": "Sofia Rahmania",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202542564992"
         },
         {
             "nama": "Sukma Citra Ayu Pratiwi",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202538398681"
         },
         {
             "nama": "Syifa Aulia Zahra",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202513433016"
         },
         {
             "nama": "Syifa Ayuni Al Thafun Nisa",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202557363994"
         },
         {
             "nama": "Tegar Arlan Cahya Pratama",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202596918367"
         },
         {
             "nama": "Tegar Indra Kusuma",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202585077209"
         },
         {
             "nama": "Tia Marshanda",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202563135907"
         },
         {
             "nama": "Vania Widya Ningrum",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202567098613"
         },
         {
             "nama": "Wedhar Ratri Puspaningdyah",
-            "jenis_kelamin": "P"
+            "jenis_kelamin": "P",
+            "nis": "202557177666"
         },
         {
             "nama": "Weldianta Firman Zaki",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202574475963"
         },
         {
             "nama": "Wildan Rezky Aditama",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202564668632"
         },
         {
             "nama": "Yohanes Sinartria Ockta Riadi",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202583394277"
         },
         {
             "nama": "Zaldy Octav Sabanna Putra",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202520811638"
         },
         {
             "nama": "Zifan Awfa Putra Arriyadli",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202524161983"
         },
         {
             "nama": "Zufan Asyfaq Izzudin Purwari",
-            "jenis_kelamin": "L"
+            "jenis_kelamin": "L",
+            "nis": "202539105215"
         }
     ]
 }
