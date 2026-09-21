@@ -236,12 +236,15 @@ class DispensasiTest extends TestCase
             'alasan' => 'Lomba',
         ]);
         $d = Dispensasi::firstOrFail();
-        $response->assertRedirect("/dispensasi?kirim_wa={$d->id}");
+        $response->assertRedirect("/dispensasi?kirim_wa={$d->id}&lihat={$d->id}");
 
         // Riwayat-nya langsung nampilkan tautan wa.me yang di-klik otomatis via JS,
         // bukan nunggu tap tombol -- dan bukan halaman detail/form (biar nggak
-        // nyangkut di situ kalau kirim WA-nya dibatalkan).
-        $this->followRedirects($response)->assertSee('wa.me', false);
+        // nyangkut di situ kalau kirim WA-nya dibatalkan). Popup detailnya juga
+        // langsung kebuka otomatis (data-auto-open-dispensasi, sama pola kayak
+        // abis Waka mutusin), biar piket langsung lihat ringkasannya.
+        $this->followRedirects($response)->assertSee('wa.me', false)
+            ->assertSee('data-auto-open-dispensasi', false);
     }
 
     public function test_jam_mulai_saja_boleh_tanpa_jam_selesai(): void
@@ -361,5 +364,101 @@ class DispensasiTest extends TestCase
         ]);
 
         $this->assertFalse($d->sudahKadaluarsa());
+    }
+
+    /**
+     * Dispensasi PENDING (Waka belum mutusin) yang tanggal MULAI-nya udah kejalan
+     * (hari ini atau sebelumnya) harus otomatis kebatal -- beda dari sudahKadaluarsa()
+     * yang khusus buat yang udah disetujui.
+     */
+    public function test_dispensasi_pending_yang_tanggalnya_udah_lewat_otomatis_batal(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today()->subDay(), 'alasan' => 'Lomba', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+        $d->refresh(); // status_waka default 'pending' dari DB, belum kebawa ke object in-memory abis create()
+
+        $this->assertTrue($d->sudahLewatBatasKeputusan());
+        $this->assertTrue($d->batalkanKalauKadaluarsa());
+
+        $d->refresh();
+        $this->assertSame('rejected', $d->status_waka);
+        $this->assertSame('rejected', $d->status_akhir);
+        $this->assertStringContainsString('Otomatis dibatalkan', $d->catatan_waka);
+    }
+
+    /**
+     * Kasus paling umum: piket ajukan dispensasi buat HARI INI JUGA (siswa lagi
+     * di depan gerbang mau izin langsung) -- ini TIDAK boleh dianggap "lewat
+     * batas" walau tanggalnya sama persis kayak hari ini, karena mustahil
+     * diputuskan sebelum harinya sendiri dimulai.
+     */
+    public function test_dispensasi_pending_untuk_hari_ini_belum_dianggap_lewat_batas(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'alasan' => 'Izin mendadak', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        $this->assertFalse($d->sudahLewatBatasKeputusan());
+
+        $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved'])
+            ->assertRedirect()->assertSessionMissing('error');
+        $this->assertSame('approved', $d->fresh()->status_akhir);
+    }
+
+    public function test_dispensasi_pending_untuk_besok_belum_dianggap_lewat_batas(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today()->addDay(), 'alasan' => 'Lomba besok', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        $this->assertFalse($d->sudahLewatBatasKeputusan());
+        $this->assertFalse($d->batalkanKalauKadaluarsa());
+        $this->assertSame('pending', $d->fresh()->status_waka);
+    }
+
+    public function test_buka_halaman_riwayat_dispensasi_otomatis_menyapu_yang_kadaluarsa(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today()->subDays(2), 'alasan' => 'Lomba kemarin lusa', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        $this->actingAs($this->waka)->get('/dispensasi')->assertOk();
+
+        $this->assertSame('rejected', $d->fresh()->status_akhir);
+    }
+
+    public function test_waka_tidak_bisa_approve_dispensasi_yang_udah_kadaluarsa(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today()->subDay(), 'alasan' => 'Telat diproses', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved'])
+            ->assertRedirect()->assertSessionHas('error');
+
+        $this->assertSame('rejected', $d->fresh()->status_akhir);
+    }
+
+    public function test_detail_dispensasi_kadaluarsa_tidak_nampilin_tombol_setuju(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today()->subDay(), 'alasan' => 'Telat diproses', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        $this->actingAs($this->waka)->get("/dispensasi/{$d->id}/fragment")
+            ->assertOk()->assertDontSee('Setujui');
     }
 }

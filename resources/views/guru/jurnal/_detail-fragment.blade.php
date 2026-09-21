@@ -29,6 +29,15 @@
         @endif
     </x-alert>
 
+    {{-- Ringkasan Hadir/Sakit/Izin/Alpha/Dispensasi ditaruh paling atas (nggak
+         nunggu scroll ke bawah dulu) -- ini yang paling sering dicek duluan
+         pas buka detail, daripada Jam Pelajaran/Materi dkk. --}}
+    <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
+        @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
+            <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
+        @endforeach
+    </div>
+
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <x-ui.field-static label="Jam Pelajaran" icon="schedule" class="sm:col-span-2">
             JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}
@@ -55,11 +64,6 @@
 
     <div>
         <p class="mb-2 text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</p>
-        <div class="mb-3 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
-            @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
-                <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
-            @endforeach
-        </div>
         <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" />
     </div>
 

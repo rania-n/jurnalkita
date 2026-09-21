@@ -60,8 +60,10 @@
                     <x-ui.field-static label="Email" icon="mail" class="sm:col-span-2">{{ $user->email }}</x-ui.field-static>
 
                     {{-- No. WhatsApp SATU sumber buat semua peran: users.no_hp (diisi admin
-                         lewat Manajemen Akun) -- bukan dari tabel gurus/siswas. --}}
-                    <x-ui.field-static label="No. WhatsApp" icon="call">{{ $user->no_hp ?: '—' }}</x-ui.field-static>
+                         lewat Manajemen Akun) -- bukan dari tabel gurus/siswas. sm:col-span-2
+                         KALAU nggak ada field guru/siswa lagi di bawahnya (admin/satpam) --
+                         soalnya kalau nggak, dia bakal nyisa sendirian nutup grid. --}}
+                    <x-ui.field-static label="No. WhatsApp" icon="call" class="{{ ! $guru && ! $siswa ? 'sm:col-span-2' : '' }}">{{ $user->no_hp ?: '—' }}</x-ui.field-static>
 
                     @if ($guru)
                         <x-ui.field-static label="NIP" icon="badge">{{ $guru->nip ?: '—' }}</x-ui.field-static>
@@ -73,7 +75,10 @@
                              DOM-order nggak nyambung sama posisi visualnya. --}}
                         <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book" class="sm:col-span-2">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
                         @if ($guru->mapels->isNotEmpty())
-                            <x-ui.field-static label="Mapel Tambahan" icon="library_books">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
+                            {{-- Mapel Tambahan juga SELALU nyisa sendirian kalau muncul --
+                                 nggak ada field 1-kolom lain setelah MapelUtama (span2)
+                                 buat dipasangin, Wali Kelas di bawahnya juga span2. --}}
+                            <x-ui.field-static label="Mapel Tambahan" icon="library_books" class="sm:col-span-2">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
                         @endif
                         @if ($guru->kelasWali->isNotEmpty())
                             <x-ui.field-static label="Wali Kelas" icon="groups" class="sm:col-span-2">{{ $guru->kelasWali->pluck('nama')->join(', ') }}</x-ui.field-static>
@@ -82,7 +87,10 @@
                         <x-ui.field-static label="Kelas" icon="school">{{ $siswa->kelas->nama ?? '—' }}</x-ui.field-static>
                         <x-ui.field-static label="NIS" icon="badge">{{ $siswa->nis }}</x-ui.field-static>
                         <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
-                        <x-ui.field-static label="Jabatan" icon="workspace_premium">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
+                        {{-- No.WhatsApp+Kelas+NIS+No.Absen+Jabatan = 5 field 1-kolom --
+                             ganjil, Jabatan (terakhir) selalu nyisa sendirian kalau
+                             nggak di-stretch. --}}
+                        <x-ui.field-static label="Jabatan" icon="workspace_premium" class="sm:col-span-2">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
                     @endif
                 </div>
 

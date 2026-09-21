@@ -18,9 +18,13 @@
         </x-alert>
     @endif
 
+    {{-- order-2/order-1 -- di HP (1 kolom), presensi (ringkasan Sakit/Izin/
+         Dispensasi dulu) ditaruh DULUAN, baru field jurnal & tombol
+         verifikasi -- biar nggak ketutup scroll panjang field-field dulu.
+         Di desktop (xl+) balik ke urutan normal kiri-kanan. --}}
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,28rem)_1fr] xl:gap-10">
         {{-- Kolom kiri: isi jurnal + aksi verifikasi --}}
-        <div class="flex flex-col gap-3">
+        <div class="order-2 flex flex-col gap-3 xl:order-1">
             <x-ui.field-static label="Jam Pelajaran">
                 JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}
                 @if ($jamJurnal)
@@ -55,7 +59,7 @@
         </div>
 
         {{-- Kolom kanan: presensi --}}
-        <div>
+        <div class="order-1 xl:order-2">
             <div class="mb-3 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
                 @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
                     <x-ui.stat :label="ucfirst($s === 'dispensasi' ? 'Dispen' : $s)" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />

@@ -134,6 +134,23 @@ class SuratDispensasiTest extends TestCase
         $this->assertSame('approved', $this->menunggu->fresh()->status_waka);
     }
 
+    public function test_persetujuan_wa_untuk_dispensasi_kadaluarsa_otomatis_batal_dan_ditolak(): void
+    {
+        $lewat = Dispensasi::create([
+            'siswa_id' => $this->menunggu->siswa_id, 'diajukan_oleh_id' => $this->piket->id, 'piket_id' => $this->piket->id,
+            'tanggal' => today()->subDays(2), 'alasan' => 'Telat diproses', 'status_piket' => 'approved',
+        ]);
+        $tautan = SuratDispensasiController::tautanPersetujuan($lewat, $this->waka);
+
+        // Halaman persetujuan tetap kebuka (link 48 jam masih valid), tapi
+        // dispensasinya sendiri udah kesapu jadi rejected pas halaman ini diload.
+        $this->get($tautan)->assertOk()->assertSee('kadaluarsa')->assertDontSee('Setujui');
+        $this->assertSame('rejected', $lewat->fresh()->status_waka);
+
+        $this->post($tautan, ['keputusan' => 'approved'])->assertStatus(409);
+        $this->assertSame('rejected', $lewat->fresh()->status_waka);
+    }
+
     public function test_qr_dispensasi_token_valid_1_jendela_ke_belakang_tapi_tidak_2(): void
     {
         $sekarang = intdiv(time(), 10);

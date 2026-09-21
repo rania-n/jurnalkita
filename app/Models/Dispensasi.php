@@ -95,6 +95,61 @@ class Dispensasi extends Model
     }
 
     /**
+     * true kalau Waka BELUM sempat mutusin dan HARI tanggal MULAI dispensasi ini
+     * udah beneran lewat (BUKAN hari ini lagi, tapi kemarin atau sebelumnya) --
+     * udah nggak relevan lagi diproses. Sengaja BUKAN "hari ini" juga dianggap
+     * lewat -- dispensasi yang diajukan & harusnya diputuskan HARI INI JUGA
+     * (kasus paling umum: piket ajukan pas ada siswa mau izin langsung) tetap
+     * harus bisa diproses sepanjang hari itu. Beda dari sudahKadaluarsa() yang
+     * khusus buat dispensasi yang UDAH disetujui.
+     */
+    public function sudahLewatBatasKeputusan(): bool
+    {
+        return $this->status_waka === 'pending' && $this->tanggal->copy()->startOfDay()->lt(today());
+    }
+
+    /**
+     * Otomatis batalkan (tolak) kalau udah lewat batas keputusan tanpa Waka sempat
+     * mutusin -- dipanggil tiap kali dispensasi ini dibuka/diproses, biar nggak
+     * nyangkut jadi "Menunggu" selamanya walau tanggalnya udah lama lewat. Setelah
+     * ini, status_waka === 'rejected' otomatis, jadi tombol Setuju/Tolak/Batalkan
+     * ilang dengan sendirinya (semua gate-nya udah cek status_waka === 'pending').
+     */
+    public function batalkanKalauKadaluarsa(): bool
+    {
+        if (! $this->sudahLewatBatasKeputusan()) {
+            return false;
+        }
+
+        $this->update([
+            'status_waka' => 'rejected',
+            'catatan_waka' => 'Otomatis dibatalkan sistem — melewati tanggal berlaku tanpa keputusan Waka Kesiswaan.',
+        ]);
+        $this->segarkanStatusAkhir();
+
+        return true;
+    }
+
+    /**
+     * Sapu semua dispensasi pending yang udah kadaluarsa sekaligus -- dipanggil
+     * pas Riwayat Dispensasi dibuka (lihat DispensasiController::index()), biar
+     * tab "Menunggu"/"Ditolak" ke-update duluan sebelum ditampilkan, nggak nunggu
+     * satu-satu baru kesapu pas dibuka detailnya.
+     */
+    public static function batalkanSemuaKadaluarsa(): int
+    {
+        $daftar = static::where('status_waka', 'pending')
+            ->whereDate('tanggal', '<=', today())
+            ->get();
+
+        foreach ($daftar as $d) {
+            $d->batalkanKalauKadaluarsa();
+        }
+
+        return $daftar->count();
+    }
+
+    /**
      * withTrashed() -- dispensasi itu CATATAN SEJARAH, harus tetap kebaca
      * utuh walau siswanya belakangan di-soft-delete (pindah/keluar/data
      * diganti data asli, dsb). Tanpa ini, dispensasi lama yang nyantol ke

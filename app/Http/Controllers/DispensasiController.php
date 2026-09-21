@@ -75,6 +75,11 @@ class DispensasiController extends Controller
         $this->pastikanBolehLihat();
         $user = $request->user();
 
+        // Sapu dispensasi pending yang udah kelewat tanggal (Waka nggak sempat
+        // mutusin) jadi otomatis batal, biar tab Menunggu/Ditolak selalu akurat
+        // tiap kali halaman ini dibuka -- lihat Dispensasi::batalkanSemuaKadaluarsa().
+        Dispensasi::batalkanSemuaKadaluarsa();
+
         // Baru saja ngajuin (?kirim_wa=<id>, lihat store()) -> link WA-nya
         // di-generate di sini & dibukakan otomatis lewat JS di view. Sengaja
         // TIDAK redirect ke halaman detail buat ini (dulu gitu) -- meta-refresh
@@ -164,11 +169,18 @@ class DispensasiController extends Controller
     {
         $this->pastikanPiket();
 
-        return view('dispensasi.create', [
-            'kelasList' => Kelas::aktif()
-                ->with(['siswas' => fn ($q) => $q->where('status', 'aktif')->select('id', 'kelas_id', 'nama', 'nis')])
-                ->orderBy('nama')->get(),
-        ]);
+        $kelasList = Kelas::aktif()
+            ->with(['siswas' => fn ($q) => $q->where('status', 'aktif')->select('id', 'kelas_id', 'nama', 'nis')])
+            ->orderBy('nama')->get();
+
+        // Diratakan jadi 1 daftar buat kotak "cari siswa" -- ketik nama/NIS
+        // langsung, nggak perlu tahu/pilih kelasnya dulu (dulu 1 <select>
+        // raksasa dikelompokkan per kelas, capek nyarinya kalau lupa kelasnya).
+        $siswaList = $kelasList->flatMap(fn ($k) => $k->siswas->map(fn ($s) => [
+            'id' => $s->id, 'nama' => $s->nama, 'nis' => $s->nis, 'kelas' => $k->nama,
+        ]))->sortBy('nama')->values();
+
+        return view('dispensasi.create', ['siswaList' => $siswaList]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -208,8 +220,11 @@ class DispensasiController extends Controller
         // Balik ke Riwayat (bukan halaman detail) -- link WA-nya dibukakan
         // otomatis dari SANA (lihat index()), biar piket nggak perlu tap
         // "Kirim Link" lagi TAPI juga nggak nyangkut di halaman detail/form
-        // kalau kirim WA-nya dibatalkan (lihat catatan di index()).
-        return redirect()->route('dispensasi.index', ['kirim_wa' => $dispensasi->id])
+        // kalau kirim WA-nya dibatalkan (lihat catatan di index()). 'lihat'
+        // ikut dikirim juga biar popup detailnya langsung kebuka otomatis di
+        // atas Riwayat (pola yang sama kayak abis Waka mutusin), jadi piket
+        // langsung lihat ringkasannya tanpa harus tap "Lihat" manual lagi.
+        return redirect()->route('dispensasi.index', ['kirim_wa' => $dispensasi->id, 'lihat' => $dispensasi->id])
             ->with('success', 'Dispensasi diajukan. Menunggu persetujuan Waka Kesiswaan.');
     }
 
@@ -247,6 +262,7 @@ class DispensasiController extends Controller
         $this->pastikanBolehLihat();
         $user = auth()->user();
 
+        $dispensasi->batalkanKalauKadaluarsa();
         $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
         $waLinkWaka = $this->waLinkUntukWaka($dispensasi);
 
@@ -279,6 +295,7 @@ class DispensasiController extends Controller
             403,
             'Hanya guru piket yang mengajukan yang bisa membatalkan.'
         );
+        $dispensasi->batalkanKalauKadaluarsa();
         abort_unless(
             $dispensasi->status_waka === 'pending',
             403,
@@ -296,6 +313,11 @@ class DispensasiController extends Controller
     public function approveWaka(Dispensasi $dispensasi, Request $request): RedirectResponse
     {
         abort_unless(auth()->user()->role === 'waka', 403);
+
+        if ($dispensasi->batalkanKalauKadaluarsa()) {
+            return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])
+                ->with('error', 'Dispensasi ini sudah kadaluarsa (melewati tanggal berlaku tanpa keputusan) dan otomatis dibatalkan.');
+        }
         abort_unless($dispensasi->status_waka === 'pending', 403);
 
         $data = $request->validate([

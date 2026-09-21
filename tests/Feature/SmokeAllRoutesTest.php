@@ -43,7 +43,7 @@ class SmokeAllRoutesTest extends TestCase
     public function test_guru_pages(): void
     {
         $guru = $this->user('winartin@jurnalkita.test');
-        foreach (['/guru', '/guru/jurnal', '/guru/jurnal/tambah', '/guru/piket', '/dispensasi', '/dispensasi-ajukan/baru', '/profil'] as $url) {
+        foreach (['/guru', '/guru/jurnal', '/guru/jurnal/tambah', '/guru/jadwal', '/dispensasi', '/dispensasi-ajukan/baru', '/profil'] as $url) {
             $this->actingAs($guru)->get($url)->assertOk("GET {$url}");
         }
 

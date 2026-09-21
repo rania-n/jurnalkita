@@ -28,7 +28,11 @@
         </div>
     </div>
 
-    @if ($sudahDiputuskan)
+    @if ($otomatisKadaluarsa ?? false)
+        <x-alert type="warning" class="mt-5">
+            Pengajuan ini sudah <strong>kadaluarsa</strong> — melewati tanggal berlaku tanpa sempat diputuskan, jadi otomatis dibatalkan sistem.
+        </x-alert>
+    @elseif ($sudahDiputuskan)
         <x-alert type="info" class="mt-5">
             Pengajuan ini sudah diputuskan sebelumnya:
             <strong>{{ $dispensasi->status_waka === 'approved' ? 'Disetujui' : 'Ditolak' }}</strong>.

@@ -24,8 +24,12 @@
         <x-ui.field-static label="Jam">{{ $dispensasi->labelJam() }}</x-ui.field-static>
         <x-ui.field-static label="Diajukan oleh (guru piket)">{{ $dispensasi->pengaju->name }}</x-ui.field-static>
         <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $dispensasi->alasan }}</x-ui.field-static>
+        {{-- sm:col-span-2 -- ini satu-satunya field kondisional yang lebarnya
+             cuma setengah, jadi kalau muncul dia selalu SENDIRIAN di barisnya
+             (field sebelum & sesudahnya di sini semua full-width), nyisain
+             gap kosong di sebelahnya kalau nggak di-stretch. --}}
         @if ($dispensasi->no_hp)
-            <x-ui.field-static label="No. HP" icon="call">{{ $dispensasi->no_hp }}</x-ui.field-static>
+            <x-ui.field-static label="No. HP" icon="call" class="sm:col-span-2">{{ $dispensasi->no_hp }}</x-ui.field-static>
         @endif
         @if ($dispensasi->surat_path)
             @php $suratUrl = Storage::url($dispensasi->surat_path); $isPdf = str_ends_with(strtolower($dispensasi->surat_path), '.pdf'); @endphp

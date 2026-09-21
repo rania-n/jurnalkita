@@ -49,6 +49,14 @@ Route::get('/dispensasi/{dispensasi}/persetujuan', [SuratDispensasiController::c
     ->name('dispensasi.persetujuan');
 Route::post('/dispensasi/{dispensasi}/persetujuan', [SuratDispensasiController::class, 'prosesPersetujuan']);
 
+/* Scan QR dispensasi -- TANPA login juga. Satpam buka dari kamera HP-nya
+   langsung (nggak sempat/perlu login dulu di gerbang), dan keamanannya udah
+   dijamin sama token QR yang ganti tiap 10 detik sendiri (lihat
+   QrDispensasi::valid()), bukan dari middleware role. Dulu ke-taruh di
+   dalam grup role:satpam -- jadi kepentok login duluan, padahal view-nya
+   (satpam.hasil-scan) udah dari awal pakai layout guest (tanpa sidebar). */
+Route::get('/satpam/scan', [SatpamController::class, 'scan'])->name('satpam.scan');
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', fn () => redirect()->route(auth()->user()->homeRoute()))->name('dashboard');
@@ -111,7 +119,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     /* =============================== GURU =============================== */
     Route::middleware('role:guru')->group(function () {
         Route::view('/guru', 'dashboards.guru')->name('guru.dashboard');
-        Route::view('/guru/piket', 'guru.piket')->name('piket.index');
 
         Route::get('/guru/wali-kelas', [WaliKelasController::class, 'index'])->name('guru.wali-kelas.index');
         Route::get('/guru/wali-kelas/{kelas}', [WaliKelasController::class, 'rekap'])->name('guru.wali-kelas.rekap');
@@ -188,7 +195,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     /* =============================== SATPAM =============================== */
     Route::middleware('role:satpam')->prefix('satpam')->name('satpam.')->group(function () {
         Route::get('/', [SatpamController::class, 'dashboard'])->name('dashboard');
-        Route::get('/scan', [SatpamController::class, 'scan'])->name('scan');
         Route::get('/terlambat', [SatpamController::class, 'terlambatCreate'])->name('terlambat.create');
         Route::post('/terlambat', [SatpamController::class, 'terlambatStore'])->name('terlambat.store');
         Route::delete('/terlambat/{catatan}', [SatpamController::class, 'terlambatDestroy'])->name('terlambat.destroy');

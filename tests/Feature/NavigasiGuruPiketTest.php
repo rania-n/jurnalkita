@@ -45,13 +45,20 @@ class NavigasiGuruPiketTest extends TestCase
             ->assertDontSee('Dispensasi')->assertSee('Jadwal Mengajar Hari Ini');
     }
 
-    public function test_menu_hari_piket_tidak_termasuk_jurnal_dan_jadwal(): void
+    /**
+     * Riwayat Jurnal tetap disembunyikan hari piket (dia nggak ngajar hari
+     * itu). Tapi menu "Piket" yang dulu berdiri sendiri (cuma nampilin jadwal
+     * piket doang, dobel/kurang fungsi) udah dihapus & diganti "Jadwal" --
+     * halaman Jadwal udah nampilin jadwal piket + kartu Monitor Piket +
+     * info Dispensasi sekaligus.
+     */
+    public function test_menu_hari_piket_ganti_jadwal_bukan_jurnal(): void
     {
         $labels = collect(config('navigation.guru-piket'))->pluck('label');
 
-        $this->assertFalse($labels->contains('Jurnal'));
-        $this->assertFalse($labels->contains('Jadwal'));
-        $this->assertTrue($labels->contains('Piket'));
+        $this->assertFalse($labels->contains('Riwayat'));
+        $this->assertFalse($labels->contains('Piket'));
+        $this->assertTrue($labels->contains('Jadwal'));
         $this->assertTrue($labels->contains('Dispensasi'));
     }
 

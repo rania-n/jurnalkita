@@ -27,6 +27,11 @@ class JadwalController extends Controller
         // kalau jadwal piket & jadwal mengajar dipisah 2 halaman/menu berbeda.
         $piketPerHari = $guru->jadwalPikets()->orderBy('mulai')->get()->groupBy('hari');
 
+        // Dihitung SEBELUM difilter per-hari di bawah -- dipakai buat nampilin
+        // kartu "Monitor Piket" & info Dispensasi (harus tetap kelihatan walau
+        // lagi filter ke hari yang kebetulan bukan jadwal piketnya).
+        $adaPiket = $piketPerHari->isNotEmpty();
+
         // Giliran piket Waka Kesiswaan -- tabel BEDA dari jadwal piket guru
         // biasa (JadwalWaka, bukan JadwalPiket; nggak ada jam, sepanjang hari),
         // jadi harus diambil terpisah. Cuma relevan buat akun role waka.
@@ -46,6 +51,6 @@ class JadwalController extends Controller
 
         $hariIni = HariSekolah::hariIni();
 
-        return view('guru.jadwal', compact('jadwalPerHari', 'piketPerHari', 'jadwalWakaPerHari', 'hari', 'hariIni'));
+        return view('guru.jadwal', compact('jadwalPerHari', 'piketPerHari', 'jadwalWakaPerHari', 'hari', 'hariIni', 'adaPiket'));
     }
 }

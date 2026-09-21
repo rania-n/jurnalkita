@@ -22,13 +22,12 @@
     <x-admin.filters :action="route('jurnal.index')" ignore="status">
         <input type="hidden" name="status" value="{{ $status }}">
 
+        {{-- f-date udah flex-1 sendiri (lihat komponennya) -- nggak perlu
+             dibungkus div flex-1 lagi di sini, dobel malah nambah lebar
+             minimum yang dipaksain & bikin gampang meluber di HP sempit. --}}
         <div class="flex w-full gap-2">
-            <div class="flex-1">
-                <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" onchange="this.form.submit()" />
-            </div>
-            <div class="flex-1">
-                <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" onchange="this.form.submit()" />
-            </div>
+            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" onchange="this.form.submit()" />
+            <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" onchange="this.form.submit()" />
         </div>
 
         <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua kelas" />

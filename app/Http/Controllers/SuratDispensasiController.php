@@ -94,17 +94,20 @@ class SuratDispensasiController extends Controller
     {
         abort_unless($request->hasValidSignature(), 403, 'Tautan tidak valid atau sudah kedaluwarsa.');
 
+        $otomatisKadaluarsa = $dispensasi->batalkanKalauKadaluarsa();
         $dispensasi->load('siswa.kelas', 'pengaju');
 
         return view('dispensasi.persetujuan-wa', [
             'dispensasi' => $dispensasi,
             'sudahDiputuskan' => $dispensasi->status_waka !== 'pending',
+            'otomatisKadaluarsa' => $otomatisKadaluarsa,
         ]);
     }
 
     public function prosesPersetujuan(Request $request, Dispensasi $dispensasi): View
     {
         abort_unless($request->hasValidSignature(), 403, 'Tautan tidak valid atau sudah kedaluwarsa.');
+        abort_unless(! $dispensasi->batalkanKalauKadaluarsa(), 409, 'Dispensasi ini sudah kadaluarsa (melewati tanggal berlaku tanpa keputusan) dan otomatis dibatalkan.');
         abort_unless($dispensasi->status_waka === 'pending', 409, 'Sudah diputuskan sebelumnya.');
 
         $data = $request->validate(['keputusan' => ['required', 'in:approved,rejected']]);

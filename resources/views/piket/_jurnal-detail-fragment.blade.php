@@ -11,13 +11,23 @@
         <span class="text-xs text-muted-2">· {{ $jurnal->jadwal->kelas->nama }} · JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}{{ $jamJurnal ? " · {$jamJurnal}" : '' }}</span>
     </div>
 
+    {{-- Ringkasan Hadir/Sakit/Izin/Alpha/Dispensasi ditaruh paling atas --
+         yang paling sering dicek duluan pas piket buka detail. --}}
+    <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
+        @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
+            <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
+        @endforeach
+    </div>
+
     <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         <x-ui.field-static label="Guru" icon="badge">{{ $jurnal->guru->nama ?? '—' }}</x-ui.field-static>
         <x-ui.field-static label="Status Kehadiran" icon="how_to_reg">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
 
         @if ($jurnal->status_guru === 'hadir')
             <x-ui.field-static label="Materi" icon="menu_book" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
-            <x-ui.field-static label="Metode" icon="school">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
+            {{-- sm:col-span-2 -- Metode ini selalu nyisa sendirian, nggak ada
+                 field 1-kolom lain buat dipasangin setelah Materi (span2). --}}
+            <x-ui.field-static label="Metode" icon="school" class="sm:col-span-2">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
         @else
             <x-ui.field-static label="Tugas Tambahan" icon="assignment" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
             <x-ui.field-static label="Alasan" icon="info" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
@@ -32,11 +42,6 @@
 
     <div>
         <p class="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted-2">Presensi ({{ $jurnal->absensis->count() }} siswa)</p>
-        <div class="mb-2 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
-            @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
-                <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
-            @endforeach
-        </div>
 
         @if ($jurnal->absensis->isNotEmpty())
             <div class="max-h-[40vh] overflow-y-auto rounded-xl border border-surface-alt sm:border-0">

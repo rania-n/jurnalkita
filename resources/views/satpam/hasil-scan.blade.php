@@ -4,7 +4,7 @@
             <span class="flex h-20 w-20 items-center justify-center rounded-full bg-hadir-soft text-hadir">
                 <x-icon name="check_circle" :size="48" fill />
             </span>
-            <h1 class="text-2xl font-bold text-hadir">DISETUJUI</h1>
+            <h1 class="text-2xl font-bold text-hadir">Disetujui</h1>
             <div class="mt-2 w-full rounded-xl bg-surface p-4 text-left text-sm">
                 <p class="text-lg font-bold text-ink">{{ $dispensasi->siswa->nama }}</p>
                 <p class="text-muted">{{ $dispensasi->siswa->kelas?->nama ?? '—' }}</p>
@@ -15,7 +15,7 @@
             <span class="flex h-20 w-20 items-center justify-center rounded-full bg-alpha-soft text-alpha">
                 <x-icon name="cancel" :size="48" fill />
             </span>
-            <h1 class="text-2xl font-bold text-alpha">TIDAK BERLAKU</h1>
+            <h1 class="text-2xl font-bold text-alpha">Tidak Berlaku</h1>
             <p class="text-sm text-muted">QR sudah kedaluwarsa, tidak valid, atau dispensasinya belum/tidak disetujui.</p>
         @endif
     </div>

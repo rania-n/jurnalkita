@@ -104,4 +104,53 @@ class JadwalTest extends TestCase
             ->assertOk()
             ->assertDontSee('Monitor Piket');
     }
+
+    /**
+     * Dulu ada halaman "Piket" sendiri (route piket.index) yang isinya cuma
+     * jadwal piket doang -- dobel sama yang udah ditampilin di sini, jadi
+     * dihapus. Kartu "Monitor Piket" & info Dispensasi yang tadinya di situ
+     * dipindah ke halaman Jadwal ini.
+     */
+    public function test_kartu_monitor_piket_dan_info_dispensasi_muncul_kalau_ada_jadwal_piket(): void
+    {
+        $user = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $user->id, 'nama' => 'Guru Piket']);
+        JadwalPiket::create(['guru_id' => $guru->id, 'hari' => 'senin']);
+
+        $this->actingAs($user)->get('/guru/jadwal')
+            ->assertOk()->assertSee('Monitor Piket')->assertSee('mengajukan dispensasi siswa', false);
+    }
+
+    public function test_kartu_monitor_piket_tidak_muncul_kalau_guru_tidak_ada_jadwal_piket(): void
+    {
+        $user = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $user->id, 'nama' => 'Guru Biasa']);
+
+        $this->actingAs($user)->get('/guru/jadwal')
+            ->assertOk()->assertDontSee('Monitor Piket');
+    }
+
+    /**
+     * Kartu Monitor Piket & info Dispensasi harus TETAP kelihatan walau lagi
+     * nge-filter ke hari yang kebetulan bukan jadwal piketnya -- ini bukan
+     * soal "piket hari ini", tapi "guru ini emang ada jadwal piket sama
+     * sekali" (lihat $adaPiket, dihitung sebelum difilter per-hari).
+     */
+    public function test_kartu_monitor_piket_tetap_muncul_walau_difilter_ke_hari_lain(): void
+    {
+        $user = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $user->id, 'nama' => 'Guru Piket']);
+        JadwalPiket::create(['guru_id' => $guru->id, 'hari' => 'rabu']);
+
+        $this->actingAs($user)->get('/guru/jadwal?hari=senin')
+            ->assertOk()->assertSee('Monitor Piket');
+    }
+
+    public function test_route_halaman_piket_lama_sudah_tidak_ada(): void
+    {
+        $user = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $user->id, 'nama' => 'Guru Piket']);
+
+        $this->actingAs($user)->get('/guru/piket')->assertNotFound();
+    }
 }

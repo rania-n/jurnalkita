@@ -38,12 +38,16 @@ return [
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
-    // Hari giliran piket: nav-nya cuma yang berhubungan sama piket. Jurnal/Jadwal
+    // Hari giliran piket: nav-nya cuma yang berhubungan sama piket. Jurnal
     // sengaja TIDAK ikut di sini -- hari itu dia ditugaskan piket, bukan ngajar
-    // (guru piket memang nggak dijadwalkan mengajar saat shift piketnya).
+    // (guru piket memang nggak dijadwalkan mengajar saat shift piketnya). Jadwal
+    // TETAP ikut -- dulu ada menu "Piket" sendiri yang isinya cuma jadwal piket
+    // doang (dobel/kurang fungsi dibanding halaman Jadwal yang udah nampilin
+    // jadwal piket + kartu Monitor Piket + info Dispensasi sekaligus), jadi
+    // diganti langsung ke Jadwal, halaman "Piket" berdiri sendiri dihapus.
     'guru-piket' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
-        ['label' => 'Piket', 'icon' => 'event_available', 'route' => 'piket.index'],
+        ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],

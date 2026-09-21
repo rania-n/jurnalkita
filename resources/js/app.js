@@ -264,10 +264,84 @@ function initJamSekarang() {
     setInterval(tulis, 1000);
 }
 
+/*
+ * Kotak "cari siswa" (ketik nama/NIS langsung, nggak perlu pilih kelas
+ * dulu) -- lihat components/ui/cari-siswa.blade.php. Daftar siswa udah
+ * di-embed di data-list (JSON), difilter di sini pas ngetik.
+ */
+function initCariSiswa() {
+    document.querySelectorAll('[data-cari-siswa]').forEach((wrap) => {
+        const data = JSON.parse(wrap.dataset.list || '[]');
+        const input = wrap.querySelector('[data-cari-siswa-input]');
+        const hidden = wrap.querySelector('[data-cari-siswa-value]');
+        const hasil = wrap.querySelector('[data-cari-siswa-hasil]');
+        const tombolClear = wrap.querySelector('[data-cari-siswa-clear]');
+        if (!input || !hidden || !hasil) return;
+
+        function render(list) {
+            if (list.length === 0) {
+                hasil.innerHTML = '<p class="px-3.5 py-2.5 text-sm text-muted-2">Tidak ada siswa yang cocok.</p>';
+                return;
+            }
+            hasil.innerHTML = list.slice(0, 30).map((s) => `
+                <button type="button" data-id="${s.id}" class="flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left hover:bg-surface-alt">
+                    <span class="text-sm font-semibold text-ink">${s.nama}</span>
+                    <span class="text-xs text-muted-2">${s.nis}${s.kelas ? ' · ' + s.kelas : ''}</span>
+                </button>
+            `).join('');
+        }
+
+        function pilih(s) {
+            input.value = `${s.nama} · ${s.nis}`;
+            hidden.value = s.id;
+            hasil.hidden = true;
+            if (tombolClear) tombolClear.hidden = false;
+        }
+
+        function kosongkan() {
+            input.value = '';
+            hidden.value = '';
+            hasil.hidden = true;
+            if (tombolClear) tombolClear.hidden = true;
+            input.focus();
+        }
+
+        input.addEventListener('input', () => {
+            hidden.value = ''; // udah ngetik lagi -> pilihan lama batal, harus pilih ulang
+            if (tombolClear) tombolClear.hidden = true;
+
+            const q = input.value.trim().toLowerCase();
+            if (!q) { hasil.hidden = true; return; }
+
+            const cocok = data.filter((s) => s.nama.toLowerCase().includes(q) || s.nis.includes(q));
+            render(cocok);
+            hasil.hidden = false;
+        });
+
+        input.addEventListener('focus', () => {
+            if (input.value.trim() && !hidden.value) hasil.hidden = false;
+        });
+
+        hasil.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-id]');
+            if (!btn) return;
+            const s = data.find((x) => String(x.id) === btn.dataset.id);
+            if (s) pilih(s);
+        });
+
+        tombolClear?.addEventListener('click', kosongkan);
+
+        document.addEventListener('click', (e) => {
+            if (!wrap.contains(e.target)) hasil.hidden = true;
+        });
+    });
+}
+
 function init() {
     initPasswordToggles();
     initUploadPreview();
     initKameraWajib();
+    initCariSiswa();
     initConfirm();
     initModals();
     initNavGroups();

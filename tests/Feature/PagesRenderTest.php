@@ -29,7 +29,7 @@ class PagesRenderTest extends TestCase
         $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
         Jadwal::create(['kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id, 'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2]);
 
-        foreach (['/guru', '/guru/jurnal', '/guru/jurnal/tambah', '/guru/piket', '/dispensasi', '/dispensasi-ajukan/baru', '/profil'] as $url) {
+        foreach (['/guru', '/guru/jurnal', '/guru/jurnal/tambah', '/guru/jadwal', '/dispensasi', '/dispensasi-ajukan/baru', '/profil'] as $url) {
             $this->actingAs($user)->get($url)->assertOk();
         }
     }

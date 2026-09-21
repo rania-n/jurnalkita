@@ -1,6 +1,9 @@
 @props(['name', 'label', 'value' => null])
 
-<label class="flex min-w-[9rem] flex-1 flex-col gap-1">
+{{-- min-w kecil (bukan 9rem kayak dulu) -- 2 field tanggal (Dari/Sampai)
+     bersebelahan gampang meluber ke kanan (horizontal scroll) di HP sempit
+     (~320-375px), 9rem x 2 + gap aja udah lebih lebar dari layarnya. --}}
+<label class="flex min-w-[6.5rem] flex-1 flex-col gap-1">
     <span class="text-xs font-semibold text-muted-2">{{ $label }}</span>
     <input type="date" name="{{ $name }}" value="{{ $value ?? request()->query($name) }}"
         {{ $attributes }}
