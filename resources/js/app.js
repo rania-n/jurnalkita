@@ -51,20 +51,36 @@ function initKameraWajib() {
         const tombolJepret = wrap.querySelector('[data-kamera-jepret]');
         const tombolBuka = wrap.querySelectorAll('[data-kamera-buka]');
         const tombolUlang = wrap.querySelector('[data-kamera-ulang]');
+        const tombolGanti = wrap.querySelector('[data-kamera-ganti]');
         const input = wrap.querySelector('[data-kamera-input]');
         const img = wrap.querySelector('[data-kamera-img]');
         const placeholder = wrap.querySelector('[data-kamera-placeholder]');
         if (!dialog || !video || !canvas || !input) return;
 
         let stream = null;
+        // Default belakang ('environment') -- paling relevan buat foto suasana
+        // kelas. Bisa ditukar manual lewat tombol data-kamera-ganti kalau
+        // kamera yang kebuka bukan yang diinginkan.
+        let facingMode = 'environment';
 
         async function bukaKamera() {
             pesanError.hidden = true;
             video.hidden = false;
+            if (tombolGanti) tombolGanti.hidden = true;
+
+            // Stream lama (kalau ada, mis. lagi ganti kamera) dimatiin dulu
+            // sebelum minta yang baru -- sebagian browser/HP nolak buka kamera
+            // kedua selama yang pertama masih aktif.
+            if (stream) {
+                stream.getTracks().forEach((track) => track.stop());
+                stream = null;
+            }
+
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
                 video.srcObject = stream;
                 await video.play();
+                if (tombolGanti) tombolGanti.hidden = false;
             } catch (err) {
                 video.hidden = true;
                 pesanError.hidden = false;
@@ -81,6 +97,11 @@ function initKameraWajib() {
 
         tombolBuka.forEach((btn) => btn.addEventListener('click', bukaKamera));
         dialog.addEventListener('close', tutupKamera);
+
+        tombolGanti?.addEventListener('click', () => {
+            facingMode = facingMode === 'environment' ? 'user' : 'environment';
+            bukaKamera();
+        });
 
         tombolJepret.addEventListener('click', () => {
             if (!stream) return;

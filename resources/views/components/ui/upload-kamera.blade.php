@@ -62,6 +62,14 @@
                 <p data-kamera-error hidden class="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 px-6 text-center text-sm font-semibold text-card">
                     Nggak bisa buka kamera. Pastikan izin kamera diaktifkan buat browser ini, lalu coba lagi.
                 </p>
+                {{-- Ganti kamera depan/belakang -- ditaruh mengambang di pojok
+                     video, jaga-jaga kamera yang kebuka duluan bukan yang
+                     diinginkan (mis. laptop/HP tertentu salah nebak default). --}}
+                <button type="button" data-kamera-ganti hidden
+                    class="press absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full bg-ink/60 text-card"
+                    aria-label="Ganti kamera depan/belakang">
+                    <x-icon name="cameraswitch" :size="18" />
+                </button>
             </div>
             <button type="button" data-kamera-jepret class="press flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-navy text-sm font-bold text-card">
                 <x-icon name="photo_camera" :size="18" /> Jepret
