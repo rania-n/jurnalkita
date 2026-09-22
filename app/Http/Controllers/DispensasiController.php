@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Notifications\DispensasiBaru;
 use App\Notifications\DispensasiDiputuskan;
 use App\Notifications\SiswaDispensasiDiKelasAnda;
+use App\Support\Versi;
 use App\Support\WaLink;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -128,6 +130,14 @@ class DispensasiController extends Controller
             'waLinkAutoKirim' => $waLinkAutoKirim,
             'lihatDispensasi' => $lihatDispensasi,
         ]);
+    }
+
+    /** Endpoint ringan buat di-poll (initAutoRefresh()) -- lihat App\Support\Versi. */
+    public function versi(): JsonResponse
+    {
+        $this->pastikanBolehLihat();
+
+        return response()->json(['versi' => Versi::dari(Dispensasi::where('status_piket', 'approved'))]);
     }
 
     /** Ekspor laporan dispensasi (kegiatan piket) sebagai CSV, ikut filter yang sedang aktif. */

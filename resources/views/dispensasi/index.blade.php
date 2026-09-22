@@ -72,6 +72,8 @@
         </x-page-header>
     @endif
 
+    <x-ui.auto-refresh :url="route('dispensasi.versi')" />
+
     {{-- Filter & status -- mirip monitor piket --}}
     <div class="mb-4 flex flex-col gap-2">
         {{-- Search bar -- filter langsung di DOM, tanpa reload (seperti monitor) --}}

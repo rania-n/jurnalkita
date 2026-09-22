@@ -461,4 +461,18 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->waka)->get("/dispensasi/{$d->id}/fragment")
             ->assertOk()->assertDontSee('Setujui');
     }
+
+    /** Endpoint polling buat banner "ada data baru" (initAutoRefresh() di app.js) -- lihat App\Support\Versi. */
+    public function test_endpoint_versi_berubah_setelah_ada_dispensasi_baru(): void
+    {
+        $versiAwal = $this->actingAs($this->waka)->get('/dispensasi/versi')->assertOk()->json('versi');
+
+        Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'alasan' => 'Baru', 'status_piket' => 'approved',
+        ]);
+
+        $versiBaru = $this->get('/dispensasi/versi')->assertOk()->json('versi');
+        $this->assertNotSame($versiAwal, $versiBaru);
+    }
 }
