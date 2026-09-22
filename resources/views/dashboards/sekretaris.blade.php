@@ -30,7 +30,7 @@
     @unless ($kelas)
         <x-alert type="warning">Akun ini bukan pengurus kelas atau belum terhubung ke kelas. Hubungi admin.</x-alert>
     @else
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 grid-fill-last">
             <a href="{{ route('sekretaris.jurnal.index') }}" class="press flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
                 <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
                     <x-icon name="fact_check" :size="24" />

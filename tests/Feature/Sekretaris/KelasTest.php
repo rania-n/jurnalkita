@@ -10,6 +10,7 @@ use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Support\HariSekolah;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -56,6 +57,62 @@ class KelasTest extends TestCase
             ->assertOk()->assertSeeInOrder(['Ketua Kelas', 'Anggota Biasa']);
     }
 
+    public function test_daftar_siswa_menampilkan_kehadiran_hari_ini(): void
+    {
+        $guru = Guru::create(['nama' => 'Bu Sarah']);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'x',
+        ]);
+        $ketua = Siswa::where('nama', 'Ketua Kelas')->firstOrFail();
+        Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $ketua->id, 'status' => 'sakit']);
+        // Anggota Biasa belum ada jurnal hari ini sama sekali -- tetap tampil, ditandai "belum ada jurnal".
+
+        $this->actingAs($this->sekretaris)->get('/sekretaris/kelas')
+            ->assertOk()
+            ->assertSee('Sakit')
+            ->assertSee('Belum ada jurnal');
+    }
+
+    /** Absensi TERAKHIR hari ini yang dipakai kalau siswa kena beberapa jurnal (JP beda) hari yang sama. */
+    public function test_daftar_siswa_pakai_absensi_jp_terakhir_kalau_lebih_dari_satu_jurnal_hari_ini(): void
+    {
+        $guru = Guru::create(['nama' => 'Bu Sarah']);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $ketua = Siswa::where('nama', 'Ketua Kelas')->firstOrFail();
+
+        $jadwalPagi = Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnalPagi = Jurnal::create([
+            'jadwal_id' => $jadwalPagi->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'pagi',
+        ]);
+        Absensi::create(['jurnal_id' => $jurnalPagi->id, 'siswa_id' => $ketua->id, 'status' => 'izin']);
+
+        $jadwalSiang = Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 5, 'jam_ke_selesai' => 6,
+        ]);
+        $jurnalSiang = Jurnal::create([
+            'jadwal_id' => $jadwalSiang->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 5, 'jam_ke_selesai' => 6, 'status_guru' => 'hadir', 'materi' => 'siang',
+        ]);
+        // Siswanya balik lagi & udah hadir pas JP 5-6, meski JP 1-2 tadi izin.
+        Absensi::create(['jurnal_id' => $jurnalSiang->id, 'siswa_id' => $ketua->id, 'status' => 'hadir']);
+
+        $this->actingAs($this->sekretaris)->get('/sekretaris/kelas')
+            ->assertOk()
+            ->assertSee('Hadir')
+            ->assertDontSee('Izin');
+    }
+
     public function test_jadwal_kelas_dikelompokkan_per_hari(): void
     {
         $guru = Guru::create(['nama' => 'Bu Sarah']);
@@ -74,6 +131,31 @@ class KelasTest extends TestCase
         $this->actingAs($this->sekretaris)->get('/sekretaris/jadwal')
             ->assertOk()->assertSee('Senin')->assertSee('Matematika')->assertSee('Bu Sarah')
             ->assertDontSee('JP 3–4');
+    }
+
+    public function test_jadwal_hari_ini_ditandai_dan_kasih_status_jurnal(): void
+    {
+        $hariIni = HariSekolah::hariIni() ?? 'senin';
+        $guru = Guru::create(['nama' => 'Bu Sarah']);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwalSudahDiisi = Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => $hariIni, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        Jurnal::create([
+            'jadwal_id' => $jadwalSudahDiisi->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'x',
+        ]);
+        Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => $hariIni, 'jam_ke_mulai' => 3, 'jam_ke_selesai' => 4,
+        ]);
+
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jadwal')
+            ->assertOk()
+            ->assertSee('Hari Ini')
+            ->assertSee('Hadir')
+            ->assertSee('Belum Diisi');
     }
 
     public function test_jadwal_kosong_menampilkan_empty_state(): void

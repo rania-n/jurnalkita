@@ -1,5 +1,5 @@
 <x-layouts.app title="Daftar Siswa Sekelas" width="wide">
-    <x-page-header title="Daftar Siswa" :subtitle="$kelas->nama" />
+    <x-page-header title="Daftar Siswa" :subtitle="$kelas->nama . ' · kehadiran hari ini'" />
 
     @if ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa di kelas ini" />
@@ -8,8 +8,9 @@
         <p class="-mt-2 mb-3 text-xs text-muted-2" id="jumlah-tampil-siswa-kelas">Menampilkan {{ $siswas->count() }} dari {{ $siswas->count() }} siswa</p>
 
         <div class="hidden sm:block">
-            <x-admin.table :head="['No. Absen', 'Nama', 'NIS', 'Jabatan']">
+            <x-admin.table :head="['No. Absen', 'Nama', 'NIS', 'Jabatan', 'Kehadiran Hari Ini']">
                 @foreach ($siswas as $s)
+                    @php $absenHariIni = $absensiHariIni->get($s->id); @endphp
                     <tr data-siswa-kelas-row data-nama="{{ strtolower($s->nama) }}">
                         <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
                         <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
@@ -21,6 +22,13 @@
                                 <span class="text-muted">Anggota</span>
                             @endif
                         </td>
+                        <td class="px-4 py-2.5">
+                            @if ($absenHariIni)
+                                <x-ui.status-badge :status="$absenHariIni->status" />
+                            @else
+                                <span class="text-muted-2">Belum ada jurnal</span>
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </x-admin.table>
@@ -28,14 +36,20 @@
 
         <div class="flex flex-col gap-2 sm:hidden">
             @foreach ($siswas as $s)
+                @php $absenHariIni = $absensiHariIni->get($s->id); @endphp
                 <div data-siswa-kelas-row data-nama="{{ strtolower($s->nama) }}">
                     <x-ui.list-card :title="$s->nama" :meta="['No. ' . ($s->no_absen ?? '—') . ' · NIS ' . $s->nis]">
                         <x-slot:badge>
-                            @if ($s->jabatan === 'pengurus')
-                                <x-ui.status-badge status="terverifikasi">Pengurus</x-ui.status-badge>
-                            @else
-                                <span class="text-xs text-muted">Anggota</span>
-                            @endif
+                            <div class="flex flex-col items-end gap-1">
+                                @if ($absenHariIni)
+                                    <x-ui.status-badge :status="$absenHariIni->status" />
+                                @else
+                                    <span class="text-[11px] text-muted-2">Belum ada jurnal</span>
+                                @endif
+                                @if ($s->jabatan === 'pengurus')
+                                    <x-ui.status-badge status="terverifikasi">Pengurus</x-ui.status-badge>
+                                @endif
+                            </div>
                         </x-slot:badge>
                     </x-ui.list-card>
                 </div>
