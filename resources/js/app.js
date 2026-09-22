@@ -308,6 +308,31 @@ function initJamSekarang() {
 }
 
 /*
+ * Titik merah di lonceng notifikasi (topbar, ada di SEMUA halaman) di-cek
+ * ulang berkala -- endpoint-nya cuma balikin angka (bukan render ulang HTML),
+ * jadi ringan buat di-poll tiap 20 detik. Biar guru/sekre nggak ketinggalan
+ * notifikasi baru (mis. jurnal disubmit guru lain, dispensasi diputuskan)
+ * tanpa harus reload manual -- isi popupnya sendiri baru di-fetch pas
+ * lonceng-nya beneran diklik (lihat initModals() + notifikasi/_daftar-fragment).
+ * Berhenti kalau tab lagi disembunyikan (hemat request pas HP dikunci/pindah app).
+ */
+function initNotifikasiPoll() {
+    const tombol = document.querySelector('[data-notif-jumlah-url]');
+    const titik = document.querySelector('[data-notif-titik]');
+    if (!tombol || !titik) return;
+
+    const cek = () => {
+        if (document.hidden) return;
+        fetch(tombol.dataset.notifJumlahUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then((r) => (r.ok ? r.json() : Promise.reject()))
+            .then((data) => { titik.hidden = !(data.jumlah > 0); })
+            .catch(() => {});
+    };
+
+    setInterval(cek, 20000);
+}
+
+/*
  * Kotak "cari siswa" (ketik nama/NIS langsung, nggak perlu pilih kelas
  * dulu) -- lihat components/ui/cari-siswa.blade.php. Daftar siswa udah
  * di-embed di data-list (JSON), difilter di sini pas ngetik.
@@ -390,6 +415,7 @@ function init() {
     initNavGroups();
     initResponsiveTables();
     initJamSekarang();
+    initNotifikasiPoll();
 }
 
 document.addEventListener('DOMContentLoaded', init);

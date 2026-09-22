@@ -63,6 +63,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/profil', 'profil')->name('profil');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::get('/notifikasi/jumlah', [NotifikasiController::class, 'jumlah'])->name('notifikasi.jumlah');
+    Route::get('/notifikasi/fragment', [NotifikasiController::class, 'fragment'])->name('notifikasi.fragment');
     Route::get('/notifikasi/{id}/buka', [NotifikasiController::class, 'buka'])->name('notifikasi.buka');
     Route::post('/notifikasi/tandai-semua-dibaca', [NotifikasiController::class, 'tandaiSemuaDibaca'])->name('notifikasi.tandai-semua-dibaca');
 

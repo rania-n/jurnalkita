@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -12,6 +13,23 @@ class NotifikasiController extends Controller
         $notifikasis = auth()->user()->notifications()->paginate(20);
 
         return view('notifikasi.index', compact('notifikasis'));
+    }
+
+    /**
+     * Endpoint ringan buat di-poll berkala lewat JS (initNotifikasiPoll() di
+     * app.js) -- biar titik merah di lonceng update sendiri kalau ada
+     * notifikasi baru masuk dari aksi orang lain, tanpa guru/sekre harus
+     * reload manual. Cuma angka doang (bukan render ulang HTML), jadi ringan.
+     */
+    public function jumlah(): JsonResponse
+    {
+        return response()->json(['jumlah' => auth()->user()->unreadNotifications()->count()]);
+    }
+
+    /** Isi popup lonceng -- di-fetch AJAX tiap dibuka (lihat _daftar-fragment.blade.php kenapa). */
+    public function fragment(): View
+    {
+        return view('notifikasi._daftar-fragment');
     }
 
     /**
