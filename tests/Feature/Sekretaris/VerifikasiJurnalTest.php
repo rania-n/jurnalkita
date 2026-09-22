@@ -215,4 +215,15 @@ class VerifikasiJurnalTest extends TestCase
         // ke-hardcode "hadir" semua.
         $this->assertSame('sakit', $jurnal->absensis()->where('siswa_id', $ketua->id)->value('status'));
     }
+
+    /** Endpoint polling buat banner "ada data baru" (initAutoRefresh() di app.js) -- lihat App\Support\Versi. */
+    public function test_endpoint_versi_berubah_setelah_ada_jurnal_baru(): void
+    {
+        $versiAwal = $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/versi')->assertOk()->json('versi');
+
+        $this->jurnalBaru();
+
+        $versiBaru = $this->get('/sekretaris/jurnal/versi')->assertOk()->json('versi');
+        $this->assertNotSame($versiAwal, $versiBaru);
+    }
 }

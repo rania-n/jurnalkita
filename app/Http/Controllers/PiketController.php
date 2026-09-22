@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
+use App\Support\Versi;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Response;
@@ -60,6 +62,20 @@ class PiketController extends Controller
             'mode' => $mode,
             'grup' => $grup,
             'rekapTotal' => $baris->countBy('status'),
+        ]);
+    }
+
+    /** Endpoint ringan buat di-poll (initAutoRefresh()) -- lihat App\Support\Versi. */
+    public function versi(Request $request): JsonResponse
+    {
+        $this->pastikanBolehLihat();
+
+        $tanggal = $this->tanggal($request);
+        $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? null;
+        $jadwalIds = $hari ? Jadwal::where('hari', $hari)->pluck('id') : collect();
+
+        return response()->json([
+            'versi' => Versi::dari(Jurnal::whereIn('jadwal_id', $jadwalIds)->whereDate('tanggal', $tanggal)),
         ]);
     }
 

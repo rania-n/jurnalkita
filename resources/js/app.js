@@ -348,6 +348,42 @@ function initNotifikasiPoll() {
 }
 
 /*
+ * Banner "ada data baru" generik -- lihat components/ui/auto-refresh.blade.php
+ * buat alasan kenapa nggak auto-reload sendiri. Satu halaman bisa pasang lebih
+ * dari satu (jarang, tapi nggak masalah -- masing-masing independen).
+ */
+function initAutoRefresh() {
+    document.querySelectorAll('[data-auto-refresh]').forEach((wrap) => {
+        const url = wrap.dataset.autoRefreshUrl;
+        const interval = parseInt(wrap.dataset.autoRefreshInterval || '20000', 10);
+        const banner = wrap.querySelector('[data-auto-refresh-banner]');
+        const tombol = wrap.querySelector('[data-auto-refresh-reload]');
+        if (!url || !banner) return;
+
+        let versiAwal = null;
+        let timer = null;
+
+        function cek() {
+            if (document.hidden) return;
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then((r) => (r.ok ? r.json() : Promise.reject()))
+                .then((data) => {
+                    if (versiAwal === null) { versiAwal = data.versi; return; }
+                    if (data.versi !== versiAwal) {
+                        banner.hidden = false;
+                        clearInterval(timer); // udah ketauan beda, nggak perlu cek terus
+                    }
+                })
+                .catch(() => {});
+        }
+
+        cek(); // baseline pertama, nggak langsung nampilin banner
+        timer = setInterval(cek, interval);
+        tombol?.addEventListener('click', () => location.reload());
+    });
+}
+
+/*
  * Kotak "cari siswa" (ketik nama/NIS langsung, nggak perlu pilih kelas
  * dulu) -- lihat components/ui/cari-siswa.blade.php. Daftar siswa udah
  * di-embed di data-list (JSON), difilter di sini pas ngetik.
@@ -503,6 +539,7 @@ function init() {
     initResponsiveTables();
     initJamSekarang();
     initNotifikasiPoll();
+    initAutoRefresh();
 }
 
 document.addEventListener('DOMContentLoaded', init);

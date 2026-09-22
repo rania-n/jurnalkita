@@ -163,6 +163,22 @@ class PiketMonitorTest extends TestCase
             ->assertNotFound();
     }
 
+    /** Endpoint polling buat banner "ada data baru" (initAutoRefresh() di app.js) -- lihat App\Support\Versi. */
+    public function test_endpoint_versi_berubah_setelah_ada_jurnal_baru(): void
+    {
+        $tanggal = today()->toDateString();
+        $versiAwal = $this->actingAs($this->piket)->get("/piket/monitor/versi?tanggal={$tanggal}")->assertOk()->json('versi');
+
+        $jadwalKelasB = Jadwal::where('kelas_id', $this->kelasB->id)->first();
+        Jurnal::create([
+            'jadwal_id' => $jadwalKelasB->id, 'guru_id' => $this->guruB->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 3, 'jam_ke_selesai' => 4, 'status_guru' => 'hadir', 'materi' => 'Baru diisi',
+        ]);
+
+        $versiBaru = $this->get("/piket/monitor/versi?tanggal={$tanggal}")->assertOk()->json('versi');
+        $this->assertNotSame($versiAwal, $versiBaru);
+    }
+
     private function unduh(string $url): string
     {
         $response = $this->actingAs($this->waka)->get($url);

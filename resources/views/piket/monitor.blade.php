@@ -33,6 +33,8 @@
         </x-page-header>
     @endif
 
+    <x-ui.auto-refresh :url="route('piket.monitor.versi', ['tanggal' => $tanggal->toDateString()])" />
+
     <x-admin.filters :action="route('piket.monitor.index')" hideButtons="true">
         <input type="hidden" name="mode" value="{{ $mode }}">
         <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" onchange="this.form.submit()" />

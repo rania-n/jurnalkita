@@ -134,6 +134,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/guru/jadwal', [GuruJadwalController::class, 'index'])->name('guru.jadwal.index');
 
         Route::get('/guru/jurnal', [JurnalController::class, 'index'])->name('jurnal.index');
+        Route::get('/guru/jurnal/versi', [JurnalController::class, 'versi'])->name('jurnal.versi');
         Route::get('/guru/jurnal/tambah', [JurnalController::class, 'create'])->name('jurnal.create');
         Route::post('/guru/jurnal', [JurnalController::class, 'store'])->name('jurnal.store');
         Route::get('/guru/jurnal/{jurnal}/fragment', [JurnalController::class, 'showFragment'])->name('jurnal.show.fragment');
@@ -153,6 +154,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/rekap', [SekretarisKelasController::class, 'rekap'])->name('kelas.rekap');
 
         Route::get('/jurnal', [VerifikasiJurnalController::class, 'index'])->name('jurnal.index');
+        Route::get('/jurnal/versi', [VerifikasiJurnalController::class, 'versi'])->name('jurnal.versi');
         Route::get('/jurnal/pengganti', [VerifikasiJurnalController::class, 'createPengganti'])->name('jurnal.pengganti');
         Route::post('/jurnal/pengganti', [VerifikasiJurnalController::class, 'storePengganti'])->name('jurnal.pengganti.store');
         Route::get('/jurnal/{jurnal}/fragment', [VerifikasiJurnalController::class, 'showFragment'])->name('jurnal.show.fragment');
@@ -183,6 +185,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     /* ===== MONITOR PIKET (pantauan kehadiran guru — piket, waka, admin oversight) ===== */
     Route::middleware('role:guru,waka,admin')->prefix('piket/monitor')->name('piket.monitor.')->group(function () {
         Route::get('/', [PiketController::class, 'index'])->name('index');
+        Route::get('/versi', [PiketController::class, 'versi'])->name('versi');
         Route::get('/ekspor', [PiketController::class, 'ekspor'])->name('ekspor');
         Route::get('/ekspor/{tipe}/{id}', [PiketController::class, 'eksporDetail'])->name('ekspor.detail');
         Route::get('/jurnal/{jurnal}', [PiketController::class, 'jurnalDetail'])->name('jurnal');

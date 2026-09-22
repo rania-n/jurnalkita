@@ -12,7 +12,9 @@ use App\Models\Mapel;
 use App\Models\PengaturanJurnal;
 use App\Notifications\JurnalPerluDiperiksa;
 use App\Support\PresensiDefault;
+use App\Support\Versi;
 use App\Support\Waktu;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -133,6 +135,12 @@ class JurnalController extends Controller
             : null;
 
         return view('guru.jurnal.index', compact('jurnals', 'status', 'dari', 'sampai', 'kelasList', 'mapelList', 'lihatJurnal'));
+    }
+
+    /** Endpoint ringan buat di-poll (initAutoRefresh()) -- lihat App\Support\Versi. */
+    public function versi(): JsonResponse
+    {
+        return response()->json(['versi' => Versi::dari($this->guru()->jurnals())]);
     }
 
     /* ------------------------------------------------------------ Form baru */

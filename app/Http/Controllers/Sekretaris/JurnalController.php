@@ -11,7 +11,9 @@ use App\Models\Jurnal;
 use App\Models\Mapel;
 use App\Notifications\JurnalPerluRevisi;
 use App\Support\PresensiDefault;
+use App\Support\Versi;
 use App\Support\Waktu;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -86,6 +88,16 @@ class JurnalController extends Controller
             'lihatJurnal' => $lihatJurnal,
             'jumlahPending' => Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
                 ->where('status_verifikasi', 'pending')->count(),
+        ]);
+    }
+
+    /** Endpoint ringan buat di-poll (initAutoRefresh()) -- lihat App\Support\Versi. */
+    public function versi(): JsonResponse
+    {
+        $kelas = $this->kelas();
+
+        return response()->json([
+            'versi' => Versi::dari(Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))),
         ]);
     }
 

@@ -8,6 +8,8 @@
         <x-ui.button :href="route('sekretaris.jurnal.pengganti')" variant="secondary" icon="edit_note">Isi Jurnal Pengganti</x-ui.button>
     </x-page-header>
 
+    <x-ui.auto-refresh :url="route('sekretaris.jurnal.versi')" />
+
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
             <a href="{{ route('sekretaris.jurnal.index', array_merge(request()->except('status', 'page'), array_filter(['status' => $key]))) }}"

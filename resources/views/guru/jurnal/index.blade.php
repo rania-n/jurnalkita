@@ -8,6 +8,8 @@
         <x-ui.button :href="route('jurnal.create')" icon="add">Isi Jurnal</x-ui.button>
     </x-page-header>
 
+    <x-ui.auto-refresh :url="route('jurnal.versi')" />
+
     <div class="mb-2 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
             <a href="{{ route('jurnal.index', array_merge(request()->except('status', 'page'), $key === 'semua' ? [] : ['status' => $key])) }}"

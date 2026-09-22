@@ -341,4 +341,22 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->get('/guru/jurnal/tambah?hari=kemarin')
             ->assertOk()->assertSee('Kemarin');
     }
+
+    /** Endpoint polling buat banner "ada data baru" (initAutoRefresh() di app.js) -- lihat App\Support\Versi. */
+    public function test_endpoint_versi_berubah_setelah_ada_jurnal_baru(): void
+    {
+        Storage::fake('public');
+
+        $versiAwal = $this->actingAs($this->user)->get('/guru/jurnal/versi')->assertOk()->json('versi');
+
+        $this->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
+        ]);
+
+        $versiBaru = $this->get('/guru/jurnal/versi')->assertOk()->json('versi');
+        $this->assertNotSame($versiAwal, $versiBaru);
+    }
 }
