@@ -43,7 +43,7 @@
     <x-admin.modal id="modal-mapel" title="Tambah Mata Pelajaran">
         <form method="POST" action="{{ route('master.mapel.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.input label="Nama Mata Pelajaran" name="nama" placeholder="Contoh: Matematika" />
+            <x-ui.input label="Nama Mata Pelajaran" name="nama" placeholder="Contoh: Matematika" required />
             <x-ui.input label="Kode (opsional)" name="kode" placeholder="Kosongkan = dibuat otomatis dari nama" />
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>

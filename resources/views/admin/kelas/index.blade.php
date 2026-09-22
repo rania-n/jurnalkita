@@ -64,7 +64,7 @@
             <p class="text-xs text-muted-2">Nama kelas dibuat otomatis, contoh: <strong>X RPL 1</strong>.</p>
 
             <div class="flex gap-3">
-                <x-ui.select label="Tingkat" name="tingkat" class="flex-1">
+                <x-ui.select label="Tingkat" name="tingkat" class="flex-1" required>
                     <option value="" disabled selected hidden>Pilih</option>
                     <option value="X">X</option>
                     <option value="XI">XI</option>
@@ -73,7 +73,7 @@
                 <x-ui.input label="Nomor" name="nomor" type="number" min="1" placeholder="1" class="w-24" />
             </div>
 
-            <x-ui.select label="Jurusan" name="jurusan">
+            <x-ui.select label="Jurusan" name="jurusan" required>
                 <option value="" disabled selected hidden>Pilih jurusan</option>
                 @foreach ($jurusanList as $kode => $nama)
                     <option value="{{ $kode }}">{{ $kode }} — {{ $nama }}</option>

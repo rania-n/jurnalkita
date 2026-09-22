@@ -10,11 +10,7 @@
 
         <x-ui.input label="Email" name="email" type="email" :value="old('email', $request->email)" required autofocus />
 
-        <x-ui.input label="Kata Sandi Baru" name="password" type="password" id="rp-password" placeholder="Buat kata sandi baru" hint="Minimal 8 karakter." required>
-            <button type="button" data-toggle-password="#rp-password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan kata sandi">
-                <x-icon name="visibility" :size="20" />
-            </button>
-        </x-ui.input>
+        <x-ui.input label="Kata Sandi Baru" name="password" type="password" id="rp-password" placeholder="Buat kata sandi baru" hint="Minimal 8 karakter." required />
 
         <x-ui.input label="Konfirmasi Kata Sandi" name="password_confirmation" type="password" placeholder="Ulangi kata sandi" required />
 

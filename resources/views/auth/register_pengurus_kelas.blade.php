@@ -12,29 +12,21 @@
     <form method="POST" action="{{ route('register.kelas') }}" class="flex flex-col gap-4">
         @csrf
 
-        <x-ui.select label="Kelas" name="kelas_id">
+        <x-ui.select label="Kelas" name="kelas_id" required>
             <option value="" disabled selected hidden>Pilih Kelas</option>
             @foreach ($kelasList as $k)
                 <option value="{{ $k->id }}" @selected(old('kelas_id') == $k->id)>{{ $k->nama }}</option>
             @endforeach
         </x-ui.select>
 
-        <x-ui.input label="Nama Lengkap" name="nama" placeholder="Masukkan nama lengkap" :value="old('nama')" />
-        <x-ui.input label="NIS" name="nis" inputmode="numeric" placeholder="Masukkan Nomor Induk Siswa" :value="old('nis')" />
-        <x-ui.input label="Email" name="email" type="email" placeholder="Masukkan alamat email aktif" :value="old('email')" />
+        <x-ui.input label="Nama Lengkap" name="nama" placeholder="Masukkan nama lengkap" :value="old('nama')" required />
+        <x-ui.input label="NIS" name="nis" inputmode="numeric" placeholder="Masukkan Nomor Induk Siswa" :value="old('nis')" required />
+        <x-ui.input label="Email" name="email" type="email" placeholder="Masukkan alamat email aktif" :value="old('email')" required />
         <x-ui.input label="No. WhatsApp" name="telepon" inputmode="numeric" placeholder="Masukkan nomor WhatsApp aktif" :value="old('telepon')" />
 
-        <x-ui.input label="Password" name="password" type="password" id="pk-password" placeholder="Buat kata sandi baru" hint="Minimal 8 karakter.">
-            <button type="button" data-toggle-password="#pk-password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan kata sandi">
-                <x-icon name="visibility" :size="20" />
-            </button>
-        </x-ui.input>
+        <x-ui.input label="Password" name="password" type="password" id="pk-password" placeholder="Buat kata sandi baru" hint="Minimal 8 karakter." required />
 
-        <x-ui.input label="Konfirmasi Password" name="password_confirmation" type="password" id="pk-password-confirm" placeholder="Ulangi kata sandi">
-            <button type="button" data-toggle-password="#pk-password-confirm" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan kata sandi">
-                <x-icon name="visibility" :size="20" />
-            </button>
-        </x-ui.input>
+        <x-ui.input label="Konfirmasi Password" name="password_confirmation" type="password" id="pk-password-confirm" placeholder="Ulangi kata sandi" required />
 
         <x-ui.button type="submit" block>Daftar Akun Siswa</x-ui.button>
     </form>

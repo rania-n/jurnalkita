@@ -14,9 +14,9 @@
     <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-4">
         @csrf
 
-        <x-ui.input label="Email" name="email" type="email" placeholder="Masukkan email" :value="old('email')" autofocus />
+        <x-ui.input label="Email" name="email" type="email" placeholder="Masukkan email" :value="old('email')" autofocus required />
 
-        <x-ui.input label="Kata Sandi" name="password" type="password" id="password" placeholder="Masukkan kata sandi" />
+        <x-ui.input label="Kata Sandi" name="password" type="password" id="password" placeholder="Masukkan kata sandi" required />
 
         <div class="flex items-center justify-between">
             <label class="flex cursor-pointer items-center gap-2">

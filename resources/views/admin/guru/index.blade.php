@@ -62,7 +62,7 @@
             <p class="text-xs text-muted-2">
                 Data guru saja. Akun login + No. WhatsApp diisi lewat menu "Manajemen Akun → Buat Akun".
             </p>
-            <x-ui.input label="Nama Lengkap" name="nama" />
+            <x-ui.input label="Nama Lengkap" name="nama" required />
             <x-ui.input label="NIP (opsional)" name="nip" />
 
             <x-ui.select label="Mapel Utama" name="mapel_utama_id">

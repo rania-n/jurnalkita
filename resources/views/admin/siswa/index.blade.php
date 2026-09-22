@@ -97,21 +97,21 @@
                 Data siswa saja. Akun login (khusus pengurus kelas) + No. WhatsApp
                 diisi lewat menu "Manajemen Akun → Buat Akun".
             </p>
-            <x-ui.select label="Kelas" name="kelas_id">
+            <x-ui.select label="Kelas" name="kelas_id" required>
                 <option value="" disabled selected hidden>Pilih kelas</option>
                 @foreach ($kelasAktifList as $k)
                     <option value="{{ $k->id }}">{{ $k->nama }}</option>
                 @endforeach
             </x-ui.select>
-            <x-ui.input label="NIS" name="nis" inputmode="numeric" />
-            <x-ui.input label="Nama Lengkap" name="nama" />
+            <x-ui.input label="NIS" name="nis" inputmode="numeric" required />
+            <x-ui.input label="Nama Lengkap" name="nama" required />
             <x-ui.input label="Nomor Presensi" name="no_absen" type="number" min="1" />
-            <x-ui.select label="Jenis Kelamin" name="jenis_kelamin">
+            <x-ui.select label="Jenis Kelamin" name="jenis_kelamin" required>
                 <option value="" disabled selected hidden>Pilih</option>
                 <option value="L">Laki-laki</option>
                 <option value="P">Perempuan</option>
             </x-ui.select>
-            <x-ui.select label="Jabatan Kelas" name="jabatan">
+            <x-ui.select label="Jabatan Kelas" name="jabatan" required>
                 <option value="anggota">Anggota</option>
                 <option value="pengurus">Pengurus Kelas</option>
             </x-ui.select>

@@ -75,11 +75,11 @@
     <x-admin.modal id="modal-waka" title="Tambah Jadwal Waka">
         <form method="POST" action="{{ route('master.jadwal-waka.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.select label="Hari" name="hari">
+            <x-ui.select label="Hari" name="hari" required>
                 <option value="" disabled selected hidden>Pilih hari</option>
                 @foreach ($hariLabel as $v => $l)<option value="{{ $v }}">{{ $l }}</option>@endforeach
             </x-ui.select>
-            <x-ui.select label="Waka Bertugas" name="user_id">
+            <x-ui.select label="Waka Bertugas" name="user_id" required>
                 <option value="" disabled selected hidden>Pilih waka</option>
                 @foreach ($wakaList as $w)<option value="{{ $w->id }}">{{ $w->name }}</option>@endforeach
             </x-ui.select>

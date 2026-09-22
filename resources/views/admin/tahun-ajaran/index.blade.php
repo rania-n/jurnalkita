@@ -47,7 +47,7 @@
             <form method="POST" action="{{ route('master.tahun-ajaran.naik-kelas') }}" class="mt-4 flex flex-col gap-3"
                   data-confirm="Yakin naikkan kelas ke tahun ajaran baru? Proses ini TIDAK BISA dibatalkan.">
                 @csrf
-                <x-ui.input label="Nama Tahun Ajaran Baru" name="nama" :value="old('nama', $saranNama)" placeholder="mis. 2027/2028" />
+                <x-ui.input label="Nama Tahun Ajaran Baru" name="nama" :value="old('nama', $saranNama)" placeholder="mis. 2027/2028" required />
                 <x-ui.button type="submit" icon="event_repeat">Naikkan Kelas &amp; Mulai Tahun Ajaran Baru</x-ui.button>
             </form>
         </div>

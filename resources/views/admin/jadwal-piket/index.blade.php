@@ -89,7 +89,7 @@
     <x-admin.modal id="modal-piket-tambah" title="Tambah Jadwal Piket">
         <form method="POST" action="{{ route('master.jadwal-piket.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.select label="Guru Piket" name="guru_id">
+            <x-ui.select label="Guru Piket" name="guru_id" required>
                 <option value="" disabled selected hidden>Pilih guru</option>
                 @foreach ($guruList as $g)<option value="{{ $g->id }}">{{ $g->nama }}</option>@endforeach
             </x-ui.select>
@@ -106,18 +106,18 @@
                 <option value="custom">Custom — atur jam manual</option>
             </x-ui.select>
             <div class="flex gap-3">
-                <x-ui.input label="Jam Mulai" name="mulai" type="time" value="07:00" class="flex-1" />
-                <x-ui.input label="Jam Selesai" name="selesai" type="time" value="11:00" class="flex-1" />
+                <x-ui.input label="Jam Mulai" name="mulai" type="time" value="07:00" class="flex-1" required />
+                <x-ui.input label="Jam Selesai" name="selesai" type="time" value="11:00" class="flex-1" required />
             </div>
-            <x-ui.input label="Tanggal Mulai" name="tanggal" type="date" hint="Piket pertama jatuh tanggal berapa (Senin-Jumat)." />
+            <x-ui.input label="Tanggal Mulai" name="tanggal" type="date" hint="Piket pertama jatuh tanggal berapa (Senin-Jumat)." required />
             <div class="flex gap-3">
-                <x-ui.select label="Ulang Setiap" name="ulang_setiap_minggu" class="flex-1">
+                <x-ui.select label="Ulang Setiap" name="ulang_setiap_minggu" class="flex-1" required>
                     <option value="1">Tiap minggu</option>
                     <option value="2" selected>Tiap 2 minggu</option>
                     <option value="3">Tiap 3 minggu</option>
                     <option value="4">Tiap 4 minggu</option>
                 </x-ui.select>
-                <x-ui.input label="Jumlah Kali" name="jumlah_kali" type="number" min="1" max="52" value="10" class="flex-1" />
+                <x-ui.input label="Jumlah Kali" name="jumlah_kali" type="number" min="1" max="52" value="10" class="flex-1" required />
             </div>
             <p class="-mt-2 text-xs text-muted-2">Sistem otomatis bikin jadwal sebanyak "Jumlah Kali", masing-masing berjarak sesuai "Ulang Setiap" dari Tanggal Mulai.</p>
             <x-ui.input label="Keterangan (opsional)" name="keterangan" />
@@ -133,14 +133,14 @@
     <x-admin.modal id="modal-piket-ubah" title="Ubah Jadwal Piket">
         <form method="POST" action="{{ route('master.jadwal-piket.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.select label="Guru Piket" name="guru_id">
+            <x-ui.select label="Guru Piket" name="guru_id" required>
                 <option value="" disabled selected hidden>Pilih guru</option>
                 @foreach ($guruList as $g)<option value="{{ $g->id }}">{{ $g->nama }}</option>@endforeach
             </x-ui.select>
-            <x-ui.input label="Tanggal" name="tanggal" type="date" />
+            <x-ui.input label="Tanggal" name="tanggal" type="date" required />
             <div class="flex gap-3">
-                <x-ui.input label="Jam Mulai" name="mulai" type="time" class="flex-1" />
-                <x-ui.input label="Jam Selesai" name="selesai" type="time" class="flex-1" />
+                <x-ui.input label="Jam Mulai" name="mulai" type="time" class="flex-1" required />
+                <x-ui.input label="Jam Selesai" name="selesai" type="time" class="flex-1" required />
             </div>
             <x-ui.input label="Keterangan (opsional)" name="keterangan" />
             <div class="mt-1 flex gap-2">
