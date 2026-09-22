@@ -200,6 +200,21 @@ function initModals() {
                                 Array.from(field.options).forEach((o) => { o.selected = arr.includes(o.value); });
                             } else {
                                 field.value = v ?? '';
+
+                                // Field ini hidden input punya x-ui.cari-pilihan (dropdown
+                                // yang bisa diketik) -- kotak teks yang KELIHATAN di
+                                // sebelahnya nggak ikut ke-set otomatis cuma dari field.value
+                                // di atas, jadi disamain manual di sini biar mode Ubah
+                                // nampilin nama pilihannya (bukan kosong/placeholder).
+                                if (field.hasAttribute('data-cari-pilihan-value')) {
+                                    const wrap = field.closest('[data-cari-pilihan]');
+                                    const daftar = JSON.parse(wrap?.dataset.list || '[]');
+                                    const cocok = daftar.find((s) => String(s.id) === String(v));
+                                    const visibleInput = wrap?.querySelector('[data-cari-pilihan-input]');
+                                    if (visibleInput) visibleInput.value = cocok ? cocok.nama : '';
+                                    const tombolClear = wrap?.querySelector('[data-cari-pilihan-clear]');
+                                    if (tombolClear) tombolClear.hidden = !cocok;
+                                }
                             }
                         });
                     } catch (_) { /* abaikan */ }
@@ -405,11 +420,83 @@ function initCariSiswa() {
     });
 }
 
+/*
+ * Versi generik dari initCariSiswa() -- buat dropdown APA AJA yang daftarnya
+ * kepanjangan buat discroll (mapel, guru, kelas, dll), bukan cuma siswa.
+ * Sengaja dipisah dari initCariSiswa() (bukan digabung/direfactor bareng)
+ * biar nggak beresiko ngerusak alur cari-siswa yang udah jalan di beberapa
+ * halaman -- lihat components/ui/cari-pilihan.blade.php.
+ */
+function initCariPilihan() {
+    document.querySelectorAll('[data-cari-pilihan]').forEach((wrap) => {
+        const data = JSON.parse(wrap.dataset.list || '[]');
+        const input = wrap.querySelector('[data-cari-pilihan-input]');
+        const hidden = wrap.querySelector('[data-cari-pilihan-value]');
+        const hasil = wrap.querySelector('[data-cari-pilihan-hasil]');
+        const daftar = wrap.querySelector('[data-cari-pilihan-daftar]');
+        const tombolClear = wrap.querySelector('[data-cari-pilihan-clear]');
+        if (!input || !hidden || !hasil || !daftar) return;
+
+        function render(list) {
+            if (list.length === 0) {
+                daftar.innerHTML = '<p class="px-3.5 py-2.5 text-sm text-muted-2">Tidak ada yang cocok.</p>';
+                return;
+            }
+            daftar.innerHTML = list.slice(0, 30).map((s) => `
+                <button type="button" data-id="${s.id}" class="flex w-full px-3.5 py-2.5 text-left text-sm font-semibold text-ink hover:bg-surface-alt">${s.nama}</button>
+            `).join('');
+        }
+
+        function pilih(s) {
+            input.value = s.nama;
+            hidden.value = s.id;
+            hasil.hidden = true;
+            if (tombolClear) tombolClear.hidden = false;
+        }
+
+        function kosongkan() {
+            input.value = '';
+            hidden.value = '';
+            hasil.hidden = true;
+            if (tombolClear) tombolClear.hidden = true;
+            input.focus();
+        }
+
+        input.addEventListener('input', () => {
+            hidden.value = ''; // udah ngetik lagi -> pilihan lama batal, harus pilih ulang
+            if (tombolClear) tombolClear.hidden = true;
+
+            const q = input.value.trim().toLowerCase();
+            const cocok = q ? data.filter((s) => s.nama.toLowerCase().includes(q)) : data;
+            render(cocok);
+            hasil.hidden = false;
+        });
+
+        input.addEventListener('focus', () => {
+            if (!hidden.value) { render(data); hasil.hidden = false; }
+        });
+
+        daftar.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-id]');
+            if (!btn) return;
+            const s = data.find((x) => String(x.id) === btn.dataset.id);
+            if (s) pilih(s);
+        });
+
+        tombolClear?.addEventListener('click', kosongkan);
+
+        document.addEventListener('click', (e) => {
+            if (!wrap.contains(e.target)) hasil.hidden = true;
+        });
+    });
+}
+
 function init() {
     initPasswordToggles();
     initUploadPreview();
     initKameraWajib();
     initCariSiswa();
+    initCariPilihan();
     initConfirm();
     initModals();
     initNavGroups();

@@ -128,14 +128,22 @@
                     </p>
                 @endif
             </div>
-            <x-ui.select label="Mata Pelajaran" name="mapel_id">
-                <option value="" disabled selected hidden>Pilih mapel</option>
-                @foreach ($mapelList as $m)<option value="{{ $m->id }}">{{ $m->nama }}</option>@endforeach
-            </x-ui.select>
-            <x-ui.select label="Guru Pengajar" name="guru_id">
-                <option value="" disabled selected hidden>Pilih guru</option>
-                @foreach ($guruList as $g)<option value="{{ $g->id }}">{{ $g->nama }}</option>@endforeach
-            </x-ui.select>
+            <x-ui.cari-pilihan
+                label="Mata Pelajaran"
+                name="mapel_id"
+                :options="$mapelList->map(fn ($m) => ['id' => $m->id, 'nama' => $m->nama])"
+                placeholder="Ketik nama mapel..."
+                tambah-label="Tambah Mata Pelajaran Baru"
+                :tambah-url="route('master.mapel.index')"
+                required
+            />
+            <x-ui.cari-pilihan
+                label="Guru Pengajar"
+                name="guru_id"
+                :options="$guruList->map(fn ($g) => ['id' => $g->id, 'nama' => $g->nama])"
+                placeholder="Ketik nama guru..."
+                required
+            />
             <div class="flex gap-3">
                 <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai" class="flex-1">
                     <option value="" disabled selected hidden>Pilih</option>
