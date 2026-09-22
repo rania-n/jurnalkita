@@ -152,9 +152,6 @@
             </div>
 
             <x-ui.input label="Password" name="password" type="password" id="akun-password" placeholder="Ketik password" hint="Minimal 8 karakter." errorBag="buatAkun">
-                <button type="button" data-toggle-password="#akun-password" class="flex shrink-0 items-center text-muted-2" aria-label="Tampilkan">
-                    <x-icon name="visibility" :size="18" />
-                </button>
             </x-ui.input>
             <x-ui.input label="Konfirmasi Password" name="password_confirmation" type="password" placeholder="Ulangi password" errorBag="buatAkun" />
 
