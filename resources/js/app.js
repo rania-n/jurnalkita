@@ -52,12 +52,15 @@ function initKameraWajib() {
         const tombolBuka = wrap.querySelectorAll('[data-kamera-buka]');
         const tombolUlang = wrap.querySelector('[data-kamera-ulang]');
         const tombolGanti = wrap.querySelector('[data-kamera-ganti]');
+        const tombolPerbesar = wrap.querySelector('[data-kamera-perbesar]');
+        const kotakVideo = wrap.querySelector('[data-kamera-box]');
         const input = wrap.querySelector('[data-kamera-input]');
         const img = wrap.querySelector('[data-kamera-img]');
         const placeholder = wrap.querySelector('[data-kamera-placeholder]');
         if (!dialog || !video || !canvas || !input) return;
 
         let stream = null;
+        let diperbesar = false;
         // Default belakang ('environment') -- paling relevan buat foto suasana
         // kelas. Bisa ditukar manual lewat tombol data-kamera-ganti kalau
         // kamera yang kebuka bukan yang diinginkan.
@@ -67,6 +70,7 @@ function initKameraWajib() {
             pesanError.hidden = true;
             video.hidden = false;
             if (tombolGanti) tombolGanti.hidden = true;
+            if (tombolPerbesar) tombolPerbesar.hidden = true;
 
             // Stream lama (kalau ada, mis. lagi ganti kamera) dimatiin dulu
             // sebelum minta yang baru -- sebagian browser/HP nolak buka kamera
@@ -81,6 +85,7 @@ function initKameraWajib() {
                 video.srcObject = stream;
                 await video.play();
                 if (tombolGanti) tombolGanti.hidden = false;
+                if (tombolPerbesar) tombolPerbesar.hidden = false;
             } catch (err) {
                 video.hidden = true;
                 pesanError.hidden = false;
@@ -93,6 +98,15 @@ function initKameraWajib() {
                 stream = null;
             }
             video.srcObject = null;
+            // Reset ukuran balik ke default tiap ditutup, biar buka lagi
+            // nanti nggak kejebak kegedean dari sesi sebelumnya.
+            if (diperbesar) {
+                diperbesar = false;
+                kotakVideo?.classList.remove('max-h-[85vh]');
+                kotakVideo?.classList.add('max-h-[50vh]');
+                video.classList.remove('max-h-[85vh]');
+                video.classList.add('max-h-[50vh]');
+            }
         }
 
         tombolBuka.forEach((btn) => btn.addEventListener('click', bukaKamera));
@@ -101,6 +115,14 @@ function initKameraWajib() {
         tombolGanti?.addEventListener('click', () => {
             facingMode = facingMode === 'environment' ? 'user' : 'environment';
             bukaKamera();
+        });
+
+        tombolPerbesar?.addEventListener('click', () => {
+            diperbesar = !diperbesar;
+            kotakVideo?.classList.toggle('max-h-[50vh]', !diperbesar);
+            kotakVideo?.classList.toggle('max-h-[85vh]', diperbesar);
+            video.classList.toggle('max-h-[50vh]', !diperbesar);
+            video.classList.toggle('max-h-[85vh]', diperbesar);
         });
 
         tombolJepret.addEventListener('click', () => {

@@ -56,8 +56,15 @@
 
     <x-ui.modal :id="$modalId" title="Ambil Foto Suasana Kelas">
         <div class="flex flex-col gap-3">
-            <div class="relative overflow-hidden rounded-xl bg-ink">
-                <video data-kamera-video hidden autoplay playsinline muted class="aspect-[4/3] w-full object-cover"></video>
+            {{-- object-contain (BUKAN object-cover) + max-height yang bisa
+                 di-toggle -- dulu dipaksa kotak 4:3 & object-cover, jadi
+                 kepotong kalau rasio kamera aslinya beda (umum banget,
+                 kebanyakan kamera HP bukan 4:3). Sekarang gambarnya utuh
+                 semua (nggak ada yang kepotong), maks tinggi 50vh biar
+                 nggak kegedean, ada tombol perbesar kalau mau lihat lebih
+                 gede/penuh. --}}
+            <div data-kamera-box class="relative flex max-h-[50vh] items-center justify-center overflow-hidden rounded-xl bg-ink transition-[max-height]">
+                <video data-kamera-video hidden autoplay playsinline muted class="max-h-[50vh] w-full object-contain"></video>
                 <canvas data-kamera-canvas hidden></canvas>
                 <p data-kamera-error hidden class="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 px-6 text-center text-sm font-semibold text-card">
                     Nggak bisa buka kamera. Pastikan izin kamera diaktifkan buat browser ini, lalu coba lagi.
@@ -69,6 +76,15 @@
                     class="press absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full bg-ink/60 text-card"
                     aria-label="Ganti kamera depan/belakang">
                     <x-icon name="cameraswitch" :size="18" />
+                </button>
+                {{-- Perbesar -- video default dibatasi 50vh biar nggak
+                     kegedean & modal tetap muat tombol Jepret tanpa scroll,
+                     tapi kalau mau lihat lebih detail sebelum jepret, bisa
+                     diperbesar ke hampir sepenuh layar. --}}
+                <button type="button" data-kamera-perbesar hidden
+                    class="press absolute right-2.5 bottom-2.5 flex h-9 w-9 items-center justify-center rounded-full bg-ink/60 text-card"
+                    aria-label="Perbesar tampilan kamera">
+                    <x-icon name="fullscreen" :size="18" />
                 </button>
             </div>
             <button type="button" data-kamera-jepret class="press flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-navy text-sm font-bold text-card">
