@@ -54,7 +54,7 @@ class NotifikasiTest extends TestCase
         $this->actingAs($sekretaris)
             ->post("/sekretaris/jurnal/{$jurnal->id}/verifikasi", [
                 'keputusan' => 'revisi', 'catatan' => 'Materi kurang lengkap',
-            ])->assertRedirect('/sekretaris/jurnal');
+            ])->assertRedirect("/sekretaris/jurnal?lihat={$jurnal->id}");
 
         Notification::assertSentTo($guruUser, JurnalPerluRevisi::class);
     }

@@ -153,7 +153,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/jurnal', [VerifikasiJurnalController::class, 'index'])->name('jurnal.index');
         Route::get('/jurnal/pengganti', [VerifikasiJurnalController::class, 'createPengganti'])->name('jurnal.pengganti');
         Route::post('/jurnal/pengganti', [VerifikasiJurnalController::class, 'storePengganti'])->name('jurnal.pengganti.store');
-        Route::get('/jurnal/{jurnal}', [VerifikasiJurnalController::class, 'show'])->name('jurnal.show');
+        Route::get('/jurnal/{jurnal}/fragment', [VerifikasiJurnalController::class, 'showFragment'])->name('jurnal.show.fragment');
         Route::post('/jurnal/{jurnal}/verifikasi', [VerifikasiJurnalController::class, 'verifikasi'])->name('jurnal.verifikasi');
     });
 

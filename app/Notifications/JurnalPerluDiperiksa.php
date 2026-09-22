@@ -10,9 +10,7 @@ class JurnalPerluDiperiksa extends Notification
 {
     use Queueable;
 
-    public function __construct(private Jurnal $jurnal, private bool $hasilRevisi = false)
-    {
-    }
+    public function __construct(private Jurnal $jurnal, private bool $hasilRevisi = false) {}
 
     /**
      * @return array<int, string>
@@ -30,7 +28,7 @@ class JurnalPerluDiperiksa extends Notification
         return [
             'title' => $this->hasilRevisi ? 'Jurnal hasil revisi perlu diperiksa' : 'Jurnal baru perlu diperiksa',
             'body' => ($this->jurnal->jadwal->mapel->nama ?? 'Jurnal').' — '.($this->jurnal->guru->nama ?? ''),
-            'url' => route('sekretaris.jurnal.show', $this->jurnal),
+            'url' => route('sekretaris.jurnal.index', ['lihat' => $this->jurnal->id]),
         ];
     }
 }

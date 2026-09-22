@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Jadwal;
 use App\Models\JamPelajaran;
 use App\Models\Jurnal;
+use App\Models\Mapel;
 use App\Notifications\JurnalPerluRevisi;
 use App\Support\PresensiDefault;
 use App\Support\Waktu;
@@ -36,28 +37,72 @@ class JurnalController extends Controller
     {
         $kelas = $this->kelas();
         $status = $request->get('status');
+        $dari = $request->query('dari');
+        $sampai = $request->query('sampai');
+
+        // "Dari" diisi tapi "Sampai" kosong -> anggap nyari HARI ITU doang,
+        // sama pola kayak Riwayat Jurnal Guru.
+        if ($dari && ! $sampai) {
+            $sampai = $dari;
+        }
+
+        // Sapu jurnal pending kelas ini yang udah kelewat hari -- otomatis
+        // terverifikasi, biar nggak numpuk pending berhari-hari kalau
+        // pengurus kelas nggak sempat periksa (lihat Jurnal::otomatisVerifikasiKalauLewatHari()).
+        Jurnal::verifikasiSemuaYangKadaluarsa(kelasId: $kelas->id);
+
+        // Cuma mapel yang PERNAH diajarkan di kelas ini -- nggak ada gunanya
+        // nawarin mapel sekolah lain yang nggak nyangkut di kelas ini.
+        $mapelList = Mapel::whereIn('id', $kelas->jadwals()->distinct()->pluck('mapel_id'))->orderBy('nama')->get();
 
         $jurnals = Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
             ->with('jadwal.mapel', 'guru')
             ->when($status, fn ($q) => $q->where('status_verifikasi', $status))
+            ->when($dari, fn ($q) => $q->whereDate('tanggal', '>=', $dari))
+            ->when($sampai, fn ($q) => $q->whereDate('tanggal', '<=', $sampai))
+            ->when($request->filled('mapel_id'), fn ($q) => $q->whereHas('jadwal', fn ($q2) => $q2->where('mapel_id', $request->query('mapel_id'))))
+            // Yang masih "Perlu diperiksa" dimunculin paling atas duluan
+            // (apapun tanggalnya) -- biar nggak kelewat/ketumpuk jurnal lama
+            // yang udah diperiksa, baru diurutkan tanggal terbaru.
+            ->orderByRaw("status_verifikasi = 'pending' desc")
             ->latest('tanggal')->latest('id')
-            ->paginate(15);
+            ->paginate(15)->withQueryString();
+
+        // Habis submit verifikasi/revisi (verifikasi()) atau dari notifikasi
+        // (JurnalPerluDiperiksa) -> balik ke sini bawa ?lihat=<id>, popup
+        // detailnya kebuka otomatis -- nggak peduli jurnalnya ada di halaman
+        // pagination yang mana.
+        $lihatJurnal = $request->filled('lihat')
+            ? Jurnal::with('jadwal.mapel')->find($request->integer('lihat'))
+            : null;
 
         return view('sekretaris.jurnal.index', [
             'jurnals' => $jurnals,
             'kelas' => $kelas,
             'status' => $status,
+            'dari' => $dari,
+            'sampai' => $sampai,
+            'mapelList' => $mapelList,
+            'lihatJurnal' => $lihatJurnal,
             'jumlahPending' => Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
                 ->where('status_verifikasi', 'pending')->count(),
         ]);
     }
 
-    public function show(Jurnal $jurnal): View
+    /**
+     * Detail jurnal -- SELALU popup (fragment HTML tanpa layout), dibuka dari
+     * Verifikasi Jurnal lewat AJAX. Nggak ada lagi halaman penuh buat ini --
+     * sengaja dihapus (dulu ada, masih bisa diakses langsung lewat URL walau
+     * harusnya cuma popup, bikin bingung -- sama pola kayak Jurnal Guru &
+     * Dispensasi yang udah dibereskan duluan).
+     */
+    public function showFragment(Jurnal $jurnal): View
     {
         $this->pastikanKelasSaya($jurnal);
+        $jurnal->otomatisVerifikasiKalauLewatHari();
         $jurnal->load('jadwal.mapel', 'guru', 'absensis.siswa');
 
-        return view('sekretaris.jurnal.show', compact('jurnal'));
+        return view('sekretaris.jurnal._detail-fragment', compact('jurnal'));
     }
 
     public function verifikasi(Jurnal $jurnal, Request $request): RedirectResponse
@@ -85,7 +130,7 @@ class JurnalController extends Controller
             $jurnal->guru->user->notify(new JurnalPerluRevisi($jurnal));
         }
 
-        return redirect()->route('sekretaris.jurnal.index')
+        return redirect()->route('sekretaris.jurnal.index', ['lihat' => $jurnal->id])
             ->with('success', $data['keputusan'] === 'terima' ? 'Jurnal diverifikasi.' : 'Permintaan revisi dikirim ke guru.');
     }
 
@@ -156,7 +201,7 @@ class JurnalController extends Controller
             ->whereDate('tanggal', now()->toDateString())
             ->first();
         if ($sudahAda) {
-            return redirect()->route('sekretaris.jurnal.show', $sudahAda)
+            return redirect()->route('sekretaris.jurnal.index', ['lihat' => $sudahAda->id])
                 ->with('info', 'Jurnal untuk jadwal ini hari ini sudah ada.');
         }
 
@@ -189,7 +234,7 @@ class JurnalController extends Controller
 
         AuditLog::catat('Jurnal Pengganti', "Pengurus kelas mengisi jurnal pengganti #{$jurnal->id}", $jurnal);
 
-        return redirect()->route('sekretaris.jurnal.show', $jurnal)
+        return redirect()->route('sekretaris.jurnal.index', ['lihat' => $jurnal->id])
             ->with('success', 'Jurnal pengganti tersimpan. Guru akan melihatnya di riwayat.');
     }
 }

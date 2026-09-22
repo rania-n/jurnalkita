@@ -101,6 +101,12 @@ class JurnalController extends Controller
 
         $guru = $this->guru();
 
+        // Sapu jurnal pending guru ini yang udah kelewat hari -- otomatis
+        // terverifikasi (lihat Jurnal::otomatisVerifikasiKalauLewatHari()),
+        // biar Riwayat-nya langsung akurat walau pengurus kelas belum
+        // sempat buka menu Verifikasi Jurnal-nya sendiri.
+        Jurnal::verifikasiSemuaYangKadaluarsa(guruId: $guru->id);
+
         // Pilihan dropdown Kelas & Mapel cuma yang PERNAH diajar guru ini
         // (dari jadwalnya), bukan semua kelas/mapel sekolah -- nggak ada
         // gunanya nawarin kelas yang dia sendiri nggak pernah pegang.

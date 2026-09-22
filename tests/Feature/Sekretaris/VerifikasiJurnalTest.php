@@ -83,7 +83,7 @@ class VerifikasiJurnalTest extends TestCase
         $jurnal = $this->jurnalBaru();
         $jurnal->absensis()->create(['siswa_id' => Siswa::where('nis', '002')->value('id'), 'status' => 'hadir']);
 
-        $this->actingAs($this->sekretaris)->get("/sekretaris/jurnal/{$jurnal->id}")
+        $this->actingAs($this->sekretaris)->get("/sekretaris/jurnal/{$jurnal->id}/fragment")
             ->assertOk()->assertSee('Presensi');
         $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti')
             ->assertOk()->assertSee('Jurnal Pengganti');
@@ -97,7 +97,7 @@ class VerifikasiJurnalTest extends TestCase
 
         $this->actingAs($this->sekretaris)
             ->post("/sekretaris/jurnal/{$jurnal->id}/verifikasi", ['keputusan' => 'terima'])
-            ->assertRedirect('/sekretaris/jurnal');
+            ->assertRedirect("/sekretaris/jurnal?lihat={$jurnal->id}");
 
         $jurnal->refresh();
         $this->assertSame('terverifikasi', $jurnal->status_verifikasi);
@@ -114,10 +114,61 @@ class VerifikasiJurnalTest extends TestCase
 
         $this->actingAs($this->sekretaris)
             ->post("/sekretaris/jurnal/{$jurnal->id}/verifikasi", ['keputusan' => 'revisi', 'catatan' => 'Materi tidak sesuai'])
-            ->assertRedirect('/sekretaris/jurnal');
+            ->assertRedirect("/sekretaris/jurnal?lihat={$jurnal->id}");
 
         $this->assertSame('revisi', $jurnal->fresh()->status_verifikasi);
         $this->assertSame('Materi tidak sesuai', $jurnal->fresh()->catatan_verifikasi);
+    }
+
+    /**
+     * Jurnal pending yang tanggalnya udah kelewat hari (bukan hari ini lagi)
+     * otomatis terverifikasi -- pengurus kelas nggak sempat periksa, daripada
+     * numpuk jadi pending berhari-hari (sama pola kayak auto-batal dispensasi).
+     */
+    public function test_jurnal_pending_yang_udah_lewat_hari_otomatis_terverifikasi(): void
+    {
+        $jurnal = $this->jurnalBaru(['tanggal' => today()->subDay()]);
+
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal')->assertOk();
+
+        $this->assertSame('terverifikasi', $jurnal->fresh()->status_verifikasi);
+        $this->assertStringContainsString('Otomatis diverifikasi', $jurnal->fresh()->catatan_verifikasi);
+    }
+
+    public function test_jurnal_pending_hari_ini_belum_diotomatis_verifikasi(): void
+    {
+        $jurnal = $this->jurnalBaru(['tanggal' => today()]);
+
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal')->assertOk();
+
+        $this->assertSame('pending', $jurnal->fresh()->status_verifikasi);
+    }
+
+    /**
+     * Jurnal "pending" (perlu diperiksa) muncul PALING ATAS, walau dibuat
+     * duluan (id lebih kecil, biasanya kalah kalau urut cuma "terbaru
+     * duluan") -- nggak kelewat ketumpuk jurnal lain yang udah diperiksa.
+     * Sengaja dua-duanya tanggal HARI INI (bukan kemarin) biar nggak kena
+     * sapu auto-verifikasi (lihat test_jurnal_pending_yang_udah_lewat_hari...)
+     * duluan sebelum sempat dicek urutannya.
+     */
+    public function test_jurnal_pending_ditampilkan_paling_atas(): void
+    {
+        // Dibuat DULUAN (id lebih kecil) -- kalau urutnya cuma "id/tanggal
+        // terbaru duluan" doang, ini bakal kalah sama yang dibuat belakangan.
+        $pending = $this->jurnalBaru();
+        $terverifikasi = $this->jurnalBaru(['status_verifikasi' => 'terverifikasi']);
+
+        // Assert lewat posisi data-ajax-url per jurnal (unik per id) --
+        // BUKAN teks status badge, soalnya "Perlu diperiksa"/"Terverifikasi"
+        // juga muncul duluan di tab bar filter di atas daftar, jadi nggak
+        // representatif buat ngecek urutan KARTU-nya.
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal')
+            ->assertOk()
+            ->assertSeeInOrder([
+                "jurnal/{$pending->id}/fragment",
+                "jurnal/{$terverifikasi->id}/fragment",
+            ]);
     }
 
     public function test_sekretaris_lain_tidak_bisa_verifikasi_jurnal_bukan_kelasnya(): void

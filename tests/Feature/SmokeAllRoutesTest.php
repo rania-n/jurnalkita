@@ -64,7 +64,7 @@ class SmokeAllRoutesTest extends TestCase
         $kelas = $sekre->kelasSekretaris();
         $jurnal = Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))->first();
         if ($jurnal) {
-            $this->actingAs($sekre)->get("/sekretaris/jurnal/{$jurnal->id}")->assertOk();
+            $this->actingAs($sekre)->get("/sekretaris/jurnal/{$jurnal->id}/fragment")->assertOk();
         }
     }
 
