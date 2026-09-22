@@ -3,10 +3,15 @@
     'name' => 'siswa_id',
     'siswas' => [],
     'errorBag' => 'default',
+    'required' => false,
 ])
 
 @php
-    $id = $attributes->get('id', $name);
+    // "-cari" SENGAJA ditambahin -- biar id kotak teks ini nggak sama persis
+    // kayak $name (lihat catatan lebih detail di cari-pilihan.blade.php,
+    // komponen kembarannya -- form.elements[name] bisa bentrok jadi
+    // RadioNodeList kalau ada elemen lain yang id-nya sama kayak name itu).
+    $id = $attributes->get('id', $name.'-cari');
     $terpilihId = old($name);
     $terpilih = collect($siswas)->firstWhere('id', (int) $terpilihId);
 @endphp
@@ -17,7 +22,7 @@
      difilter di klien pas ngetik -- lihat initCariSiswa() di app.js. --}}
 <div {{ $attributes->class('flex flex-col gap-1.5') }} data-cari-siswa data-list='@json(collect($siswas)->values())'>
     @if ($label)
-        <x-ui.label :for="$id">{{ $label }}</x-ui.label>
+        <x-ui.label :for="$id" :required="$required">{{ $label }}</x-ui.label>
     @endif
 
     <div class="relative">

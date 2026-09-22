@@ -21,7 +21,7 @@
 
 <div {{ $wrap->class('flex flex-col gap-1.5') }}>
     @if ($label)
-        <x-ui.label :for="$id">{{ $label }}</x-ui.label>
+        <x-ui.label :for="$id" :required="$attributes->has('required')">{{ $label }}</x-ui.label>
     @endif
 
     <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy @error($name, $errorBag) !border-alpha @enderror">

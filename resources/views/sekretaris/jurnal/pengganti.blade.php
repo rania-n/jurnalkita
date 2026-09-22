@@ -14,7 +14,7 @@
             @csrf
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-ui.select label="Mata Pelajaran (jadwal)" name="jadwal_id" id="jadwal_id" class="sm:col-span-2">
+                <x-ui.select label="Mata Pelajaran (jadwal)" name="jadwal_id" id="jadwal_id" class="sm:col-span-2" required>
                     <option value="" disabled selected hidden>Pilih jadwal</option>
                     @foreach ($jadwals as $j)
                         @php $jamOpsi = \App\Support\Waktu::rentangJam($j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
@@ -38,8 +38,8 @@
                      Yang diisi itu Tugas Tambahan (apa yang dikasih ke siswa)
                      + Alasan (kenapa gurunya nggak hadir), bukan "Materi"
                      (itu khusus kalau gurunya beneran hadir). --}}
-                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengerjakan LKS halaman 12–15.">{{ old('tugas_tambahan') }}</x-ui.textarea>
-                <x-ui.textarea label="Alasan" name="alasan" :rows="2" class="sm:col-span-2" placeholder="Contoh: rapat dinas luar kota, izin sakit, dll.">{{ old('alasan') }}</x-ui.textarea>
+                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengerjakan LKS halaman 12–15." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
+                <x-ui.textarea label="Alasan" name="alasan" :rows="2" class="sm:col-span-2" placeholder="Contoh: rapat dinas luar kota, izin sakit, dll." required>{{ old('alasan') }}</x-ui.textarea>
             </div>
 
             {{-- Presensi diisi bareng jurnalnya -- kamu yang ada di kelas paling

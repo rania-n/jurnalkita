@@ -5,6 +5,7 @@
     'tones' => [],      // opsional: ['hadir' => 'hadir', 'alpha' => 'alpha', ...]
     'size' => 'md',     // md | sm
     'label' => null,
+    'required' => false, // cuma nampilin tanda * di label -- radio-nya sendiri udah selalu ada nilai kepilih (lihat :checked), jadi nggak butuh atribut required HTML.
 ])
 
 {{--
@@ -29,7 +30,7 @@
 
 <div {{ $attributes->only('class')->class('flex flex-col gap-1.5') }}>
     @if ($label)
-        <x-ui.label>{{ $label }}</x-ui.label>
+        <x-ui.label :required="$required">{{ $label }}</x-ui.label>
     @endif
 
     <div class="flex flex-wrap gap-1.5" role="radiogroup" @if ($label) aria-label="{{ $label }}" @endif>

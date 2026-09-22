@@ -18,7 +18,7 @@
 
 <div {{ $wrap->class('flex flex-col gap-1.5') }}>
     @if ($label)
-        <x-ui.label :for="$id">{{ $label }}</x-ui.label>
+        <x-ui.label :for="$id" :required="$attributes->has('required')">{{ $label }}</x-ui.label>
     @endif
 
     <textarea

@@ -9,9 +9,9 @@
         @csrf
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-ui.cari-siswa name="siswa_id" :siswas="$siswaList" class="sm:col-span-2" />
+            <x-ui.cari-siswa name="siswa_id" :siswas="$siswaList" class="sm:col-span-2" required />
 
-            <x-ui.input label="Tanggal" name="tanggal" type="date" :value="old('tanggal', now()->toDateString())" />
+            <x-ui.input label="Tanggal" name="tanggal" type="date" :value="old('tanggal', now()->toDateString())" required />
             <x-ui.input label="Sampai Tanggal (opsional)" name="tanggal_selesai" type="date" :value="old('tanggal_selesai')" />
             <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Kosongkan "Sampai Tanggal" kalau dispensasinya cuma 1 hari. Isi kalau lebih dari 1 hari (mis. sakit 3 hari).</p>
 
@@ -29,7 +29,7 @@
                 "selesai" kosong — otomatis berarti sampai selesai hari itu.
             </p>
 
-            <x-ui.textarea label="Alasan Dispensasi" name="alasan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengikuti lomba tingkat kabupaten.">{{ old('alasan') }}</x-ui.textarea>
+            <x-ui.textarea label="Alasan Dispensasi" name="alasan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengikuti lomba tingkat kabupaten." required>{{ old('alasan') }}</x-ui.textarea>
 
             <x-ui.input label="No. HP yang bisa dihubungi (opsional)" name="no_hp" inputmode="numeric" :value="old('no_hp')" />
 
