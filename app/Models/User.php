@@ -69,9 +69,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function piketHariIni(): bool
     {
-        $hari = HariSekolah::hariIni();
+        if (! HariSekolah::hariIni() || ! $this->isPiket()) {
+            return false;
+        }
 
-        return $hari && $this->isPiket() && $this->guru->jadwalPikets()->where('hari', $hari)->exists();
+        // berlakuPada() -- piket sekarang per TANGGAL SPESIFIK (ulang tiap 2
+        // minggu, bukan tiap minggu di hari yang sama); baris lama (tanggal
+        // kosong) tetap dianggap berulang tiap minggu (lihat JadwalPiket).
+        return $this->guru->jadwalPikets()->berlakuPada(today())->exists();
     }
 
     /** Waka yang PUNYA jadwal shift sama sekali -- kalau kosong berarti belum diatur (semua Waka dianggap standby). */

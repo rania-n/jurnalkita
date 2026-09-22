@@ -7,28 +7,137 @@ use App\Models\AuditLog;
 use App\Models\JadwalPiket;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class JadwalPiketController extends Controller
 {
+    /**
+     * Piket asli gilirannya per TANGGAL SPESIFIK, ulang tiap 2 minggu --
+     * bukan "tiap Senin selamanya". Dua alur beda di sini:
+     *   - Ubah (ada 'id'): 1 baris doang, tanggal/jam/keterangan-nya diubah
+     *     langsung -- field ulang_setiap_minggu/jumlah_kali DIABAIKAN sama
+     *     sekali, ngedit 1 baris nggak boleh diam-diam nggandain baris baru.
+     *   - Tambah (nggak ada 'id'): generate BANYAK baris sekaligus dari
+     *     tanggal awal + tiap berapa minggu + berapa kali, biar admin nggak
+     *     perlu isi manual satu-satu tiap 2 minggu.
+     */
     public function save(Request $request): RedirectResponse
     {
+        if ($request->filled('id')) {
+            return $this->ubahSatuBaris($request);
+        }
+
+        return $this->tambahBanyakBaris($request);
+    }
+
+    private function ubahSatuBaris(Request $request): RedirectResponse
+    {
         $data = $request->validate([
-            'id' => ['nullable', 'exists:jadwal_pikets,id'],
+            'id' => ['required', 'exists:jadwal_pikets,id'],
             'guru_id' => ['required', 'exists:gurus,id'],
-            'hari' => ['required', 'in:senin,selasa,rabu,kamis,jumat'],
+            'tanggal' => ['required', 'date'],
             'mulai' => ['nullable', 'date_format:H:i'],
             'selesai' => ['nullable', 'date_format:H:i', 'after_or_equal:mulai'],
             'keterangan' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $piket = $request->filled('id') ? JadwalPiket::findOrFail($data['id']) : new JadwalPiket;
-        $baru = ! $piket->exists;
+        $tanggal = Carbon::parse($data['tanggal']);
+        $hari = JadwalPiket::HARI_URUT[$tanggal->dayOfWeek - 1] ?? null;
+        if (! $hari) {
+            return back()->with('error', 'Tanggal itu jatuh di hari Sabtu/Minggu -- pilih tanggal hari sekolah (Senin-Jumat).')->withInput();
+        }
 
-        $piket->fill($data)->save();
+        $sudahAda = JadwalPiket::where('guru_id', $data['guru_id'])
+            ->whereDate('tanggal', $tanggal)
+            ->where('mulai', $data['mulai'] ?? null)
+            ->where('selesai', $data['selesai'] ?? null)
+            ->whereKeyNot($data['id'])
+            ->exists();
+        if ($sudahAda) {
+            return back()->with('error', 'Jadwal piket ini udah ada -- guru, tanggal, dan jamnya persis sama kayak yang sudah tersimpan.')->withInput();
+        }
 
-        AuditLog::catat($baru ? 'Tambah Jadwal Piket' : 'Ubah Jadwal Piket', "Jadwal piket {$piket->hari}", $piket);
+        $piket = JadwalPiket::findOrFail($data['id']);
+        $piket->fill([
+            'guru_id' => $data['guru_id'],
+            'hari' => $hari,
+            'tanggal' => $tanggal->toDateString(),
+            'mulai' => $data['mulai'] ?? null,
+            'selesai' => $data['selesai'] ?? null,
+            'keterangan' => $data['keterangan'] ?? null,
+        ])->save();
 
-        return back()->with('success', $baru ? 'Jadwal piket ditambahkan.' : 'Jadwal piket diperbarui.');
+        AuditLog::catat('Ubah Jadwal Piket', "Jadwal piket {$piket->guru->nama} — {$tanggal->translatedFormat('d M Y')}", $piket);
+
+        return back()->with('success', 'Jadwal piket diperbarui.');
+    }
+
+    private function tambahBanyakBaris(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'guru_id' => ['required', 'exists:gurus,id'],
+            'tanggal' => ['required', 'date'],
+            'ulang_setiap_minggu' => ['required', 'integer', 'min:1', 'max:8'],
+            'jumlah_kali' => ['required', 'integer', 'min:1', 'max:52'],
+            'mulai' => ['nullable', 'date_format:H:i'],
+            'selesai' => ['nullable', 'date_format:H:i', 'after_or_equal:mulai'],
+            'keterangan' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $tanggalAwal = Carbon::parse($data['tanggal']);
+        if (! in_array($tanggalAwal->dayOfWeek, [1, 2, 3, 4, 5], true)) {
+            return back()->with('error', 'Tanggal itu jatuh di hari Sabtu/Minggu -- pilih tanggal hari sekolah (Senin-Jumat).')->withInput();
+        }
+
+        // Hitung dulu SEMUA tanggal targetnya, cek satu-satu apa udah ada
+        // yang bentrok (guru+tanggal+jam sama persis) SEBELUM nyimpen apa
+        // pun -- biar nggak nyetok separuh jalan terus baru ketauan gagal.
+        $tanggalTarget = [];
+        for ($i = 0; $i < $data['jumlah_kali']; $i++) {
+            $tanggalTarget[] = $tanggalAwal->copy()->addWeeks($i * $data['ulang_setiap_minggu']);
+        }
+
+        // whereDate() (BUKAN whereIn polos) -- kolom tanggal kesimpen sebagai
+        // datetime lengkap ("2026-09-21 00:00:00") di sebagian driver DB
+        // (mis. SQLite pas testing), jadi whereIn(['2026-09-21']) gagal
+        // cocok walau tanggalnya beneran sama (perbandingan string mentah,
+        // bukan tanggal). whereDate() ngebandingin cuma bagian tanggalnya.
+        $bentrok = JadwalPiket::where('guru_id', $data['guru_id'])
+            ->where('mulai', $data['mulai'] ?? null)
+            ->where('selesai', $data['selesai'] ?? null)
+            ->where(function ($q) use ($tanggalTarget) {
+                foreach ($tanggalTarget as $t) {
+                    $q->orWhereDate('tanggal', $t);
+                }
+            })
+            ->pluck('tanggal');
+        if ($bentrok->isNotEmpty()) {
+            $daftar = $bentrok->map(fn ($t) => $t->translatedFormat('d M Y'))->implode(', ');
+
+            return back()->with('error', "Guru ini udah ada jadwal piket di jam yang sama pada tanggal: {$daftar}. Ubah tanggal mulai atau hapus dulu yang bentrok.")->withInput();
+        }
+
+        $baris = [];
+        foreach ($tanggalTarget as $tanggal) {
+            $baris[] = [
+                'guru_id' => $data['guru_id'],
+                'hari' => JadwalPiket::HARI_URUT[$tanggal->dayOfWeek - 1],
+                'tanggal' => $tanggal->toDateString(),
+                'mulai' => $data['mulai'] ?? null,
+                'selesai' => $data['selesai'] ?? null,
+                'keterangan' => $data['keterangan'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        JadwalPiket::insert($baris);
+
+        AuditLog::catat(
+            'Tambah Jadwal Piket',
+            "Jadwal piket guru #{$data['guru_id']} — {$data['jumlah_kali']}x mulai {$tanggalAwal->translatedFormat('d M Y')}, tiap {$data['ulang_setiap_minggu']} minggu"
+        );
+
+        return back()->with('success', "{$data['jumlah_kali']} jadwal piket ditambahkan (mulai {$tanggalAwal->translatedFormat('d M Y')}).");
     }
 
     public function destroy(JadwalPiket $jadwalPiket): RedirectResponse

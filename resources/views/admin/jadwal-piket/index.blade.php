@@ -4,10 +4,15 @@
     $hariLabel = config('akademik.hari');
     $tabs = ['semua' => 'Semua'] + $hariLabel;
 
+    // hari tetap keisi (diturunin dari tanggal) buat baris yang tanggalnya
+    // spesifik -- jadi tab filter Hari tetap jalan normal buat baris lama
+    // MAUPUN baris baru. Diurutkan tanggal PALING DEKAT duluan (yang belum
+    // lewat), biar giliran yang mau datang keliatan paling atas.
     $rows = \App\Models\JadwalPiket::with('guru')
         ->when($hari !== 'semua', fn ($b) => $b->where('hari', $hari))
         ->when($q, fn ($b) => $b->whereHas('guru', fn ($g) => $g->where('nama', 'like', "%{$q}%")))
         ->orderByRaw(\App\Support\Db::hariOrder())
+        ->orderByRaw('tanggal IS NULL, tanggal asc')
         ->get();
 
     $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);
@@ -15,9 +20,9 @@
 @endphp
 
 <x-layouts.admin title="Jadwal Piket" heading="Jadwal Piket">
-    <x-admin.page title="Jadwal Piket" subtitle="Penugasan piket guru per hari">
+    <x-admin.page title="Jadwal Piket" subtitle="Penugasan piket guru per tanggal (ulang tiap 2 minggu)">
         <x-slot:action>
-            <x-ui.button type="button" icon="add" data-modal-open="modal-piket" data-modal-title="Tambah Jadwal Piket">Tambah Piket</x-ui.button>
+            <x-ui.button type="button" icon="add" data-modal-open="modal-piket-tambah" data-modal-title="Tambah Jadwal Piket">Tambah Piket</x-ui.button>
         </x-slot:action>
     </x-admin.page>
 
@@ -40,21 +45,34 @@
     @if ($rows->isEmpty())
         <x-ui.empty title="Belum ada jadwal piket" />
     @else
-        <x-admin.table :head="$semua ? ['Hari', 'Guru', 'Jam', 'Keterangan', ''] : ['Guru', 'Jam', 'Keterangan', '']">
+        <x-admin.table :head="$semua ? ['Hari', 'Tanggal', 'Guru', 'Jam', 'Keterangan', ''] : ['Tanggal', 'Guru', 'Jam', 'Keterangan', '']">
             @foreach ($rows as $p)
                 <tr class="hover:bg-surface/60">
                     @if ($semua)
                         <td class="px-4 py-3 font-semibold text-ink">{{ $hariLabel[$p->hari] ?? $p->hari }}</td>
                     @endif
+                    <td class="px-4 py-3 text-muted">
+                        @if ($p->tanggal)
+                            {{ $p->tanggal->translatedFormat('d M Y') }}
+                        @else
+                            <span class="italic">Berulang tiap minggu</span>
+                        @endif
+                    </td>
                     <td class="px-4 py-3 {{ $semua ? 'text-muted' : 'font-semibold text-ink' }}">{{ $p->guru?->nama }}</td>
                     <td class="px-4 py-3 text-muted">{{ $p->mulai?->format('H:i') ?? '—' }} – {{ $p->selesai?->format('H:i') ?? '—' }}</td>
                     <td class="px-4 py-3 text-muted">{{ $p->keterangan ?: '—' }}</td>
                     <td class="px-4 py-3">
                         <x-admin.row-actions
-                            edit-modal="modal-piket"
+                            edit-modal="modal-piket-ubah"
                             edit-title="Ubah Jadwal Piket"
                             :edit-id="$p->id"
-                            :edit-fill="['hari' => $p->hari, 'guru_id' => $p->guru_id, 'mulai' => $p->mulai?->format('H:i'), 'selesai' => $p->selesai?->format('H:i'), 'keterangan' => $p->keterangan]"
+                            :edit-fill="[
+                                'guru_id' => $p->guru_id,
+                                'tanggal' => $p->tanggal?->toDateString(),
+                                'mulai' => $p->mulai?->format('H:i'),
+                                'selesai' => $p->selesai?->format('H:i'),
+                                'keterangan' => $p->keterangan,
+                            ]"
                             :delete-action="route('master.jadwal-piket.destroy', $p)"
                             delete-confirm="Hapus jadwal piket ini?"
                         />
@@ -64,20 +82,65 @@
         </x-admin.table>
     @endif
 
-    <x-admin.modal id="modal-piket" title="Tambah Jadwal Piket">
+    {{-- Modal TAMBAH -- generate banyak baris sekaligus dari 1 tanggal awal,
+         diulang tiap N minggu, sebanyak M kali. Piket asli emang gilirannya
+         per tanggal spesifik & ulang tiap 2 minggu, bukan "tiap Senin
+         selamanya" -- jadi nggak perlu isi manual satu-satu tiap giliran. --}}
+    <x-admin.modal id="modal-piket-tambah" title="Tambah Jadwal Piket">
         <form method="POST" action="{{ route('master.jadwal-piket.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.select label="Hari" name="hari">
-                <option value="" disabled selected hidden>Pilih hari</option>
-                @foreach ($hariLabel as $v => $l)<option value="{{ $v }}">{{ $l }}</option>@endforeach
-            </x-ui.select>
             <x-ui.select label="Guru Piket" name="guru_id">
                 <option value="" disabled selected hidden>Pilih guru</option>
                 @foreach ($guruList as $g)<option value="{{ $g->id }}">{{ $g->nama }}</option>@endforeach
             </x-ui.select>
+            {{-- Sesi -- shortcut isi Jam Mulai/Selesai otomatis (2 sesi yang
+                 beneran dipakai sekolah), tapi field jamnya sendiri tetap
+                 bisa diubah manual sesudahnya kalau memang beda. --}}
+            <x-ui.select label="Sesi" name="sesi_piket" onchange="
+                var m = this.closest('form').querySelector('[name=mulai]'), s = this.closest('form').querySelector('[name=selesai]');
+                if (this.value === 'pagi') { m.value = '07:00'; s.value = '11:00'; }
+                else if (this.value === 'siang') { m.value = '11:00'; s.value = '15:00'; }
+            ">
+                <option value="pagi">Pagi (07:00–11:00)</option>
+                <option value="siang">Siang (11:00–15:00)</option>
+                <option value="custom">Custom — atur jam manual</option>
+            </x-ui.select>
             <div class="flex gap-3">
                 <x-ui.input label="Jam Mulai" name="mulai" type="time" value="07:00" class="flex-1" />
-                <x-ui.input label="Jam Selesai" name="selesai" type="time" value="12:00" class="flex-1" />
+                <x-ui.input label="Jam Selesai" name="selesai" type="time" value="11:00" class="flex-1" />
+            </div>
+            <x-ui.input label="Tanggal Mulai" name="tanggal" type="date" hint="Piket pertama jatuh tanggal berapa (Senin-Jumat)." />
+            <div class="flex gap-3">
+                <x-ui.select label="Ulang Setiap" name="ulang_setiap_minggu" class="flex-1">
+                    <option value="1">Tiap minggu</option>
+                    <option value="2" selected>Tiap 2 minggu</option>
+                    <option value="3">Tiap 3 minggu</option>
+                    <option value="4">Tiap 4 minggu</option>
+                </x-ui.select>
+                <x-ui.input label="Jumlah Kali" name="jumlah_kali" type="number" min="1" max="52" value="10" class="flex-1" />
+            </div>
+            <p class="-mt-2 text-xs text-muted-2">Sistem otomatis bikin jadwal sebanyak "Jumlah Kali", masing-masing berjarak sesuai "Ulang Setiap" dari Tanggal Mulai.</p>
+            <x-ui.input label="Keterangan (opsional)" name="keterangan" />
+            <div class="mt-1 flex gap-2">
+                <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
+            </div>
+        </form>
+    </x-admin.modal>
+
+    {{-- Modal UBAH -- 1 baris doang, nggak ada opsi ulang (ngedit baris yang
+         udah ada, bukan bikin baris baru). --}}
+    <x-admin.modal id="modal-piket-ubah" title="Ubah Jadwal Piket">
+        <form method="POST" action="{{ route('master.jadwal-piket.save') }}" class="flex flex-col gap-4">
+            @csrf
+            <x-ui.select label="Guru Piket" name="guru_id">
+                <option value="" disabled selected hidden>Pilih guru</option>
+                @foreach ($guruList as $g)<option value="{{ $g->id }}">{{ $g->nama }}</option>@endforeach
+            </x-ui.select>
+            <x-ui.input label="Tanggal" name="tanggal" type="date" />
+            <div class="flex gap-3">
+                <x-ui.input label="Jam Mulai" name="mulai" type="time" class="flex-1" />
+                <x-ui.input label="Jam Selesai" name="selesai" type="time" class="flex-1" />
             </div>
             <x-ui.input label="Keterangan (opsional)" name="keterangan" />
             <div class="mt-1 flex gap-2">
