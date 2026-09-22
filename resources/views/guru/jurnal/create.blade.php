@@ -52,7 +52,7 @@
             desc="Sedang di luar jam pelajaran (istirahat/pergantian jam). Coba lagi begitu jam pelajaran Anda mulai."
         />
     @else
-        <form method="POST" action="{{ route('jurnal.store') }}" enctype="multipart/form-data">
+        <form id="form-jurnal" method="POST" action="{{ route('jurnal.store') }}" enctype="multipart/form-data">
             @csrf
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
@@ -78,7 +78,9 @@
 
             @if ($jadwalTerkunci)
                 <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" tone="muted" class="sm:col-span-2">
-                    {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
+                    <span data-jadwal-terkunci-teks>
+                        {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
+                    </span>
                     @if ($jamAwal)
                         <span class="text-muted-2">({{ $jamAwal }})</span>
                     @endif
@@ -90,7 +92,7 @@
                      yang tepat ikut kerender dari server. Materi/dll yang sudah
                      diketik sebelum ganti jadwal memang akan hilang -- wajar karena
                      pindah kelas = konteks jurnalnya beda total. --}}
-                <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2">
+                <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2" required>
                     <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
                     @foreach ($jadwals as $j)
                         @php $jamOpsi = \App\Support\Waktu::rentangJamUntukHari($j->hari, $j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
@@ -135,7 +137,7 @@
             {{-- Semua field di sini full-width (sm:col-span-2), jadi nggak perlu ikut
                  grid 2-kolom di atas -- aman langsung disembunyikan/ditampilkan. --}}
             <div id="blok-hadir" class="mt-4 flex flex-col gap-4">
-                <x-ui.textarea label="Materi" name="materi" :rows="3" placeholder="Materi yang diajarkan...">{{ old('materi') }}</x-ui.textarea>
+                <x-ui.textarea label="Materi" name="materi" :rows="3" placeholder="Materi yang diajarkan..." required>{{ old('materi') }}</x-ui.textarea>
 
                 <div class="flex flex-col gap-1.5">
                     <x-ui.choice
@@ -151,8 +153,8 @@
             </div>
 
             <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
-                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman...">{{ old('tugas_tambahan') }}</x-ui.textarea>
-                <x-ui.textarea label="Alasan" name="alasan" :rows="2" placeholder="Alasan tidak hadir...">{{ old('alasan') }}</x-ui.textarea>
+                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
+                <x-ui.textarea label="Alasan" name="alasan" :rows="2" placeholder="Alasan tidak hadir..." required>{{ old('alasan') }}</x-ui.textarea>
             </div>
 
             @if ($jadwalTerpilih)
@@ -177,6 +179,93 @@
                 <x-ui.button type="submit" block icon="save">Simpan Jurnal &amp; Presensi</x-ui.button>
             </x-ui.sticky-bar>
         </form>
+
+        {{-- Ringkasan sebelum beneran terkirim -- guru sempat cek dulu semua
+             udah bener (biasanya isi jurnal buru-buru pas lagi jalan ke kelas
+             lain), baru pilih "Kirim". Bukan validasi ulang (itu tetap di
+             server) -- cuma tampilan ringkas dari apa yang udah diisi di form. --}}
+        <x-ui.modal id="modal-ringkasan-jurnal" title="Cek Dulu Sebelum Kirim">
+            <div class="flex flex-col gap-3 text-sm">
+                <x-ui.field-static label="Kelas & Mata Pelajaran"><span data-ringkasan="kelas-mapel">—</span></x-ui.field-static>
+                <x-ui.field-static label="Status Kehadiran Anda"><span data-ringkasan="status-guru">—</span></x-ui.field-static>
+                <x-ui.field-static label="Materi / Tugas"><span data-ringkasan="isi">—</span></x-ui.field-static>
+                <x-ui.field-static label="Presensi Siswa"><span data-ringkasan="presensi">—</span></x-ui.field-static>
+                <x-ui.field-static label="Foto Suasana Kelas"><span data-ringkasan="foto">—</span></x-ui.field-static>
+            </div>
+            <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-3">
+                <x-ui.button type="button" id="tombol-kirim-jurnal" icon="send" class="flex-1">Sudah Benar, Kirim</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Cek Lagi</x-ui.button>
+            </div>
+        </x-ui.modal>
+
+        @push('scripts')
+            <script>
+                (function () {
+                    const form = document.getElementById('form-jurnal');
+                    const modalRingkasan = document.getElementById('modal-ringkasan-jurnal');
+                    if (!form || !modalRingkasan) return;
+
+                    let dikonfirmasi = false;
+
+                    function teksTerpilih(name) {
+                        const opt = form.querySelector(`select[name="${name}"] option:checked`);
+                        return opt ? opt.textContent.trim() : null;
+                    }
+
+                    function isiRingkasan() {
+                        const jadwalSelect = form.querySelector('select[name="jadwal_id"]');
+                        const kelasMapel = jadwalSelect
+                            ? (jadwalSelect.options[jadwalSelect.selectedIndex]?.textContent.trim() || '—')
+                            : (document.querySelector('[data-jadwal-terkunci-teks]')?.textContent.trim() || '—');
+                        modalRingkasan.querySelector('[data-ringkasan="kelas-mapel"]').textContent = kelasMapel;
+
+                        const statusGuru = form.querySelector('input[name="status_guru"]:checked')?.value;
+                        const hadir = statusGuru === 'hadir';
+                        modalRingkasan.querySelector('[data-ringkasan="status-guru"]').textContent = hadir ? 'Hadir' : 'Tidak Hadir';
+
+                        const isiEl = modalRingkasan.querySelector('[data-ringkasan="isi"]');
+                        if (hadir) {
+                            const materi = form.querySelector('[name="materi"]')?.value.trim();
+                            isiEl.textContent = materi || '(belum diisi)';
+                        } else {
+                            const tugas = form.querySelector('[name="tugas_tambahan"]')?.value.trim();
+                            const alasan = form.querySelector('[name="alasan"]')?.value.trim();
+                            isiEl.textContent = `Tugas: ${tugas || '(belum diisi)'} — Alasan: ${alasan || '(belum diisi)'}`;
+                        }
+
+                        const rekap = {};
+                        form.querySelectorAll('[data-siswa-row] input[type="radio"]:checked').forEach((r) => {
+                            rekap[r.value] = (rekap[r.value] || 0) + 1;
+                        });
+                        const label = { hadir: 'Hadir', sakit: 'Sakit', izin: 'Izin', alpha: 'Alpha', dispensasi: 'Dispensasi' };
+                        const totalSiswa = form.querySelectorAll('[data-siswa-row]').length;
+                        const ringkasPresensi = Object.entries(rekap)
+                            .filter(([, n]) => n > 0)
+                            .map(([k, n]) => `${label[k] || k} ${n}`)
+                            .join(', ');
+                        modalRingkasan.querySelector('[data-ringkasan="presensi"]').textContent =
+                            totalSiswa ? `${ringkasPresensi || '—'} (dari ${totalSiswa} siswa)` : '—';
+
+                        const fotoInput = form.querySelector('[data-kamera-input]');
+                        modalRingkasan.querySelector('[data-ringkasan="foto"]').textContent =
+                            (fotoInput?.files?.length > 0) ? 'Sudah diambil' : 'Belum diambil';
+                    }
+
+                    form.addEventListener('submit', (e) => {
+                        if (dikonfirmasi) return;
+                        e.preventDefault();
+                        isiRingkasan();
+                        modalRingkasan.showModal();
+                    });
+
+                    document.getElementById('tombol-kirim-jurnal')?.addEventListener('click', () => {
+                        dikonfirmasi = true;
+                        modalRingkasan.close();
+                        form.requestSubmit();
+                    });
+                })();
+            </script>
+        @endpush
 
         @push('scripts')
             <script>
@@ -228,8 +317,17 @@
                     const blokTidakHadir = document.getElementById('blok-tidak-hadir');
                     function syncStatusGuru() {
                         const val = document.querySelector('input[name="status_guru"]:checked')?.value;
-                        blokHadir.hidden = val !== 'hadir';
-                        blokTidakHadir.hidden = val === 'hadir';
+                        const hadir = val === 'hadir';
+                        blokHadir.hidden = !hadir;
+                        blokTidakHadir.hidden = hadir;
+
+                        // Atribut "required" bawaan HTML TETAP ngecek elemen yang
+                        // disembunyiin lewat ancestor "hidden" (nggak otomatis
+                        // dikecualiin kayak dugaan awal) -- kalau nggak dicopot
+                        // manual di sini, form nggak akan pernah lolos validitas
+                        // native pas blok yang lagi disembunyiin isinya kosong.
+                        blokHadir.querySelectorAll('[required]').forEach((el) => { el.disabled = !hadir; });
+                        blokTidakHadir.querySelectorAll('[required]').forEach((el) => { el.disabled = hadir; });
                     }
                     document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
                     syncStatusGuru();

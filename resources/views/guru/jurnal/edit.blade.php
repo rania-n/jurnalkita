@@ -17,7 +17,7 @@
         </x-alert>
     @endif
 
-    <form method="POST" action="{{ route('jurnal.update', $jurnal) }}" enctype="multipart/form-data">
+    <form id="form-jurnal" method="POST" action="{{ route('jurnal.update', $jurnal) }}" enctype="multipart/form-data">
         @csrf
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -43,7 +43,7 @@
 
         {{-- Semua field di sini full-width, jadi nggak perlu ikut grid 2-kolom di atas. --}}
         <div id="blok-hadir" class="mt-4 flex flex-col gap-4">
-            <x-ui.textarea label="Materi" name="materi" :rows="3">{{ old('materi', $jurnal->materi) }}</x-ui.textarea>
+            <x-ui.textarea label="Materi" name="materi" :rows="3" required>{{ old('materi', $jurnal->materi) }}</x-ui.textarea>
 
             <div class="flex flex-col gap-1.5">
                 <x-ui.choice
@@ -59,8 +59,8 @@
         </div>
 
         <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
-            <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2">{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
-            <x-ui.textarea label="Alasan" name="alasan" :rows="2">{{ old('alasan', $jurnal->alasan) }}</x-ui.textarea>
+            <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" required>{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
+            <x-ui.textarea label="Alasan" name="alasan" :rows="2" required>{{ old('alasan', $jurnal->alasan) }}</x-ui.textarea>
         </div>
 
         @include('guru.jurnal._presensi-grid')
@@ -89,8 +89,79 @@
         </x-ui.sticky-bar>
     </form>
 
+    {{-- Ringkasan sebelum beneran terkirim -- sama pola kayak Form Jurnal baru. --}}
+    <x-ui.modal id="modal-ringkasan-jurnal" title="Cek Dulu Sebelum Kirim">
+        <div class="flex flex-col gap-3 text-sm">
+            <x-ui.field-static label="Kelas & Mata Pelajaran">{{ $jurnal->jadwal->kelas->nama }} · {{ $jurnal->jadwal->mapel->nama }}</x-ui.field-static>
+            <x-ui.field-static label="Status Kehadiran Anda"><span data-ringkasan="status-guru">—</span></x-ui.field-static>
+            <x-ui.field-static label="Materi / Tugas"><span data-ringkasan="isi">—</span></x-ui.field-static>
+            <x-ui.field-static label="Presensi Siswa"><span data-ringkasan="presensi">—</span></x-ui.field-static>
+            <x-ui.field-static label="Foto Suasana Kelas"><span data-ringkasan="foto">—</span></x-ui.field-static>
+        </div>
+        <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-3">
+            <x-ui.button type="button" id="tombol-kirim-jurnal" icon="send" class="flex-1">Sudah Benar, Kirim</x-ui.button>
+            <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Cek Lagi</x-ui.button>
+        </div>
+    </x-ui.modal>
+
     @push('scripts')
         <script>
+            (function () {
+                const form = document.getElementById('form-jurnal');
+                const modalRingkasan = document.getElementById('modal-ringkasan-jurnal');
+                if (form && modalRingkasan) {
+                    let dikonfirmasi = false;
+
+                    function isiRingkasan() {
+                        const statusGuru = form.querySelector('input[name="status_guru"]:checked')?.value;
+                        const hadir = statusGuru === 'hadir';
+                        modalRingkasan.querySelector('[data-ringkasan="status-guru"]').textContent = hadir ? 'Hadir' : 'Tidak Hadir';
+
+                        const isiEl = modalRingkasan.querySelector('[data-ringkasan="isi"]');
+                        if (hadir) {
+                            const materi = form.querySelector('[name="materi"]')?.value.trim();
+                            isiEl.textContent = materi || '(belum diisi)';
+                        } else {
+                            const tugas = form.querySelector('[name="tugas_tambahan"]')?.value.trim();
+                            const alasan = form.querySelector('[name="alasan"]')?.value.trim();
+                            isiEl.textContent = `Tugas: ${tugas || '(belum diisi)'} — Alasan: ${alasan || '(belum diisi)'}`;
+                        }
+
+                        const rekap = {};
+                        form.querySelectorAll('[data-siswa-row] input[type="radio"]:checked').forEach((r) => {
+                            rekap[r.value] = (rekap[r.value] || 0) + 1;
+                        });
+                        const label = { hadir: 'Hadir', sakit: 'Sakit', izin: 'Izin', alpha: 'Alpha', dispensasi: 'Dispensasi' };
+                        const totalSiswa = form.querySelectorAll('[data-siswa-row]').length;
+                        const ringkasPresensi = Object.entries(rekap)
+                            .filter(([, n]) => n > 0)
+                            .map(([k, n]) => `${label[k] || k} ${n}`)
+                            .join(', ');
+                        modalRingkasan.querySelector('[data-ringkasan="presensi"]').textContent =
+                            totalSiswa ? `${ringkasPresensi || '—'} (dari ${totalSiswa} siswa)` : '—';
+
+                        const fotoInput = form.querySelector('[data-kamera-input]');
+                        const fotoBaru = fotoInput?.files?.length > 0;
+                        modalRingkasan.querySelector('[data-ringkasan="foto"]').textContent = fotoBaru
+                            ? 'Foto baru diambil'
+                            : (@json((bool) $jurnal->foto_bukti) ? 'Pakai foto lama' : 'Belum diambil');
+                    }
+
+                    form.addEventListener('submit', (e) => {
+                        if (dikonfirmasi) return;
+                        e.preventDefault();
+                        isiRingkasan();
+                        modalRingkasan.showModal();
+                    });
+
+                    document.getElementById('tombol-kirim-jurnal')?.addEventListener('click', () => {
+                        dikonfirmasi = true;
+                        modalRingkasan.close();
+                        form.requestSubmit();
+                    });
+                }
+            })();
+
             (function () {
                 // Status Kehadiran -> Hadir nampilin Materi+Metode, selain itu
                 // nampilin Tugas Tambahan+Alasan.
@@ -98,8 +169,16 @@
                 const blokTidakHadir = document.getElementById('blok-tidak-hadir');
                 function syncStatusGuru() {
                     const val = document.querySelector('input[name="status_guru"]:checked')?.value;
-                    blokHadir.hidden = val !== 'hadir';
-                    blokTidakHadir.hidden = val === 'hadir';
+                    const hadir = val === 'hadir';
+                    blokHadir.hidden = !hadir;
+                    blokTidakHadir.hidden = hadir;
+
+                    // "required" bawaan HTML tetap ngecek elemen yang disembunyiin
+                    // lewat ancestor "hidden" -- dicopot manual (via disabled)
+                    // biar form bisa lolos validitas native pas blok yang lagi
+                    // disembunyiin isinya kosong.
+                    blokHadir.querySelectorAll('[required]').forEach((el) => { el.disabled = !hadir; });
+                    blokTidakHadir.querySelectorAll('[required]').forEach((el) => { el.disabled = hadir; });
                 }
                 document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
                 syncStatusGuru();
