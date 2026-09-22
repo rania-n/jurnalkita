@@ -56,9 +56,9 @@
                     :meta="[$j->tanggal->translatedFormat('d M Y') . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai . ($jamJurnal ? ' (' . $jamJurnal . ')' : '')]"
                 >
                     <x-slot:badge>
-                        <div class="flex flex-col items-end gap-1">
+                        <div class="flex flex-wrap items-center gap-1.5">
                             <x-ui.status-badge :status="$statusLabel[$j->status_verifikasi] ?? 'menunggu'">
-                                {{ ['pending' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu revisi'][$j->status_verifikasi] }}
+                                {{ $j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen() ? 'Dicatat' : ['pending' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu revisi'][$j->status_verifikasi] }}
                             </x-ui.status-badge>
                             @if ($j->otomatisDiverifikasi())
                                 <x-ui.status-badge status="otomatis">Otomatis</x-ui.status-badge>

@@ -74,6 +74,18 @@ class Jurnal extends Model
     }
 
     /**
+     * true kalau guru TIDAK HADIR -- jurnalnya nggak punya materi/isi buat
+     * "diverifikasi" beneran, pengurus kelas cuma perlu tau & catat laporan
+     * absennya. Label & tombol aksi di view sengaja dibedain dari jurnal
+     * "Hadir" biasa (lihat labelStatusVerifikasi()) biar nggak kesan aneh
+     * "verifikasi" sesuatu yang isinya kosong.
+     */
+    public function verifikasiAbsen(): bool
+    {
+        return $this->status_guru === 'tidak_hadir';
+    }
+
+    /**
      * Otomatis verifikasi kalau masih "pending" tapi tanggalnya udah kelewat
      * hari (bukan hari ini lagi) -- pengurus kelas nggak sempat periksa,
      * daripada numpuk jadi pending berhari-hari. verifikator_id SENGAJA

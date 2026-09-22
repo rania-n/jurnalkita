@@ -20,6 +20,9 @@
     <x-alert :type="$jurnal->otomatisDiverifikasi() ? 'info' : ($vs === 'terverifikasi' ? 'success' : ($vs === 'revisi' ? 'error' : 'info'))">
         @if ($jurnal->otomatisDiverifikasi())
             Jurnal <strong>otomatis terverifikasi sistem</strong> — pengurus kelas nggak sempat periksa sampai hari berikutnya. Tidak bisa diubah lagi.
+        @elseif ($vs === 'terverifikasi' && $jurnal->verifikasiAbsen())
+            Laporan tidak hadir sudah <strong>dicatat</strong> oleh pengurus kelas
+            @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.
         @elseif ($vs === 'terverifikasi')
             Jurnal sudah <strong>diverifikasi</strong> oleh pengurus kelas
             @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.

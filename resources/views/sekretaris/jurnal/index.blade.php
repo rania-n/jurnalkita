@@ -52,9 +52,9 @@
                     ]"
                 >
                     <x-slot:badge>
-                        <div class="flex flex-col items-end gap-1">
+                        <div class="flex flex-wrap items-center gap-1.5">
                             <x-ui.status-badge :status="$badge[$j->status_verifikasi]">
-                                {{ ['pending' => 'Perlu diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Diminta revisi'][$j->status_verifikasi] }}
+                                {{ $j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen() ? 'Dicatat' : ['pending' => 'Perlu diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Diminta revisi'][$j->status_verifikasi] }}
                             </x-ui.status-badge>
                             {{-- Beda dari verifikasi manusia beneran -- biar
                                  pengurus kelas nggak salah kira udah ada yang

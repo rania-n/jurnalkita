@@ -39,6 +39,14 @@
                     $dariDispensasiOtomatis = $statusAwal === 'dispensasi' && str_starts_with((string) $catatanAwal, 'Dispensasi');
                     $dariJurnalLain = ! $dariDispensasiOtomatis && $statusAwal !== 'hadir' && isset($presensiAwal[$s->id]);
                     $catatanId = 'catatan-'.$s->id;
+                    // Hadir itu default buat hampir semua siswa -- nunjukkin
+                    // 5 tombol status penuh tiap baris kerasa berisik. Kalau
+                    // statusnya emang masih default Hadir (bukan hasil ikut
+                    // dispensasi/jurnal lain), collapse jadi teks doang +
+                    // tombol "Ubah"; baru pas diklik tombol pilihan lengkap
+                    // (yang tetap radio asli, bukan disimulasikan) kebuka.
+                    $statusRingkas = $statusAwal === 'hadir' && ! $dariDispensasiOtomatis && ! $dariJurnalLain;
+                    $statusToggleId = 'status-pilihan-'.$s->id;
                 @endphp
                 <div
                     class="flex flex-col gap-2.5 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]"
@@ -64,13 +72,25 @@
                         </div>
                     </div>
 
-                    <x-ui.choice
-                        :name="'presensi[' . $s->id . '][status]'"
-                        :options="$statuses"
-                        :tones="$tones"
-                        :value="$statusAwal"
-                        size="sm"
-                    />
+                    @if ($statusRingkas)
+                        <button
+                            type="button"
+                            data-toggle-status="{{ $statusToggleId }}"
+                            class="flex items-center justify-between gap-2 rounded-lg border border-hadir-soft bg-hadir-soft px-3 py-2 text-left text-xs font-bold text-hadir"
+                        >
+                            <span class="flex items-center gap-1"><x-icon name="check_circle" :size="14" /> Hadir</span>
+                            <span class="text-[11px] underline">Ubah</span>
+                        </button>
+                    @endif
+                    <div id="{{ $statusToggleId }}" @if ($statusRingkas) hidden @endif>
+                        <x-ui.choice
+                            :name="'presensi[' . $s->id . '][status]'"
+                            :options="$statuses"
+                            :tones="$tones"
+                            :value="$statusAwal"
+                            size="sm"
+                        />
+                    </div>
 
                     <div class="border-t border-surface-alt pt-2.5">
                         <button
@@ -127,6 +147,15 @@
                     if (cocok) tampil++;
                 });
                 counter.textContent = `Menampilkan ${tampil} dari ${rows.length} siswa`;
+            });
+
+            document.querySelectorAll('[data-toggle-status]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const target = document.getElementById(btn.dataset.toggleStatus);
+                    target.hidden = false;
+                    btn.hidden = true;
+                    target.querySelector('input')?.focus();
+                });
             });
 
             document.querySelectorAll('[data-toggle-catatan]').forEach((btn) => {

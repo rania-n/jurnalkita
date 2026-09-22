@@ -21,6 +21,8 @@
         <x-alert :type="$jurnal->otomatisDiverifikasi() ? 'info' : ($jurnal->status_verifikasi === 'terverifikasi' ? 'success' : 'error')">
             @if ($jurnal->otomatisDiverifikasi())
                 <strong>Otomatis terverifikasi sistem</strong> — pengurus kelas nggak sempat periksa sampai hari berikutnya.
+            @elseif ($jurnal->status_verifikasi === 'terverifikasi' && $jurnal->verifikasiAbsen())
+                Laporan tidak hadir sudah dicatat{{ $jurnal->verifikator ? ' oleh '.$jurnal->verifikator->nama : '' }}.
             @elseif ($jurnal->status_verifikasi === 'terverifikasi')
                 Sudah diverifikasi{{ $jurnal->verifikator ? ' oleh '.$jurnal->verifikator->nama : '' }}.
             @else
@@ -71,7 +73,13 @@
             @csrf
             <x-ui.textarea label="Catatan (wajib jika minta revisi)" name="catatan" :rows="2" placeholder="Contoh: materi tidak sesuai dengan yang diajarkan.">{{ old('catatan') }}</x-ui.textarea>
             <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
-                <x-ui.button type="submit" name="keputusan" value="terima" variant="success" icon="check" class="flex-1">Sesuai — Verifikasi</x-ui.button>
+                {{-- Jurnal absen guru nggak ada materi/isi buat "diverifikasi"
+                     beneran, jadi tombolnya dibedain -- "Catat" (bukan
+                     "Verifikasi") biar nggak kesan lagi ngecek konten yang
+                     memang kosong (lihat Jurnal::verifikasiAbsen()). --}}
+                <x-ui.button type="submit" name="keputusan" value="terima" variant="success" icon="check" class="flex-1">
+                    {{ $jurnal->verifikasiAbsen() ? 'Sesuai — Catat' : 'Sesuai — Verifikasi' }}
+                </x-ui.button>
                 <x-ui.button type="submit" name="keputusan" value="revisi" variant="danger" icon="edit" class="flex-1">Minta Revisi</x-ui.button>
             </div>
         </form>
