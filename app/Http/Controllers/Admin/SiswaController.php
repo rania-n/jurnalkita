@@ -5,12 +5,37 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Siswa;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class SiswaController extends Controller
 {
+    /**
+     * Saran Nomor Presensi otomatis -- dihitung dari BANYAKNYA siswa aktif di
+     * kelas yang sama, yang namanya alfabetis lebih dulu dari nama ini (+1).
+     * Cuma SARAN (admin masih bebas timpa manual) -- nggak menjamin unik
+     * (nomor lama nggak digeser ulang cuma gara-gara ada siswa baru).
+     */
+    public function noAbsenOtomatis(Request $request): JsonResponse
+    {
+        $kelasId = $request->integer('kelas_id');
+        $nama = trim((string) $request->query('nama'));
+
+        if (! $kelasId || $nama === '') {
+            return response()->json(['no_absen' => null]);
+        }
+
+        $urutan = Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->when($request->filled('kecuali_id'), fn ($q) => $q->where('id', '!=', $request->integer('kecuali_id')))
+            ->whereRaw('LOWER(nama) < ?', [strtolower($nama)])
+            ->count();
+
+        return response()->json(['no_absen' => $urutan + 1]);
+    }
+
     public function save(Request $request): RedirectResponse
     {
         $data = $request->validate([

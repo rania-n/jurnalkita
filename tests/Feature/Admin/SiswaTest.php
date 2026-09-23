@@ -92,15 +92,17 @@ class SiswaTest extends TestCase
     {
         $admin = $this->admin();
         $guru = Guru::create(['nama' => 'Wali Test']);
+        $guruLain = Guru::create(['nama' => 'Wali Lain']);
 
-        $this->actingAs($admin)->post('/admin/kelas', ['tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 7])
-            ->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post('/admin/kelas', [
+            'tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 7, 'wali_id' => $guru->id, 'status' => 'aktif',
+        ])->assertSessionHasNoErrors();
         $kelas = Kelas::where('nama', 'X RPL 7')->firstOrFail();
 
         $this->actingAs($admin)->post('/admin/kelas', [
-            'id' => $kelas->id, 'tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 7, 'wali_id' => $guru->id,
+            'id' => $kelas->id, 'tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 7, 'wali_id' => $guruLain->id, 'status' => 'aktif',
         ])->assertSessionHasNoErrors();
-        $this->assertSame($guru->id, $kelas->fresh()->wali_id);
+        $this->assertSame($guruLain->id, $kelas->fresh()->wali_id);
 
         $this->actingAs($admin)->delete("/admin/kelas/{$kelas->id}")->assertRedirect();
         $this->assertSoftDeleted('kelas', ['id' => $kelas->id]);

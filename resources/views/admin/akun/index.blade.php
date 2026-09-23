@@ -84,6 +84,7 @@
                                     data-modal-title="Ubah Akun — {{ $u->name }}"
                                     data-modal-id="{{ $u->id }}"
                                     data-modal-fill='@json($ubahFill)'
+                                    data-modal-role="{{ $u->role }}"
                                     class="flex h-8 items-center gap-1 rounded-lg bg-izin-soft px-2.5 text-xs font-bold text-izin hover:bg-[#bae6fd]">
                                     <x-icon name="edit" :size="14" /> Ubah
                                 </button>
@@ -155,8 +156,19 @@
             {{-- guru baru & waka: NIP (siswa punya NIS sendiri di bawah, satpam tidak perlu) --}}
             <x-ui.input label="NIP (opsional)" name="nip" data-grup="nip" errorBag="buatAkun" />
 
-            {{-- semua peran: no. WhatsApp, dipakai kirim link/notifikasi lewat WA --}}
-            <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" hint="Dipakai buat kirim link persetujuan/surat lewat WhatsApp." errorBag="buatAkun" />
+            {{-- semua peran: no. WhatsApp, dipakai kirim link/notifikasi lewat WA --
+                 wajib KHUSUS guru (guru sering butuh dihubungi langsung soal
+                 jadwal/piket), peran lain tetap opsional -- lihat toggle
+                 required di script bawah. --}}
+            <x-ui.input
+                label="No. WhatsApp"
+                name="no_hp"
+                id="akun-no-hp"
+                inputmode="numeric"
+                placeholder="08xxxxxxxxxx"
+                hint="Dipakai buat kirim link persetujuan/surat lewat WhatsApp. Wajib untuk Guru."
+                errorBag="buatAkun"
+            />
 
             {{-- khusus data pengurus kelas baru --}}
             <div data-grup="siswa-baru" class="flex flex-col gap-4">
@@ -191,7 +203,16 @@
             <x-ui.input label="Nama Lengkap" name="nama" errorBag="ubahAkun" required />
             <x-ui.input label="Email" name="email" type="email" errorBag="ubahAkun" required />
             <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" errorBag="ubahAkun" />
-            <x-ui.input label="NIP (opsional, khusus Waka)" name="nip" errorBag="ubahAkun" />
+
+            {{-- Cuma relevan buat Waka/Satpam (guru punya NIP sendiri di data
+                 guru, siswa/pengurus kelas nggak punya NIP sama sekali) --
+                 dulu field ini selalu tampil buat SEMUA peran walau labelnya
+                 udah bilang "khusus Waka", isinya diam-diam diabaikan server
+                 kalau bukan waka/satpam -- bingung-in, sekarang disembunyiin
+                 beneran sesuai peran akun yang lagi diubah (lihat script bawah). --}}
+            <div data-grup="nip-ubah">
+                <x-ui.input label="NIP (opsional)" name="nip" errorBag="ubahAkun" />
+            </div>
 
             <x-ui.input label="Password Baru (opsional)" name="password" type="password" id="akun-ubah-password" placeholder="Kosongkan kalau tidak diganti" hint="Kosongkan kalau tidak diganti. Kalau diisi, minimal 8 karakter." errorBag="ubahAkun" />
             <x-ui.input label="Konfirmasi Password Baru" name="password_confirmation" type="password" placeholder="Ulangi kalau ganti password" errorBag="ubahAkun" />
@@ -215,6 +236,7 @@
                 const nama = document.getElementById('akun-nama');
                 const grupSiswaBaru = form.querySelector('[data-grup="siswa-baru"]');
                 const grupNip = form.querySelector('[data-grup="nip"]');
+                const noHp = document.getElementById('akun-no-hp');
 
                 const setGrup = (el, on) => {
                     el.hidden = !on;
@@ -236,6 +258,10 @@
 
                     setGrup(grupSiswaBaru, r === 'siswa' && baru);
                     setGrup(grupNip, r === 'waka' || (r === 'guru' && baru));
+                    // No. WA wajib khusus Guru (nggak lewat setGrup -- field ini
+                    // sendiri tetap tampil buat semua peran, cuma required-nya aja
+                    // yang beda tergantung Jenis Akun).
+                    noHp.required = r === 'guru';
 
                     const namaTerisi = sumberAktif?.closest('[data-cari-pilihan]')?.querySelector('[data-cari-pilihan-input]')?.value;
                     if (!baru && namaTerisi) { nama.value = namaTerisi; nama.readOnly = true; }
@@ -247,6 +273,21 @@
                 sumberSiswaHidden.addEventListener('change', refresh);
                 document.getElementById('modal-akun').addEventListener('modal:open', refresh);
                 refresh();
+            })();
+
+            (function () {
+                // Modal Ubah Akun nggak punya pemilih "Jenis Akun" (role akun
+                // nggak bisa diganti dari sini) -- peran akun yang lagi diubah
+                // dibaca dari tombol yang diklik (data-modal-role), dipakai buat
+                // nampilin/nyembunyiin NIP (cuma relevan buat Waka/Satpam).
+                const grupNipUbah = document.querySelector('#modal-akun-ubah [data-grup="nip-ubah"]');
+                document.querySelectorAll('[data-modal-open="modal-akun-ubah"]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const tampil = ['waka', 'satpam'].includes(btn.dataset.modalRole);
+                        grupNipUbah.hidden = !tampil;
+                        grupNipUbah.querySelectorAll('input').forEach((i) => (i.disabled = !tampil));
+                    });
+                });
             })();
         </script>
     @endpush

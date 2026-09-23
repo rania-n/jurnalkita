@@ -19,11 +19,7 @@
                         <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
                         <td class="px-4 py-2.5 text-muted">{{ $s->nis }}</td>
                         <td class="px-4 py-2.5">
-                            @if ($s->jabatan === 'pengurus')
-                                <x-ui.status-badge status="terverifikasi">Pengurus</x-ui.status-badge>
-                            @else
-                                <span class="text-muted">Anggota</span>
-                            @endif
+                            <x-ui.status-badge :status="$s->jabatan === 'pengurus' ? 'pengurus' : 'anggota'" />
                         </td>
                     </tr>
                 @endforeach

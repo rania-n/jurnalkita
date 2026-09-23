@@ -75,8 +75,10 @@ class MasterCrudTest extends TestCase
 
     public function test_kelas_name_is_generated(): void
     {
+        $wali = Guru::create(['nama' => 'Bu Wali']);
+
         $this->actingAs($this->admin())->post('/admin/kelas', [
-            'tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 2,
+            'tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 2, 'wali_id' => $wali->id, 'status' => 'aktif',
         ])->assertRedirect();
 
         $this->assertDatabaseHas('kelas', ['nama' => 'X RPL 2', 'jurusan' => 'RPL', 'nomor' => 2]);

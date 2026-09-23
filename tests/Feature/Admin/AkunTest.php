@@ -29,6 +29,7 @@ class AkunTest extends TestCase
             'email' => 'baru@sekolah.test',
             'password' => 'rahasia-kuat-123',
             'password_confirmation' => 'rahasia-kuat-123',
+            'no_hp' => '081234567890', // wajib khusus role guru
         ], $override);
     }
 

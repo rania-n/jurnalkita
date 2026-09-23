@@ -19,6 +19,7 @@ use App\Http\Controllers\Guru\SiswaController as GuruSiswaController;
 use App\Http\Controllers\Guru\WaliKelasController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PiketController;
+use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\SatpamController;
 use App\Http\Controllers\Sekretaris\JurnalController as VerifikasiJurnalController;
@@ -61,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', fn () => redirect()->route(auth()->user()->homeRoute()))->name('dashboard');
     Route::view('/profil', 'profil')->name('profil');
+    Route::post('/profil/no-hp', [ProfilController::class, 'updateNoHp'])->name('profil.no-hp');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::get('/notifikasi/jumlah', [NotifikasiController::class, 'jumlah'])->name('notifikasi.jumlah');
@@ -76,6 +78,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin/kelas', 'admin.kelas.index')->name('master.kelas.index');
         Route::get('/admin/kelas/{kelas}', [KelasController::class, 'show'])->name('master.kelas.show');
         Route::view('/admin/siswa', 'admin.siswa.index')->name('master.siswa.index');
+        Route::get('/admin/siswa/no-absen-otomatis', [SiswaController::class, 'noAbsenOtomatis'])->name('master.siswa.no-absen-otomatis');
         Route::view('/admin/mapel', 'admin.mapel.index')->name('master.mapel.index');
         Route::view('/admin/jadwal-pelajaran', 'admin.jadwal-pelajaran.index')->name('master.jadwal-pelajaran.index');
         Route::view('/admin/jam-pelajaran', 'admin.jam-pelajaran.index')->name('master.jam-pelajaran.index');

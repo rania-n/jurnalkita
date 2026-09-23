@@ -53,7 +53,7 @@
                             edit-modal="modal-kelas"
                             edit-title="Ubah Kelas"
                             :edit-id="$k->id"
-                            :edit-fill="['tingkat' => $k->tingkat, 'jurusan' => $k->jurusan, 'nomor' => $k->nomor, 'wali_id' => $k->wali_id]"
+                            :edit-fill="['tingkat' => $k->tingkat, 'jurusan' => $k->jurusan, 'nomor' => $k->nomor, 'wali_id' => $k->wali_id, 'status' => $k->status]"
                             :delete-action="route('master.kelas.destroy', $k)"
                             delete-confirm="Yakin hapus kelas {{ $k->nama }}?"
                         />
@@ -84,7 +84,16 @@
                 label="Wali Kelas"
                 name="wali_id"
                 :options="$guruList"
-                placeholder="Ketik nama guru... (opsional)"
+                placeholder="Ketik nama guru..."
+                required
+            />
+
+            <x-ui.choice
+                label="Status"
+                name="status"
+                :options="['aktif' => 'Aktif', 'pkl' => 'PKL']"
+                value="aktif"
+                required
             />
 
             <div class="mt-1 flex gap-2">

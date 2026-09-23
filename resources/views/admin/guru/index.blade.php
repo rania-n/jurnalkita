@@ -72,16 +72,11 @@
                 placeholder="Ketik nama mapel... (opsional)"
             />
 
-            <label class="flex flex-col gap-1.5">
-                <span class="text-sm font-semibold text-ink">Mapel Tambahan <span class="font-normal text-muted-2">(jika mengajar lebih dari 1)</span></span>
-                <select name="mapel_tambahan[]" multiple size="4"
-                    class="rounded-xl border border-surface-alt bg-card px-3 py-2 text-sm text-ink outline-none focus:border-navy">
-                    @foreach ($mapelList as $m)
-                        <option value="{{ $m->id }}">{{ $m->nama }}</option>
-                    @endforeach
-                </select>
-                <span class="text-xs text-muted-2">Tahan Ctrl / Cmd untuk pilih beberapa.</span>
-            </label>
+            <x-ui.cari-checkbox
+                label="Mapel Tambahan (jika mengajar lebih dari 1)"
+                name="mapel_tambahan"
+                :options="$mapelList"
+            />
 
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>

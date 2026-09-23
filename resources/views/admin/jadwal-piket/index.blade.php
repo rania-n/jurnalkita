@@ -89,12 +89,12 @@
     <x-admin.modal id="modal-piket-tambah" title="Tambah Jadwal Piket">
         <form method="POST" action="{{ route('master.jadwal-piket.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.cari-pilihan
-                label="Guru Piket"
-                name="guru_id"
+            {{-- Bisa dicentang lebih dari 1 -- kadang piket hari itu emang
+                 digilir bareng beberapa guru sekaligus. --}}
+            <x-ui.cari-checkbox
+                label="Guru Piket (boleh pilih lebih dari 1)"
+                name="guru_ids"
                 :options="$guruList"
-                placeholder="Ketik nama guru..."
-                required
             />
             {{-- Sesi -- shortcut isi Jam Mulai/Selesai otomatis (2 sesi yang
                  beneran dipakai sekolah), tapi field jamnya sendiri tetap

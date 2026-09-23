@@ -1,7 +1,7 @@
 <x-layouts.admin title="Backup Data" heading="Backup Data">
     <x-admin.page title="Backup Data" subtitle="Unduh salinan lengkap database" />
 
-    <div class="max-w-xl rounded-2xl border border-surface-alt bg-card p-6">
+    <div class="rounded-2xl border border-surface-alt bg-card p-6">
         <div class="flex items-start gap-3">
             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface-alt text-navy">
                 <x-icon name="cloud_download" :size="24" />

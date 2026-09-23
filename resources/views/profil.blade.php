@@ -56,23 +56,33 @@
                     </div>
                 </form>
             @else
+                @if (session('success'))
+                    <x-alert type="success" class="mt-4">
+                        {{ session('success') }}
+                    </x-alert>
+                @endif
+
                 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <x-ui.field-static label="Email" icon="mail" class="sm:col-span-2">{{ $user->email }}</x-ui.field-static>
 
-                    {{-- No. WhatsApp SATU sumber buat semua peran: users.no_hp (diisi admin
-                         lewat Manajemen Akun) -- bukan dari tabel gurus/siswas. sm:col-span-2
-                         KALAU nggak ada field guru/siswa lagi di bawahnya (admin/satpam) --
-                         soalnya kalau nggak, dia bakal nyisa sendirian nutup grid. --}}
-                    <x-ui.field-static label="No. WhatsApp" icon="call" class="{{ ! $guru && ! $siswa ? 'sm:col-span-2' : '' }}">{{ $user->no_hp ?: '—' }}</x-ui.field-static>
+                    {{-- No. WhatsApp SATU sumber buat semua peran: users.no_hp -- beda
+                         dari field lain di sini (nama/email/dll, cuma admin yang boleh
+                         ubah), No. WA ini boleh diubah sendiri sama pemilik akunnya --
+                         guru sering butuh di-update sendiri (ganti nomor) tanpa nunggu
+                         admin. SELALU sm:col-span-2 -- ini form+tombol (bukan field
+                         statis polos kayak yang lain), kalau cuma setengah kolom
+                         kotak inputnya keburu sempit banget disenggol tombol Simpan. --}}
+                    <form method="POST" action="{{ route('profil.no-hp') }}" class="flex items-end gap-2 sm:col-span-2">
+                        @csrf
+                        <x-ui.input label="No. WhatsApp" icon="call" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" errorBag="ubahNoHp" class="flex-1" />
+                        <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
+                    </form>
 
                     @if ($guru)
-                        <x-ui.field-static label="NIP" icon="badge">{{ $guru->nip ?: '—' }}</x-ui.field-static>
-                        {{-- No.WhatsApp+NIP+MapelUtama = 3 field 1-kolom -- ganjil, jadi
-                             yang terakhir (ini) selalu nyisa sendirian kalau nggak
-                             di-stretch. sm:col-span-2 di sini, bukan CSS generik,
-                             soalnya field opsional di bawah (Mapel Tambahan/Wali
-                             Kelas) sudah span-2 sendiri & bikin hitungan "genap/ganjil"
-                             DOM-order nggak nyambung sama posisi visualnya. --}}
+                        {{-- NIP sendirian (nggak ada field 1-kolom lain buat dipasangin --
+                             No.WhatsApp di atas sekarang selalu span-2 sendiri), jadi
+                             di-stretch juga biar nggak nyisa gap kosong di sampingnya. --}}
+                        <x-ui.field-static label="NIP" icon="badge" class="sm:col-span-2">{{ $guru->nip ?: '—' }}</x-ui.field-static>
                         <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book" class="sm:col-span-2">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
                         @if ($guru->mapels->isNotEmpty())
                             {{-- Mapel Tambahan juga SELALU nyisa sendirian kalau muncul --
@@ -84,12 +94,14 @@
                             <x-ui.field-static label="Wali Kelas" icon="groups" class="sm:col-span-2">{{ $guru->kelasWali->pluck('nama')->join(', ') }}</x-ui.field-static>
                         @endif
                     @elseif ($siswa)
+                        {{-- Kelas+NIS = 2 field 1-kolom, pas genap, dipasangin bareng. --}}
                         <x-ui.field-static label="Kelas" icon="school">{{ $siswa->kelas->nama ?? '—' }}</x-ui.field-static>
                         <x-ui.field-static label="NIS" icon="badge">{{ $siswa->nis }}</x-ui.field-static>
-                        <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
-                        {{-- No.WhatsApp+Kelas+NIS+No.Absen+Jabatan = 5 field 1-kolom --
-                             ganjil, Jabatan (terakhir) selalu nyisa sendirian kalau
-                             nggak di-stretch. --}}
+                        {{-- No.Absen sendirian (No.WhatsApp di atas sekarang selalu
+                             span-2 sendiri, nggak lagi ikut dipasangin di sini) --
+                             sama Jabatan sesudahnya juga span-2, biar nggak ada yang
+                             nyisa gap kosong. --}}
+                        <x-ui.field-static label="No. Absen" icon="tag" class="sm:col-span-2">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
                         <x-ui.field-static label="Jabatan" icon="workspace_premium" class="sm:col-span-2">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
                     @endif
                 </div>

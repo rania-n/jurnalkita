@@ -58,11 +58,7 @@
                     <td class="px-4 py-3 text-muted">{{ $s->kelas?->nama ?: '—' }}</td>
                     <td class="px-4 py-3 text-muted">{{ $s->jenis_kelamin }}</td>
                     <td class="px-4 py-3">
-                        @if ($s->jabatan === 'pengurus')
-                            <x-ui.status-badge status="izin">Pengurus</x-ui.status-badge>
-                        @else
-                            <span class="text-muted">Anggota</span>
-                        @endif
+                        <x-ui.status-badge :status="$s->jabatan === 'pengurus' ? 'pengurus' : 'anggota'" />
                     </td>
                     <td class="px-4 py-3">
                         @if ($s->status === 'aktif')
@@ -105,8 +101,17 @@
                 required
             />
             <x-ui.input label="NIS" name="nis" inputmode="numeric" required />
-            <x-ui.input label="Nama Lengkap" name="nama" required />
-            <x-ui.input label="Nomor Presensi" name="no_absen" type="number" min="1" />
+            <x-ui.input label="Nama Lengkap" name="nama" id="siswa-nama" required />
+
+            <div class="flex flex-col gap-1.5">
+                <x-ui.label>Nomor Presensi</x-ui.label>
+                <div class="flex gap-2">
+                    <x-ui.input name="no_absen" id="siswa-no-absen" type="number" min="1" class="flex-1" />
+                    <x-ui.button type="button" variant="secondary" id="siswa-no-absen-otomatis" class="shrink-0">Otomatis</x-ui.button>
+                </div>
+                <span class="text-xs text-muted-2">"Otomatis" nyaranin nomor sesuai urutan abjad nama di kelas ini -- boleh diisi manual sendiri juga.</span>
+            </div>
+
             <x-ui.choice label="Jenis Kelamin" name="jenis_kelamin" :options="['L' => 'Laki-laki', 'P' => 'Perempuan']" required />
             <x-ui.choice label="Jabatan Kelas" name="jabatan" :options="['anggota' => 'Anggota', 'pengurus' => 'Pengurus Kelas']" value="anggota" required />
             <x-ui.choice label="Status" name="status" :options="['aktif' => 'Aktif', 'lulus' => 'Lulus', 'pindah' => 'Pindah']" value="aktif" />
@@ -120,4 +125,28 @@
             </div>
         </form>
     </x-admin.modal>
+
+    @push('scripts')
+        <script>
+            (function () {
+                const tombol = document.getElementById('siswa-no-absen-otomatis');
+                tombol?.addEventListener('click', async () => {
+                    const form = tombol.closest('form');
+                    const kelasId = form.querySelector('[name="kelas_id"]')?.value;
+                    const nama = form.querySelector('[name="nama"]')?.value?.trim();
+                    if (!kelasId || !nama) return;
+
+                    const kecualiId = form.querySelector('[name="id"]')?.value || '';
+                    const url = new URL('{{ route('master.siswa.no-absen-otomatis') }}', window.location.origin);
+                    url.searchParams.set('kelas_id', kelasId);
+                    url.searchParams.set('nama', nama);
+                    if (kecualiId) url.searchParams.set('kecuali_id', kecualiId);
+
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data.no_absen) document.getElementById('siswa-no-absen').value = data.no_absen;
+                });
+            })();
+        </script>
+    @endpush
 </x-layouts.admin>

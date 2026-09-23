@@ -31,6 +31,19 @@
     $autoSubmit = $autoSubmit || $modeFilter;
     $terpilihId = $modeFilter ? request()->query($name) : old($name, $value);
     $terpilih = $daftar->firstWhere('id', is_numeric($terpilihId) ? (int) $terpilihId : $terpilihId);
+    // Dihitung DI SINI (bukan langsung nulis "@error(...)" sebagai key string
+    // di dalam @class([...]) di bawah) -- directive Blade nggak ke-compile
+    // kalau ditulis di dalam string literal gitu, malah numpuk jadi teks
+    // "@error(...)" mentah yang nempel sebagai class HTML (gara-gara ada
+    // spasi di dalemnya, "!border-alpha" di tengah teks itu tetap ke-parse
+    // browser sebagai 1 class token yang valid & SELALU ke-apply, nggak
+    // peduli beneran ada errornya apa nggak -- makanya border-nya selalu
+    // merah). Filter (mode $all) nggak pernah nampilin error validasi -- ini
+    // query-string biasa, bukan field form yang divalidasi, jadi border
+    // merah di sini cuma bakal nyasar dari error form LAIN yang kebetulan
+    // pakai nama field sama (mis. "kelas_id" di form Tambah Jadwal) dan
+    // nyangkut di session.
+    $adaError = ! $modeFilter && $errors->getBag($errorBag)->has($name);
 @endphp
 
 {{--
@@ -70,12 +83,7 @@
     <div class="relative">
         <div @class([
             'flex items-center gap-2 border border-surface-alt bg-card transition-colors focus-within:border-navy',
-            // Filter (mode $all) nggak pernah nampilin error validasi -- ini
-            // query-string biasa, bukan field form yang divalidasi, jadi
-            // border merah di sini cuma bakal nyasar dari error form LAIN
-            // yang kebetulan pakai nama field sama (mis. "kelas_id" di form
-            // Tambah Jadwal) dan nyangkut di session.
-            "@error($name, $errorBag) !border-alpha @enderror" => ! $modeFilter,
+            '!border-alpha' => $adaError,
             'h-10 rounded-lg px-3' => $compact,
             'h-[52px] rounded-xl px-4' => ! $compact,
         ])>

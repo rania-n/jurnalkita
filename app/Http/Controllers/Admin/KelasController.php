@@ -43,7 +43,8 @@ class KelasController extends Controller
             'tingkat' => ['required', Rule::in(config('akademik.tingkat'))],
             'jurusan' => ['required', Rule::in(array_keys(config('akademik.jurusan')))],
             'nomor' => ['nullable', 'integer', 'min:1', 'max:20'],
-            'wali_id' => ['nullable', 'exists:gurus,id'],
+            'wali_id' => ['required', 'exists:gurus,id'],
+            'status' => ['required', Rule::in(['aktif', 'pkl'])],
         ]);
 
         // Nama kelas dibuat otomatis: "X RPL 1"

@@ -10,7 +10,7 @@
 <x-layouts.admin title="Pengaturan Isi Jurnal" heading="Pengaturan Isi Jurnal">
     <x-admin.page title="Pengaturan Isi Jurnal" subtitle="Atur seberapa ketat aturan JAM buat guru isi jurnal mengajar" />
 
-    <form method="POST" action="{{ route('master.pengaturan-jurnal.save') }}" class="max-w-xl">
+    <form method="POST" action="{{ route('master.pengaturan-jurnal.save') }}">
         @csrf
 
         <div class="flex flex-col gap-2.5">

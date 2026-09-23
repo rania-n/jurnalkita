@@ -532,12 +532,38 @@ function initCariPilihan() {
     });
 }
 
+/*
+ * Multi-pilih yang bisa dicari (x-ui.cari-checkbox) -- ngetik nyaring baris
+ * checkbox yang KELIHATAN (bukan dropdown terpisah kayak cari-pilihan),
+ * soalnya di sini bisa milih lebih dari satu.
+ */
+function initCariCheckbox() {
+    document.querySelectorAll('[data-cari-checkbox]').forEach((wrap) => {
+        const input = wrap.querySelector('[data-cari-checkbox-input]');
+        const rows = wrap.querySelectorAll('[data-cari-checkbox-row]');
+        const kosong = wrap.querySelector('[data-cari-checkbox-kosong]');
+        if (!input) return;
+
+        input.addEventListener('input', () => {
+            const q = input.value.trim().toLowerCase();
+            let ada = false;
+            rows.forEach((row) => {
+                const cocok = !q || row.dataset.nama.includes(q);
+                row.hidden = !cocok;
+                if (cocok) ada = true;
+            });
+            if (kosong) kosong.hidden = ada;
+        });
+    });
+}
+
 function init() {
     initPasswordToggles();
     initUploadPreview();
     initKameraWajib();
     initCariSiswa();
     initCariPilihan();
+    initCariCheckbox();
     initConfirm();
     initModals();
     initNavGroups();

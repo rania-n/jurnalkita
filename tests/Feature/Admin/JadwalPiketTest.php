@@ -29,7 +29,7 @@ class JadwalPiketTest extends TestCase
     private function payloadTambah(array $override = []): array
     {
         return array_merge([
-            'guru_id' => $this->guru->id, 'tanggal' => '2026-09-21',
+            'guru_ids' => [$this->guru->id], 'tanggal' => '2026-09-21',
             'ulang_setiap_minggu' => 2, 'jumlah_kali' => 1,
             'mulai' => '07:00', 'selesai' => '11:00',
         ], $override);
@@ -141,10 +141,24 @@ class JadwalPiketTest extends TestCase
         $guruLain = Guru::create(['nama' => 'Bu Sinta']);
         JadwalPiket::create(['guru_id' => $this->guru->id, 'hari' => 'senin', 'tanggal' => '2026-09-21', 'mulai' => '07:00', 'selesai' => '11:00']);
 
-        $this->actingAs($this->admin)->post('/admin/jadwal-piket', array_merge($this->payloadTambah(), ['guru_id' => $guruLain->id]))
+        $this->actingAs($this->admin)->post('/admin/jadwal-piket', array_merge($this->payloadTambah(), ['guru_ids' => [$guruLain->id]]))
             ->assertSessionMissing('error');
 
         $this->assertSame(2, JadwalPiket::count());
+    }
+
+    /** Fitur baru: bisa centang lebih dari 1 guru sekaligus, masing-masing dapet baris sendiri buat semua tanggal target. */
+    public function test_tambah_jadwal_piket_beberapa_guru_sekaligus(): void
+    {
+        $guruLain = Guru::create(['nama' => 'Bu Sinta']);
+
+        $this->actingAs($this->admin)->post('/admin/jadwal-piket', $this->payloadTambah([
+            'guru_ids' => [$this->guru->id, $guruLain->id], 'jumlah_kali' => 2,
+        ]))->assertRedirect()->assertSessionHas('success');
+
+        $this->assertSame(4, JadwalPiket::count());
+        $this->assertDatabaseHas('jadwal_pikets', ['guru_id' => $this->guru->id, 'tanggal' => '2026-09-21']);
+        $this->assertDatabaseHas('jadwal_pikets', ['guru_id' => $guruLain->id, 'tanggal' => '2026-09-21']);
     }
 
     /*

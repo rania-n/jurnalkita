@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Guru;
 use App\Models\JadwalPiket;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -75,7 +76,11 @@ class JadwalPiketController extends Controller
     private function tambahBanyakBaris(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'guru_id' => ['required', 'exists:gurus,id'],
+            // Bisa lebih dari 1 guru sekaligus -- kadang piket hari itu emang
+            // digilir bareng beberapa guru, daripada isi form yang sama
+            // berkali-kali satu-satu per guru.
+            'guru_ids' => ['required', 'array', 'min:1'],
+            'guru_ids.*' => ['exists:gurus,id'],
             'tanggal' => ['required', 'date'],
             'ulang_setiap_minggu' => ['required', 'integer', 'min:1', 'max:8'],
             'jumlah_kali' => ['required', 'integer', 'min:1', 'max:52'],
@@ -97,47 +102,58 @@ class JadwalPiketController extends Controller
             $tanggalTarget[] = $tanggalAwal->copy()->addWeeks($i * $data['ulang_setiap_minggu']);
         }
 
-        // whereDate() (BUKAN whereIn polos) -- kolom tanggal kesimpen sebagai
-        // datetime lengkap ("2026-09-21 00:00:00") di sebagian driver DB
-        // (mis. SQLite pas testing), jadi whereIn(['2026-09-21']) gagal
-        // cocok walau tanggalnya beneran sama (perbandingan string mentah,
-        // bukan tanggal). whereDate() ngebandingin cuma bagian tanggalnya.
-        $bentrok = JadwalPiket::where('guru_id', $data['guru_id'])
-            ->where('mulai', $data['mulai'] ?? null)
-            ->where('selesai', $data['selesai'] ?? null)
-            ->where(function ($q) use ($tanggalTarget) {
-                foreach ($tanggalTarget as $t) {
-                    $q->orWhereDate('tanggal', $t);
-                }
-            })
-            ->pluck('tanggal');
-        if ($bentrok->isNotEmpty()) {
-            $daftar = $bentrok->map(fn ($t) => $t->translatedFormat('d M Y'))->implode(', ');
-
-            return back()->with('error', "Guru ini udah ada jadwal piket di jam yang sama pada tanggal: {$daftar}. Ubah tanggal mulai atau hapus dulu yang bentrok.")->withInput();
+        // Dicek per-guru (bukan digabung) biar pesan errornya jelas nyebut
+        // guru mana yang bentrok, bukan cuma tanggalnya doang.
+        $pesanBentrok = [];
+        foreach ($data['guru_ids'] as $guruId) {
+            // whereDate() (BUKAN whereIn polos) -- kolom tanggal kesimpen sebagai
+            // datetime lengkap ("2026-09-21 00:00:00") di sebagian driver DB
+            // (mis. SQLite pas testing), jadi whereIn(['2026-09-21']) gagal
+            // cocok walau tanggalnya beneran sama (perbandingan string mentah,
+            // bukan tanggal). whereDate() ngebandingin cuma bagian tanggalnya.
+            $bentrok = JadwalPiket::where('guru_id', $guruId)
+                ->where('mulai', $data['mulai'] ?? null)
+                ->where('selesai', $data['selesai'] ?? null)
+                ->where(function ($q) use ($tanggalTarget) {
+                    foreach ($tanggalTarget as $t) {
+                        $q->orWhereDate('tanggal', $t);
+                    }
+                })
+                ->pluck('tanggal');
+            if ($bentrok->isNotEmpty()) {
+                $nama = Guru::find($guruId)?->nama ?? "#{$guruId}";
+                $daftar = $bentrok->map(fn ($t) => $t->translatedFormat('d M Y'))->implode(', ');
+                $pesanBentrok[] = "{$nama} ({$daftar})";
+            }
+        }
+        if (! empty($pesanBentrok)) {
+            return back()->with('error', 'Udah ada jadwal piket di jam yang sama buat: '.implode('; ', $pesanBentrok).'. Ubah tanggal mulai atau hapus dulu yang bentrok.')->withInput();
         }
 
         $baris = [];
-        foreach ($tanggalTarget as $tanggal) {
-            $baris[] = [
-                'guru_id' => $data['guru_id'],
-                'hari' => JadwalPiket::HARI_URUT[$tanggal->dayOfWeek - 1],
-                'tanggal' => $tanggal->toDateString(),
-                'mulai' => $data['mulai'] ?? null,
-                'selesai' => $data['selesai'] ?? null,
-                'keterangan' => $data['keterangan'] ?? null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+        foreach ($data['guru_ids'] as $guruId) {
+            foreach ($tanggalTarget as $tanggal) {
+                $baris[] = [
+                    'guru_id' => $guruId,
+                    'hari' => JadwalPiket::HARI_URUT[$tanggal->dayOfWeek - 1],
+                    'tanggal' => $tanggal->toDateString(),
+                    'mulai' => $data['mulai'] ?? null,
+                    'selesai' => $data['selesai'] ?? null,
+                    'keterangan' => $data['keterangan'] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
         JadwalPiket::insert($baris);
 
+        $jumlahGuru = count($data['guru_ids']);
         AuditLog::catat(
             'Tambah Jadwal Piket',
-            "Jadwal piket guru #{$data['guru_id']} — {$data['jumlah_kali']}x mulai {$tanggalAwal->translatedFormat('d M Y')}, tiap {$data['ulang_setiap_minggu']} minggu"
+            "Jadwal piket {$jumlahGuru} guru — {$data['jumlah_kali']}x mulai {$tanggalAwal->translatedFormat('d M Y')}, tiap {$data['ulang_setiap_minggu']} minggu"
         );
 
-        return back()->with('success', "{$data['jumlah_kali']} jadwal piket ditambahkan (mulai {$tanggalAwal->translatedFormat('d M Y')}).");
+        return back()->with('success', count($baris)." jadwal piket ditambahkan ({$jumlahGuru} guru × {$data['jumlah_kali']}x, mulai {$tanggalAwal->translatedFormat('d M Y')}).");
     }
 
     public function destroy(JadwalPiket $jadwalPiket): RedirectResponse

@@ -35,7 +35,9 @@ class AkunController extends Controller
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'lowercase', Rule::unique('users', 'email')->withoutTrashed()],
             'password' => ['required', 'confirmed', PasswordRule::defaults()],
-            'no_hp' => ['nullable', 'string', 'max:20'],
+            // Wajib khusus Guru -- sering butuh dihubungi langsung soal
+            // jadwal/piket. Peran lain tetap opsional.
+            'no_hp' => ['required_if:role,guru', 'nullable', 'string', 'max:20'],
             'nip' => ['nullable', 'string', 'max:30'],
             'nis' => ['nullable', 'string', 'max:20'],
             'kelas_id' => ['nullable', 'exists:kelas,id'],
