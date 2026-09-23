@@ -15,11 +15,17 @@ class Kelas extends Model
 
     protected $table = 'kelas';
 
-    protected $fillable = ['nama', 'tingkat', 'jurusan', 'nomor', 'wali_id', 'tahun_ajaran_id'];
+    protected $fillable = ['nama', 'tingkat', 'jurusan', 'nomor', 'wali_id', 'tahun_ajaran_id', 'status'];
 
     public function jurusanNama(): string
     {
         return config("akademik.jurusan.{$this->jurusan}", $this->jurusan ?? '—');
+    }
+
+    /** Kelas PKL (biasanya XII, praktik kerja lapangan) -- nggak perlu diminta isi jurnal. */
+    public function pkl(): bool
+    {
+        return $this->status === 'pkl';
     }
 
     /** withTrashed() -- wali_id bisa nyantol ke guru yang belakangan dihapus admin. */

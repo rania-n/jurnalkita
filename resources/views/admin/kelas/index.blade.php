@@ -37,7 +37,12 @@
         <x-admin.table :head="['Nama', 'Tingkat', 'Jurusan', 'Jml Siswa', 'Wali Kelas', '']">
             @foreach ($rows as $k)
                 <tr class="hover:bg-surface/60">
-                    <td class="px-4 py-3 font-semibold text-ink">{{ $k->nama }}</td>
+                    <td class="px-4 py-3 font-semibold text-ink">
+                        {{ $k->nama }}
+                        @if ($k->pkl())
+                            <x-ui.status-badge status="pkl" class="ml-1.5">PKL</x-ui.status-badge>
+                        @endif
+                    </td>
                     <td class="px-4 py-3 text-muted">{{ $k->tingkat }}</td>
                     <td class="px-4 py-3 text-muted">{{ $k->jurusanNama() }}</td>
                     <td class="px-4 py-3 text-muted">{{ $k->siswas_count }}</td>

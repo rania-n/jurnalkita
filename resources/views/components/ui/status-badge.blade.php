@@ -16,6 +16,7 @@
         'terverifikasi' => ['bg-hadir-soft text-hadir', 'Terverifikasi'],
         'revisi' => ['bg-alpha-soft text-alpha', 'Revisi'],
         'lewat' => ['bg-surface-alt text-muted', 'Sudah Lewat'],
+        'pkl' => ['bg-navy/10 text-navy', 'PKL'],
         'otomatis' => ['bg-surface-alt text-muted', 'Otomatis'],
         'berlangsung' => ['bg-hadir-soft text-hadir', 'Berlangsung'],
         'istirahat' => ['bg-sakit-soft text-sakit', 'Jeda Istirahat'],
