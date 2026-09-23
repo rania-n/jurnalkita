@@ -17,6 +17,14 @@
     $guruTanpaAkun = \App\Models\Guru::whereNull('user_id')->orderBy('nama')->get(['id', 'nama', 'nip']);
     $siswaTanpaAkun = \App\Models\Siswa::whereNull('user_id')->where('jabatan', 'pengurus')->with('kelas')->orderBy('nama')->get();
     $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
+
+    // Dipisah jadi variable (bukan langsung di atribut :options="...") --
+    // string berkutip di dalam atribut Blade bikin compiler gagal parse tag
+    // komponennya (pernah ketemu bug ini juga di $hariOptions Jadwal Pelajaran).
+    $guruOptions = collect([['id' => 'baru', 'nama' => '➕ Buat data baru']])
+        ->concat($guruTanpaAkun->map(fn ($g) => ['id' => "guru:{$g->id}", 'nama' => $g->nama.($g->nip ? " · {$g->nip}" : '')]));
+    $siswaOptions = collect([['id' => 'baru', 'nama' => '➕ Buat data baru']])
+        ->concat($siswaTanpaAkun->map(fn ($s) => ['id' => "siswa:{$s->id}", 'nama' => $s->nama.' · '.($s->kelas?->nama ?? '?')]));
     $roleTabs = ['' => 'Semua'] + $roleLabel;
     $roleAktif = (string) request()->query('role');
     $queryTanpaRole = request()->except('page', 'role');
@@ -108,26 +116,38 @@
         <form method="POST" action="{{ route('master.akun.save') }}" class="flex flex-col gap-4" id="form-akun">
             @csrf
 
-            <x-ui.select label="Jenis Akun" name="role" id="akun-role" required>
-                <option value="guru">Guru</option>
-                <option value="siswa">Pengurus Kelas</option>
-                <option value="waka">Waka Kesiswaan</option>
-                <option value="satpam">Satpam</option>
-            </x-ui.select>
+            <x-ui.choice
+                label="Jenis Akun"
+                name="role"
+                :options="['guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan', 'satpam' => 'Satpam']"
+                value="guru"
+            />
 
-            <x-ui.select label="Ambil dari data" name="sumber" id="akun-sumber" data-grup="sumber">
-                <option value="baru">➕ Buat data baru</option>
-                <optgroup label="Guru belum punya akun" data-role="guru">
-                    @foreach ($guruTanpaAkun as $g)
-                        <option value="guru:{{ $g->id }}" data-nama="{{ $g->nama }}">{{ $g->nama }}{{ $g->nip ? " · {$g->nip}" : '' }}</option>
-                    @endforeach
-                </optgroup>
-                <optgroup label="Pengurus kelas belum punya akun" data-role="siswa">
-                    @foreach ($siswaTanpaAkun as $s)
-                        <option value="siswa:{{ $s->id }}" data-nama="{{ $s->nama }}">{{ $s->nama }} · {{ $s->kelas?->nama }}</option>
-                    @endforeach
-                </optgroup>
-            </x-ui.select>
+            {{-- "Ambil dari data" -- 2 kotak cari terpisah (satu buat guru,
+                 satu buat pengurus kelas), gantian ditampilin sesuai Jenis
+                 Akun yang lagi kepilih (lihat setGrup() di script bawah) --
+                 dulu 1 <select> isinya 2 optgroup, sekarang dipecah biar
+                 masing-masing bisa diketik-cari (banyak guru/siswa). --}}
+            <div data-grup="sumber-guru">
+                <x-ui.cari-pilihan
+                    label="Ambil dari data"
+                    name="sumber"
+                    id="akun-sumber-guru"
+                    placeholder="Ketik nama guru, atau biarkan kosong buat data baru"
+                    :options="$guruOptions"
+                    value="baru"
+                />
+            </div>
+            <div data-grup="sumber-siswa">
+                <x-ui.cari-pilihan
+                    label="Ambil dari data"
+                    name="sumber"
+                    id="akun-sumber-siswa"
+                    placeholder="Ketik nama siswa, atau biarkan kosong buat data baru"
+                    :options="$siswaOptions"
+                    value="baru"
+                />
+            </div>
 
             <x-ui.input label="Nama Lengkap" name="nama" id="akun-nama" errorBag="buatAkun" required />
             <x-ui.input label="Email" name="email" type="email" placeholder="email@sekolah.sch.id" errorBag="buatAkun" required />
@@ -140,15 +160,15 @@
 
             {{-- khusus data pengurus kelas baru --}}
             <div data-grup="siswa-baru" class="flex flex-col gap-4">
-                <x-ui.select label="Kelas" name="kelas_id" required>
-                    <option value="" disabled selected hidden>Pilih kelas</option>
-                    @foreach ($kelasList as $k)<option value="{{ $k->id }}">{{ $k->nama }}</option>@endforeach
-                </x-ui.select>
+                <x-ui.cari-pilihan
+                    label="Kelas"
+                    name="kelas_id"
+                    :options="$kelasList"
+                    placeholder="Ketik nama kelas..."
+                    required
+                />
                 <x-ui.input label="NIS" name="nis" inputmode="numeric" errorBag="buatAkun" required />
-                <x-ui.select label="Jenis Kelamin" name="jenis_kelamin" required>
-                    <option value="L">Laki-laki</option>
-                    <option value="P">Perempuan</option>
-                </x-ui.select>
+                <x-ui.choice label="Jenis Kelamin" name="jenis_kelamin" :options="['L' => 'Laki-laki', 'P' => 'Perempuan']" value="L" required />
             </div>
 
             <x-ui.input label="Password" name="password" type="password" id="akun-password" placeholder="Ketik password" hint="Minimal 8 karakter." errorBag="buatAkun" required>
@@ -187,10 +207,12 @@
         <script>
             (function () {
                 const form = document.getElementById('form-akun');
-                const role = document.getElementById('akun-role');
-                const sumber = document.getElementById('akun-sumber');
+                const roleRadios = form.querySelectorAll('input[name="role"]');
+                const sumberGuruWrap = form.querySelector('[data-grup="sumber-guru"]');
+                const sumberSiswaWrap = form.querySelector('[data-grup="sumber-siswa"]');
+                const sumberGuruHidden = sumberGuruWrap.querySelector('[data-cari-pilihan-value]');
+                const sumberSiswaHidden = sumberSiswaWrap.querySelector('[data-cari-pilihan-value]');
                 const nama = document.getElementById('akun-nama');
-                const sumberWrap = sumber.closest('[data-grup]');
                 const grupSiswaBaru = form.querySelector('[data-grup="siswa-baru"]');
                 const grupNip = form.querySelector('[data-grup="nip"]');
 
@@ -199,28 +221,30 @@
                     el.querySelectorAll('input, select').forEach((i) => (i.disabled = !on));
                 };
 
+                function roleTerpilih() {
+                    return [...roleRadios].find((r) => r.checked)?.value;
+                }
+
                 function refresh() {
-                    const r = role.value;
-                    const pakaiData = r === 'guru' || r === 'siswa';
+                    const r = roleTerpilih();
 
-                    sumber.querySelectorAll('optgroup').forEach((g) => {
-                        const off = g.dataset.role !== r;
-                        g.hidden = g.disabled = off;
-                    });
-                    setGrup(sumberWrap, pakaiData);
-                    if (!pakaiData || sumber.selectedOptions[0]?.parentElement?.hidden) sumber.value = 'baru';
+                    setGrup(sumberGuruWrap, r === 'guru');
+                    setGrup(sumberSiswaWrap, r === 'siswa');
 
-                    const baru = sumber.value === 'baru';
+                    const sumberAktif = r === 'guru' ? sumberGuruHidden : (r === 'siswa' ? sumberSiswaHidden : null);
+                    const baru = !sumberAktif || !sumberAktif.value || sumberAktif.value === 'baru';
+
                     setGrup(grupSiswaBaru, r === 'siswa' && baru);
                     setGrup(grupNip, r === 'waka' || (r === 'guru' && baru));
 
-                    const opt = sumber.selectedOptions[0];
-                    if (!baru && opt?.dataset.nama) { nama.value = opt.dataset.nama; nama.readOnly = true; }
+                    const namaTerisi = sumberAktif?.closest('[data-cari-pilihan]')?.querySelector('[data-cari-pilihan-input]')?.value;
+                    if (!baru && namaTerisi) { nama.value = namaTerisi; nama.readOnly = true; }
                     else { nama.readOnly = false; }
                 }
 
-                role.addEventListener('change', refresh);
-                sumber.addEventListener('change', refresh);
+                roleRadios.forEach((r) => r.addEventListener('change', refresh));
+                sumberGuruHidden.addEventListener('change', refresh);
+                sumberSiswaHidden.addEventListener('change', refresh);
                 document.getElementById('modal-akun').addEventListener('modal:open', refresh);
                 refresh();
             })();

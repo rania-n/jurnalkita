@@ -12,12 +12,13 @@
     <form method="POST" action="{{ route('register.kelas') }}" class="flex flex-col gap-4">
         @csrf
 
-        <x-ui.select label="Kelas" name="kelas_id" required>
-            <option value="" disabled selected hidden>Pilih Kelas</option>
-            @foreach ($kelasList as $k)
-                <option value="{{ $k->id }}" @selected(old('kelas_id') == $k->id)>{{ $k->nama }}</option>
-            @endforeach
-        </x-ui.select>
+        <x-ui.cari-pilihan
+            label="Kelas"
+            name="kelas_id"
+            :options="$kelasList"
+            placeholder="Ketik nama kelas..."
+            required
+        />
 
         <x-ui.input label="Nama Lengkap" name="nama" placeholder="Masukkan nama lengkap" :value="old('nama')" required />
         <x-ui.input label="NIS" name="nis" inputmode="numeric" placeholder="Masukkan Nomor Induk Siswa" :value="old('nis')" required />

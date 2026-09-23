@@ -47,11 +47,6 @@
                         $statusAwal !== 'hadir' && isset(($presensiAwal ?? [])[$s->id]) => 'Ikut jurnal lain hari ini di kelas ini',
                         default => null,
                     };
-                    // Sama kayak guru/jurnal/_presensi-grid.blade.php -- Hadir
-                    // default collapse jadi teks doang, biar nggak 5 tombol
-                    // berisik tiap baris buat siswa yang emang hadir semua.
-                    $statusRingkas = $statusAwal === 'hadir' && ! $keteranganAwal;
-                    $statusToggleId = 'status-pilihan-pengganti-'.$s->id;
                 @endphp
                 <div
                     class="flex flex-col gap-2.5 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]"
@@ -73,25 +68,13 @@
                         </div>
                     </div>
 
-                    @if ($statusRingkas)
-                        <button
-                            type="button"
-                            data-toggle-status="{{ $statusToggleId }}"
-                            class="flex items-center justify-between gap-2 rounded-lg border border-hadir-soft bg-hadir-soft px-3 py-2 text-left text-xs font-bold text-hadir"
-                        >
-                            <span class="flex items-center gap-1"><x-icon name="check_circle" :size="14" /> Hadir</span>
-                            <span class="text-[11px] underline">Ubah</span>
-                        </button>
-                    @endif
-                    <div id="{{ $statusToggleId }}" @if ($statusRingkas) hidden @endif>
-                        <x-ui.choice
-                            :name="'presensi[' . $s->id . '][status]'"
-                            :options="$statuses"
-                            :tones="$tones"
-                            :value="$statusAwal"
-                            size="sm"
-                        />
-                    </div>
+                    <x-ui.choice
+                        :name="'presensi[' . $s->id . '][status]'"
+                        :options="$statuses"
+                        :tones="$tones"
+                        :value="$statusAwal"
+                        size="sm"
+                    />
 
                     <div class="border-t border-surface-alt pt-2.5">
                         <button
@@ -144,15 +127,6 @@
                     if (cocok) tampil++;
                 });
                 counter.textContent = `Menampilkan ${tampil} dari ${rows.length} siswa`;
-            });
-
-            document.querySelectorAll('[data-toggle-status]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const target = document.getElementById(btn.dataset.toggleStatus);
-                    target.hidden = false;
-                    btn.hidden = true;
-                    target.querySelector('input')?.focus();
-                });
             });
 
             document.querySelectorAll('[data-toggle-catatan]').forEach((btn) => {

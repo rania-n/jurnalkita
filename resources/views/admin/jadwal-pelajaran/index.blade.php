@@ -22,7 +22,7 @@
     $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
     $mapelList = \App\Models\Mapel::orderBy('nama')->get(['id', 'nama']);
     $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);
-    $ruangList = collect(config('akademik.ruangan'))->mapWithKeys(fn ($r) => [$r => $r]);
+    $ruangList = collect(config('akademik.ruangan'))->map(fn ($r) => ['id' => $r, 'nama' => $r]);
     $jpList = collect(range(1, 13))->mapWithKeys(fn ($i) => [$i => "Jam ke-{$i}"]);
     $queryTanpaHari = request()->except('page', 'hari');
 
@@ -37,6 +37,7 @@
     // query string & bikin salah kefilter di tabel atas).
     $kelasDipilih = request()->query('kelas_id');
     $hariPenuh = $kelasDipilih ? \App\Models\Jadwal::hariPenuhUntukKelas((int) $kelasDipilih) : [];
+    $hariOptions = collect($hariLabel)->map(fn ($l, $v) => in_array($v, $hariPenuh, true) ? "{$l} (Penuh)" : $l)->all();
 @endphp
 
 <x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran">
@@ -59,10 +60,10 @@
         @if ($hari !== 'semua')
             <input type="hidden" name="hari" value="{{ $hari }}">
         @endif
-        <x-admin.f-select name="kelas" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua Kelas" />
-        <x-admin.f-select name="guru" label="Guru" :options="$guruList->pluck('nama', 'id')" all="Semua Guru" />
-        <x-admin.f-select name="mapel" label="Mapel" :options="$mapelList->pluck('nama', 'id')" all="Semua Mapel" />
-        <x-admin.f-select name="ruang" label="Ruang" :options="$ruangList" all="Semua Ruang" />
+        <x-ui.cari-pilihan name="kelas" label="Kelas" :options="$kelasList" all="Semua Kelas" />
+        <x-ui.cari-pilihan name="guru" label="Guru" :options="$guruList" all="Semua Guru" />
+        <x-ui.cari-pilihan name="mapel" label="Mapel" :options="$mapelList" all="Semua Mapel" />
+        <x-ui.cari-pilihan name="ruang" label="Ruang" :options="$ruangList" all="Semua Ruang" />
         <x-admin.f-select name="jp" label="JP" :options="$jpList" all="Semua JP" />
     </x-admin.filters>
 
@@ -101,27 +102,25 @@
              udah kepilih & opsi Hari yang penuh otomatis kekunci. --}}
         <form method="POST" action="{{ route('master.jadwal-pelajaran.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.select
+            <x-ui.cari-pilihan
                 label="Kelas"
                 name="kelas_id"
-                onchange="location.href='{{ route('master.jadwal-pelajaran.index') }}?kelas_id=' + this.value"
-            >
-                <option value="" disabled hidden @selected(! $kelasDipilih)>Pilih kelas</option>
-                @foreach ($kelasList as $k)
-                    <option value="{{ $k->id }}" @selected((string) $kelasDipilih === (string) $k->id)>{{ $k->nama }}</option>
-                @endforeach
-            </x-ui.select>
+                :options="$kelasList"
+                :value="$kelasDipilih"
+                placeholder="Ketik nama kelas..."
+            />
             <div class="flex flex-col gap-1.5">
-                <x-ui.select label="Hari" name="hari">
-                    <option value="" disabled selected hidden>Pilih hari</option>
-                    @foreach ($hariLabel as $v => $l)
-                        <option value="{{ $v }}" @disabled(in_array($v, $hariPenuh, true))>{{ $l }}{{ in_array($v, $hariPenuh, true) ? ' (Penuh)' : '' }}</option>
-                    @endforeach
-                </x-ui.select>
+                <x-ui.choice
+                    label="Hari"
+                    name="hari"
+                    :options="$hariOptions"
+                    :disabled="$hariPenuh"
+                    required
+                />
                 @if ($kelasDipilih)
                     <p class="text-xs text-muted-2">
                         @if (count($hariPenuh) > 0)
-                            Hari yang ditandai "(Penuh)" udah nggak ada celah JP kosong buat kelas ini.
+                            Hari yang ditandai "(Penuh)" udah nggak ada celah JP kosong buat kelas ini, nggak bisa dipilih.
                         @else
                             Semua hari masih ada celah JP kosong buat kelas ini.
                         @endif
@@ -154,12 +153,12 @@
                     @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
                 </x-ui.select>
             </div>
-            <x-ui.select label="Ruang" name="ruang">
-                <option value="">— belum ditentukan —</option>
-                @foreach (config('akademik.ruangan') as $r)
-                    <option value="{{ $r }}">{{ $r }}</option>
-                @endforeach
-            </x-ui.select>
+            <x-ui.cari-pilihan
+                label="Ruang"
+                name="ruang"
+                :options="$ruangList"
+                placeholder="Ketik nama ruang... (opsional)"
+            />
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>
                 <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
@@ -181,4 +180,16 @@
             <script>window.addEventListener('load', () => document.querySelector('[data-auto-open-jadwal]')?.click());</script>
         @endpush
     @endif
+
+    {{-- Ganti Kelas (dropdown yang bisa dicari) -> reload halaman ini bawa
+         ?kelas_id=..., sama kayak dulu pas masih <select onchange>, biar
+         "hari penuh" keitung seger dari server (bukan JS). --}}
+    @push('scripts')
+        <script>
+            document.querySelector('[data-cari-pilihan] input[name="kelas_id"][data-cari-pilihan-value]')?.addEventListener('change', function () {
+                if (!this.value) return;
+                location.href = '{{ route('master.jadwal-pelajaran.index') }}?kelas_id=' + this.value;
+            });
+        </script>
+    @endpush
 </x-layouts.admin>

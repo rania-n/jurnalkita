@@ -106,7 +106,7 @@
             @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
 
             <div class="w-full">
-                <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua Kelas" onchange="this.form.submit()" />
+                <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua Kelas" />
             </div>
 
             <div class="flex w-full gap-2">

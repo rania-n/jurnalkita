@@ -9,16 +9,7 @@
         @csrf
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-ui.select label="Siswa" name="siswa_id" class="sm:col-span-2" required>
-                <option value="" disabled selected hidden>Pilih siswa</option>
-                @foreach ($kelasList as $k)
-                    <optgroup label="{{ $k->nama }}">
-                        @foreach ($k->siswas->sortBy('nama') as $s)
-                            <option value="{{ $s->id }}" @selected(old('siswa_id') == $s->id)>{{ $s->nama }} · {{ $s->nis }}</option>
-                        @endforeach
-                    </optgroup>
-                @endforeach
-            </x-ui.select>
+            <x-ui.cari-siswa name="siswa_id" :siswas="$siswaList" class="sm:col-span-2" required />
 
             <x-ui.input label="Jam Datang" name="jam_datang" type="time" :value="old('jam_datang', now()->format('H:i'))" required />
 

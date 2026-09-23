@@ -22,9 +22,7 @@
          di halaman ini nggak dipaginate, semua siswa yang cocok kelas/tanggal
          udah ada), jadi nggak perlu reload cuma buat cari nama. --}}
     <x-admin.filters :action="route('rekap.siswa.index')" hideButtons="true">
-        {{-- f-select udah auto-submit bawaan (this.form.requestSubmit() di
-             komponennya sendiri), nggak perlu ditambah apa-apa lagi. --}}
-        <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua kelas" />
+        <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua kelas" />
         <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" onchange="this.form.submit()" />
         <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" onchange="this.form.submit()" />
     </x-admin.filters>

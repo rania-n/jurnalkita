@@ -32,8 +32,8 @@
             <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" onchange="this.form.submit()" />
         </div>
 
-        <x-admin.f-select name="kelas_id" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua kelas" />
-        <x-admin.f-select name="mapel_id" label="Mata Pelajaran" :options="$mapelList->pluck('nama', 'id')" all="Semua mapel" />
+        <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua kelas" />
+        <x-ui.cari-pilihan name="mapel_id" label="Mata Pelajaran" :options="$mapelList" all="Semua mapel" />
     </x-admin.filters>
 
     {{-- Cari mapel/kelas -- langsung filter baris yang sudah dimuat di halaman

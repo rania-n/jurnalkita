@@ -483,11 +483,15 @@ function initCariPilihan() {
             `).join('');
         }
 
+        const autoSubmit = wrap.hasAttribute('data-auto-submit');
+
         function pilih(s) {
             input.value = s.nama;
             hidden.value = s.id;
             hasil.hidden = true;
             if (tombolClear) tombolClear.hidden = false;
+            hidden.dispatchEvent(new Event('change', { bubbles: true }));
+            if (autoSubmit) wrap.closest('form')?.requestSubmit();
         }
 
         function kosongkan() {
@@ -495,6 +499,7 @@ function initCariPilihan() {
             hidden.value = '';
             hasil.hidden = true;
             if (tombolClear) tombolClear.hidden = true;
+            if (autoSubmit) { wrap.closest('form')?.requestSubmit(); return; }
             input.focus();
         }
 

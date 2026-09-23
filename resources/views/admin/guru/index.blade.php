@@ -20,7 +20,7 @@
 
     <x-admin.filters :action="route('master.guru.index')">
         <x-admin.f-search placeholder="Nama atau NIP..." />
-        <x-admin.f-select name="mapel" label="Mata Pelajaran" :options="$mapelList->pluck('nama', 'id')" all="Semua Mapel" />
+        <x-ui.cari-pilihan name="mapel" label="Mata Pelajaran" :options="$mapelList" all="Semua Mapel" />
     </x-admin.filters>
 
     @if ($rows->isEmpty())
@@ -65,12 +65,12 @@
             <x-ui.input label="Nama Lengkap" name="nama" required />
             <x-ui.input label="NIP (opsional)" name="nip" />
 
-            <x-ui.select label="Mapel Utama" name="mapel_utama_id">
-                <option value="">— belum ditentukan —</option>
-                @foreach ($mapelList as $m)
-                    <option value="{{ $m->id }}">{{ $m->nama }}</option>
-                @endforeach
-            </x-ui.select>
+            <x-ui.cari-pilihan
+                label="Mapel Utama"
+                name="mapel_utama_id"
+                :options="$mapelList"
+                placeholder="Ketik nama mapel... (opsional)"
+            />
 
             <label class="flex flex-col gap-1.5">
                 <span class="text-sm font-semibold text-ink">Mapel Tambahan <span class="font-normal text-muted-2">(jika mengajar lebih dari 1)</span></span>

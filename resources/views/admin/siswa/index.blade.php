@@ -41,7 +41,7 @@
 
     <x-admin.filters :action="route('master.siswa.index')">
         <x-admin.f-search placeholder="Nama, NIS, atau kelas..." />
-        <x-admin.f-select name="kelas" label="Kelas" :options="$kelasList->pluck('nama', 'id')" all="Semua Kelas" />
+        <x-ui.cari-pilihan name="kelas" label="Kelas" :options="$kelasList" all="Semua Kelas" />
         <x-admin.f-select name="jabatan" label="Jabatan" :options="['anggota' => 'Anggota', 'pengurus' => 'Pengurus Kelas']" all="Semua Jabatan" />
         <x-admin.f-select name="jk" label="Jenis Kelamin" :options="['L' => 'Laki-laki', 'P' => 'Perempuan']" all="Semua" />
         <x-admin.f-select name="status" label="Status" :options="['aktif' => 'Aktif', 'lulus' => 'Lulus', 'pindah' => 'Pindah']" all="Semua Status" />
@@ -97,29 +97,19 @@
                 Data siswa saja. Akun login (khusus pengurus kelas) + No. WhatsApp
                 diisi lewat menu "Manajemen Akun → Buat Akun".
             </p>
-            <x-ui.select label="Kelas" name="kelas_id" required>
-                <option value="" disabled selected hidden>Pilih kelas</option>
-                @foreach ($kelasAktifList as $k)
-                    <option value="{{ $k->id }}">{{ $k->nama }}</option>
-                @endforeach
-            </x-ui.select>
+            <x-ui.cari-pilihan
+                label="Kelas"
+                name="kelas_id"
+                :options="$kelasAktifList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama])"
+                placeholder="Ketik nama kelas..."
+                required
+            />
             <x-ui.input label="NIS" name="nis" inputmode="numeric" required />
             <x-ui.input label="Nama Lengkap" name="nama" required />
             <x-ui.input label="Nomor Presensi" name="no_absen" type="number" min="1" />
-            <x-ui.select label="Jenis Kelamin" name="jenis_kelamin" required>
-                <option value="" disabled selected hidden>Pilih</option>
-                <option value="L">Laki-laki</option>
-                <option value="P">Perempuan</option>
-            </x-ui.select>
-            <x-ui.select label="Jabatan Kelas" name="jabatan" required>
-                <option value="anggota">Anggota</option>
-                <option value="pengurus">Pengurus Kelas</option>
-            </x-ui.select>
-            <x-ui.select label="Status" name="status">
-                <option value="aktif">Aktif</option>
-                <option value="lulus">Lulus</option>
-                <option value="pindah">Pindah</option>
-            </x-ui.select>
+            <x-ui.choice label="Jenis Kelamin" name="jenis_kelamin" :options="['L' => 'Laki-laki', 'P' => 'Perempuan']" required />
+            <x-ui.choice label="Jabatan Kelas" name="jabatan" :options="['anggota' => 'Anggota', 'pengurus' => 'Pengurus Kelas']" value="anggota" required />
+            <x-ui.choice label="Status" name="status" :options="['aktif' => 'Aktif', 'lulus' => 'Lulus', 'pindah' => 'Pindah']" value="aktif" />
             <p class="-mt-2 text-xs text-muted-2">
                 Biasanya biarkan "Aktif" — "Lulus" otomatis diisi lewat Kenaikan Kelas,
                 "Pindah" dipakai kalau siswa pindah sekolah.

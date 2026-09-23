@@ -89,36 +89,33 @@
     <x-admin.modal id="modal-piket-tambah" title="Tambah Jadwal Piket">
         <form method="POST" action="{{ route('master.jadwal-piket.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.select label="Guru Piket" name="guru_id" required>
-                <option value="" disabled selected hidden>Pilih guru</option>
-                @foreach ($guruList as $g)<option value="{{ $g->id }}">{{ $g->nama }}</option>@endforeach
-            </x-ui.select>
+            <x-ui.cari-pilihan
+                label="Guru Piket"
+                name="guru_id"
+                :options="$guruList"
+                placeholder="Ketik nama guru..."
+                required
+            />
             {{-- Sesi -- shortcut isi Jam Mulai/Selesai otomatis (2 sesi yang
                  beneran dipakai sekolah), tapi field jamnya sendiri tetap
                  bisa diubah manual sesudahnya kalau memang beda. --}}
-            <x-ui.select label="Sesi" name="sesi_piket" onchange="
-                var m = this.closest('form').querySelector('[name=mulai]'), s = this.closest('form').querySelector('[name=selesai]');
-                if (this.value === 'pagi') { m.value = '07:00'; s.value = '11:00'; }
-                else if (this.value === 'siang') { m.value = '11:00'; s.value = '15:00'; }
-            ">
-                <option value="pagi">Pagi (07:00–11:00)</option>
-                <option value="siang">Siang (11:00–15:00)</option>
-                <option value="custom">Custom — atur jam manual</option>
-            </x-ui.select>
+            <x-ui.choice
+                label="Sesi"
+                name="sesi_piket"
+                data-sesi-piket
+                :options="['pagi' => 'Pagi (07:00–11:00)', 'siang' => 'Siang (11:00–15:00)', 'custom' => 'Custom']"
+            />
             <div class="flex gap-3">
                 <x-ui.input label="Jam Mulai" name="mulai" type="time" value="07:00" class="flex-1" required />
                 <x-ui.input label="Jam Selesai" name="selesai" type="time" value="11:00" class="flex-1" required />
             </div>
-            <x-ui.input label="Tanggal Mulai" name="tanggal" type="date" hint="Piket pertama jatuh tanggal berapa (Senin-Jumat)." required />
-            <div class="flex gap-3">
-                <x-ui.select label="Ulang Setiap" name="ulang_setiap_minggu" class="flex-1" required>
-                    <option value="1">Tiap minggu</option>
-                    <option value="2" selected>Tiap 2 minggu</option>
-                    <option value="3">Tiap 3 minggu</option>
-                    <option value="4">Tiap 4 minggu</option>
-                </x-ui.select>
-                <x-ui.input label="Jumlah Kali" name="jumlah_kali" type="number" min="1" max="52" value="10" class="flex-1" required />
-            </div>
+            <x-ui.choice
+                label="Ulang Setiap"
+                name="ulang_setiap_minggu"
+                :options="['1' => '1 minggu', '2' => '2 minggu', '3' => '3 minggu', '4' => '4 minggu']"
+                value="2"
+            />
+            <x-ui.input label="Jumlah Kali" name="jumlah_kali" type="number" min="1" max="52" value="10" required />
             <p class="-mt-2 text-xs text-muted-2">Sistem otomatis bikin jadwal sebanyak "Jumlah Kali", masing-masing berjarak sesuai "Ulang Setiap" dari Tanggal Mulai.</p>
             <x-ui.input label="Keterangan (opsional)" name="keterangan" />
             <div class="mt-1 flex gap-2">
@@ -133,10 +130,13 @@
     <x-admin.modal id="modal-piket-ubah" title="Ubah Jadwal Piket">
         <form method="POST" action="{{ route('master.jadwal-piket.save') }}" class="flex flex-col gap-4">
             @csrf
-            <x-ui.select label="Guru Piket" name="guru_id" required>
-                <option value="" disabled selected hidden>Pilih guru</option>
-                @foreach ($guruList as $g)<option value="{{ $g->id }}">{{ $g->nama }}</option>@endforeach
-            </x-ui.select>
+            <x-ui.cari-pilihan
+                label="Guru Piket"
+                name="guru_id"
+                :options="$guruList"
+                placeholder="Ketik nama guru..."
+                required
+            />
             <x-ui.input label="Tanggal" name="tanggal" type="date" required />
             <div class="flex gap-3">
                 <x-ui.input label="Jam Mulai" name="mulai" type="time" class="flex-1" required />
@@ -149,4 +149,19 @@
             </div>
         </form>
     </x-admin.modal>
+
+    @push('scripts')
+        <script>
+            // Sesi -- shortcut isi Jam Mulai/Selesai otomatis, jam-nya sendiri
+            // tetap bisa diubah manual sesudahnya kalau memang beda.
+            document.querySelectorAll('[data-sesi-piket] input[name="sesi_piket"]').forEach((r) => {
+                r.addEventListener('change', function () {
+                    const form = this.closest('form');
+                    const m = form.querySelector('[name=mulai]'), s = form.querySelector('[name=selesai]');
+                    if (this.value === 'pagi') { m.value = '07:00'; s.value = '11:00'; }
+                    else if (this.value === 'siang') { m.value = '11:00'; s.value = '15:00'; }
+                });
+            });
+        </script>
+    @endpush
 </x-layouts.admin>

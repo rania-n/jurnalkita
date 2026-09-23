@@ -69,28 +69,23 @@
             <p class="text-xs text-muted-2">Nama kelas dibuat otomatis, contoh: <strong>X RPL 1</strong>.</p>
 
             <div class="flex gap-3">
-                <x-ui.select label="Tingkat" name="tingkat" class="flex-1" required>
-                    <option value="" disabled selected hidden>Pilih</option>
-                    <option value="X">X</option>
-                    <option value="XI">XI</option>
-                    <option value="XII">XII</option>
-                </x-ui.select>
+                <x-ui.choice label="Tingkat" name="tingkat" :options="['X' => 'X', 'XI' => 'XI', 'XII' => 'XII']" required />
                 <x-ui.input label="Nomor" name="nomor" type="number" min="1" placeholder="1" class="w-24" />
             </div>
 
-            <x-ui.select label="Jurusan" name="jurusan" required>
-                <option value="" disabled selected hidden>Pilih jurusan</option>
-                @foreach ($jurusanList as $kode => $nama)
-                    <option value="{{ $kode }}">{{ $kode }} — {{ $nama }}</option>
-                @endforeach
-            </x-ui.select>
+            <x-ui.choice
+                label="Jurusan"
+                name="jurusan"
+                :options="collect($jurusanList)->mapWithKeys(fn ($nama, $kode) => [$kode => $kode])->all()"
+                required
+            />
 
-            <x-ui.select label="Wali Kelas" name="wali_id">
-                <option value="">— tanpa wali —</option>
-                @foreach ($guruList as $g)
-                    <option value="{{ $g->id }}">{{ $g->nama }}</option>
-                @endforeach
-            </x-ui.select>
+            <x-ui.cari-pilihan
+                label="Wali Kelas"
+                name="wali_id"
+                :options="$guruList"
+                placeholder="Ketik nama guru... (opsional)"
+            />
 
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>

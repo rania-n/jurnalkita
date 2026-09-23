@@ -5,7 +5,8 @@
     'tones' => [],      // opsional: ['hadir' => 'hadir', 'alpha' => 'alpha', ...]
     'size' => 'md',     // md | sm
     'label' => null,
-    'required' => false, // cuma nampilin tanda * di label -- radio-nya sendiri udah selalu ada nilai kepilih (lihat :checked), jadi nggak butuh atribut required HTML.
+    'required' => false, // tanda * di label + atribut required HTML asli di tiap radio (browser ngeblok submit kalau belum ada yg kepilih) -- KECUALI $value udah keisi dari awal (mis. default 'hadir'), di situ nggak perlu dipaksa karena udah pasti ada nilai kepilih.
+    'disabled' => [],   // daftar $optValue yang nggak boleh dipilih (mis. hari yang udah penuh) -- tetap kelihatan, dicoret/pudar
 ])
 
 {{--
@@ -35,12 +36,15 @@
 
     <div class="flex flex-wrap gap-1.5" role="radiogroup" @if ($label) aria-label="{{ $label }}" @endif>
         @foreach ($options as $optValue => $optLabel)
-            <label class="grow basis-20 cursor-pointer select-none">
+            @php $matiin = in_array($optValue, $disabled, true); @endphp
+            <label @class(['grow basis-20 select-none', 'cursor-pointer' => ! $matiin, 'cursor-not-allowed opacity-40' => $matiin])>
                 <input
                     type="radio"
                     name="{{ $name }}"
                     value="{{ $optValue }}"
                     @checked((string) $value === (string) $optValue)
+                    @disabled($matiin)
+                    @required($required && $value === null)
                     class="peer sr-only"
                 >
                 <span class="flex w-full items-center justify-center rounded-lg border border-surface-alt bg-card text-center font-semibold text-muted-2 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-navy/40 {{ $pad }} {{ $toneClass[$tones[$optValue] ?? 'navy'] }}">

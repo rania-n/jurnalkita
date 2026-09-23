@@ -33,11 +33,17 @@ class SatpamController extends Controller
     /** Form catat siswa telat masuk gerbang pagi -- "buku piket ketertiban". */
     public function terlambatCreate(): View
     {
-        return view('satpam.terlambat-create', [
-            'kelasList' => Kelas::aktif()
-                ->with(['siswas' => fn ($q) => $q->where('status', 'aktif')->select('id', 'kelas_id', 'nama', 'nis')])
-                ->orderBy('nama')->get(),
-        ]);
+        $kelasList = Kelas::aktif()
+            ->with(['siswas' => fn ($q) => $q->where('status', 'aktif')->select('id', 'kelas_id', 'nama', 'nis')])
+            ->orderBy('nama')->get();
+
+        // Diratakan jadi 1 daftar buat kotak "cari siswa" -- sama pola kayak
+        // DispensasiController@create, biar nggak usah pilih kelas dulu.
+        $siswaList = $kelasList->flatMap(fn ($k) => $k->siswas->map(fn ($s) => [
+            'id' => $s->id, 'nama' => $s->nama, 'nis' => $s->nis, 'kelas' => $k->nama,
+        ]))->sortBy('nama')->values();
+
+        return view('satpam.terlambat-create', ['siswaList' => $siswaList]);
     }
 
     public function terlambatStore(Request $request): RedirectResponse

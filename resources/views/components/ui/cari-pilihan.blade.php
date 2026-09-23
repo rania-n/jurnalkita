@@ -8,6 +8,9 @@
     'tambahUrl' => null,
     'errorBag' => 'default',
     'required' => false,
+    'all' => null,        // teks pas kosong, mis. "Semua Kelas" -- pasang ini buat mode FILTER (bukan form input)
+    'compact' => false,   // kotak lebih kecil (h-10, ala x-admin.f-select) -- dipasang otomatis kalau $all diisi
+    'autoSubmit' => false, // langsung submit form begitu milih -- buat filter tabel (ala f-select onchange)
 ])
 
 @php
@@ -20,37 +23,70 @@
     // field.value nggak pernah ke-isi pas mode Ubah dibuka.
     $id = $attributes->get('id', $name.'-cari');
     $daftar = collect($options)->values();
-    $terpilihId = old($name, $value);
+    // Mode filter (dipasang $all): value awal dari query string langsung
+    // (bukan old(), field ini nggak nyambung ke validasi form biasa),
+    // dan compact+autoSubmit otomatis nyala kalau belum eksplisit dimatiin.
+    $modeFilter = $all !== null;
+    $compact = $compact || $modeFilter;
+    $autoSubmit = $autoSubmit || $modeFilter;
+    $terpilihId = $modeFilter ? request()->query($name) : old($name, $value);
     $terpilih = $daftar->firstWhere('id', is_numeric($terpilihId) ? (int) $terpilihId : $terpilihId);
 @endphp
 
 {{--
-    Dropdown biasa (<select>) buat daftar panjang (mis. 47 mapel, 131 guru)
-    capek discroll -- ini versi "ketik buat cari" generik, pola SAMA persis
-    kayak x-ui.cari-siswa (JS-nya sengaja dipisah sendiri di initCariPilihan()
-    biar nggak ganggu cari-siswa yang udah jalan), bedanya di sini bisa
-    dipasang di field APA AJA (kelas/guru/mapel/dll), bukan cuma siswa.
+    Dropdown biasa (<select>) buat daftar panjang (mis. 47 mapel, 131 guru,
+    72 kelas) capek discroll -- ini versi "ketik buat cari" generik, pola
+    SAMA persis kayak x-ui.cari-siswa (JS-nya sengaja dipisah sendiri di
+    initCariPilihan() biar nggak ganggu cari-siswa yang udah jalan), bedanya
+    di sini bisa dipasang di field APA AJA (kelas/guru/mapel/dll).
 
-    Opsional: kasih tombolLabel+tambahUrl buat nampilin link "+ Tambah X
+    2 mode:
+    - Form input (default) -- kotak gede ala x-ui.input, submit manual.
+    - Filter tabel -- pasang prop "all" (teks placeholder pas kosong, mis.
+      "Semua Kelas"), otomatis jadi kotak kompak ala x-admin.f-select +
+      langsung submit form begitu milih/hapus (pola sama kayak onchange
+      submit di f-select).
+
+    Opsional: kasih tambahLabel+tambahUrl buat nampilin link "+ Tambah X
     Baru" nempel di bagian bawah hasil pencarian -- biar kalau pilihannya
-    belum ada, admin nggak perlu keluar dulu cari menu Tambah Mapel manual.
+    belum ada, nggak perlu keluar dulu cari menu Tambah Mapel manual.
 --}}
-<div {{ $attributes->class('flex flex-col gap-1.5') }} data-cari-pilihan data-list='@json($daftar)'>
-    @if ($label)
+<div
+    {{-- "id" SENGAJA nggak diteruskan ke wrapper -- dipakainya khusus buat
+         $id (label "for" + kotak teks) di bawah, bukan div ini. Kalau
+         diteruskan juga ke wrapper, jadi 2 elemen beda pegang id yang sama
+         persis (invalid HTML, bikin getElementById nebak-nebak). --}}
+    {{ $attributes->except('id')->class(['flex flex-col gap-1', 'min-w-[9rem] flex-1' => $compact, 'gap-1.5' => ! $compact]) }}
+    data-cari-pilihan
+    data-list='@json($daftar)'
+    @if ($autoSubmit) data-auto-submit @endif
+>
+    @if ($label && $compact)
+        <span class="text-xs font-semibold text-muted-2">{{ $label }}</span>
+    @elseif ($label)
         <x-ui.label :for="$id" :required="$required">{{ $label }}</x-ui.label>
     @endif
 
     <div class="relative">
-        <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy @error($name, $errorBag) !border-alpha @enderror">
-            <x-icon name="search" :size="20" class="shrink-0 text-muted-2" />
+        <div @class([
+            'flex items-center gap-2 rounded-xl border border-surface-alt bg-card transition-colors focus-within:border-navy',
+            "@error($name, $errorBag) !border-alpha @enderror",
+            'h-10 rounded-lg px-3' => $compact,
+            'h-[52px] px-4' => ! $compact,
+        ])>
+            <x-icon name="search" :size="$compact ? 16 : 20" class="shrink-0 text-muted-2" />
             <input
                 type="text"
                 id="{{ $id }}"
                 autocomplete="off"
-                placeholder="{{ $placeholder }}"
+                placeholder="{{ $modeFilter ? ($all ?: $placeholder) : $placeholder }}"
                 value="{{ $terpilih['nama'] ?? '' }}"
                 data-cari-pilihan-input
-                class="w-full border-none bg-transparent text-[15px] text-ink outline-none placeholder:text-placeholder"
+                @class([
+                    'w-full border-none bg-transparent text-ink outline-none placeholder:text-placeholder',
+                    'text-sm font-medium' => $compact,
+                    'text-[15px]' => ! $compact,
+                ])
             >
             <button
                 type="button"
