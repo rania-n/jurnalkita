@@ -194,7 +194,25 @@ class JurnalController extends Controller
         $jadwalJpIni = ($modeDisiplinHariIni && $jpAktif !== null)
             ? $jadwals->filter(fn ($j) => $j->jam_ke_mulai <= $jpAktif && $j->jam_ke_selesai >= $jpAktif)
             : collect();
-        $jadwalTerkunci = ! $request->filled('jadwal') && $jadwalJpIni->count() === 1;
+
+        // Jadwal yang diminta eksplisit lewat ?jadwal=... (tombol "Isi Jurnal"
+        // di kartu jadwal per-JP di Beranda) HARUS lolos pengecekan yang SAMA
+        // kayak submit (jadwalBolehDiisi()) -- dulu ID-nya langsung di-trust
+        // apa adanya tanpa dicek ulang sama sekali, beda sama jalur tanpa
+        // parameter (menu "Isi Jurnal" biasa) yang emang auto-pilih murni dari
+        // $jadwalJpIni sehingga otomatis bener. Akibatnya kartu jadwal yang JP-
+        // nya "Sudah Lewat" tetap bisa kebuka form isinya. Kalau ternyata nggak
+        // lolos, anggap SAMA kayak nggak ada parameter -- biar auto-pilih ke JP
+        // yang BENERAN aktif sekarang (atau keblokir kalau emang lagi nggak ada
+        // JP aktif sama sekali), bukan malah nolak mentah-mentah padahal guru
+        // ini beneran lagi ada jadwal aktif (cuma bukan yang dia klik).
+        $jadwalDiminta = $request->filled('jadwal') ? $semuaJadwal->firstWhere('id', (int) $request->jadwal) : null;
+        if ($jadwalDiminta && ! $this->jadwalBolehDiisi($jadwalDiminta, $mode, $tanggalAktif)) {
+            $jadwalDiminta = null;
+        }
+        $adaJadwalDiminta = $jadwalDiminta !== null;
+
+        $jadwalTerkunci = ! $adaJadwalDiminta && $jadwalJpIni->count() === 1;
 
         // Di luar jam yang beneran cocok jadi jadwal SENDIRI (istirahat, atau
         // jam ini emang bukan jadwal dia), tapi MASIH dalam rentang jam sekolah
@@ -203,12 +221,12 @@ class JurnalController extends Controller
         // bebas milih (buat susulan/testing) kalau BENERAN udah di luar jam
         // sekolah (pulang sekolah, atau sebelum jam ke-1 mulai). Mode selain
         // 'disiplin' (atau tab Kemarin) nggak pernah diblokir sama sekali.
-        $jurnalDiblokirIstirahat = $modeDisiplinHariIni && Waktu::dalamJamSekolah() && $jadwalJpIni->count() !== 1;
+        $jurnalDiblokirIstirahat = $modeDisiplinHariIni && Waktu::dalamJamSekolah() && ! $adaJadwalDiminta && $jadwalJpIni->count() !== 1;
 
         $jadwalTerpilih = $jurnalDiblokirIstirahat
             ? null
-            : ($request->filled('jadwal')
-                ? $semuaJadwal->firstWhere('id', (int) $request->jadwal)
+            : ($adaJadwalDiminta
+                ? $jadwalDiminta
                 : ($jadwalTerkunci
                     ? $jadwalJpIni->first()
                     // Cuma ada 1 opsi -> browser otomatis milih itu (placeholder "Pilih

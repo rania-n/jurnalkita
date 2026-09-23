@@ -33,7 +33,15 @@
          jadi satu halaman panjang. Lebih pendek di HP (layarnya udah sempit,
          separuh layar kerasa kebesaran), agak lega lagi di layar lebih lebar. --}}
     <div class="mt-2 max-h-[38vh] overflow-y-auto rounded-2xl border border-surface-alt bg-surface-alt/40 p-3 sm:max-h-[50vh]">
-        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2 grid-fill-last">
+        {{-- "grid-fill-last" (CSS murni) SENGAJA nggak dipakai di sini --
+             utility itu ngecek :last-child:nth-child(odd) DI DOM, nggak sadar
+             ada kartu yang `hidden` (sebagian besar kartu emang disembunyiin
+             default di sini, lihat JS di bawah). Jadi kalau yang KELIHATAN
+             cuma 1 kartu, dia tetap nggak stretch penuh (posisinya di DOM
+             belum tentu last-child). Diakalin manual lewat JS (lihat
+             refresh() -- assign kelas col-span ke kartu KELIHATAN terakhir
+             kalau jumlahnya ganjil). --}}
+        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2" data-grid-presensi>
             @foreach ($siswas as $s)
                 @php
                     $isiAwal = $presensiAwal[$s->id] ?? ['status' => 'hadir', 'catatan' => null];
@@ -141,7 +149,16 @@
                     const statusNyaTidakHadir = statusRow(row) !== 'hadir';
                     if (statusNyaTidakHadir) tidakHadir++;
                     row.hidden = !cocokCari || !(q || semua || statusNyaTidakHadir);
+                    row.classList.remove('lg:col-span-2');
                 });
+
+                // Kartu yang KELIHATAN (bukan yang di-hidden) terakhir -- kalau
+                // jumlahnya ganjil di layar lebar (grid 2 kolom), stretch dia
+                // penuh 1 baris biar nggak nyisa gap kosong di sampingnya.
+                const tampil = rows.filter((row) => !row.hidden);
+                if (tampil.length % 2 === 1) {
+                    tampil[tampil.length - 1].classList.add('lg:col-span-2');
+                }
 
                 if (q) {
                     counter.textContent = `Hasil cari "${cari.value.trim()}"`;

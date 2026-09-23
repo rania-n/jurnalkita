@@ -32,7 +32,10 @@
     </div>
 
     <div class="mt-2 max-h-[38vh] overflow-y-auto rounded-2xl border border-surface-alt bg-surface-alt/40 p-3 sm:max-h-[50vh]">
-        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2 grid-fill-last">
+        {{-- Sama alasannya kayak versi Guru -- "grid-fill-last" CSS nggak
+             sadar kartu yang `hidden` lewat JS, jadi stretch-nya diakalin
+             manual lewat JS (lihat refresh() di bawah). --}}
+        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2" data-grid-presensi>
             @foreach ($siswas as $s)
                 @php
                     $isiAwal = ($presensiAwal ?? [])[$s->id] ?? ['status' => 'hadir', 'catatan' => null];
@@ -133,7 +136,13 @@
                     const statusNyaTidakHadir = statusRow(row) !== 'hadir';
                     if (statusNyaTidakHadir) tidakHadir++;
                     row.hidden = !cocokCari || !(q || semua || statusNyaTidakHadir);
+                    row.classList.remove('lg:col-span-2');
                 });
+
+                const tampil = rows.filter((row) => !row.hidden);
+                if (tampil.length % 2 === 1) {
+                    tampil[tampil.length - 1].classList.add('lg:col-span-2');
+                }
 
                 if (q) {
                     counter.textContent = `Hasil cari "${cari.value.trim()}"`;

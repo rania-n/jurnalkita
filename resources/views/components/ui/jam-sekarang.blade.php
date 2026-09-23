@@ -24,24 +24,25 @@
     ulang tiap beberapa menit).
 --}}
 {{--
-    Dulu tanggal/jam & badge status disatuin dalam 1 baris (flex justify-between)
-    -- di HP sempit (~320px) badge-nya kepotong/ke luar layar & tanggalnya
-    numpuk jadi 3 baris berantakan (teksnya ketekan sama badge di sisi kanan).
-    Sekarang dipisah: baris atas cuma ikon+tanggal+jam (nggak ada yang
-    berebut lebar), baris bawah badge status full-width sendiri -- nggak
-    akan overflow di lebar layar berapa pun.
+    Yang paling PENTING di sini bukan jam/tanggal (itu bisa dilihat sendiri
+    dari device), tapi status "sekarang lagi JP berapa / istirahat / di luar
+    jam pelajaran" -- itu info yang jelas dan harus paling menonjol. Jam &
+    tanggal tetap ditampilkan (kadang berguna), tapi dikecilin jadi baris
+    keterangan di atas, bukan elemen utama widget ini lagi.
+
+    Baris tanggal+jam dibikin flex-wrap (bukan dipaksa 1 baris) biar aman di
+    HP sempit (~320px) -- dulu pernah overflow pas dipaksa sejajar sama
+    badge status di 1 baris yang sama, makanya sekarang statusnya emang
+    dipisah ke baris sendiri (dan sekarang jadi baris UTAMA, bukan badge kecil).
 --}}
-<div class="mb-4 flex flex-col gap-2.5 rounded-2xl bg-navy px-4 py-3.5 text-card">
-    <div class="flex items-center gap-2.5">
-        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15">
-            <x-icon name="schedule" :size="20" />
-        </span>
-        <div class="min-w-0">
-            <p class="truncate text-xs text-card/70">{{ $tanggalIndo }}</p>
-            <p class="text-lg font-bold tabular-nums leading-tight" data-jam-sekarang>{{ now()->format('H:i:s') }}</p>
-        </div>
+<div class="mb-4 flex flex-col gap-1 rounded-2xl bg-navy px-4 py-3.5 text-card">
+    <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-card/60">
+        <x-icon name="schedule" :size="14" class="shrink-0" />
+        <span>{{ $tanggalIndo }}</span>
+        <span aria-hidden="true">·</span>
+        <span class="tabular-nums" data-jam-sekarang>{{ now()->format('H:i:s') }}</span>
     </div>
-    <span class="w-full rounded-lg bg-white/15 px-3 py-1.5 text-center text-xs font-bold">
+    <p class="text-xl font-bold leading-tight lg:text-2xl">
         {{ $jpSekarang ? 'Sedang JP '.$jpSekarang : ($dalamJamSekolah ? 'Waktu Istirahat' : 'Di luar jam pelajaran') }}
-    </span>
+    </p>
 </div>

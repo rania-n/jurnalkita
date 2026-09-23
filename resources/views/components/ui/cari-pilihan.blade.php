@@ -69,10 +69,15 @@
 
     <div class="relative">
         <div @class([
-            'flex items-center gap-2 rounded-xl border border-surface-alt bg-card transition-colors focus-within:border-navy',
-            "@error($name, $errorBag) !border-alpha @enderror",
+            'flex items-center gap-2 border border-surface-alt bg-card transition-colors focus-within:border-navy',
+            // Filter (mode $all) nggak pernah nampilin error validasi -- ini
+            // query-string biasa, bukan field form yang divalidasi, jadi
+            // border merah di sini cuma bakal nyasar dari error form LAIN
+            // yang kebetulan pakai nama field sama (mis. "kelas_id" di form
+            // Tambah Jadwal) dan nyangkut di session.
+            "@error($name, $errorBag) !border-alpha @enderror" => ! $modeFilter,
             'h-10 rounded-lg px-3' => $compact,
-            'h-[52px] px-4' => ! $compact,
+            'h-[52px] rounded-xl px-4' => ! $compact,
         ])>
             <x-icon name="search" :size="$compact ? 16 : 20" class="shrink-0 text-muted-2" />
             <input
@@ -83,9 +88,12 @@
                 value="{{ $terpilih['nama'] ?? '' }}"
                 data-cari-pilihan-input
                 @class([
-                    'w-full border-none bg-transparent text-ink outline-none placeholder:text-placeholder',
-                    'text-sm font-medium' => $compact,
-                    'text-[15px]' => ! $compact,
+                    'w-full border-none bg-transparent text-ink outline-none',
+                    // Kompak (filter bar) pakai warna placeholder yang sama
+                    // kayak kotak filter tetangganya (search-bar/f-select) --
+                    // text-placeholder itu punya kotak form gede (x-ui.input).
+                    'text-sm font-medium placeholder:text-muted' => $compact,
+                    'text-[15px] placeholder:text-placeholder' => ! $compact,
                 ])
             >
             <button

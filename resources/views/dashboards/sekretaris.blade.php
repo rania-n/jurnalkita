@@ -21,7 +21,7 @@
 @endphp
 
 <x-layouts.app title="Beranda Pengurus Kelas" width="wide">
-    <x-page-header title="Beranda" :subtitle="$kelas?->nama ?? 'Pengurus Kelas'" />
+    <x-page-header title="Beranda" size="sm" :subtitle="$kelas?->nama ?? 'Pengurus Kelas'" />
 
     @if ($kelas)
         <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />

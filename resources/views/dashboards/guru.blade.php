@@ -20,7 +20,11 @@
 @endphp
 
 <x-layouts.app title="Beranda Guru" width="wide">
-    <x-page-header title="Beranda" :subtitle="'Selamat mengajar, ' . auth()->user()->name" />
+    {{-- Nama guru udah ada di header atas (avatar + nama) -- nggak perlu
+         diulang lagi di sini. "Beranda" sendiri cuma label halaman (sidebar
+         udah nyorot menu aktif), jadi dikecilin (size="sm") biar konten di
+         bawahnya (jam mengajar sekarang, jadwal hari ini) yang lebih menonjol. --}}
+    <x-page-header title="Beranda" size="sm" />
 
     <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
 
