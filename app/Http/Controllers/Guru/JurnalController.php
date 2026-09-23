@@ -33,6 +33,12 @@ class JurnalController extends Controller
         'lainnya' => 'Lainnya',
     ];
 
+    /** Alasan Tidak Hadir -- cuma 2 kategori (bar, bukan teks bebas lagi). */
+    public const ALASAN_LABEL = [
+        'sakit' => 'Sakit',
+        'izin' => 'Izin',
+    ];
+
     private function guru()
     {
         return auth()->user()->guru ?? abort(403, 'Akun tidak terhubung ke data guru.');
@@ -269,6 +275,7 @@ class JurnalController extends Controller
             'metodeLabel' => self::METODE_LABEL,
             'metodeTerpilih' => old('metode_pilihan'),
             'metodeCustom' => old('metode_custom'),
+            'alasanLabel' => self::ALASAN_LABEL,
             'modeJurnal' => $mode,
             'pakaiKemarin' => $pakaiKemarin,
             'tanggalAktif' => $tanggalAktif,
@@ -287,14 +294,24 @@ class JurnalController extends Controller
             'metode_pilihan' => ['nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
             'metode_custom' => ['nullable', 'string', 'max:255'],
             'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
-            'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
+            'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
             'presensi' => ['nullable', 'array'],
             'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
-            'foto_bukti' => ['required', 'image', 'max:4096'],
+            // Wajib cuma kalau Hadir (bukti "beneran di kelas", lewat kamera
+            // langsung). Kalau Tidak Hadir, opsional -- boleh lampirin foto
+            // surat izin/sakit dari galeri (bukan wajib jepret kamera), lihat
+            // x-ui.upload di view. mimes (bukan "image") biar PDF juga lolos.
+            'foto_bukti' => [
+                $request->input('status_guru') === 'hadir' ? 'required' : 'nullable',
+                'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096',
+            ],
         ]);
 
         $data['metode'] = $this->hitungMetode($data);
+        if (isset($data['alasan'])) {
+            $data['alasan'] = self::ALASAN_LABEL[$data['alasan']] ?? $data['alasan'];
+        }
 
         $mode = PengaturanJurnal::mode();
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
@@ -387,7 +404,10 @@ class JurnalController extends Controller
 
         $jadwals = $jadwals->reject(fn ($j) => $idJadwalSudahDiisi->contains($j->id))->values();
 
-        return view('guru.jurnal.create-massal', compact('jadwals'));
+        return view('guru.jurnal.create-massal', [
+            'jadwals' => $jadwals,
+            'alasanLabel' => self::ALASAN_LABEL,
+        ]);
     }
 
     public function storeMassal(Request $request): RedirectResponse
@@ -397,10 +417,14 @@ class JurnalController extends Controller
         $data = $request->validate([
             'jadwal_ids' => ['required', 'array', 'min:1'],
             'jadwal_ids.*' => ['integer', 'exists:jadwals,id'],
-            'alasan' => ['required', 'string'],
+            'alasan' => ['required', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
             'tugas_tambahan_default' => ['required', 'string'],
             'tugas_khusus' => ['nullable', 'array'],
             'tugas_khusus.*' => ['nullable', 'string'],
+            // Opsional -- surat izin/sakit (kalau ada), BUKAN wajib jepret
+            // kamera kayak "foto suasana kelas" di form biasa (guru nggak di
+            // sekolah). 1 file yang sama dipakai buat semua kelas tercentang.
+            'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
 
         $jadwals = Jadwal::whereIn('id', $data['jadwal_ids'])->with('kelas.siswas', 'mapel')->get();
@@ -415,13 +439,16 @@ class JurnalController extends Controller
                 ->with('info', 'Kelas yang dipilih sudah ada jurnalnya semua (mungkin baru saja diisi dari tab lain).');
         }
 
+        $alasan = self::ALASAN_LABEL[$data['alasan']];
+        $suratPath = $request->file('surat')?->store('jurnal-bukti', 'public');
+
         // Nggak lewat jadwalBolehDiisi() (kunci-ke-JP-aktif buat mode
         // 'disiplin') SENGAJA -- itu buat nyegah klaim "udah ngajarin materi"
         // yang belum beneran kejalanin, sedangkan di sini nggak ada klaim
         // hadir sama sekali (isinya deklarasi ke depan "saya nggak masuk"),
         // termasuk buat jadwal JP yang belum kejalanin hari ini.
-        $dibuat = DB::transaction(function () use ($jadwals, $data, $guru, $tanggal) {
-            return $jadwals->map(function ($jadwal) use ($data, $guru, $tanggal) {
+        $dibuat = DB::transaction(function () use ($jadwals, $data, $guru, $tanggal, $alasan, $suratPath) {
+            return $jadwals->map(function ($jadwal) use ($data, $guru, $tanggal, $alasan, $suratPath) {
                 $tugasKhusus = trim($data['tugas_khusus'][$jadwal->id] ?? '');
 
                 $jurnal = Jurnal::create([
@@ -432,7 +459,8 @@ class JurnalController extends Controller
                     'jam_ke_selesai' => $jadwal->jam_ke_selesai,
                     'status_guru' => 'tidak_hadir',
                     'tugas_tambahan' => $tugasKhusus !== '' ? $tugasKhusus : $data['tugas_tambahan_default'],
-                    'alasan' => $data['alasan'],
+                    'alasan' => $alasan,
+                    'foto_bukti' => $suratPath,
                 ]);
 
                 // Guru nggak di kelas manapun buat nentuin presensi manual --
@@ -493,11 +521,18 @@ class JurnalController extends Controller
             $metodeCustom = $metodeTerpilih === 'lainnya' ? $jurnal->metode : null;
         }
 
+        // Sama pola kayak metode -- alasan disimpan sebagai teks label ("Sakit"/
+        // "Izin"), dicocokkan balik ke key bar-nya. Data lama (sebelum alasan
+        // jadi bar, masih teks bebas) nggak bakal cocok -- wajar, radio-nya
+        // biarin kosong, guru pilih ulang salah satu pas ubah jurnal ini.
+        $alasanTerpilih = old('alasan', array_search($jurnal->alasan, self::ALASAN_LABEL, true) ?: null);
+
         return view('guru.jurnal.edit', [
-            ...compact('jurnal', 'siswas', 'presensiAwal', 'jurnalSebelumnya'),
+            ...compact('jurnal', 'siswas', 'presensiAwal', 'jurnalSebelumnya', 'alasanTerpilih'),
             'metodeLabel' => self::METODE_LABEL,
             'metodeTerpilih' => old('metode_pilihan', $metodeTerpilih),
             'metodeCustom' => old('metode_custom', $metodeCustom),
+            'alasanLabel' => self::ALASAN_LABEL,
         ]);
     }
 
@@ -518,13 +553,18 @@ class JurnalController extends Controller
             'metode_pilihan' => ['nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
             'metode_custom' => ['nullable', 'string', 'max:255'],
             'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
-            'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
+            'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
             'presensi' => ['nullable', 'array'],
             'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
-            // Foto wajib -- kecuali jurnal ini udah punya foto dari sebelumnya
-            // (guru cuma ubah data lain, nggak wajib upload ulang fotonya).
-            'foto_bukti' => [$jurnal->foto_bukti ? 'nullable' : 'required', 'image', 'max:4096'],
+            // Foto wajib cuma kalau status_guru Hadir DAN belum ada foto dari
+            // sebelumnya (guru cuma ubah data lain nggak wajib upload ulang).
+            // Tidak Hadir -> selalu opsional (surat izin/sakit, bukan wajib
+            // jepret kamera) -- sama alasannya kayak store().
+            'foto_bukti' => [
+                ($jurnal->foto_bukti || $request->input('status_guru') !== 'hadir') ? 'nullable' : 'required',
+                'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096',
+            ],
         ]);
 
         // Jam selesai SELALU ikut jadwal aslinya, sama kayak di store() -- field
@@ -532,6 +572,9 @@ class JurnalController extends Controller
         $data['jam_ke_selesai'] = $jurnal->jam_ke_selesai;
 
         $data['metode'] = $this->hitungMetode($data);
+        if (isset($data['alasan'])) {
+            $data['alasan'] = self::ALASAN_LABEL[$data['alasan']] ?? $data['alasan'];
+        }
 
         DB::transaction(function () use ($jurnal, $data, $request) {
             $jurnal->update(collect($data)->except(['presensi', 'foto_bukti', 'jam_ke_mulai', 'metode_pilihan', 'metode_custom'])->all());

@@ -163,26 +163,8 @@
                         <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" />
                     </div>
                 </div>
-            </div>
 
-            <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
-                @if ($jadwals->count() > 1)
-                    {{-- Izin/sakit biasanya bukan cuma 1 jam pelajaran -- kalau guru
-                         megang lebih dari 1 jadwal hari ini, tawarin jalan pintas
-                         biar nggak harus bolak-balik isi form ini per kelas. --}}
-                    <x-alert type="info">
-                        Izin/sakit buat lebih dari 1 kelas hari ini?
-                        <a href="{{ route('jurnal.massal.create') }}" class="font-bold underline">Isi sekali buat semua kelas →</a>
-                    </x-alert>
-                @endif
-                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
-                <x-ui.textarea label="Alasan" name="alasan" :rows="2" placeholder="Alasan tidak hadir..." required>{{ old('alasan') }}</x-ui.textarea>
-            </div>
-
-            @if ($jadwalTerpilih)
-                @include('guru.jurnal._presensi-grid')
-
-                <div class="mt-4">
+                @if ($jadwalTerpilih)
                     {{-- Wajib jepret langsung dari kamera (nggak boleh unggah dari
                          galeri) -- biar beneran bukti sedang di kelas, bukan foto
                          lama. Jalan di HP maupun PC/laptop (lihat komponennya). --}}
@@ -192,7 +174,55 @@
                         hint="Wajib diisi — bukti pembelajaran sedang berlangsung"
                         required
                     />
-                </div>
+                @endif
+            </div>
+
+            <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
+                @if ($jadwals->count() > 1)
+                    {{-- Izin/sakit biasanya bukan cuma 1 jam pelajaran -- kalau guru
+                         megang lebih dari 1 jadwal hari ini, tawarin milih dari
+                         sini langsung, daripada isi form ini berkali-kali per
+                         kelas. Pilih "Ya" -> lompat ke halaman isi massal. --}}
+                    <x-ui.choice
+                        label="Tidak Hadir 1 Hari Penuh?"
+                        name="tidak_hadir_sehari_penuh"
+                        :options="['tidak' => 'Cuma Kelas Ini', 'ya' => 'Ya, Semua Kelas']"
+                        value="tidak"
+                        data-toggle-massal
+                    />
+                @endif
+
+                <x-ui.choice
+                    label="Alasan"
+                    name="alasan"
+                    :options="$alasanLabel"
+                    :value="old('alasan')"
+                    required
+                />
+
+                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
+
+                @if ($jadwalTerpilih)
+                    {{-- Opsional (BEDA dari foto suasana kelas di atas) -- guru
+                         nggak di sekolah, jadi nggak wajib jepret kamera, cukup
+                         lampirin foto/scan surat izin dari galeri kalau ada. --}}
+                    {{-- id BEDA dari yang di blok-hadir (walau name-nya sama
+                         persis "foto_bukti") -- dua elemen id kembar bikin
+                         getElementById/dst nebak-nebak (sama kasusnya kayak
+                         cari-pilihan, lihat catatan di komponen itu). --}}
+                    <x-ui.upload
+                        id="foto_bukti_tidak_hadir"
+                        label="Surat Izin/Sakit (opsional)"
+                        name="foto_bukti"
+                        title="Lampirkan Surat / Foto Bukti"
+                        hint="JPG, PNG, atau PDF"
+                        accept="image/*,application/pdf"
+                    />
+                @endif
+            </div>
+
+            @if ($jadwalTerpilih)
+                @include('guru.jurnal._presensi-grid')
             @else
                 <x-alert type="info" class="mt-6">Pilih kelas & mata pelajaran dulu di atas untuk mengisi presensi siswa.</x-alert>
             @endif
@@ -251,8 +281,11 @@
                             isiEl.textContent = materi || '(belum diisi)';
                         } else {
                             const tugas = form.querySelector('[name="tugas_tambahan"]')?.value.trim();
-                            const alasan = form.querySelector('[name="alasan"]')?.value.trim();
-                            isiEl.textContent = `Tugas: ${tugas || '(belum diisi)'} — Alasan: ${alasan || '(belum diisi)'}`;
+                            // Alasan sekarang bar (radio), bukan teks bebas -- ambil
+                            // yang BENERAN kecentang, bukan cuma elemen pertama.
+                            const alasanLabel = { sakit: 'Sakit', izin: 'Izin' };
+                            const alasan = form.querySelector('input[name="alasan"]:checked')?.value;
+                            isiEl.textContent = `Tugas: ${tugas || '(belum diisi)'} — Alasan: ${alasan ? (alasanLabel[alasan] ?? alasan) : '(belum dipilih)'}`;
                         }
 
                         // Yang ditampilin cuma nama yang BUKAN Hadir -- itu yang
@@ -277,9 +310,13 @@
                             ? (bagianTidakHadir ? `${bagianTidakHadir} (sisanya ${jumlahHadir} Hadir)` : `Semua ${rowsSiswa.length} siswa Hadir`)
                             : '—';
 
-                        const fotoInput = form.querySelector('[data-kamera-input]');
+                        // Bisa dari 2 sumber beda tergantung status_guru -- kamera
+                        // (blok-hadir, wajib) atau file-picker biasa buat surat
+                        // (blok-tidak-hadir, opsional). Yang disabled (blok yang
+                        // lagi disembunyiin) otomatis nggak dihitung filesnya.
+                        const fotoInput = form.querySelector('[data-kamera-input]:not(:disabled), [data-upload-input]:not(:disabled)');
                         modalRingkasan.querySelector('[data-ringkasan="foto"]').textContent =
-                            (fotoInput?.files?.length > 0) ? 'Sudah diambil' : 'Belum diambil';
+                            (fotoInput?.files?.length > 0) ? 'Sudah dilampirkan' : (hadir ? 'Belum diambil' : 'Tidak dilampirkan (opsional)');
                     }
 
                     form.addEventListener('submit', (e) => {
@@ -352,16 +389,29 @@
                         blokHadir.hidden = !hadir;
                         blokTidakHadir.hidden = hadir;
 
-                        // Atribut "required" bawaan HTML TETAP ngecek elemen yang
-                        // disembunyiin lewat ancestor "hidden" (nggak otomatis
-                        // dikecualiin kayak dugaan awal) -- kalau nggak dicopot
-                        // manual di sini, form nggak akan pernah lolos validitas
-                        // native pas blok yang lagi disembunyiin isinya kosong.
-                        blokHadir.querySelectorAll('[required]').forEach((el) => { el.disabled = !hadir; });
-                        blokTidakHadir.querySelectorAll('[required]').forEach((el) => { el.disabled = hadir; });
+                        // Disable SEMUA field (bukan cuma yang "required") di blok
+                        // yang lagi disembunyiin -- dua alasan: (1) atribut
+                        // "required" bawaan HTML tetap ngecek elemen yang
+                        // disembunyiin lewat ancestor "hidden", nggak otomatis
+                        // dikecualiin; (2) dua-duanya sama-sama punya field
+                        // name="foto_bukti" (beda id, kamera vs upload biasa) --
+                        // kalau yang disembunyiin nggak di-disable, dua-duanya
+                        // ikut kesubmit bareng & yang kepakai jadi nggak pasti.
+                        blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
+                        blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
                     }
                     document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
                     syncStatusGuru();
+
+                    // "Tidak Hadir 1 Hari Penuh?" -> pilih "Ya" langsung lompat ke
+                    // halaman isi massal (bukan lanjut isi form 1 kelas ini).
+                    document.querySelectorAll('input[name="tidak_hadir_sehari_penuh"]').forEach((el) => {
+                        el.addEventListener('change', () => {
+                            if (el.checked && el.value === 'ya') {
+                                window.location.href = '{{ route('jurnal.massal.create') }}';
+                            }
+                        });
+                    });
 
                     // Metode Pembelajaran "Lainnya" -> munculin kotak teks bebas.
                     const metodeCustom = document.getElementById('metode_custom_wrap');

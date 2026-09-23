@@ -50,6 +50,18 @@
             />
         </div>
 
+        {{-- Foto lama (kalau ada) ditampilin sekali di luar blok hadir/tidak --
+             dua-duanya sama-sama bisa punya foto lama yang mau dipertahankan. --}}
+        @if ($jurnal->foto_bukti)
+            <div class="mt-4 mb-2 flex flex-col gap-1.5">
+                <x-ui.label>{{ $jurnal->status_guru === 'hadir' ? 'Foto Suasana Kelas' : 'Surat Izin/Sakit' }} (sudah diunggah)</x-ui.label>
+                <a href="{{ Storage::url($jurnal->foto_bukti) }}" target="_blank" rel="noopener">
+                    <img src="{{ Storage::url($jurnal->foto_bukti) }}" alt="Foto/surat bukti"
+                         class="max-h-56 w-full rounded-xl border border-surface-alt object-cover">
+                </a>
+            </div>
+        @endif
+
         {{-- Semua field di sini full-width, jadi nggak perlu ikut grid 2-kolom di atas. --}}
         <div id="blok-hadir" class="mt-4 flex flex-col gap-4">
             <x-ui.textarea label="Materi" name="materi" :rows="3" required>{{ old('materi', $jurnal->materi) }}</x-ui.textarea>
@@ -65,25 +77,7 @@
                     <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" />
                 </div>
             </div>
-        </div>
 
-        <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
-            <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" required>{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
-            <x-ui.textarea label="Alasan" name="alasan" :rows="2" required>{{ old('alasan', $jurnal->alasan) }}</x-ui.textarea>
-        </div>
-
-        @include('guru.jurnal._presensi-grid')
-
-        <div class="mt-4">
-            @if ($jurnal->foto_bukti)
-                <div class="mb-2 flex flex-col gap-1.5">
-                    <x-ui.label>Foto Suasana Kelas (sudah diunggah)</x-ui.label>
-                    <a href="{{ Storage::url($jurnal->foto_bukti) }}" target="_blank" rel="noopener">
-                        <img src="{{ Storage::url($jurnal->foto_bukti) }}" alt="Foto suasana kelas"
-                             class="max-h-56 w-full rounded-xl border border-surface-alt object-cover">
-                    </a>
-                </div>
-            @endif
             <x-ui.upload-kamera
                 :label="$jurnal->foto_bukti ? 'Ganti Foto Suasana Kelas (opsional)' : 'Foto Suasana Kelas'"
                 name="foto_bukti"
@@ -92,6 +86,30 @@
                 :required="! $jurnal->foto_bukti"
             />
         </div>
+
+        <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
+            <x-ui.choice
+                label="Alasan"
+                name="alasan"
+                :options="$alasanLabel"
+                :value="$alasanTerpilih"
+                required
+            />
+            <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" required>{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
+
+            {{-- id BEDA dari yang di blok-hadir (name-nya sama "foto_bukti") --
+                 lihat catatan lebih detail di guru/jurnal/create.blade.php. --}}
+            <x-ui.upload
+                id="foto_bukti_tidak_hadir"
+                :label="$jurnal->foto_bukti ? 'Ganti Surat Izin/Sakit (opsional)' : 'Surat Izin/Sakit (opsional)'"
+                name="foto_bukti"
+                title="Lampirkan Surat / Foto Bukti"
+                hint="JPG, PNG, atau PDF"
+                accept="image/*,application/pdf"
+            />
+        </div>
+
+        @include('guru.jurnal._presensi-grid')
 
         <x-ui.sticky-bar>
             <x-ui.button type="submit" block icon="save">Simpan Perubahan</x-ui.button>
@@ -132,8 +150,9 @@
                             isiEl.textContent = materi || '(belum diisi)';
                         } else {
                             const tugas = form.querySelector('[name="tugas_tambahan"]')?.value.trim();
-                            const alasan = form.querySelector('[name="alasan"]')?.value.trim();
-                            isiEl.textContent = `Tugas: ${tugas || '(belum diisi)'} — Alasan: ${alasan || '(belum diisi)'}`;
+                            const alasanLabel = { sakit: 'Sakit', izin: 'Izin' };
+                            const alasan = form.querySelector('input[name="alasan"]:checked')?.value;
+                            isiEl.textContent = `Tugas: ${tugas || '(belum diisi)'} — Alasan: ${alasan ? (alasanLabel[alasan] ?? alasan) : '(belum dipilih)'}`;
                         }
 
                         const rowsSiswa = form.querySelectorAll('[data-siswa-row]');
@@ -154,11 +173,11 @@
                             ? (bagianTidakHadir ? `${bagianTidakHadir} (sisanya ${jumlahHadir} Hadir)` : `Semua ${rowsSiswa.length} siswa Hadir`)
                             : '—';
 
-                        const fotoInput = form.querySelector('[data-kamera-input]');
+                        const fotoInput = form.querySelector('[data-kamera-input]:not(:disabled), [data-upload-input]:not(:disabled)');
                         const fotoBaru = fotoInput?.files?.length > 0;
                         modalRingkasan.querySelector('[data-ringkasan="foto"]').textContent = fotoBaru
-                            ? 'Foto baru diambil'
-                            : (@json((bool) $jurnal->foto_bukti) ? 'Pakai foto lama' : 'Belum diambil');
+                            ? 'Foto/surat baru dilampirkan'
+                            : (@json((bool) $jurnal->foto_bukti) ? 'Pakai yang lama' : (hadir ? 'Belum diambil' : 'Tidak dilampirkan (opsional)'));
                     }
 
                     form.addEventListener('submit', (e) => {
@@ -187,12 +206,12 @@
                     blokHadir.hidden = !hadir;
                     blokTidakHadir.hidden = hadir;
 
-                    // "required" bawaan HTML tetap ngecek elemen yang disembunyiin
-                    // lewat ancestor "hidden" -- dicopot manual (via disabled)
-                    // biar form bisa lolos validitas native pas blok yang lagi
-                    // disembunyiin isinya kosong.
-                    blokHadir.querySelectorAll('[required]').forEach((el) => { el.disabled = !hadir; });
-                    blokTidakHadir.querySelectorAll('[required]').forEach((el) => { el.disabled = hadir; });
+                    // Disable SEMUA field (bukan cuma yang "required") di blok yang
+                    // disembunyiin -- selain biar validitas native nggak kesandung,
+                    // dua-duanya sama-sama punya field name="foto_bukti" (beda id),
+                    // kalau nggak di-disable dua-duanya ikut kesubmit bareng.
+                    blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
+                    blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
                 }
                 document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
                 syncStatusGuru();

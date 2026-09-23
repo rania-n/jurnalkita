@@ -12,16 +12,16 @@
             desc="Semua jadwal Anda hari ini sudah ada jurnalnya, atau memang nggak ada jadwal hari ini."
         />
     @else
-        <form method="POST" action="{{ route('jurnal.massal.store') }}">
+        <form method="POST" action="{{ route('jurnal.massal.store') }}" enctype="multipart/form-data">
             @csrf
 
-            <x-ui.textarea
+            <x-ui.choice
                 label="Alasan"
                 name="alasan"
-                :rows="2"
-                placeholder="Contoh: sakit, izin keperluan keluarga..."
+                :options="$alasanLabel"
+                :value="old('alasan')"
                 required
-            >{{ old('alasan') }}</x-ui.textarea>
+            />
 
             <x-ui.textarea
                 label="Tugas Tambahan (default -- berlaku ke semua kelas di bawah, kecuali diisi khusus)"
@@ -31,6 +31,18 @@
                 placeholder="Contoh: kerjakan LKS halaman 12-15."
                 required
             >{{ old('tugas_tambahan_default') }}</x-ui.textarea>
+
+            {{-- Opsional -- 1 file yang sama (misal foto surat dokter) dipakai
+                 buat semua kelas yang ditandai di bawah, nggak usah upload
+                 berkali-kali. --}}
+            <x-ui.upload
+                label="Surat Izin/Sakit (opsional)"
+                name="surat"
+                title="Lampirkan Surat / Foto Bukti"
+                hint="JPG, PNG, atau PDF -- berlaku buat semua kelas di bawah"
+                accept="image/*,application/pdf"
+                class="mt-4"
+            />
 
             <p class="mb-2 mt-5 text-sm font-bold text-ink">Kelas yang ditandai ({{ $jadwals->count() }})</p>
             <p class="mb-3 text-xs text-muted-2">Semua tercentang otomatis -- hapus centang kelas yang nggak mau ikut ditandai (mis. mau diisi manual belakangan).</p>

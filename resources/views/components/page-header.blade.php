@@ -17,13 +17,14 @@
          mulai `sm:`. --}}
     <header class="flex {{ $alwaysRow ? 'flex-row items-start justify-between' : 'flex-col items-stretch sm:flex-row sm:items-start' }} gap-3">
         {{-- Panah kembali nempel SEJAJAR sama judul (bukan baris sendiri di
-             atasnya) -- pola tombol "chip" ngambang sendiri kesannya kayak
-             aksi terpisah, padahal ini navigasi yang nempel ke judul. --}}
-        <div class="flex flex-1 min-w-0 items-start gap-2">
+             atasnya kayak dulu) TAPI tetap keliatan jelas sebagai TOMBOL --
+             background abu-abu selalu ada (bukan cuma pas hover), biar nggak
+             kayak ikon nyasar doang nempel di judul. --}}
+        <div class="flex flex-1 min-w-0 items-start gap-3">
             @if ($back)
                 <a
                     href="{{ $back }}"
-                    class="press mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-alt hover:text-ink"
+                    class="press mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-alt text-ink transition-colors hover:bg-[#cbd5e1]"
                     aria-label="Kembali"
                 >
                     <x-icon name="arrow_back" :size="20" />
