@@ -19,9 +19,18 @@
 
 <div class="mt-6">
     <h2 class="mb-1 text-sm font-bold text-ink">Presensi ({{ $siswas->count() }} siswa)</h2>
-    <p class="mb-3 text-xs text-muted-2">Semua siswa otomatis <strong>Hadir</strong> (kecuali yang udah otomatis kesorot dari jurnal lain di bawah). Cari nama buat menandai yang Sakit/Izin/Alpha/Dispensasi.</p>
+    <p class="mb-3 text-xs text-muted-2">Semua siswa otomatis <strong>Hadir</strong> (kecuali yang udah otomatis kesorot dari jurnal lain di bawah). Ketik nama buat cari & tandai yang Sakit/Izin/Alpha/Dispensasi.</p>
 
-    <x-ui.search-bar id="cari-siswa-pengganti" placeholder="Cari nama siswa yang tidak hadir..." />
+    {{-- Dropdown beneran (bukan filter kartu langsung), sama pola kayak versi
+         Guru -- lihat catatan lebih detail di guru/jurnal/_presensi-grid.blade.php. --}}
+    <div class="relative">
+        <x-ui.search-bar id="cari-siswa-pengganti" placeholder="Cari nama siswa yang tidak hadir..." />
+        <div
+            id="hasil-cari-siswa-pengganti"
+            hidden
+            class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-surface-alt bg-card py-1 shadow-lg"
+        ></div>
+    </div>
 
     <div class="mt-2 flex items-center justify-between gap-2">
         <p class="text-xs text-muted-2" id="jumlah-tampil-pengganti"></p>
@@ -112,9 +121,11 @@
     <script>
         (function () {
             const cari = document.getElementById('cari-siswa-pengganti');
+            const hasil = document.getElementById('hasil-cari-siswa-pengganti');
             const rows = Array.from(document.querySelectorAll('[data-siswa-row-pengganti]'));
             const counter = document.getElementById('jumlah-tampil-pengganti');
             const tampilkanSemua = document.getElementById('tampilkan-semua-siswa-pengganti');
+            const dipilihManual = new Set();
 
             cari?.closest('form')?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && (e.target.type === 'text' || e.target.type === 'search')) {
@@ -126,16 +137,49 @@
                 return row.querySelector('input[type="radio"]:checked')?.value ?? 'hadir';
             }
 
+            function namaAsli(row) {
+                return row.querySelector('.text-ink')?.textContent.trim() ?? '';
+            }
+
+            function renderHasilCari(q) {
+                if (!hasil) return;
+                if (!q) {
+                    hasil.hidden = true;
+                    return;
+                }
+                const cocok = rows.filter((row) => row.dataset.nama.includes(q) || row.dataset.noAbsen.includes(q));
+                if (cocok.length === 0) {
+                    hasil.innerHTML = '<p class="px-3.5 py-2.5 text-sm text-muted-2">Tidak ada siswa yang cocok.</p>';
+                } else {
+                    hasil.innerHTML = cocok.slice(0, 30).map((row, i) => `
+                        <button type="button" data-pilih-hasil="${i}" class="flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left hover:bg-surface-alt">
+                            <span class="text-sm font-semibold text-ink">${namaAsli(row)}</span>
+                            <span class="text-xs text-muted-2">No. ${row.dataset.noAbsen} · ${statusRow(row) === 'hadir' ? 'Hadir' : 'Sudah ditandai'}</span>
+                        </button>
+                    `).join('');
+                    hasil.querySelectorAll('[data-pilih-hasil]').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            const row = cocok[Number(btn.dataset.pilihHasil)];
+                            dipilihManual.add(row);
+                            cari.value = '';
+                            hasil.hidden = true;
+                            refresh();
+                            row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                            row.querySelector('input[type="radio"]')?.focus();
+                        });
+                    });
+                }
+                hasil.hidden = false;
+            }
+
             function refresh() {
-                const q = cari ? cari.value.trim().toLowerCase() : '';
                 const semua = tampilkanSemua?.checked;
                 let tidakHadir = 0;
 
                 rows.forEach((row) => {
-                    const cocokCari = !q || row.dataset.nama.includes(q) || row.dataset.noAbsen.includes(q);
                     const statusNyaTidakHadir = statusRow(row) !== 'hadir';
                     if (statusNyaTidakHadir) tidakHadir++;
-                    row.hidden = !cocokCari || !(q || semua || statusNyaTidakHadir);
+                    row.hidden = !(semua || statusNyaTidakHadir || dipilihManual.has(row));
                     row.classList.remove('lg:col-span-2');
                 });
 
@@ -144,9 +188,7 @@
                     tampil[tampil.length - 1].classList.add('lg:col-span-2');
                 }
 
-                if (q) {
-                    counter.textContent = `Hasil cari "${cari.value.trim()}"`;
-                } else if (semua) {
+                if (semua) {
                     counter.textContent = `Menampilkan semua ${rows.length} siswa`;
                 } else {
                     counter.textContent = tidakHadir > 0
@@ -155,7 +197,13 @@
                 }
             }
 
-            cari?.addEventListener('input', refresh);
+            cari?.addEventListener('input', () => renderHasilCari(cari.value.trim().toLowerCase()));
+            cari?.addEventListener('focus', () => { if (cari.value.trim()) renderHasilCari(cari.value.trim().toLowerCase()); });
+            document.addEventListener('click', (e) => {
+                if (hasil && !hasil.hidden && !e.target.closest('#hasil-cari-siswa-pengganti') && e.target !== cari) {
+                    hasil.hidden = true;
+                }
+            });
             tampilkanSemua?.addEventListener('change', refresh);
             rows.forEach((row) => {
                 row.querySelectorAll('input[type="radio"]').forEach((r) => r.addEventListener('change', refresh));
