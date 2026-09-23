@@ -233,18 +233,27 @@
                             isiEl.textContent = `Tugas: ${tugas || '(belum diisi)'} — Alasan: ${alasan || '(belum diisi)'}`;
                         }
 
-                        const rekap = {};
-                        form.querySelectorAll('[data-siswa-row] input[type="radio"]:checked').forEach((r) => {
-                            rekap[r.value] = (rekap[r.value] || 0) + 1;
+                        // Yang ditampilin cuma nama yang BUKAN Hadir -- itu yang
+                        // paling penting dicek ulang sebelum kirim (semuanya
+                        // udah Hadir emang defaultnya, nge-list 36 nama satu-satu
+                        // di sini nggak nambah info, cuma bikin ringkasan panjang).
+                        const rowsSiswa = form.querySelectorAll('[data-siswa-row]');
+                        const kelompok = { sakit: [], izin: [], alpha: [], dispensasi: [] };
+                        let jumlahHadir = 0;
+                        rowsSiswa.forEach((row) => {
+                            const status = row.querySelector('input[type="radio"]:checked')?.value ?? 'hadir';
+                            if (status === 'hadir') { jumlahHadir++; return; }
+                            const nama = row.querySelector('.text-ink')?.textContent.trim() || '(tanpa nama)';
+                            (kelompok[status] ?? (kelompok[status] = [])).push(nama);
                         });
-                        const label = { hadir: 'Hadir', sakit: 'Sakit', izin: 'Izin', alpha: 'Alpha', dispensasi: 'Dispensasi' };
-                        const totalSiswa = form.querySelectorAll('[data-siswa-row]').length;
-                        const ringkasPresensi = Object.entries(rekap)
-                            .filter(([, n]) => n > 0)
-                            .map(([k, n]) => `${label[k] || k} ${n}`)
-                            .join(', ');
-                        modalRingkasan.querySelector('[data-ringkasan="presensi"]').textContent =
-                            totalSiswa ? `${ringkasPresensi || '—'} (dari ${totalSiswa} siswa)` : '—';
+                        const label = { sakit: 'Sakit', izin: 'Izin', alpha: 'Alpha', dispensasi: 'Dispensasi' };
+                        const bagianTidakHadir = Object.entries(kelompok)
+                            .filter(([, arr]) => arr.length > 0)
+                            .map(([k, arr]) => `${label[k] || k}: ${arr.join(', ')}`)
+                            .join(' · ');
+                        modalRingkasan.querySelector('[data-ringkasan="presensi"]').textContent = rowsSiswa.length
+                            ? (bagianTidakHadir ? `${bagianTidakHadir} (sisanya ${jumlahHadir} Hadir)` : `Semua ${rowsSiswa.length} siswa Hadir`)
+                            : '—';
 
                         const fotoInput = form.querySelector('[data-kamera-input]');
                         modalRingkasan.querySelector('[data-ringkasan="foto"]').textContent =
