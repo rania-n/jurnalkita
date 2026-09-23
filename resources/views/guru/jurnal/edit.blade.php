@@ -31,6 +31,15 @@
             </x-ui.field-static>
             <input type="hidden" name="jam_ke_selesai" value="{{ $jurnal->jam_ke_selesai }}">
 
+            @if ($jurnalSebelumnya)
+                <div class="sm:col-span-2 rounded-xl bg-surface-alt/60 px-3.5 py-2.5 text-xs text-muted">
+                    <span class="font-semibold text-ink">
+                        Terakhir diisi ({{ $jurnalSebelumnya->tanggal->translatedFormat('d M Y') }}{{ $jurnalSebelumnya->status_guru === 'tidak_hadir' ? ', gurunya tidak hadir' : '' }}):
+                    </span>
+                    {{ ($jurnalSebelumnya->status_guru === 'hadir' ? $jurnalSebelumnya->materi : $jurnalSebelumnya->tugas_tambahan) ?: '—' }}
+                </div>
+            @endif
+
             <x-ui.choice
                 label="Status Kehadiran Anda"
                 name="status_guru"

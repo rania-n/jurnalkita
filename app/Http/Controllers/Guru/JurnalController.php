@@ -237,12 +237,22 @@ class JurnalController extends Controller
 
         $siswas = collect();
         $presensiAwal = [];
+        $jurnalSebelumnya = null;
         if ($jadwalTerpilih) {
             $jadwalTerpilih->loadMissing('kelas.siswas');
             $siswas = $jadwalTerpilih->kelas->siswas->sortBy('no_absen')->values();
             $presensiAwal = PresensiDefault::untukKelas(
                 $siswas, $jadwalTerpilih->kelas_id, $tanggalAktif->toDateString(), $jadwalTerpilih->jam_ke_mulai, $jadwalTerpilih->jam_ke_selesai
             );
+
+            // Jurnal terakhir di jadwal yang SAMA (kelas+mapel+guru+slot ini
+            // juga) sebelum tanggal aktif -- biasanya minggu lalu, tapi bisa
+            // lebih lama kalau ada libur di antaranya. Dipakai cuma buat
+            // acuan tampilan (nggak dipakai isi otomatis field manapun).
+            $jurnalSebelumnya = Jurnal::where('jadwal_id', $jadwalTerpilih->id)
+                ->where('tanggal', '<', $tanggalAktif->toDateString())
+                ->latest('tanggal')
+                ->first();
         }
 
         return view('guru.jurnal.create', [
@@ -251,6 +261,7 @@ class JurnalController extends Controller
             'jadwalTerkunci' => $jadwalTerkunci,
             'jurnalDiblokirIstirahat' => $jurnalDiblokirIstirahat,
             'jumlahSudahDiisiHariIni' => $jumlahSudahDiisiHariIni,
+            'jurnalSebelumnya' => $jurnalSebelumnya,
             'jpSekarang' => $jpSekarang,
             'jpMaks' => 13,
             'siswas' => $siswas,
@@ -351,6 +362,109 @@ class JurnalController extends Controller
             ->with('success', 'Jurnal & presensi tersimpan.');
     }
 
+    /* --------------------------------------------------- Tidak hadir, massal */
+
+    /**
+     * Guru izin/sakit seharian & megang lebih dari 1 kelas -- daripada
+     * bolak-balik isi form yang sama persis per kelas, di sini bisa ditandai
+     * SEKALIGUS buat semua jadwal hari ini yang belum ada jurnalnya. Alasan
+     * berlaku sama ke semua (memang soal kondisi gurunya sendiri), Tugas
+     * Tambahan punya 1 teks default yang bisa di-override per kelas kalau
+     * ternyata beda (lihat storeMassal()).
+     */
+    public function createMassal(): View
+    {
+        $guru = $this->guru();
+        $hariIni = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][now()->dayOfWeek - 1] ?? null;
+
+        $jadwals = $hariIni
+            ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hariIni)->orderBy('jam_ke_mulai')->get()
+            : collect();
+
+        $idJadwalSudahDiisi = Jurnal::whereIn('jadwal_id', $jadwals->pluck('id'))
+            ->whereDate('tanggal', now()->toDateString())
+            ->pluck('jadwal_id');
+
+        $jadwals = $jadwals->reject(fn ($j) => $idJadwalSudahDiisi->contains($j->id))->values();
+
+        return view('guru.jurnal.create-massal', compact('jadwals'));
+    }
+
+    public function storeMassal(Request $request): RedirectResponse
+    {
+        $guru = $this->guru();
+
+        $data = $request->validate([
+            'jadwal_ids' => ['required', 'array', 'min:1'],
+            'jadwal_ids.*' => ['integer', 'exists:jadwals,id'],
+            'alasan' => ['required', 'string'],
+            'tugas_tambahan_default' => ['required', 'string'],
+            'tugas_khusus' => ['nullable', 'array'],
+            'tugas_khusus.*' => ['nullable', 'string'],
+        ]);
+
+        $jadwals = Jadwal::whereIn('id', $data['jadwal_ids'])->with('kelas.siswas', 'mapel')->get();
+        abort_if($jadwals->contains(fn ($j) => $j->guru_id !== $guru->id), 403);
+
+        $tanggal = now()->toDateString();
+        $sudahAda = Jurnal::whereIn('jadwal_id', $jadwals->pluck('id'))->whereDate('tanggal', $tanggal)->pluck('jadwal_id');
+        $jadwals = $jadwals->reject(fn ($j) => $sudahAda->contains($j->id))->values();
+
+        if ($jadwals->isEmpty()) {
+            return redirect()->route('jurnal.index')
+                ->with('info', 'Kelas yang dipilih sudah ada jurnalnya semua (mungkin baru saja diisi dari tab lain).');
+        }
+
+        // Nggak lewat jadwalBolehDiisi() (kunci-ke-JP-aktif buat mode
+        // 'disiplin') SENGAJA -- itu buat nyegah klaim "udah ngajarin materi"
+        // yang belum beneran kejalanin, sedangkan di sini nggak ada klaim
+        // hadir sama sekali (isinya deklarasi ke depan "saya nggak masuk"),
+        // termasuk buat jadwal JP yang belum kejalanin hari ini.
+        $dibuat = DB::transaction(function () use ($jadwals, $data, $guru, $tanggal) {
+            return $jadwals->map(function ($jadwal) use ($data, $guru, $tanggal) {
+                $tugasKhusus = trim($data['tugas_khusus'][$jadwal->id] ?? '');
+
+                $jurnal = Jurnal::create([
+                    'jadwal_id' => $jadwal->id,
+                    'guru_id' => $guru->id,
+                    'tanggal' => $tanggal,
+                    'jam_ke_mulai' => $jadwal->jam_ke_mulai,
+                    'jam_ke_selesai' => $jadwal->jam_ke_selesai,
+                    'status_guru' => 'tidak_hadir',
+                    'tugas_tambahan' => $tugasKhusus !== '' ? $tugasKhusus : $data['tugas_tambahan_default'],
+                    'alasan' => $data['alasan'],
+                ]);
+
+                // Guru nggak di kelas manapun buat nentuin presensi manual --
+                // ikut default (dispensasi hari ini / carry-over jurnal lain
+                // kelas ini hari ini / Hadir), sama kayak store() biasa.
+                // Pengurus kelas yang koreksi kalau ada yang beda pas Verifikasi.
+                $presensiDefault = PresensiDefault::untukKelas(
+                    $jadwal->kelas->siswas, $jadwal->kelas_id, $tanggal, $jadwal->jam_ke_mulai, $jadwal->jam_ke_selesai
+                );
+                foreach ($jadwal->kelas->siswas as $siswa) {
+                    $isi = $presensiDefault[$siswa->id] ?? ['status' => 'hadir', 'catatan' => null];
+                    Absensi::create([
+                        'jurnal_id' => $jurnal->id,
+                        'siswa_id' => $siswa->id,
+                        'status' => $isi['status'],
+                        'catatan' => $isi['catatan'] ?? null,
+                    ]);
+                }
+
+                return $jurnal;
+            });
+        });
+
+        foreach ($dibuat as $jurnal) {
+            AuditLog::catat('Tambah Jurnal (massal)', "Jurnal {$jurnal->jadwal->mapel->nama} — {$jurnal->jadwal->kelas->nama}", $jurnal);
+            $jurnal->jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal));
+        }
+
+        return redirect()->route('jurnal.index')
+            ->with('success', $dibuat->count().' jurnal berhasil dibuat sekaligus.');
+    }
+
     /* ------------------------------------------------------------- Ubah jurnal */
     public function edit(Jurnal $jurnal): View
     {
@@ -364,6 +478,11 @@ class JurnalController extends Controller
             $a->siswa_id => ['status' => $a->status, 'catatan' => $a->catatan],
         ])->all();
 
+        $jurnalSebelumnya = Jurnal::where('jadwal_id', $jurnal->jadwal_id)
+            ->where('tanggal', '<', $jurnal->tanggal)
+            ->latest('tanggal')
+            ->first();
+
         // Metode lama disimpan sebagai teks bebas -- cocokkan ke preset kalau ada,
         // kalau nggak (atau metode custom dari sebelum ada preset ini) anggap "Lainnya".
         $metodeTerpilih = null;
@@ -375,7 +494,7 @@ class JurnalController extends Controller
         }
 
         return view('guru.jurnal.edit', [
-            ...compact('jurnal', 'siswas', 'presensiAwal'),
+            ...compact('jurnal', 'siswas', 'presensiAwal', 'jurnalSebelumnya'),
             'metodeLabel' => self::METODE_LABEL,
             'metodeTerpilih' => old('metode_pilihan', $metodeTerpilih),
             'metodeCustom' => old('metode_custom', $metodeCustom),

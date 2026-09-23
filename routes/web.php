@@ -137,6 +137,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/guru/jurnal/versi', [JurnalController::class, 'versi'])->name('jurnal.versi');
         Route::get('/guru/jurnal/tambah', [JurnalController::class, 'create'])->name('jurnal.create');
         Route::post('/guru/jurnal', [JurnalController::class, 'store'])->name('jurnal.store');
+        // Statis, HARUS didaftarkan sebelum route {jurnal} di bawah (POST
+        // /guru/jurnal/{jurnal} bisa "nangkep" /guru/jurnal/tidak-hadir-massal
+        // kalau didaftarkan belakangan -- {jurnal} nganggep itu ID/slug).
+        Route::get('/guru/jurnal/tidak-hadir-massal', [JurnalController::class, 'createMassal'])->name('jurnal.massal.create');
+        Route::post('/guru/jurnal/tidak-hadir-massal', [JurnalController::class, 'storeMassal'])->name('jurnal.massal.store');
         Route::get('/guru/jurnal/{jurnal}/fragment', [JurnalController::class, 'showFragment'])->name('jurnal.show.fragment');
         Route::get('/guru/jurnal/{jurnal}/ubah', [JurnalController::class, 'edit'])->name('jurnal.edit');
         Route::post('/guru/jurnal/{jurnal}', [JurnalController::class, 'update'])->name('jurnal.update');

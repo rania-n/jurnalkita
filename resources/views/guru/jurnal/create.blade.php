@@ -124,6 +124,19 @@
                 @if ($jamAwal) <span id="keterangan-jam-aktual">Waktunya {{ $jamAwal }}.</span> @endif
             </p>
 
+            {{-- Acuan dari jurnal TERAKHIR di jadwal yang sama (bisa minggu lalu,
+                 bisa lebih lama kalau libur) -- biar guru/pengurus kelas yang isi
+                 nggak lupa nyambungin dari mana terakhir kali, tanpa harus buka
+                 Riwayat Jurnal dulu di tab lain. --}}
+            @if ($jurnalSebelumnya)
+                <div class="sm:col-span-2 rounded-xl bg-surface-alt/60 px-3.5 py-2.5 text-xs text-muted">
+                    <span class="font-semibold text-ink">
+                        Terakhir diisi ({{ $jurnalSebelumnya->tanggal->translatedFormat('d M Y') }}{{ $jurnalSebelumnya->status_guru === 'tidak_hadir' ? ', gurunya tidak hadir' : '' }}):
+                    </span>
+                    {{ ($jurnalSebelumnya->status_guru === 'hadir' ? $jurnalSebelumnya->materi : $jurnalSebelumnya->tugas_tambahan) ?: '—' }}
+                </div>
+            @endif
+
             <x-ui.choice
                 label="Status Kehadiran Anda"
                 name="status_guru"
@@ -153,6 +166,15 @@
             </div>
 
             <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
+                @if ($jadwals->count() > 1)
+                    {{-- Izin/sakit biasanya bukan cuma 1 jam pelajaran -- kalau guru
+                         megang lebih dari 1 jadwal hari ini, tawarin jalan pintas
+                         biar nggak harus bolak-balik isi form ini per kelas. --}}
+                    <x-alert type="info">
+                        Izin/sakit buat lebih dari 1 kelas hari ini?
+                        <a href="{{ route('jurnal.massal.create') }}" class="font-bold underline">Isi sekali buat semua kelas →</a>
+                    </x-alert>
+                @endif
                 <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
                 <x-ui.textarea label="Alasan" name="alasan" :rows="2" placeholder="Alasan tidak hadir..." required>{{ old('alasan') }}</x-ui.textarea>
             </div>
