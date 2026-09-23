@@ -13,6 +13,17 @@
     $waLinkAdmin = $admin ? \App\Support\WaLink::url($admin->no_hp, "Halo Admin jurnalkita, saya {$nama} ({$roleLabel}), mau tanya soal akun/jadwal.") : null;
 
     $jumlahBelumDibaca = $user?->unreadNotifications()->count() ?? 0;
+
+    // Status "Sedang JP berapa" -- dulu cuma kelihatan di widget Beranda
+    // (jam-sekarang), jadi guru/pengurus kelas nggak tau lagi JP berapa kalau
+    // udah pindah ke halaman lain. Ditaruh di topbar (nempel di semua
+    // halaman) khusus peran yang jadwalnya emang ngikutin JP -- Waka/Satpam
+    // nggak punya jadwal per-JP kayak gitu, jadi nggak relevan buat mereka.
+    $tampilkanJp = in_array($user?->role, ['guru', 'siswa'], true);
+    if ($tampilkanJp) {
+        $jpAktif = \App\Support\Waktu::jpAktifSekarang();
+        $labelJp = $jpAktif ? 'JP '.$jpAktif : (\App\Support\Waktu::dalamJamSekolah() ? 'Istirahat' : 'Di luar jam');
+    }
 @endphp
 
 <header class="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-surface-alt bg-card/95 px-4 py-2.5 backdrop-blur sm:px-6 lg:px-10">
@@ -28,6 +39,13 @@
     </a>
 
     <div class="flex shrink-0 items-center gap-1.5">
+        @if ($tampilkanJp)
+            <span class="flex shrink-0 items-center gap-1 rounded-full bg-navy px-2.5 py-1 text-[11px] font-bold text-card" title="Status jam pelajaran sekarang">
+                <x-icon name="schedule" :size="13" />
+                {{ $labelJp }}
+            </span>
+        @endif
+
         @if ($waLinkAdmin)
             <a href="{{ $waLinkAdmin }}" target="_blank" rel="noopener"
                class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-muted transition-colors hover:text-navy"

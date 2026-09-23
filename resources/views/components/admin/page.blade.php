@@ -4,6 +4,12 @@
     'back' => null,
 ])
 
+{{-- Judul halaman SENGAJA nggak diulang di sini -- topbar admin (header
+     sticky, selalu kelihatan biar nggak ketutup pas scroll) udah nampilin
+     nama halaman yang sama persis lewat prop "heading"/"title" ke
+     x-layouts.admin. Dulu di sini juga ada <h2> isinya sama, keliatan
+     dobel nggak guna. Subtitle tetap ada -- itu info TAMBAHAN yang topbar
+     nggak punya (mis. jumlah data). --}}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
     <div class="flex flex-col gap-1">
         @if ($back)
@@ -11,7 +17,6 @@
                 <x-icon name="arrow_back" :size="18" /> Kembali
             </a>
         @endif
-        <h2 class="text-xl font-bold text-ink">{{ $title }}</h2>
         @if ($subtitle)
             <p class="text-sm text-muted">{{ $subtitle }}</p>
         @endif
