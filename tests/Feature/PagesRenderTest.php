@@ -70,7 +70,7 @@ class PagesRenderTest extends TestCase
         $jurnal->absensis()->create(['siswa_id' => Siswa::first()->id, 'status' => 'hadir']);
 
         $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}/fragment")->assertOk()->assertSee('Kurang lengkap');
-        $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}/ubah")->assertOk();
+        $this->actingAs($user)->get("/guru/jurnal/{$jurnal->id}/ubah/fragment")->assertOk();
     }
 
     public function test_guru_bisa_revisi_jurnal_lalu_kembali_pending(): void
@@ -89,7 +89,7 @@ class PagesRenderTest extends TestCase
         Storage::fake('public');
 
         $this->actingAs($user)->post("/guru/jurnal/{$jurnal->id}", [
-            'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'materi baru yang lengkap',
+            'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'materi baru yang lengkap', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect();
 

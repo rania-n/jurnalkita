@@ -125,9 +125,14 @@
     </div>
 </div>
 
-@push('scripts')
-    <script>
-        (function () {
+{{-- Inline (BUKAN @push('scripts')) -- partial ini kadang dirender berdiri
+     sendiri sebagai fragment AJAX (popup "Ubah Jurnal"), yang nggak punya
+     @stack('scripts') buat nampung push. Inline jalan di dua-duanya: di
+     halaman penuh (create.blade.php) browser jalanin pas ke-parse normal,
+     di fragment AJAX di-eksekusi ulang manual lewat setFragmentHtml() di
+     app.js. --}}
+<script>
+    (function () {
             const cari = document.getElementById('cari-siswa');
             const hasil = document.getElementById('hasil-cari-siswa');
             const rows = Array.from(document.querySelectorAll('[data-siswa-row]'));
@@ -254,4 +259,4 @@
             });
         })();
     </script>
-@endpush
+

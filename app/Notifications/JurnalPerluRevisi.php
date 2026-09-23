@@ -29,10 +29,12 @@ class JurnalPerluRevisi extends Notification
             'title' => 'Jurnal perlu direvisi',
             'body' => ($this->jurnal->jadwal->mapel->nama ?? 'Jurnal').' — '.($this->jurnal->jadwal->kelas->nama ?? '')
                 .': '.($this->jurnal->catatan_verifikasi ?: 'Pengurus kelas minta perbaikan.'),
-            // Langsung ke halaman Ubah (bukan sekadar lihat) -- itu jelas
+            // Langsung ke popup Ubah (bukan sekadar lihat) -- itu jelas
             // maksudnya guru klik notif ini, jadi nggak perlu 1 klik ekstra
-            // "Ubah" lagi dari halaman detail.
-            'url' => route('jurnal.edit', $this->jurnal),
+            // "Ubah Jurnal" lagi dari popup detail. Halaman Ubah terpisah
+            // udah nggak ada -- ?ubah=1 yang bikin popup detail otomatis
+            // kebuka langsung ke fragment form (lihat guru/jurnal/index.blade.php).
+            'url' => route('jurnal.index', ['lihat' => $this->jurnal->id, 'ubah' => 1]),
         ];
     }
 }

@@ -16,6 +16,7 @@
         'terverifikasi' => ['bg-hadir-soft text-hadir', 'Terverifikasi'],
         'revisi' => ['bg-alpha-soft text-alpha', 'Revisi'],
         'lewat' => ['bg-surface-alt text-muted', 'Sudah Lewat'],
+        'terlewat' => ['bg-alpha-soft text-alpha', 'Terlewat'],
         'pkl' => ['bg-navy/10 text-navy', 'PKL'],
         'pengurus' => ['bg-navy/10 text-navy', 'Pengurus'],
         'anggota' => ['bg-surface-alt text-muted', 'Anggota'],

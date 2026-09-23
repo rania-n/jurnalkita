@@ -164,12 +164,31 @@ function initConfirm() {
     });
 }
 
+/* Tulis HTML fragment (hasil fetch AJAX) ke dalam target, lalu jalanin ulang
+ * <script> yang ikut kebawa -- browser SENGAJA nggak ngejalanin <script> yang
+ * disisipin lewat innerHTML, jadi elemen script-nya diganti manual biar
+ * kejalanin (dipakai buat popup "Lihat"/"Ubah Jurnal" yang isinya punya
+ * interaksi sendiri, mis. toggle blok hadir/tidak-hadir). */
+function setFragmentHtml(target, html) {
+    target.innerHTML = html;
+    target.querySelectorAll('script').forEach((lama) => {
+        const baru = document.createElement('script');
+        baru.textContent = lama.textContent;
+        lama.replaceWith(baru);
+    });
+}
+
 /* Modal <dialog>.
  *   <button data-modal-open="id-modal">Tambah</button>
  *   <button data-modal-open="id-modal"
  *           data-modal-title="Ubah Kelas"
  *           data-modal-fill='{"nama":"X RPL 1","tingkat":"X"}'>Ubah</button>
  * Field diisi berdasarkan atribut name di dalam <dialog>.
+ *
+ * Ganti isi popup yang UDAH kebuka (tanpa nutup/buka ulang dialognya -- biar
+ * kelihatan masih popup yang sama, bukan popup baru numpuk di atasnya):
+ *   <button type="button" data-modal-ajax-swap="/url/fragment/lain">Ubah</button>
+ * Fragment barunya nimpa isi [data-modal-ajax-target] punya dialog yang sama.
  */
 function initModals() {
     document.addEventListener('click', (e) => {
@@ -246,7 +265,7 @@ function initModals() {
                 ajaxTarget.innerHTML = '<p class="py-10 text-center text-sm text-muted-2">Memuat…</p>';
                 fetch(opener.dataset.ajaxUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                     .then((r) => (r.ok ? r.text() : Promise.reject()))
-                    .then((html) => { ajaxTarget.innerHTML = html; })
+                    .then((html) => setFragmentHtml(ajaxTarget, html))
                     .catch(() => {
                         ajaxTarget.innerHTML = '<p class="py-10 text-center text-sm text-alpha">Gagal memuat detail. Coba lagi.</p>';
                     });
@@ -256,6 +275,23 @@ function initModals() {
 
         if (e.target.closest('[data-modal-close]')) {
             e.target.closest('dialog')?.close();
+            return;
+        }
+
+        // Ganti isi popup yang lagi kebuka TANPA nutup/buka ulang -- dipakai
+        // tombol "Ubah Jurnal" di dalam popup "Lihat" biar keliatan masih
+        // popup yang sama, cuma isinya berubah jadi form.
+        const swap = e.target.closest('[data-modal-ajax-swap]');
+        if (swap) {
+            const target = swap.closest('dialog')?.querySelector('[data-modal-ajax-target]');
+            if (!target) return;
+            target.innerHTML = '<p class="py-10 text-center text-sm text-muted-2">Memuat…</p>';
+            fetch(swap.dataset.modalAjaxSwap, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then((r) => (r.ok ? r.text() : Promise.reject()))
+                .then((html) => setFragmentHtml(target, html))
+                .catch(() => {
+                    target.innerHTML = '<p class="py-10 text-center text-sm text-alpha">Gagal memuat form ubah. Coba lagi.</p>';
+                });
         }
     });
 

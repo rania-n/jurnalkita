@@ -142,8 +142,15 @@ class JurnalController extends Controller
             $jurnal->guru->user->notify(new JurnalPerluRevisi($jurnal));
         }
 
+        // Pesan sukses ikut beda buat jurnal Tidak Hadir -- "disetujui" (bukan
+        // "diverifikasi"), samain sama istilah tombolnya (lihat
+        // sekretaris/jurnal/_detail-fragment.blade.php & Jurnal::verifikasiAbsen()).
+        $pesanSukses = $data['keputusan'] === 'terima'
+            ? ($jurnal->verifikasiAbsen() ? 'Laporan tidak hadir disetujui.' : 'Jurnal diverifikasi.')
+            : 'Permintaan revisi dikirim ke guru.';
+
         return redirect()->route('sekretaris.jurnal.index', ['lihat' => $jurnal->id])
-            ->with('success', $data['keputusan'] === 'terima' ? 'Jurnal diverifikasi.' : 'Permintaan revisi dikirim ke guru.');
+            ->with('success', $pesanSukses);
     }
 
     /* ---------------------------------------- Jurnal pengganti (guru tidak sempat) */

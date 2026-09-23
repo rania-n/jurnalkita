@@ -96,18 +96,20 @@
 @endphp
 
 <x-layouts.app title="Beranda Guru" width="wide">
-    {{-- Nama guru udah ada di header atas (avatar + nama) -- nggak perlu
-         diulang lagi di sini. "Beranda" sendiri cuma label halaman (sidebar
-         udah nyorot menu aktif), jadi dikecilin (size="sm") biar konten di
-         bawahnya (jam mengajar sekarang, jadwal hari ini) yang lebih menonjol. --}}
-    <x-page-header title="Beranda" size="sm">
-        @if ($piketHariIni)
+    {{-- Nama guru udah ada di header atas (avatar + nama), dan "Beranda"
+         sendiri udah kelihatan dari menu yang lagi disorot di sidebar/navbar
+         -- teks itu nggak nambah informasi apa pun, jadi nggak usah
+         ditampilkan lagi sama sekali di sini. Badge piket (kalau ada) tetap
+         ditampilkan, cukup lewat div ringkas -- nggak perlu x-page-header
+         lagi kalau nggak ada judul yang mau ditampilkan. --}}
+    @if ($piketHariIni)
+        <div class="mb-4 flex justify-end">
             <span class="flex items-center gap-1.5 rounded-full bg-hadir-soft px-3 py-1 text-xs font-bold text-hadir">
                 <span class="flex h-2 w-2 rounded-full bg-hadir animate-pulse"></span>
                 Petugas Piket Hari Ini
             </span>
-        @endif
-    </x-page-header>
+        </div>
+    @endif
 
     <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
 
@@ -527,7 +529,25 @@
         @else
             <x-ui.card-list class="grid-fill-last">
                 @foreach ($jadwalHariIni as $j)
-                    @php $statusJam = \App\Support\Waktu::statusJpHariIni($j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
+                    @php
+                        $statusJamAsli = \App\Support\Waktu::statusJpHariIni($j->jam_ke_mulai, $j->jam_ke_selesai);
+                        $sudahIsiIni = in_array($j->id, $sudahDiisi);
+                        // "Sudah Lewat" polos itu ambigu -- guru bisa salah
+                        // kira jamnya emang udah kelewatan padahal jurnalnya
+                        // UDAH diisi, atau sebaliknya nyangka masih bisa
+                        // nyusul padahal mode disiplin udah beneran nolak.
+                        // Kalau udah diisi, badge jam nggak usah ditampilin
+                        // lagi (tombol "Sudah diisi" di bawah udah cukup
+                        // jelas). Kalau BELUM diisi & mode disiplin (jamnya
+                        // beneran kekunci, nggak bisa diisi lagi lewat form
+                        // biasa), tegasin "Terlewat" -- beda dari "Sudah
+                        // Lewat" yang kesannya masih bisa nyusul kapan aja.
+                        $terlewatTerkunci = $statusJamAsli === 'lewat' && ! $sudahIsiIni
+                            && \App\Models\PengaturanJurnal::mode() === 'disiplin';
+                        $statusJam = $statusJamAsli === 'lewat'
+                            ? ($sudahIsiIni ? null : ($terlewatTerkunci ? 'terlewat' : 'lewat'))
+                            : $statusJamAsli;
+                    @endphp
                     <x-ui.list-card
                         :title="$j->mapel->nama"
                         :meta="[$j->kelas->nama . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai, 'Ruang ' . ($j->ruang ?? '-')]"
@@ -538,8 +558,10 @@
                             </x-slot:badge>
                         @endif
                         <x-slot:actions>
-                            @if (in_array($j->id, $sudahDiisi))
+                            @if ($sudahIsiIni)
                                 <x-ui.action-button label="Sudah diisi" icon="check_circle" variant="success" href="{{ route('jurnal.index') }}" />
+                            @elseif ($terlewatTerkunci)
+                                <x-ui.action-button label="Terlewat" icon="block" variant="neutral" disabled />
                             @else
                                 <x-ui.action-button label="Isi Jurnal" icon="edit_note" variant="info" :href="route('jurnal.create', ['jadwal' => $j->id])" />
                             @endif

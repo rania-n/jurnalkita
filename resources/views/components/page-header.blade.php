@@ -1,5 +1,9 @@
 @props([
-    'title',
+    // Nullable -- halaman yang judulnya cuma label lokasi (mis. "Beranda",
+    // sudah jelas kelihatan dari menu yang lagi disorot di sidebar/navbar)
+    // boleh nggak ngirim title sama sekali, biar nggak nampilin teks yang
+    // sebenarnya nggak nambah informasi apa-apa buat pengguna.
+    'title' => null,
     'subtitle' => null,
     'back' => null,
     'alwaysRow' => false,
@@ -31,11 +35,13 @@
                 </a>
             @endif
             <div class="flex flex-1 flex-col gap-0.5 min-w-0">
-                <h1 @class([
-                    'font-bold leading-tight text-ink',
-                    'text-base lg:text-lg' => $size === 'sm',
-                    'text-[22px] lg:text-[26px]' => $size !== 'sm',
-                ])>{{ $title }}</h1>
+                @if ($title)
+                    <h1 @class([
+                        'font-bold leading-tight text-ink',
+                        'text-base lg:text-lg' => $size === 'sm',
+                        'text-[22px] lg:text-[26px]' => $size !== 'sm',
+                    ])>{{ $title }}</h1>
+                @endif
                 @if ($subtitle)
                     <p class="text-sm leading-snug text-muted lg:text-[15px]">{{ $subtitle }}</p>
                 @endif

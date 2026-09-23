@@ -137,13 +137,20 @@
                 </div>
             @endif
 
+            {{-- Ganti jadwal (dropdown di atas) muat ulang HALAMAN PENUH --
+                 kalau guru udah sempat pilih "Tidak Hadir" duluan sebelum
+                 ganti jadwal, itu bakal ke-reset balik ke "Hadir" tanpa
+                 kesadaran (bug yang sempat dilaporkan). request()->query
+                 jadi jaring kedua setelah old() -- JS di bawah nyisipin
+                 status_guru yang lagi kepilih ke URL pas jadwal diganti,
+                 biar ikut kebawa lagi pas halaman render ulang. --}}
             <x-ui.choice
                 label="Status Kehadiran Anda"
                 name="status_guru"
                 class="sm:col-span-2"
                 :options="['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir']"
                 :tones="['hadir' => 'hadir', 'tidak_hadir' => 'alpha']"
-                :value="old('status_guru', 'hadir')"
+                :value="old('status_guru', request()->query('status_guru', 'hadir'))"
             />
             </div>
 
@@ -158,9 +165,10 @@
                         name="metode_pilihan"
                         :options="$metodeLabel"
                         :value="$metodeTerpilih"
+                        required
                     />
                     <div id="metode_custom_wrap" hidden>
-                        <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" />
+                        <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" required />
                     </div>
                 </div>
 
@@ -178,20 +186,10 @@
             </div>
 
             <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
-                @if ($jadwals->count() > 1)
-                    {{-- Izin/sakit biasanya bukan cuma 1 jam pelajaran -- kalau guru
-                         megang lebih dari 1 jadwal hari ini, tawarin milih dari
-                         sini langsung, daripada isi form ini berkali-kali per
-                         kelas. Pilih "Ya" -> lompat ke halaman isi massal. --}}
-                    <x-ui.choice
-                        label="Tidak Hadir 1 Hari Penuh?"
-                        name="tidak_hadir_sehari_penuh"
-                        :options="['tidak' => 'Cuma Kelas Ini', 'ya' => 'Ya, Semua Kelas']"
-                        value="tidak"
-                        data-toggle-massal
-                    />
-                @endif
-
+                {{-- Alasan duluan (langsung di bawah Status Kehadiran) --
+                     itu pertanyaan paling dasar begitu "Tidak Hadir" dipilih,
+                     baru abis itu urusan cakupannya (1 kelas ini/semua kelas)
+                     & tugas buat siswa. --}}
                 <x-ui.choice
                     label="Alasan"
                     name="alasan"
@@ -200,12 +198,69 @@
                     required
                 />
 
+                @if ($jadwals->count() > 1)
+                    {{-- Izin/sakit biasanya bukan cuma 1 jam pelajaran -- kalau guru
+                         megang lebih dari 1 jadwal hari ini, tawarin tandain
+                         sekaligus. Pilih "Ya" -> checklist kelas muncul LANGSUNG
+                         di bawah (nggak pindah halaman lagi), sama pola kayak
+                         milih Kelas di form ini -- baru abis dipilih, bagian
+                         yang relevan (presensi/checklist) muncul. --}}
+                    <x-ui.choice
+                        label="Tidak Hadir 1 Hari Penuh?"
+                        name="tidak_hadir_sehari_penuh"
+                        :options="['tidak' => 'Cuma Kelas Ini', 'ya' => 'Ya, Semua Kelas']"
+                        value="tidak"
+                        data-toggle-massal
+                    />
+
+                    {{-- Checklist ini SEBAGIAN GEDE tersembunyi & field-nya
+                         disabled selama "Cuma Kelas Ini" -- sync() di script
+                         bawah yang nampilin/nyembunyiin & disable/enable-nya. --}}
+                    <div id="blok-massal-kelas" class="flex flex-col gap-2" hidden>
+                        <x-ui.label>Kelas yang Ditandai</x-ui.label>
+                        <p class="-mt-1 text-xs text-muted-2">Semua tercentang otomatis -- ketuk kartunya buat centang/batal. Alasan & Tugas Tambahan di bawah berlaku buat semua yang tercentang, kecuali diisi khusus.</p>
+
+                        <div class="flex flex-col gap-2">
+                            @foreach ($jadwals as $j)
+                                {{-- Sengaja pakai <div>, BUKAN <label> buat bungkus semua --
+                                     kalau seluruh kartu jadi <label>, ngeklik tombol "Tugas
+                                     khusus" atau ngetik di kotak teksnya bakal ikut nge-toggle
+                                     checkbox di atasnya (perilaku bawaan <label>). Checkbox-nya
+                                     sendiri tetap dibungkus <label> kecil biar area klik-nya
+                                     tetap nyaman. --}}
+                                <div class="flex flex-col gap-2 rounded-2xl border border-surface-alt bg-card p-3 transition-colors has-[[data-checkbox-jadwal-massal]:checked]:border-navy has-[[data-checkbox-jadwal-massal]:checked]:bg-surface-alt/60" data-baris-jadwal-massal>
+                                    <label class="flex cursor-pointer items-center gap-2.5">
+                                        <input type="checkbox" name="jadwal_ids[]" value="{{ $j->id }}" checked
+                                            class="h-4 w-4 shrink-0 rounded border-surface-alt text-navy focus:ring-navy" data-checkbox-jadwal-massal>
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block truncate text-sm font-semibold text-ink">{{ $j->kelas->nama }} · {{ $j->mapel->nama }}</span>
+                                            <span class="block text-xs text-muted-2">{{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}</span>
+                                        </span>
+                                    </label>
+
+                                    <div class="border-t border-surface-alt pt-2">
+                                        <button type="button" data-toggle-khusus="{{ $j->id }}" class="flex items-center gap-1 text-xs font-semibold text-navy hover:underline">
+                                            <x-icon name="add_circle" :size="14" />
+                                            Tugas khusus buat kelas ini
+                                        </button>
+                                        <div id="tugas-khusus-{{ $j->id }}" class="mt-2" hidden>
+                                            <x-ui.input name="tugas_khusus[{{ $j->id }}]" placeholder="Tugas khusus (kosongkan buat pakai default di bawah)" />
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
 
                 @if ($jadwalTerpilih)
                     {{-- Opsional (BEDA dari foto suasana kelas di atas) -- guru
                          nggak di sekolah, jadi nggak wajib jepret kamera, cukup
-                         lampirin foto/scan surat izin dari galeri kalau ada. --}}
+                         lampirin foto/scan surat izin dari galeri kalau ada.
+                         Dipakai juga buat mode "Ya, Semua Kelas" -- 1 lampiran
+                         yang sama berlaku ke semua kelas yang ditandai. --}}
                     {{-- id BEDA dari yang di blok-hadir (walau name-nya sama
                          persis "foto_bukti") -- dua elemen id kembar bikin
                          getElementById/dst nebak-nebak (sama kasusnya kayak
@@ -222,7 +277,13 @@
             </div>
 
             @if ($jadwalTerpilih)
-                @include('guru.jurnal._presensi-grid')
+                {{-- Disembunyikan pas mode massal aktif -- presensi 1 kelas ini
+                     nggak relevan lagi kalau guru nyatain absen dari SEMUA
+                     kelas (server juga nggak makai kiriman presensi buat
+                     storeMassal(), lihat sync() di script bawah). --}}
+                <div id="blok-presensi">
+                    @include('guru.jurnal._presensi-grid')
+                </div>
             @else
                 <x-alert type="info" class="mt-6">Pilih kelas & mata pelajaran dulu di atas untuk mengisi presensi siswa.</x-alert>
             @endif
@@ -265,10 +326,21 @@
                     }
 
                     function isiRingkasan() {
-                        const jadwalSelect = form.querySelector('select[name="jadwal_id"]');
-                        const kelasMapel = jadwalSelect
-                            ? (jadwalSelect.options[jadwalSelect.selectedIndex]?.textContent.trim() || '—')
-                            : (document.querySelector('[data-jadwal-terkunci-teks]')?.textContent.trim() || '—');
+                        // Mode massal (semua kelas) -> daftar kelas yang beneran
+                        // ditandai, bukan cuma jadwal yang kepilih di atas.
+                        const kelasTertandai = Array.from(form.querySelectorAll('[data-checkbox-jadwal-massal]:not(:disabled):checked'))
+                            .map((cb) => cb.closest('[data-baris-jadwal-massal]')?.querySelector('.text-ink')?.textContent.trim())
+                            .filter(Boolean);
+
+                        let kelasMapel;
+                        if (kelasTertandai.length) {
+                            kelasMapel = kelasTertandai.join(', ');
+                        } else {
+                            const jadwalSelect = form.querySelector('select[name="jadwal_id"]');
+                            kelasMapel = jadwalSelect
+                                ? (jadwalSelect.options[jadwalSelect.selectedIndex]?.textContent.trim() || '—')
+                                : (document.querySelector('[data-jadwal-terkunci-teks]')?.textContent.trim() || '—');
+                        }
                         modalRingkasan.querySelector('[data-ringkasan="kelas-mapel"]').textContent = kelasMapel;
 
                         const statusGuru = form.querySelector('input[name="status_guru"]:checked')?.value;
@@ -338,6 +410,8 @@
         @push('scripts')
             <script>
                 (function () {
+                    const form = document.getElementById('form-jurnal');
+
                     // Jadwal terkunci (jadwalTerkunci=true) -> select-nya nggak dirender
                     // sama sekali, jadi elemen ini bisa null.
                     const jadwal = document.getElementById('jadwal_id');
@@ -367,10 +441,18 @@
                         }
 
                         // Ganti jadwal -> presensi kelas yang beda perlu dirender ulang
-                        // dari server, jadi muat ulang halaman dengan jadwal itu.
+                        // dari server, jadi muat ulang halaman dengan jadwal itu. Ikut
+                        // sisipin status_guru yang LAGI kepilih (dan pertahanin query
+                        // lain kayak ?hari=kemarin) -- kalau nggak, pilihan "Tidak
+                        // Hadir" yang udah dipilih duluan ke-reset balik ke "Hadir"
+                        // begitu halaman render ulang (bug yang sempat dilaporkan).
                         jadwal.addEventListener('change', () => {
                             if (!jadwal.value) return;
-                            window.location.href = '{{ route('jurnal.create') }}?jadwal=' + jadwal.value;
+                            const params = new URLSearchParams(window.location.search);
+                            params.set('jadwal', jadwal.value);
+                            const statusGuru = document.querySelector('input[name="status_guru"]:checked')?.value;
+                            if (statusGuru) params.set('status_guru', statusGuru);
+                            window.location.href = '{{ route('jurnal.create') }}?' + params.toString();
                         });
 
                         // Browser bisa langsung memilih satu-satunya opsi jadwal saat halaman
@@ -403,21 +485,67 @@
                     document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
                     syncStatusGuru();
 
-                    // "Tidak Hadir 1 Hari Penuh?" -> pilih "Ya" langsung lompat ke
-                    // halaman isi massal (bukan lanjut isi form 1 kelas ini).
-                    document.querySelectorAll('input[name="tidak_hadir_sehari_penuh"]').forEach((el) => {
-                        el.addEventListener('change', () => {
-                            if (el.checked && el.value === 'ya') {
-                                window.location.href = '{{ route('jurnal.massal.create') }}';
-                            }
-                        });
-                    });
+                    // "Tidak Hadir 1 Hari Penuh?" -> pilih "Ya" munculin checklist
+                    // kelas LANGSUNG di bawahnya (nggak pindah halaman), sekalian
+                    // ganti tujuan form ke endpoint massal.
+                    const blokMassal = document.getElementById('blok-massal-kelas');
+                    const blokPresensi = document.getElementById('blok-presensi');
+                    if (blokMassal) {
+                        function syncMassal() {
+                            const massal = document.querySelector('input[name="tidak_hadir_sehari_penuh"]:checked')?.value === 'ya';
+                            blokMassal.hidden = !massal;
+                            blokMassal.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !massal; });
+                            form.action = massal
+                                ? '{{ route('jurnal.massal.store') }}'
+                                : '{{ route('jurnal.store') }}';
 
-                    // Metode Pembelajaran "Lainnya" -> munculin kotak teks bebas.
+                            // Dua hal ini nggak dipakai sama sekali sama
+                            // storeMassal() -- jadwal_id (1 kelas doang) nggak
+                            // relevan lagi (ditandai LEBIH dari 1 kelas lewat
+                            // checklist di atas), dan presensi cuma bisa diisi
+                            // manual kalau guru beneran ada di kelasnya.
+                            // "required"-nya jadwal_id ikut nggak ngeblok
+                            // submit begitu di-disable.
+                            if (jadwal) jadwal.disabled = massal;
+                            if (blokPresensi) blokPresensi.hidden = massal;
+                        }
+                        document.querySelectorAll('input[name="tidak_hadir_sehari_penuh"]').forEach((el) => el.addEventListener('change', syncMassal));
+                        syncMassal();
+
+                        // Kartu kelas yang nggak dicentang -> field "tugas khusus"-nya
+                        // ikut di-disable, biar nggak ketinggalan kesubmit walau
+                        // kelasnya sendiri nggak ditandai.
+                        blokMassal.querySelectorAll('[data-checkbox-jadwal-massal]').forEach((cb) => {
+                            cb.addEventListener('change', () => {
+                                const khusus = document.getElementById('tugas-khusus-' + cb.value);
+                                if (!cb.checked) khusus.querySelector('input').disabled = true;
+                            });
+                        });
+
+                        // Tombol "Tugas khusus" -> munculin kotak teksnya, TANPA ikut
+                        // nge-toggle checkbox kelas (makanya kartu di atas sengaja
+                        // bukan <label> tunggal buat semuanya).
+                        blokMassal.querySelectorAll('[data-toggle-khusus]').forEach((btn) => {
+                            btn.addEventListener('click', () => {
+                                const khusus = document.getElementById('tugas-khusus-' + btn.dataset.toggleKhusus);
+                                khusus.hidden = false;
+                                khusus.querySelector('input').disabled = false;
+                                btn.hidden = true;
+                                khusus.querySelector('input').focus();
+                            });
+                        });
+                    }
+
+                    // Metode Pembelajaran "Lainnya" -> munculin kotak teks bebas
+                    // (wajib diisi kalau "Lainnya" dipilih -- disabled pas
+                    // disembunyiin biar required-nya nggak ikut ngeblok submit
+                    // pas metode-nya BUKAN "Lainnya").
                     const metodeCustom = document.getElementById('metode_custom_wrap');
                     function syncMetode() {
                         const val = document.querySelector('input[name="metode_pilihan"]:checked')?.value;
-                        metodeCustom.hidden = val !== 'lainnya';
+                        const lainnya = val === 'lainnya';
+                        metodeCustom.hidden = ! lainnya;
+                        metodeCustom.querySelector('input').disabled = ! lainnya;
                     }
                     document.querySelectorAll('input[name="metode_pilihan"]').forEach((el) => el.addEventListener('change', syncMetode));
                     syncMetode();

@@ -19,6 +19,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class JurnalController extends Controller
@@ -139,6 +140,16 @@ class JurnalController extends Controller
         $lihatJurnal = $request->filled('lihat')
             ? $guru->jurnals()->with('jadwal.kelas', 'jadwal.mapel')->find($request->query('lihat'))
             : null;
+
+        // ?ubah=1 (dari redirect gagal-validasi di update()) butuh 2 loncatan
+        // request: halaman ini DULU, baru abis itu fetch AJAX ke fragment
+        // form-nya (lihat index.blade.php). Flash session (old input +
+        // $errors) bawaan Laravel cuma nyampe 1 loncatan -- tanpa keep() di
+        // sini, pas fragment-nya di-fetch, errornya udah keburu ilang & form
+        // balik nampilin data lama (bukan yang barusan diketik + errornya).
+        if ($request->boolean('ubah') && $lihatJurnal) {
+            $request->session()->keep(['errors', '_old_input']);
+        }
 
         return view('guru.jurnal.index', compact('jurnals', 'status', 'dari', 'sampai', 'kelasList', 'mapelList', 'lihatJurnal'));
     }
@@ -291,8 +302,8 @@ class JurnalController extends Controller
             'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15'],
             'status_guru' => ['required', 'in:hadir,tidak_hadir'],
             'materi' => ['required_if:status_guru,hadir', 'nullable', 'string'],
-            'metode_pilihan' => ['nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
-            'metode_custom' => ['nullable', 'string', 'max:255'],
+            'metode_pilihan' => ['required_if:status_guru,hadir', 'nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
+            'metode_custom' => ['required_if:metode_pilihan,lainnya', 'nullable', 'string', 'max:255'],
             'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
             'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
             'presensi' => ['nullable', 'array'],
@@ -384,32 +395,12 @@ class JurnalController extends Controller
     /**
      * Guru izin/sakit seharian & megang lebih dari 1 kelas -- daripada
      * bolak-balik isi form yang sama persis per kelas, di sini bisa ditandai
-     * SEKALIGUS buat semua jadwal hari ini yang belum ada jurnalnya. Alasan
-     * berlaku sama ke semua (memang soal kondisi gurunya sendiri), Tugas
-     * Tambahan punya 1 teks default yang bisa di-override per kelas kalau
-     * ternyata beda (lihat storeMassal()).
+     * SEKALIGUS buat semua jadwal hari ini yang belum ada jurnalnya (checklist
+     * "Kelas yang Ditandai" di jurnal.create, muncul setelah pilih "Ya, Semua
+     * Kelas"). Alasan berlaku sama ke semua (memang soal kondisi gurunya
+     * sendiri), Tugas Tambahan punya 1 teks default yang bisa di-override per
+     * kelas kalau ternyata beda.
      */
-    public function createMassal(): View
-    {
-        $guru = $this->guru();
-        $hariIni = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][now()->dayOfWeek - 1] ?? null;
-
-        $jadwals = $hariIni
-            ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hariIni)->orderBy('jam_ke_mulai')->get()
-            : collect();
-
-        $idJadwalSudahDiisi = Jurnal::whereIn('jadwal_id', $jadwals->pluck('id'))
-            ->whereDate('tanggal', now()->toDateString())
-            ->pluck('jadwal_id');
-
-        $jadwals = $jadwals->reject(fn ($j) => $idJadwalSudahDiisi->contains($j->id))->values();
-
-        return view('guru.jurnal.create-massal', [
-            'jadwals' => $jadwals,
-            'alasanLabel' => self::ALASAN_LABEL,
-        ]);
-    }
-
     public function storeMassal(Request $request): RedirectResponse
     {
         $guru = $this->guru();
@@ -418,13 +409,16 @@ class JurnalController extends Controller
             'jadwal_ids' => ['required', 'array', 'min:1'],
             'jadwal_ids.*' => ['integer', 'exists:jadwals,id'],
             'alasan' => ['required', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
-            'tugas_tambahan_default' => ['required', 'string'],
+            'tugas_tambahan' => ['required', 'string'],
             'tugas_khusus' => ['nullable', 'array'],
             'tugas_khusus.*' => ['nullable', 'string'],
             // Opsional -- surat izin/sakit (kalau ada), BUKAN wajib jepret
             // kamera kayak "foto suasana kelas" di form biasa (guru nggak di
             // sekolah). 1 file yang sama dipakai buat semua kelas tercentang.
-            'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+            // Nama field disamain sama form isi 1 kelas ("foto_bukti") --
+            // sekarang satu form yang sama dipakai buat dua-duanya, jadi nggak
+            // perlu ganti nama field pakai JS pas mode massal aktif.
+            'foto_bukti' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
 
         $jadwals = Jadwal::whereIn('id', $data['jadwal_ids'])->with('kelas.siswas', 'mapel')->get();
@@ -440,7 +434,7 @@ class JurnalController extends Controller
         }
 
         $alasan = self::ALASAN_LABEL[$data['alasan']];
-        $suratPath = $request->file('surat')?->store('jurnal-bukti', 'public');
+        $suratPath = $request->file('foto_bukti')?->store('jurnal-bukti', 'public');
 
         // Nggak lewat jadwalBolehDiisi() (kunci-ke-JP-aktif buat mode
         // 'disiplin') SENGAJA -- itu buat nyegah klaim "udah ngajarin materi"
@@ -458,7 +452,7 @@ class JurnalController extends Controller
                     'jam_ke_mulai' => $jadwal->jam_ke_mulai,
                     'jam_ke_selesai' => $jadwal->jam_ke_selesai,
                     'status_guru' => 'tidak_hadir',
-                    'tugas_tambahan' => $tugasKhusus !== '' ? $tugasKhusus : $data['tugas_tambahan_default'],
+                    'tugas_tambahan' => $tugasKhusus !== '' ? $tugasKhusus : $data['tugas_tambahan'],
                     'alasan' => $alasan,
                     'foto_bukti' => $suratPath,
                 ]);
@@ -493,8 +487,14 @@ class JurnalController extends Controller
             ->with('success', $dibuat->count().' jurnal berhasil dibuat sekaligus.');
     }
 
+    /**
+     * Isi popup "Ubah Jurnal" -- SELALU nempel di popup "Lihat" yang sama
+     * (tombol "Ubah Jurnal" di _detail-fragment nge-swap isi popup ke
+     * fragment ini, bukan buka popup/halaman baru). Nggak ada lagi halaman
+     * penuh terpisah buat ini -- sama kayak showFragment(), sengaja dihapus.
+     */
     /* ------------------------------------------------------------- Ubah jurnal */
-    public function edit(Jurnal $jurnal): View
+    public function editFragment(Jurnal $jurnal): View
     {
         $this->milikSendiri($jurnal);
         abort_unless($jurnal->bisaDiubah(), 403, 'Jurnal sudah diverifikasi, tidak bisa diubah.');
@@ -527,7 +527,7 @@ class JurnalController extends Controller
         // biarin kosong, guru pilih ulang salah satu pas ubah jurnal ini.
         $alasanTerpilih = old('alasan', array_search($jurnal->alasan, self::ALASAN_LABEL, true) ?: null);
 
-        return view('guru.jurnal.edit', [
+        return view('guru.jurnal._edit-fragment', [
             ...compact('jurnal', 'siswas', 'presensiAwal', 'jurnalSebelumnya', 'alasanTerpilih'),
             'metodeLabel' => self::METODE_LABEL,
             'metodeTerpilih' => old('metode_pilihan', $metodeTerpilih),
@@ -546,26 +546,38 @@ class JurnalController extends Controller
 
         $sudahRevisi = $jurnal->status_verifikasi === 'revisi';
 
-        $data = $request->validate([
-            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
-            'status_guru' => ['required', 'in:hadir,tidak_hadir'],
-            'materi' => ['required_if:status_guru,hadir', 'nullable', 'string'],
-            'metode_pilihan' => ['nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
-            'metode_custom' => ['nullable', 'string', 'max:255'],
-            'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
-            'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
-            'presensi' => ['nullable', 'array'],
-            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
-            'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
-            // Foto wajib cuma kalau status_guru Hadir DAN belum ada foto dari
-            // sebelumnya (guru cuma ubah data lain nggak wajib upload ulang).
-            // Tidak Hadir -> selalu opsional (surat izin/sakit, bukan wajib
-            // jepret kamera) -- sama alasannya kayak store().
-            'foto_bukti' => [
-                ($jurnal->foto_bukti || $request->input('status_guru') !== 'hadir') ? 'nullable' : 'required',
-                'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096',
-            ],
-        ]);
+        // Form-nya nempel di popup (bukan halaman sendiri lagi) -- kalau
+        // validasi gagal, redirect default (back()) bakal lompat ke halaman
+        // APAPUN yang lagi kebuka Riwayat Jurnal-nya TANPA popup ini otomatis
+        // kebuka lagi & errornya nggak kelihatan sama sekali. Tangkap manual
+        // biar bisa arahin balik ke popup Ubah jurnal ini juga (?ubah=1),
+        // lengkap sama pesan error & isian sebelumnya -- lihat
+        // resources/views/guru/jurnal/index.blade.php buat auto-buka-nya.
+        try {
+            $data = $request->validate([
+                'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
+                'status_guru' => ['required', 'in:hadir,tidak_hadir'],
+                'materi' => ['required_if:status_guru,hadir', 'nullable', 'string'],
+                'metode_pilihan' => ['required_if:status_guru,hadir', 'nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
+                'metode_custom' => ['required_if:metode_pilihan,lainnya', 'nullable', 'string', 'max:255'],
+                'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
+                'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
+                'presensi' => ['nullable', 'array'],
+                'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
+                'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
+                // Foto wajib cuma kalau status_guru Hadir DAN belum ada foto dari
+                // sebelumnya (guru cuma ubah data lain nggak wajib upload ulang).
+                // Tidak Hadir -> selalu opsional (surat izin/sakit, bukan wajib
+                // jepret kamera) -- sama alasannya kayak store().
+                'foto_bukti' => [
+                    ($jurnal->foto_bukti || $request->input('status_guru') !== 'hadir') ? 'nullable' : 'required',
+                    'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096',
+                ],
+            ]);
+        } catch (ValidationException $e) {
+            return redirect()->route('jurnal.index', ['lihat' => $jurnal->id, 'ubah' => 1])
+                ->withErrors($e->errors())->withInput();
+        }
 
         // Jam selesai SELALU ikut jadwal aslinya, sama kayak di store() -- field
         // di form udah dikunci di sisi tampilan, ini jaga-jaga di server juga.

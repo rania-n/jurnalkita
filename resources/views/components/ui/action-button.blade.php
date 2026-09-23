@@ -13,7 +13,7 @@
         'danger' => 'bg-alpha-soft text-alpha hover:bg-[#fecdd3]',
         'success' => 'bg-hadir-soft text-hadir hover:bg-[#bef3ab]',
     ];
-    $classes = 'press flex items-center justify-between gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-colors ' . ($variants[$variant] ?? $variants['neutral']);
+    $classes = 'press flex items-center justify-between gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ' . ($variants[$variant] ?? $variants['neutral']);
 @endphp
 
 @if ($href)

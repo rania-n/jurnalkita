@@ -164,7 +164,7 @@ class NotifikasiTest extends TestCase
         // Jurnal baru.
         $this->actingAs($guruUser)->post('/guru/jurnal', [
             'jadwal_id' => $jadwal->id, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect();
 
@@ -177,7 +177,7 @@ class NotifikasiTest extends TestCase
         Notification::fake();
 
         $this->actingAs($guruUser)->post("/guru/jurnal/{$jurnal->id}", [
-            'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Bab 1 diperbaiki',
+            'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Bab 1 diperbaiki', 'metode_pilihan' => 'ceramah',
         ])->assertRedirect();
 
         Notification::assertSentTo($sekretaris, JurnalPerluDiperiksa::class);

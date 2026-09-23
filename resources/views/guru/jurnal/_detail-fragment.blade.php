@@ -21,7 +21,7 @@
         @if ($jurnal->otomatisDiverifikasi())
             Jurnal <strong>otomatis terverifikasi sistem</strong> — pengurus kelas nggak sempat periksa sampai hari berikutnya. Tidak bisa diubah lagi.
         @elseif ($vs === 'terverifikasi' && $jurnal->verifikasiAbsen())
-            Laporan tidak hadir sudah <strong>dicatat</strong> oleh pengurus kelas
+            Laporan tidak hadir sudah <strong>disetujui</strong> oleh pengurus kelas
             @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.
         @elseif ($vs === 'terverifikasi')
             Jurnal sudah <strong>diverifikasi</strong> oleh pengurus kelas
@@ -74,7 +74,10 @@
 
     @if ($bisaUbah)
         <div class="flex gap-2">
-            <x-ui.button :href="route('jurnal.edit', $jurnal)" icon="edit" class="flex-1 sm:flex-none">Ubah Jurnal</x-ui.button>
+            {{-- Nge-swap ISI popup yang lagi kebuka jadi form ubah (lihat
+                 setFragmentHtml() di app.js) -- BUKAN pindah ke popup/halaman
+                 lain, biar keliatan masih popup yang sama persis. --}}
+            <x-ui.button type="button" data-modal-ajax-swap="{{ route('jurnal.edit.fragment', $jurnal) }}" icon="edit" class="flex-1 sm:flex-none">Ubah Jurnal</x-ui.button>
             <form method="POST" action="{{ route('jurnal.destroy', $jurnal) }}" class="flex-1 sm:flex-none"
                   data-confirm="Hapus jurnal ini beserta presensinya? Tindakan ini tidak bisa dibatalkan lewat aplikasi.">
                 @csrf @method('DELETE')

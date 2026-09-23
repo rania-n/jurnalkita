@@ -143,10 +143,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Statis, HARUS didaftarkan sebelum route {jurnal} di bawah (POST
         // /guru/jurnal/{jurnal} bisa "nangkep" /guru/jurnal/tidak-hadir-massal
         // kalau didaftarkan belakangan -- {jurnal} nganggep itu ID/slug).
-        Route::get('/guru/jurnal/tidak-hadir-massal', [JurnalController::class, 'createMassal'])->name('jurnal.massal.create');
+        // Halaman GET-nya udah nggak ada -- "Tidak Hadir Semua Kelas" sekarang
+        // nyatu di jurnal.create (blok-massal-kelas), endpoint POST ini yang
+        // dipanggil form yang sama.
         Route::post('/guru/jurnal/tidak-hadir-massal', [JurnalController::class, 'storeMassal'])->name('jurnal.massal.store');
         Route::get('/guru/jurnal/{jurnal}/fragment', [JurnalController::class, 'showFragment'])->name('jurnal.show.fragment');
-        Route::get('/guru/jurnal/{jurnal}/ubah', [JurnalController::class, 'edit'])->name('jurnal.edit');
+        // Halaman GET penuh buat "Ubah Jurnal" udah nggak ada -- popup "Lihat"
+        // yang nyatu jadi form ubah lewat fragment ini (tombol "Ubah Jurnal"
+        // di _detail-fragment nge-swap isi popup, bukan pindah halaman).
+        Route::get('/guru/jurnal/{jurnal}/ubah/fragment', [JurnalController::class, 'editFragment'])->name('jurnal.edit.fragment');
         Route::post('/guru/jurnal/{jurnal}', [JurnalController::class, 'update'])->name('jurnal.update');
         Route::delete('/guru/jurnal/{jurnal}', [JurnalController::class, 'destroy'])->name('jurnal.destroy');
 

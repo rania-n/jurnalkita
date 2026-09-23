@@ -56,7 +56,11 @@
                     <x-slot:badge>
                         <div class="flex flex-wrap items-center gap-1.5">
                             <x-ui.status-badge :status="$badge[$j->status_verifikasi]">
-                                {{ $j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen() ? 'Dicatat' : ['pending' => 'Perlu diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Diminta revisi'][$j->status_verifikasi] }}
+                                {{-- Tidak Hadir nggak ada materi buat "diverifikasi"
+                                     beneran -- pengurus kelas cuma nyetujuin dia
+                                     udah tahu gurunya nggak masuk, bukan meriksa
+                                     konten (lihat Jurnal::verifikasiAbsen()). --}}
+                                {{ $j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen() ? 'Disetujui' : ['pending' => 'Perlu diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Diminta revisi'][$j->status_verifikasi] }}
                             </x-ui.status-badge>
                             {{-- Beda dari verifikasi manusia beneran -- biar
                                  pengurus kelas nggak salah kira udah ada yang

@@ -4,8 +4,12 @@
 @endphp
 
 <x-layouts.app title="Riwayat Jurnal" width="wide">
-    <x-page-header title="Riwayat Jurnal" subtitle="Jurnal mengajar yang sudah Anda isi">
-        <x-ui.button :href="route('jurnal.create')" icon="add">Isi Jurnal</x-ui.button>
+    {{-- alwaysRow -- tombol tetap di pojok kanan sejajar judul, nggak ikut
+         melebar penuh layar pas HP sempit (dulu numpuk di bawah judul & jadi
+         kebesaran). Ikon disamakan sama menu "Isi Jurnal" di sidebar/navbar
+         (edit_note), bukan ikon "add" generik. --}}
+    <x-page-header title="Riwayat Jurnal" subtitle="Jurnal mengajar yang sudah Anda isi" alwaysRow>
+        <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="!h-10 !px-4 !text-sm">Isi Jurnal</x-ui.button>
     </x-page-header>
 
     <x-ui.auto-refresh :url="route('jurnal.versi')" />
@@ -60,7 +64,11 @@
                     <x-slot:badge>
                         <div class="flex flex-wrap items-center gap-1.5">
                             <x-ui.status-badge :status="$statusLabel[$j->status_verifikasi] ?? 'menunggu'">
-                                {{ $j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen() ? 'Dicatat' : ['pending' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu revisi'][$j->status_verifikasi] }}
+                                {{-- Sinkron sama istilah di Verifikasi Jurnal punya
+                                     pengurus kelas -- Tidak Hadir "disetujui" (nggak
+                                     ada materi buat diverifikasi beneran), bukan
+                                     "diverifikasi". --}}
+                                {{ $j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen() ? 'Disetujui' : ['pending' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu revisi'][$j->status_verifikasi] }}
                             </x-ui.status-badge>
                             @if ($j->otomatisDiverifikasi())
                                 <x-ui.status-badge status="otomatis">Otomatis</x-ui.status-badge>
@@ -96,15 +104,24 @@
         {{-- Dibuka lewat ?lihat=<id> (habis submit/redirect dari tempat lain
              -- lihat JurnalController@index) -- tombol tersembunyi ini di-klik
              otomatis sekali lewat JS, biar popup-nya kebuka walau jurnalnya
-             nggak ada di halaman pagination yang lagi tampil. --}}
-        @php $judulLihat = $lihatJurnal->jadwal->mapel->nama . ' — ' . $lihatJurnal->jadwal->kelas->nama; @endphp
+             nggak ada di halaman pagination yang lagi tampil.
+
+             ?ubah=1 ikut nempel -> buka LANGSUNG ke fragment form ubah,
+             bukan fragment lihat dulu. Dipakai JurnalController@update pas
+             validasi submit ubah gagal, biar guru balik ke popup yang SAMA
+             (bukan ilang begitu aja) lengkap sama pesan error & isian yang
+             barusan diketik ($errors/old() otomatis ke-render fragment-nya). --}}
+        @php
+            $ubahJurnal = request()->boolean('ubah');
+            $judulLihat = $lihatJurnal->jadwal->mapel->nama . ' — ' . $lihatJurnal->jadwal->kelas->nama;
+        @endphp
         <button
             type="button"
             hidden
             data-auto-open-jurnal
             data-modal-open="modal-jurnal-detail"
             data-modal-title="{{ $judulLihat }}"
-            data-ajax-url="{{ route('jurnal.show.fragment', $lihatJurnal) }}"
+            data-ajax-url="{{ $ubahJurnal ? route('jurnal.edit.fragment', $lihatJurnal) : route('jurnal.show.fragment', $lihatJurnal) }}"
         ></button>
         @push('scripts')
             <script>

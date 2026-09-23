@@ -22,7 +22,7 @@
             @if ($jurnal->otomatisDiverifikasi())
                 <strong>Otomatis terverifikasi sistem</strong> — pengurus kelas nggak sempat periksa sampai hari berikutnya.
             @elseif ($jurnal->status_verifikasi === 'terverifikasi' && $jurnal->verifikasiAbsen())
-                Laporan tidak hadir sudah dicatat{{ $jurnal->verifikator ? ' oleh '.$jurnal->verifikator->nama : '' }}.
+                Laporan tidak hadir sudah disetujui{{ $jurnal->verifikator ? ' oleh '.$jurnal->verifikator->nama : '' }}.
             @elseif ($jurnal->status_verifikasi === 'terverifikasi')
                 Sudah diverifikasi{{ $jurnal->verifikator ? ' oleh '.$jurnal->verifikator->nama : '' }}.
             @else
@@ -74,11 +74,13 @@
             <x-ui.textarea label="Catatan (wajib jika minta revisi)" name="catatan" :rows="2" placeholder="Contoh: materi tidak sesuai dengan yang diajarkan.">{{ old('catatan') }}</x-ui.textarea>
             <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
                 {{-- Jurnal absen guru nggak ada materi/isi buat "diverifikasi"
-                     beneran, jadi tombolnya dibedain -- "Catat" (bukan
+                     beneran, jadi tombolnya dibedain -- "Setujui" (bukan
                      "Verifikasi") biar nggak kesan lagi ngecek konten yang
-                     memang kosong (lihat Jurnal::verifikasiAbsen()). --}}
+                     memang kosong. Cuma nyetujuin (udah tahu gurunya nggak
+                     masuk), sama istilahnya kayak alur Dispensasi (lihat
+                     Jurnal::verifikasiAbsen()). --}}
                 <x-ui.button type="submit" name="keputusan" value="terima" variant="success" icon="check" class="flex-1">
-                    {{ $jurnal->verifikasiAbsen() ? 'Sesuai — Catat' : 'Sesuai — Verifikasi' }}
+                    {{ $jurnal->verifikasiAbsen() ? 'Setujui' : 'Sesuai — Verifikasi' }}
                 </x-ui.button>
                 <x-ui.button type="submit" name="keputusan" value="revisi" variant="danger" icon="edit" class="flex-1">Minta Revisi</x-ui.button>
             </div>

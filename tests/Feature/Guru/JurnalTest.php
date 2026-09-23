@@ -59,7 +59,7 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect();
 
@@ -77,7 +77,7 @@ class JurnalTest extends TestCase
         $payload = [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ];
 
@@ -103,7 +103,7 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ]);
 
@@ -125,7 +125,7 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
             'presensi' => [
                 $siswaA->id => ['status' => 'sakit', 'catatan' => 'demam'],
                 $siswaB->id => ['status' => 'hadir'],
@@ -146,18 +146,18 @@ class JurnalTest extends TestCase
 
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'x',
+            'status_guru' => 'hadir', 'materi' => 'x', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ]);
         $jurnal = Jurnal::first();
         $siswaA = Siswa::where('nis', '001')->firstOrFail();
         $siswaB = Siswa::where('nis', '002')->firstOrFail();
 
-        $this->actingAs($this->user)->get("/guru/jurnal/{$jurnal->id}/ubah")
+        $this->actingAs($this->user)->get("/guru/jurnal/{$jurnal->id}/ubah/fragment")
             ->assertOk()->assertSee('A')->assertSee('B');
 
         $this->actingAs($this->user)->post("/guru/jurnal/{$jurnal->id}", [
-            'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'materi baru',
+            'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'materi baru', 'metode_pilihan' => 'diskusi',
             'presensi' => [
                 $siswaA->id => ['status' => 'sakit', 'catatan' => 'demam'],
                 $siswaB->id => ['status' => 'hadir'],
@@ -206,7 +206,7 @@ class JurnalTest extends TestCase
 
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'salah kelas',
+            'status_guru' => 'hadir', 'materi' => 'salah kelas', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ]);
         $jurnal = Jurnal::firstOrFail();
@@ -289,7 +289,7 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertForbidden();
     }
@@ -306,7 +306,7 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect();
 
@@ -325,7 +325,7 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Susulan kemarin',
+            'status_guru' => 'hadir', 'materi' => 'Susulan kemarin', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ])->assertRedirect();
 
@@ -352,7 +352,7 @@ class JurnalTest extends TestCase
         $this->post('/guru/jurnal', [
             'jadwal_id' => $this->jadwal->id,
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'status_guru' => 'hadir', 'materi' => 'Bab 1',
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ]);
 
