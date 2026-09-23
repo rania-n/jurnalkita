@@ -71,7 +71,7 @@
         @if ($jadwalHariIni->isEmpty())
             <x-ui.empty icon="event_busy" title="Tidak ada jadwal hari ini" />
         @else
-            <x-ui.card-list>
+            <x-ui.card-list class="grid-fill-last">
                 @foreach ($jadwalHariIni as $j)
                     @php $jr = $jurnalHariIni->get($j->id); @endphp
                     <x-ui.list-card

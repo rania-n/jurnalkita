@@ -45,7 +45,7 @@
     @if ($jurnals->isEmpty())
         <x-ui.empty icon="menu_book" title="Belum ada jurnal" desc="Mulai isi jurnal dari beranda atau tombol di atas." />
     @else
-        <x-ui.card-list id="daftar-riwayat-jurnal">
+        <x-ui.card-list id="daftar-riwayat-jurnal" class="grid-fill-last">
             @foreach ($jurnals as $j)
                 @php
                     $jamJurnal = \App\Support\Waktu::rentangJam($j->jam_ke_mulai, $j->jam_ke_selesai, $j->tanggal);

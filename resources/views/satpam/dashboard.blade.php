@@ -24,7 +24,7 @@
     @if ($riwayatScan->isEmpty())
         <x-ui.empty icon="qr_code_scanner" title="Belum ada scan hari ini" />
     @else
-        <x-ui.card-list class="mb-6">
+        <x-ui.card-list class="mb-6 grid-fill-last">
             @foreach ($riwayatScan as $log)
                 <x-ui.list-card
                     :title="$log->deskripsi"
@@ -45,7 +45,7 @@
     @if ($riwayatTerlambat->isEmpty())
         <x-ui.empty icon="schedule" title="Belum ada catatan keterlambatan hari ini" />
     @else
-        <x-ui.card-list>
+        <x-ui.card-list class="grid-fill-last">
             @foreach ($riwayatTerlambat as $c)
                 <x-ui.list-card
                     :title="$c->siswa->nama"

@@ -95,7 +95,7 @@
                 <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
             </x-ui.empty>
         @else
-            <x-ui.card-list>
+            <x-ui.card-list class="grid-fill-last">
                 @foreach ($jadwalHariIniWaka as $j)
                     <x-ui.list-card
                         :title="$j->mapel->nama"
@@ -129,7 +129,7 @@
     @if ($dispensasiTerbaru->isEmpty())
         <x-ui.empty icon="fact_check" title="Belum ada dispensasi" />
     @else
-        <x-ui.card-list>
+        <x-ui.card-list class="grid-fill-last">
             @foreach ($dispensasiTerbaru as $d)
                 <x-ui.list-card
                     :title="$d->siswa->nama"

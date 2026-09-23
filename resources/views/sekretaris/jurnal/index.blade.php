@@ -42,7 +42,7 @@
     @if ($jurnals->isEmpty())
         <x-ui.empty icon="menu_book" title="Tidak ada jurnal" />
     @else
-        <x-ui.card-list id="daftar-verifikasi-jurnal">
+        <x-ui.card-list id="daftar-verifikasi-jurnal" class="grid-fill-last">
             @foreach ($jurnals as $j)
                 <x-ui.list-card
                     data-baris-verifikasi-jurnal

@@ -123,7 +123,7 @@
     @if ($items->isEmpty())
         <x-ui.empty icon="fact_check" title="Belum ada dispensasi" desc="Coba ubah filter kalau sedang mencari data tertentu." />
     @else
-        <x-ui.card-list>
+        <x-ui.card-list class="grid-fill-last">
             @foreach ($items as $d)
                 @php
                     $cariStr = strtolower(

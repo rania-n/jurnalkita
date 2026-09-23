@@ -31,7 +31,10 @@
 
             <x-ui.textarea label="Alasan Dispensasi" name="alasan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengikuti lomba tingkat kabupaten." required>{{ old('alasan') }}</x-ui.textarea>
 
-            <x-ui.input label="No. HP yang bisa dihubungi (opsional)" name="no_hp" inputmode="numeric" :value="old('no_hp')" />
+            {{-- sm:col-span-2 -- field sebelum (Alasan) & sesudah (Upload) di sini
+                 sama-sama span2, jadi No. HP selalu nyisa sendirian kalau nggak
+                 di-stretch. --}}
+            <x-ui.input label="No. HP yang bisa dihubungi (opsional)" name="no_hp" inputmode="numeric" :value="old('no_hp')" class="sm:col-span-2" />
 
             <x-ui.upload label="Surat / Bukti Pendukung (opsional)" name="surat" accept="image/*,application/pdf" title="Lampirkan surat atau foto" hint="JPG, PNG, atau PDF" class="sm:col-span-2" />
         </div>

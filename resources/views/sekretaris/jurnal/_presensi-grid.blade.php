@@ -32,7 +32,7 @@
     </div>
 
     <div class="mt-2 max-h-[38vh] overflow-y-auto rounded-2xl border border-surface-alt bg-surface-alt/40 p-3 sm:max-h-[50vh]">
-        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2 grid-fill-last">
             @foreach ($siswas as $s)
                 @php
                     $isiAwal = ($presensiAwal ?? [])[$s->id] ?? ['status' => 'hadir', 'catatan' => null];

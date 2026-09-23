@@ -112,7 +112,7 @@
                 <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
             </x-ui.empty>
         @else
-            <x-ui.card-list>
+            <x-ui.card-list class="grid-fill-last">
                 @foreach ($jadwalHariIni as $j)
                     @php $statusJam = \App\Support\Waktu::statusJpHariIni($j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
                     <x-ui.list-card

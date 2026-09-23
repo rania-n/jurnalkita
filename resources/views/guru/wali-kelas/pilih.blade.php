@@ -1,7 +1,7 @@
 <x-layouts.app title="Wali Kelas">
     <x-page-header title="Wali Kelas" subtitle="Anda wali di beberapa kelas — pilih dulu" />
 
-    <x-ui.card-list>
+    <x-ui.card-list class="grid-fill-last">
         @foreach ($kelasList as $k)
             <x-ui.list-card
                 :title="$k->nama"
