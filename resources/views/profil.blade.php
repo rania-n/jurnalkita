@@ -3,10 +3,7 @@
     $guru = $user->guru;
     $siswa = $user->siswa;
 
-    $roleLabel = $user->roleLabel();
-
     $nama = $guru->nama ?? $siswa->nama ?? $user->name;
-    $inisial = collect(explode(' ', $nama))->map(fn ($w) => mb_substr($w, 0, 1))->take(2)->implode('');
     // Halaman ini dipakai SEMUA peran -- admin pakai shell admin biar konsisten
     // sama sidebar & topbar-nya (lihat catatan yang sama di dispensasi/index dkk).
     $admin = $user->role === 'admin';
@@ -16,21 +13,18 @@
     @if ($admin)
         <x-admin.page title="Profil" subtitle="Data akun Anda" />
     @else
-        <x-page-header title="Profil" subtitle="Data akun Anda" />
+        {{-- Judul size="sm" -- dikecilin (bukan dihilangin) biar halaman tetap
+             ada kop (khusus tampilan non-admin; sidebar Admin beda pola,
+             nggak disentuh). --}}
+        <x-page-header title="Profil" subtitle="Data akun Anda" size="sm" />
     @endif
 
+    {{-- Avatar + nama + role SENGAJA nggak diulang di sini -- topbar (admin
+         maupun non-admin) udah selalu nampilin itu di atas, di halaman
+         manapun. Ulang lagi di badan halaman Profil cuma dobel info yang
+         sama persis. --}}
     <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-2 lg:gap-6">
         <div @class(['flex flex-col', 'rounded-2xl border border-surface-alt bg-card p-5 sm:p-6' => $admin])>
-            <div class="flex items-center gap-4 py-2">
-                <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-navy text-xl font-bold text-card">
-                    {{ $inisial }}
-                </span>
-                <div>
-                    <p class="text-lg font-bold text-ink">{{ $nama }}</p>
-                    <p class="text-sm text-muted">{{ $roleLabel }}</p>
-                </div>
-            </div>
-
             @if ($admin)
                 @if (session('success'))
                     <x-alert type="success" class="mt-4">
@@ -65,29 +59,10 @@
                 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <x-ui.field-static label="Email" icon="mail" class="sm:col-span-2">{{ $user->email }}</x-ui.field-static>
 
-                    {{-- No. WhatsApp SATU sumber buat semua peran: users.no_hp -- beda
-                         dari field lain di sini (nama/email/dll, cuma admin yang boleh
-                         ubah), No. WA ini boleh diubah sendiri sama pemilik akunnya --
-                         guru sering butuh di-update sendiri (ganti nomor) tanpa nunggu
-                         admin. SELALU sm:col-span-2 -- ini form+tombol (bukan field
-                         statis polos kayak yang lain), kalau cuma setengah kolom
-                         kotak inputnya keburu sempit banget disenggol tombol Simpan. --}}
-                    <form method="POST" action="{{ route('profil.no-hp') }}" class="flex items-end gap-2 sm:col-span-2">
-                        @csrf
-                        <x-ui.input label="No. WhatsApp" icon="call" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" errorBag="ubahNoHp" class="flex-1" />
-                        <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
-                    </form>
-
                     @if ($guru)
-                        {{-- NIP sendirian (nggak ada field 1-kolom lain buat dipasangin --
-                             No.WhatsApp di atas sekarang selalu span-2 sendiri), jadi
-                             di-stretch juga biar nggak nyisa gap kosong di sampingnya. --}}
-                        <x-ui.field-static label="NIP" icon="badge" class="sm:col-span-2">{{ $guru->nip ?: '—' }}</x-ui.field-static>
-                        <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book" class="sm:col-span-2">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
+                        <x-ui.field-static label="NIP" icon="badge">{{ $guru->nip ?: '—' }}</x-ui.field-static>
+                        <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
                         @if ($guru->mapels->isNotEmpty())
-                            {{-- Mapel Tambahan juga SELALU nyisa sendirian kalau muncul --
-                                 nggak ada field 1-kolom lain setelah MapelUtama (span2)
-                                 buat dipasangin, Wali Kelas di bawahnya juga span2. --}}
                             <x-ui.field-static label="Mapel Tambahan" icon="library_books" class="sm:col-span-2">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
                         @endif
                         @if ($guru->kelasWali->isNotEmpty())
@@ -97,13 +72,25 @@
                         {{-- Kelas+NIS = 2 field 1-kolom, pas genap, dipasangin bareng. --}}
                         <x-ui.field-static label="Kelas" icon="school">{{ $siswa->kelas->nama ?? '—' }}</x-ui.field-static>
                         <x-ui.field-static label="NIS" icon="badge">{{ $siswa->nis }}</x-ui.field-static>
-                        {{-- No.Absen sendirian (No.WhatsApp di atas sekarang selalu
-                             span-2 sendiri, nggak lagi ikut dipasangin di sini) --
-                             sama Jabatan sesudahnya juga span-2, biar nggak ada yang
-                             nyisa gap kosong. --}}
-                        <x-ui.field-static label="No. Absen" icon="tag" class="sm:col-span-2">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
-                        <x-ui.field-static label="Jabatan" icon="workspace_premium" class="sm:col-span-2">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
+                        <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
+                        <x-ui.field-static label="Jabatan" icon="workspace_premium">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
                     @endif
+
+                    {{-- No. WhatsApp ditaruh paling bawah (bukan di atas dekat Email) --
+                         field lain di sini murni informasi, ini satu-satunya yang
+                         punya FORM+tombol Simpan sendiri, jadi dipisah ke akhir biar
+                         nggak keselip di tengah daftar field yang cuma buat dibaca.
+                         SATU sumber buat semua peran: users.no_hp -- beda dari field
+                         lain (nama/email/dll, cuma Admin yang boleh ubah), No. WA ini
+                         boleh diubah sendiri sama pemilik akunnya -- guru sering butuh
+                         update sendiri (ganti nomor) tanpa nunggu Admin. SELALU
+                         sm:col-span-2 -- form+tombol, kalau cuma setengah kolom kotak
+                         inputnya keburu sempit disenggol tombol Simpan. --}}
+                    <form method="POST" action="{{ route('profil.no-hp') }}" class="flex items-end gap-2 sm:col-span-2">
+                        @csrf
+                        <x-ui.input label="No. WhatsApp" icon="call" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" errorBag="ubahNoHp" class="flex-1" />
+                        <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
+                    </form>
                 </div>
 
                 <x-alert type="info" class="mt-6">

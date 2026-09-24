@@ -1,7 +1,11 @@
 <x-layouts.app title="Form Jurnal Mengajar">
+    {{-- Judul tetap ditulis (size="sm" -- dikecilin, bukan dihilangin total)
+         biar halaman nggak kesan cuma numpang teks tanpa kop sama sekali,
+         walau isinya sama kayak yang udah disorot di navbar/sidebar. --}}
     <x-page-header
-        title="Form Jurnal Mengajar"
+        title="Isi Jurnal"
         subtitle="Isi jurnal mengajar dan kehadiran siswa dalam satu langkah"
+        size="sm"
     />
 
     @if ($modeJurnal === 'bebas_kemarin')
@@ -301,11 +305,30 @@
             <div class="flex flex-col gap-3 text-sm">
                 <x-ui.field-static label="Kelas & Mata Pelajaran"><span data-ringkasan="kelas-mapel">—</span></x-ui.field-static>
                 <x-ui.field-static label="Status Kehadiran Anda"><span data-ringkasan="status-guru">—</span></x-ui.field-static>
-                <x-ui.field-static label="Materi / Tugas"><span data-ringkasan="isi">—</span></x-ui.field-static>
-                <x-ui.field-static label="Presensi Siswa"><span data-ringkasan="presensi">—</span></x-ui.field-static>
-                <x-ui.field-static label="Foto Suasana Kelas"><span data-ringkasan="foto">—</span></x-ui.field-static>
+
+                {{-- Beda field & label tergantung Status Kehadiran -- jurnal
+                     Tidak Hadir nggak ada "Materi"/"Foto Suasana Kelas", jadi
+                     jangan dipaksa pakai label yang sama kayak Hadir. --}}
+                <div data-ringkasan-blok-hadir class="flex flex-col gap-3">
+                    <x-ui.field-static label="Materi"><span data-ringkasan="materi">—</span></x-ui.field-static>
+                    <x-ui.field-static label="Foto Suasana Kelas"><span data-ringkasan="foto-hadir">—</span></x-ui.field-static>
+                </div>
+                <div data-ringkasan-blok-tidak-hadir class="flex flex-col gap-3" hidden>
+                    <x-ui.field-static label="Alasan"><span data-ringkasan="alasan">—</span></x-ui.field-static>
+                    <x-ui.field-static label="Tugas Tambahan"><span data-ringkasan="tugas">—</span></x-ui.field-static>
+                    <x-ui.field-static label="Surat Izin/Sakit"><span data-ringkasan="surat">—</span></x-ui.field-static>
+                </div>
+
+                {{-- Presensi cuma relevan kalau BENERAN ada 1 kelas yang lagi
+                     diisi presensinya di halaman ini -- disembunyiin total pas
+                     mode massal (guru nggak ngisi presensi manual sama sekali
+                     di situ, lihat blok-presensi di form). --}}
+                <x-ui.field-static data-ringkasan-blok-presensi label="Presensi Siswa"><span data-ringkasan="presensi">—</span></x-ui.field-static>
             </div>
-            <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-3">
+            {{-- Sejajar kanan-kiri langsung (bukan numpuk di HP dulu) -- samain
+                 sama pola tombol submit/batal modal lain di app (mis. modal
+                 Tambah/Ubah di Admin), bukan bikin pola baru. --}}
+            <div class="mt-4 flex gap-2">
                 <x-ui.button type="button" id="tombol-kirim-jurnal" icon="send" class="flex-1">Sudah Benar, Kirim</x-ui.button>
                 <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Cek Lagi</x-ui.button>
             </div>
@@ -331,9 +354,10 @@
                         const kelasTertandai = Array.from(form.querySelectorAll('[data-checkbox-jadwal-massal]:not(:disabled):checked'))
                             .map((cb) => cb.closest('[data-baris-jadwal-massal]')?.querySelector('.text-ink')?.textContent.trim())
                             .filter(Boolean);
+                        const massal = kelasTertandai.length > 0;
 
                         let kelasMapel;
-                        if (kelasTertandai.length) {
+                        if (massal) {
                             kelasMapel = kelasTertandai.join(', ');
                         } else {
                             const jadwalSelect = form.querySelector('select[name="jadwal_id"]');
@@ -347,48 +371,67 @@
                         const hadir = statusGuru === 'hadir';
                         modalRingkasan.querySelector('[data-ringkasan="status-guru"]').textContent = hadir ? 'Hadir' : 'Tidak Hadir';
 
-                        const isiEl = modalRingkasan.querySelector('[data-ringkasan="isi"]');
+                        // Field yang ditampilin BEDA total antara Hadir & Tidak
+                        // Hadir (bukan cuma isinya -- labelnya juga nggak masuk
+                        // akal dipakai bareng, mis. "Foto Suasana Kelas" nggak
+                        // relevan buat guru yang nggak di sekolah).
+                        modalRingkasan.querySelector('[data-ringkasan-blok-hadir]').hidden = ! hadir;
+                        modalRingkasan.querySelector('[data-ringkasan-blok-tidak-hadir]').hidden = hadir;
+
                         if (hadir) {
                             const materi = form.querySelector('[name="materi"]')?.value.trim();
-                            isiEl.textContent = materi || '(belum diisi)';
+                            modalRingkasan.querySelector('[data-ringkasan="materi"]').textContent = materi || '(belum diisi)';
+
+                            const fotoKamera = form.querySelector('[data-kamera-input]:not(:disabled)');
+                            modalRingkasan.querySelector('[data-ringkasan="foto-hadir"]').textContent =
+                                (fotoKamera?.files?.length > 0) ? 'Sudah dilampirkan' : 'Belum diambil';
                         } else {
-                            const tugas = form.querySelector('[name="tugas_tambahan"]')?.value.trim();
-                            // Alasan sekarang bar (radio), bukan teks bebas -- ambil
-                            // yang BENERAN kecentang, bukan cuma elemen pertama.
+                            const tugas = form.querySelector('[name="tugas_tambahan"]:not(:disabled)')?.value.trim();
+                            modalRingkasan.querySelector('[data-ringkasan="tugas"]').textContent = tugas || '(belum diisi)';
+
+                            // Alasan bar (radio), bukan teks bebas -- ambil yang
+                            // BENERAN kecentang, bukan cuma elemen pertama.
                             const alasanLabel = { sakit: 'Sakit', izin: 'Izin' };
                             const alasan = form.querySelector('input[name="alasan"]:checked')?.value;
-                            isiEl.textContent = `Tugas: ${tugas || '(belum diisi)'} — Alasan: ${alasan ? (alasanLabel[alasan] ?? alasan) : '(belum dipilih)'}`;
+                            modalRingkasan.querySelector('[data-ringkasan="alasan"]').textContent =
+                                alasan ? (alasanLabel[alasan] ?? alasan) : '(belum dipilih)';
+
+                            const suratInput = form.querySelector('[data-upload-input]:not(:disabled)');
+                            modalRingkasan.querySelector('[data-ringkasan="surat"]').textContent =
+                                (suratInput?.files?.length > 0) ? 'Sudah dilampirkan' : 'Tidak dilampirkan (opsional)';
                         }
 
-                        // Yang ditampilin cuma nama yang BUKAN Hadir -- itu yang
-                        // paling penting dicek ulang sebelum kirim (semuanya
-                        // udah Hadir emang defaultnya, nge-list 36 nama satu-satu
-                        // di sini nggak nambah info, cuma bikin ringkasan panjang).
-                        const rowsSiswa = form.querySelectorAll('[data-siswa-row]');
-                        const kelompok = { sakit: [], izin: [], alpha: [], dispensasi: [] };
-                        let jumlahHadir = 0;
-                        rowsSiswa.forEach((row) => {
-                            const status = row.querySelector('input[type="radio"]:checked')?.value ?? 'hadir';
-                            if (status === 'hadir') { jumlahHadir++; return; }
-                            const nama = row.querySelector('.text-ink')?.textContent.trim() || '(tanpa nama)';
-                            (kelompok[status] ?? (kelompok[status] = [])).push(nama);
-                        });
-                        const label = { sakit: 'Sakit', izin: 'Izin', alpha: 'Alpha', dispensasi: 'Dispensasi' };
-                        const bagianTidakHadir = Object.entries(kelompok)
-                            .filter(([, arr]) => arr.length > 0)
-                            .map(([k, arr]) => `${label[k] || k}: ${arr.join(', ')}`)
-                            .join(' · ');
-                        modalRingkasan.querySelector('[data-ringkasan="presensi"]').textContent = rowsSiswa.length
-                            ? (bagianTidakHadir ? `${bagianTidakHadir} (sisanya ${jumlahHadir} Hadir)` : `Semua ${rowsSiswa.length} siswa Hadir`)
-                            : '—';
+                        // Presensi cuma relevan kalau ada grid-nya beneran kelihatan
+                        // di halaman (nggak ada sama sekali pas mode massal -- guru
+                        // nggak di kelas manapun buat nentuin presensi manual).
+                        const blokPresensiEl = document.getElementById('blok-presensi');
+                        const presensiField = modalRingkasan.querySelector('[data-ringkasan-blok-presensi]');
+                        const presensiKelihatan = blokPresensiEl && ! blokPresensiEl.hidden;
+                        presensiField.hidden = ! presensiKelihatan;
 
-                        // Bisa dari 2 sumber beda tergantung status_guru -- kamera
-                        // (blok-hadir, wajib) atau file-picker biasa buat surat
-                        // (blok-tidak-hadir, opsional). Yang disabled (blok yang
-                        // lagi disembunyiin) otomatis nggak dihitung filesnya.
-                        const fotoInput = form.querySelector('[data-kamera-input]:not(:disabled), [data-upload-input]:not(:disabled)');
-                        modalRingkasan.querySelector('[data-ringkasan="foto"]').textContent =
-                            (fotoInput?.files?.length > 0) ? 'Sudah dilampirkan' : (hadir ? 'Belum diambil' : 'Tidak dilampirkan (opsional)');
+                        if (presensiKelihatan) {
+                            // Yang ditampilin cuma nama yang BUKAN Hadir -- itu yang
+                            // paling penting dicek ulang sebelum kirim (semuanya
+                            // udah Hadir emang defaultnya, nge-list 36 nama satu-satu
+                            // di sini nggak nambah info, cuma bikin ringkasan panjang).
+                            const rowsSiswa = form.querySelectorAll('[data-siswa-row]');
+                            const kelompok = { sakit: [], izin: [], alpha: [], dispensasi: [] };
+                            let jumlahHadir = 0;
+                            rowsSiswa.forEach((row) => {
+                                const status = row.querySelector('input[type="radio"]:checked')?.value ?? 'hadir';
+                                if (status === 'hadir') { jumlahHadir++; return; }
+                                const nama = row.querySelector('.text-ink')?.textContent.trim() || '(tanpa nama)';
+                                (kelompok[status] ?? (kelompok[status] = [])).push(nama);
+                            });
+                            const label = { sakit: 'Sakit', izin: 'Izin', alpha: 'Alpha', dispensasi: 'Dispensasi' };
+                            const bagianTidakHadir = Object.entries(kelompok)
+                                .filter(([, arr]) => arr.length > 0)
+                                .map(([k, arr]) => `${label[k] || k}: ${arr.join(', ')}`)
+                                .join(' · ');
+                            modalRingkasan.querySelector('[data-ringkasan="presensi"]').textContent = rowsSiswa.length
+                                ? (bagianTidakHadir ? `${bagianTidakHadir} (sisanya ${jumlahHadir} Hadir)` : `Semua ${rowsSiswa.length} siswa Hadir`)
+                                : '—';
+                        }
                     }
 
                     form.addEventListener('submit', (e) => {
@@ -514,9 +557,18 @@
 
                         // Kartu kelas yang nggak dicentang -> field "tugas khusus"-nya
                         // ikut di-disable, biar nggak ketinggalan kesubmit walau
-                        // kelasnya sendiri nggak ditandai.
-                        blokMassal.querySelectorAll('[data-checkbox-jadwal-massal]').forEach((cb) => {
+                        // kelasnya sendiri nggak ditandai. Minimal 1 kelas HARUS
+                        // tetap tercentang -- kalau ini yang terakhir, batalin
+                        // uncheck-nya (server juga nolak jadwal_ids kosong, tapi
+                        // dicegah dari sini biar guru langsung ngerti kenapa).
+                        const semuaCheckboxMassal = blokMassal.querySelectorAll('[data-checkbox-jadwal-massal]');
+                        semuaCheckboxMassal.forEach((cb) => {
                             cb.addEventListener('change', () => {
+                                if (!cb.checked && ! Array.from(semuaCheckboxMassal).some((c) => c.checked)) {
+                                    cb.checked = true;
+                                    alert('Minimal 1 kelas harus tetap ditandai.');
+                                    return;
+                                }
                                 const khusus = document.getElementById('tugas-khusus-' + cb.value);
                                 if (!cb.checked) khusus.querySelector('input').disabled = true;
                             });

@@ -47,10 +47,17 @@
             @endif
         </x-ui.field-static>
         <x-ui.field-static label="Status Kehadiran Guru" class="sm:col-span-2">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
-        <x-ui.field-static label="Materi" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
-        <x-ui.field-static label="Metode">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
-        <x-ui.field-static label="Tugas Tambahan">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
-        <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
+
+        {{-- Sinkron sama popup Lihat punya guru sendiri -- Tidak Hadir nggak
+             ada Materi/Metode (nggak beneran mengajar), jangan ditampilin
+             kosong. --}}
+        @if ($jurnal->status_guru === 'hadir')
+            <x-ui.field-static label="Materi" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
+            <x-ui.field-static label="Metode" class="sm:col-span-2">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
+        @else
+            <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
+            <x-ui.field-static label="Tugas Tambahan" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
+        @endif
     </div>
 
     @if ($jurnal->foto_bukti)
@@ -72,7 +79,10 @@
         <form method="POST" action="{{ route('sekretaris.jurnal.verifikasi', $jurnal) }}" class="flex flex-col gap-3">
             @csrf
             <x-ui.textarea label="Catatan (wajib jika minta revisi)" name="catatan" :rows="2" placeholder="Contoh: materi tidak sesuai dengan yang diajarkan.">{{ old('catatan') }}</x-ui.textarea>
-            <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
+            {{-- flex gap-2 langsung (bukan flex-col sm:flex-row) -- sejajar
+                 kanan-kiri di semua ukuran layar, samain sama pola tombol
+                 berpasangan lain di app. --}}
+            <div class="flex gap-2">
                 {{-- Jurnal absen guru nggak ada materi/isi buat "diverifikasi"
                      beneran, jadi tombolnya dibedain -- "Setujui" (bukan
                      "Verifikasi") biar nggak kesan lagi ngecek konten yang

@@ -93,7 +93,10 @@
         <form method="POST" action="{{ route('dispensasi.waka', $dispensasi) }}" class="flex flex-col gap-3">
             @csrf
             <x-ui.input label="Catatan (opsional)" name="catatan" :value="old('catatan')" />
-            <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
+            {{-- flex gap-2 langsung (bukan flex-col sm:flex-row) -- sejajar
+                 kanan-kiri di semua ukuran layar, samain sama pola tombol
+                 berpasangan lain di app. --}}
+            <div class="flex gap-2">
                 <x-ui.button type="submit" name="keputusan" value="approved" variant="success" icon="check" class="flex-1">Setujui</x-ui.button>
                 <x-ui.button type="submit" name="keputusan" value="rejected" variant="danger" icon="close" data-confirm="Yakin tolak dispensasi ini?" class="flex-1">Tolak</x-ui.button>
             </div>

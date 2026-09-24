@@ -40,7 +40,10 @@
     @else
         <form method="POST" action="{{ url()->full() }}" class="mt-5 flex flex-col gap-3">
             @csrf
-            <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
+            {{-- flex gap-2 langsung (bukan flex-col sm:flex-row) -- sejajar
+                 kanan-kiri di semua ukuran layar, samain sama pola tombol
+                 berpasangan lain di app. --}}
+            <div class="flex gap-2">
                 <button type="submit" name="keputusan" value="approved"
                     class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-hadir/25 bg-hadir-soft text-base font-bold text-hadir">
                     <x-icon name="check" :size="20" /> Setujui

@@ -8,6 +8,25 @@
         $jpAktif = \App\Support\Waktu::jpAktifSekarang();
         $dalamJamSekolah = \App\Support\Waktu::dalamJamSekolah();
 
+        // Piket BUKAN berarti otomatis nggak ada jadwal ngajar hari itu --
+        // dua-duanya bisa nempel di hari yang sama. Dihitung juga di sini
+        // (bukan cuma di cabang "else" di bawah) biar "Jadwal Mengajar Hari
+        // Ini" tetap kelihatan kalau ternyata guru ini piket SEKALIGUS ngajar
+        // -- jangan disembunyiin cuma gara-gara lagi piket (lihat pemakaian
+        // di bawah, dekat "Jadwal Mengajar Hari Ini").
+        $jadwalHariIni = $hari && $guru
+            ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hari)->orderBy('jam_ke_mulai')->get()
+            : collect();
+        $sudahDiisi = $guru
+            ? $guru->jurnals()->whereDate('tanggal', today())->pluck('jadwal_id')->all()
+            : [];
+
+        // Jam berakhir JP TERAKHIR hari ini -- dipakai buat kasih tau "piket
+        // sampai jam berapa" di badge atas (piket nggak punya jam sendiri di
+        // data, jadi dipakein jam pulang sekolah beneran).
+        $jpTerakhirHariIni = \App\Models\JamPelajaran::where('kategori', \App\Support\Waktu::kategori())
+            ->orderByDesc('jam_ke')->first();
+
         // Jadwal + jurnal SATU HARI SEKOLAH (bukan cuma jadwal guru ini sendiri
         // -- piket ngawasin SEMUA kelas), dipetakan ke status per baris. Cuma
         // 'hadir'/'tidak_hadir' yang valid sekarang (status "Tugas Luar" udah
@@ -103,10 +122,18 @@
          ditampilkan, cukup lewat div ringkas -- nggak perlu x-page-header
          lagi kalau nggak ada judul yang mau ditampilkan. --}}
     @if ($piketHariIni)
+        {{-- "Sampai jam berapa" eksplisit ditulis (bukan cuma "Petugas Piket
+             Hari Ini" doang) -- guru piket paling sering nanya itu duluan.
+             Piket sendiri nggak punya jam di data (berlaku 1 hari penuh),
+             jadi dipakein jam pulang sekolah (JP terakhir hari ini) yang
+             paling representatif buat "sampai kapan". --}}
         <div class="mb-4 flex justify-end">
             <span class="flex items-center gap-1.5 rounded-full bg-hadir-soft px-3 py-1 text-xs font-bold text-hadir">
                 <span class="flex h-2 w-2 rounded-full bg-hadir animate-pulse"></span>
                 Petugas Piket Hari Ini
+                @if ($jpTerakhirHariIni)
+                    <span class="font-semibold opacity-80">· Sampai {{ $jpTerakhirHariIni->selesai->format('H:i') }}</span>
+                @endif
             </span>
         </div>
     @endif
@@ -418,7 +445,7 @@
                                                 <p class="truncate text-[11px] text-muted">{{ $rp->keterangan ?: 'Piket Harian' }}</p>
                                             </div>
                                             @if ($waRekan && ! $isMe)
-                                                <a href="{{ $waRekan }}" target="_blank" rel="noopener" class="flex shrink-0 items-center gap-1 rounded-lg bg-hadir-soft px-2 py-1 text-[11px] font-bold text-hadir transition-colors hover:bg-[#bef3ab]">
+                                                <a href="{{ $waRekan }}" target="_blank" rel="noopener" class="flex shrink-0 items-center gap-1 rounded-lg border border-hadir/25 bg-hadir-soft px-2 py-1 text-[11px] font-bold text-hadir transition-colors hover:bg-[#bef3ab]">
                                                     <x-icon name="chat" :size="13" /> WA
                                                 </a>
                                             @endif
@@ -513,10 +540,13 @@
         </a>
     @endif
 
-    {{-- Hari piket: guru nggak dijadwalkan mengajar (lihat catatan di atas), jadi
-         bagian jurnal/jadwal mengajar sengaja disembunyikan biar nggak rancu --
-         fokus ke piket & dispensasi aja hari itu. --}}
-    @unless ($piketHariIni)
+    {{-- Piket TETAP bisa nempel jadwal ngajar di hari yang sama -- kalau
+         ternyata ada, tetap ditampilkan (jangan disembunyiin cuma gara-gara
+         lagi piket). Kalau piket TANPA jadwal ngajar (kasus paling umum),
+         bagian ini disembunyikan total -- state kosongnya ("Tidak ada jadwal
+         hari ini, isi jurnal buat jadwal lain") nggak relevan buat fokus
+         piket hari itu. --}}
+    @if (! $piketHariIni || $jadwalHariIni->isNotEmpty())
         <div class="mb-3 flex items-center justify-between">
             <h2 class="text-sm font-bold text-ink">Jadwal Mengajar Hari Ini</h2>
             <a href="{{ route('jurnal.index') }}" class="text-sm font-semibold text-navy">Riwayat Jurnal →</a>
@@ -570,5 +600,5 @@
                 @endforeach
             </x-ui.card-list>
         @endif
-    @endunless
+    @endif
 </x-layouts.app>

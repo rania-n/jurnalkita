@@ -4,11 +4,13 @@
 @endphp
 
 <x-layouts.app title="Riwayat Jurnal" width="wide">
-    {{-- alwaysRow -- tombol tetap di pojok kanan sejajar judul, nggak ikut
-         melebar penuh layar pas HP sempit (dulu numpuk di bawah judul & jadi
-         kebesaran). Ikon disamakan sama menu "Isi Jurnal" di sidebar/navbar
-         (edit_note), bukan ikon "add" generik. --}}
-    <x-page-header title="Riwayat Jurnal" subtitle="Jurnal mengajar yang sudah Anda isi" alwaysRow>
+    {{-- Judul size="sm" -- dikecilin (bukan dihilangin) biar halaman tetap
+         ada kop, walau isinya sama kayak yang udah disorot di navbar/sidebar.
+         alwaysRow -- tombol tetap di pojok kanan sejajar, nggak ikut melebar
+         penuh layar pas HP sempit (dulu numpuk di bawah judul). Ikon
+         disamakan sama menu "Isi Jurnal" di sidebar/navbar (edit_note),
+         bukan ikon "add" generik. --}}
+    <x-page-header title="Riwayat Jurnal" subtitle="Jurnal mengajar yang sudah Anda isi" size="sm" alwaysRow>
         <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="!h-10 !px-4 !text-sm">Isi Jurnal</x-ui.button>
     </x-page-header>
 
@@ -31,9 +33,12 @@
         {{-- f-date udah flex-1 sendiri (lihat komponennya) -- nggak perlu
              dibungkus div flex-1 lagi di sini, dobel malah nambah lebar
              minimum yang dipaksain & bikin gampang meluber di HP sempit. --}}
+        {{-- max hari ini -- jurnal nggak mungkin ada buat tanggal yang belum
+             kejalanin, nggak ada gunanya nawarin guru milih tanggal masa
+             depan (pasti kosong). --}}
         <div class="flex w-full gap-2">
-            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" onchange="this.form.submit()" />
-            <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" onchange="this.form.submit()" />
+            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+            <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
         </div>
 
         <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua kelas" />
@@ -55,6 +60,23 @@
                     $jamJurnal = \App\Support\Waktu::rentangJam($j->jam_ke_mulai, $j->jam_ke_selesai, $j->tanggal);
                     $judul = $j->jadwal->mapel->nama . ' — ' . $j->jadwal->kelas->nama;
                 @endphp
+                @php
+                    // Tidak Hadir cuma pernyataan "saya nggak masuk", bukan
+                    // laporan yang beneran perlu "diverifikasi" isinya -- dari
+                    // sudut pandang GURU, itu udah selesai begitu dikirim,
+                    // bukan lagi "menggantung nunggu keputusan orang". Beda
+                    // sama Verifikasi Jurnal punya pengurus kelas (TETAP ada
+                    // antrean "Perlu diperiksa" di sana, nggak berubah) --
+                    // cuma framing di Riwayat guru sendiri yang disesuaikan.
+                    if ($j->status_verifikasi === 'pending' && $j->verifikasiAbsen()) {
+                        [$badgeStatus, $badgeLabel] = ['otomatis', 'Terkirim'];
+                    } elseif ($j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen()) {
+                        [$badgeStatus, $badgeLabel] = ['disetujui', 'Disetujui'];
+                    } else {
+                        $badgeStatus = $statusLabel[$j->status_verifikasi] ?? 'menunggu';
+                        $badgeLabel = ['pending' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu revisi'][$j->status_verifikasi] ?? $j->status_verifikasi;
+                    }
+                @endphp
                 <x-ui.list-card
                     data-baris-riwayat-jurnal
                     data-cari="{{ strtolower($judul) }}"
@@ -63,13 +85,7 @@
                 >
                     <x-slot:badge>
                         <div class="flex flex-wrap items-center gap-1.5">
-                            <x-ui.status-badge :status="$statusLabel[$j->status_verifikasi] ?? 'menunggu'">
-                                {{-- Sinkron sama istilah di Verifikasi Jurnal punya
-                                     pengurus kelas -- Tidak Hadir "disetujui" (nggak
-                                     ada materi buat diverifikasi beneran), bukan
-                                     "diverifikasi". --}}
-                                {{ $j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen() ? 'Disetujui' : ['pending' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu revisi'][$j->status_verifikasi] }}
-                            </x-ui.status-badge>
+                            <x-ui.status-badge :status="$badgeStatus">{{ $badgeLabel }}</x-ui.status-badge>
                             @if ($j->otomatisDiverifikasi())
                                 <x-ui.status-badge status="otomatis">Otomatis</x-ui.status-badge>
                             @endif

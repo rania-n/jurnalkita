@@ -96,7 +96,12 @@ class JurnalController extends Controller
     public function index(Request $request): View
     {
         $status = $request->query('status', 'semua');
-        $dari = $request->query('dari');
+        // Default-nya HARI INI (bukan seluruh riwayat tanpa batas) -- guru
+        // paling sering buka Riwayat buat ngecek jurnal yang BARUSAN diisi
+        // hari itu. Filter jelas kok kelihatan keisi tanggal hari ini di
+        // kotaknya (bukan kosong tersembunyi), tetap bisa diganti manual
+        // kalau mau lihat tanggal lain.
+        $dari = $request->filled('dari') ? $request->query('dari') : today()->toDateString();
         $sampai = $request->query('sampai');
 
         // "Dari" diisi tapi "Sampai" kosong -> anggap nyari HARI ITU doang

@@ -10,7 +10,10 @@
 @endphp
 
 <x-layouts.app title="Jadwal Mengajar Saya" width="wide">
-    <x-page-header title="Jadwal Mengajar Saya" subtitle="Jadwal mengajar & piket Anda seminggu" />
+    {{-- Judul size="sm" -- dikecilin (bukan dihilangin) biar halaman tetap
+         ada kop. Subtitle nambah info baru: ini jadwal SEMINGGU, termasuk
+         piket. --}}
+    <x-page-header title="Jadwal Mengajar" subtitle="Jadwal mengajar & piket Anda seminggu" size="sm" />
 
     {{-- Dulu ada halaman "Piket" terpisah yang isinya cuma jadwal piket doang
          (dobel sama yang di sini) -- udah dihapus, 2 kartu link-nya dipindah

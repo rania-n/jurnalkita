@@ -16,9 +16,18 @@
 @if ($notifikasiTerbaru->isEmpty())
     <x-ui.empty icon="notifications" title="Belum ada notifikasi" desc="Pemberitahuan tentang jurnal & dispensasi Anda akan muncul di sini." />
 @else
+    {{-- Baris yang UDAH dibaca dulu nggak punya border/background sama sekali
+         -- nyaru sama badan modal yang putih juga, kesannya cuma teks
+         ngambang tanpa batas kartu. Sekarang semua baris punya border tipis
+         (rounded card), yang belum dibaca dibedain lewat aksen background +
+         border lebih kentara. --}}
     <div class="flex flex-col gap-1.5">
         @foreach ($notifikasiTerbaru as $n)
-            <a href="{{ route('notifikasi.buka', $n->id) }}" @class(['flex items-start gap-2.5 rounded-xl px-3 py-2.5 transition-colors hover:bg-surface-alt', 'bg-surface-alt' => is_null($n->read_at)])>
+            <a href="{{ route('notifikasi.buka', $n->id) }}" @class([
+                'flex items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-colors hover:border-navy/30',
+                'border-alpha/20 bg-alpha-soft/40' => is_null($n->read_at),
+                'border-surface-alt bg-card' => ! is_null($n->read_at),
+            ])>
                 @if (is_null($n->read_at))
                     <span class="mt-1.5 flex h-2 w-2 shrink-0 rounded-full bg-alpha"></span>
                 @else

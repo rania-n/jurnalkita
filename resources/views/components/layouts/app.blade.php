@@ -37,7 +37,10 @@
 
             {{-- Konten mengalir memenuhi lebar wadah (setelah sidebar di desktop),
                  dengan gutter yang konsisten. Dibatasi hanya di layar sangat besar. --}}
-            <main class="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-10">
+            {{-- pt disamain sama px di tiap breakpoint (bukan angka beda
+                 sendiri) -- dulu 24px atas vs 16px samping di HP, kelihatan
+                 nggak seimbang. --}}
+            <main class="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-24 pt-4 sm:px-6 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-10">
                 @foreach (['success' => 'success', 'error' => 'error', 'info' => 'info'] as $key => $type)
                     @if (session($key))
                         <x-alert :type="$type" class="mb-4">{{ session($key) }}</x-alert>

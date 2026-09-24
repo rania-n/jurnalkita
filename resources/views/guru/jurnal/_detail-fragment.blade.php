@@ -29,6 +29,12 @@
         @elseif ($vs === 'revisi')
             Pengurus kelas meminta <strong>perbaikan</strong>: {{ $jurnal->catatan_verifikasi ?: 'tidak ada catatan.' }}
             Perbaiki lalu simpan — jurnal akan diperiksa ulang.
+        @elseif ($jurnal->verifikasiAbsen())
+            {{-- Beda framing dari Hadir -- Tidak Hadir cuma pernyataan, bukan
+                 laporan yang perlu "ditunggu" keputusannya. Dari sisi guru
+                 udah selesai (tetap bisa diubah kalau ada yang salah),
+                 pengurus kelas yang meriksa di baliknya nggak berubah. --}}
+            Terkirim ke pengurus kelas. Jurnal masih bisa diubah kalau ada yang salah.
         @else
             Menunggu verifikasi pengurus kelas. Selama menunggu, jurnal masih bisa diubah.
         @endif
@@ -51,10 +57,18 @@
             @endif
         </x-ui.field-static>
         <x-ui.field-static label="Status Kehadiran Anda" class="sm:col-span-2">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
-        <x-ui.field-static label="Materi" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
-        <x-ui.field-static label="Metode">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
-        <x-ui.field-static label="Tugas Tambahan">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
-        <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
+
+        {{-- Field beda total tergantung Status Kehadiran -- jurnal Tidak
+             Hadir nggak ada Materi/Metode (nggak beneran mengajar), jangan
+             ditampilin kosong ("—") yang cuma bikin bingung, sama pola kayak
+             ringkasan sebelum kirim di Form Jurnal. --}}
+        @if ($jurnal->status_guru === 'hadir')
+            <x-ui.field-static label="Materi" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>
+            <x-ui.field-static label="Metode" class="sm:col-span-2">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
+        @else
+            <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
+            <x-ui.field-static label="Tugas Tambahan" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
+        @endif
     </div>
 
     @if ($jurnal->foto_bukti)
@@ -73,12 +87,16 @@
     </div>
 
     @if ($bisaUbah)
+        {{-- flex-1 di dua-duanya (BUKAN sm:flex-none) -- dulu di layar lebar
+             tombolnya menyusut cuma sebesar teksnya sendiri, jadi nggak
+             sejajar rata & nyisa kosong nggak simetris. Samain sama pola
+             tombol berpasangan lain di app (ringkasan jurnal, modal Admin). --}}
         <div class="flex gap-2">
             {{-- Nge-swap ISI popup yang lagi kebuka jadi form ubah (lihat
                  setFragmentHtml() di app.js) -- BUKAN pindah ke popup/halaman
                  lain, biar keliatan masih popup yang sama persis. --}}
-            <x-ui.button type="button" data-modal-ajax-swap="{{ route('jurnal.edit.fragment', $jurnal) }}" icon="edit" class="flex-1 sm:flex-none">Ubah Jurnal</x-ui.button>
-            <form method="POST" action="{{ route('jurnal.destroy', $jurnal) }}" class="flex-1 sm:flex-none"
+            <x-ui.button type="button" data-modal-ajax-swap="{{ route('jurnal.edit.fragment', $jurnal) }}" icon="edit" class="flex-1">Ubah Jurnal</x-ui.button>
+            <form method="POST" action="{{ route('jurnal.destroy', $jurnal) }}" class="flex-1"
                   data-confirm="Hapus jurnal ini beserta presensinya? Tindakan ini tidak bisa dibatalkan lewat aplikasi.">
                 @csrf @method('DELETE')
                 <x-ui.button type="submit" variant="danger" icon="delete" class="w-full">Hapus Jurnal</x-ui.button>

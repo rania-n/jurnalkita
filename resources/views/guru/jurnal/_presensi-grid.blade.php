@@ -139,10 +139,11 @@
             const counter = document.getElementById('jumlah-tampil');
             const tampilkanSemua = document.getElementById('tampilkan-semua-siswa');
 
-            // Kartu yang udah pernah "dibuka" lewat dropdown cari -- tetap
-            // kelihatan terus (walau ternyata dibiarin Hadir), nggak balik
-            // sembunyi lagi cuma gara-gara nggak lagi dicari. Dipakai Set biar
-            // gampang cek/nambah tanpa dobel.
+            // Kartu yang barusan "dibuka" lewat dropdown cari -- tetap kelihatan
+            // SEMENTARA biar guru sempat ubah statusnya, TAPI begitu statusnya
+            // balik/tetap Hadir, langsung disembunyikan lagi (nggak nyangkut
+            // nampil selamanya cuma gara-gara pernah dicari). Dipakai Set biar
+            // gampang cek/nambah/hapus tanpa dobel.
             const dipilihManual = new Set();
 
             function statusRow(row) {
@@ -165,15 +166,14 @@
 
             function renderHasilCari(q) {
                 if (!hasil) return;
-                if (!q) {
-                    hasil.hidden = true;
-                    return;
-                }
-                const cocok = rows.filter((row) => row.dataset.nama.includes(q) || row.dataset.noAbsen.includes(q));
+                // Kosong (baru fokus, belum ngetik apa-apa) -> tampilin SEMUA
+                // nama, bukan malah nyembunyiin dropdown-nya. Guru bisa lihat
+                // daftar lengkap dulu sebelum mutusin mau cari siapa.
+                const cocok = q ? rows.filter((row) => row.dataset.nama.includes(q) || row.dataset.noAbsen.includes(q)) : rows;
                 if (cocok.length === 0) {
                     hasil.innerHTML = '<p class="px-3.5 py-2.5 text-sm text-muted-2">Tidak ada siswa yang cocok.</p>';
                 } else {
-                    hasil.innerHTML = cocok.slice(0, 30).map((row, i) => `
+                    hasil.innerHTML = cocok.slice(0, 50).map((row, i) => `
                         <button type="button" data-pilih-hasil="${i}" class="flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left hover:bg-surface-alt">
                             <span class="text-sm font-semibold text-ink">${namaAsli(row)}</span>
                             <span class="text-xs text-muted-2">No. ${row.dataset.noAbsen} · ${statusRow(row) === 'hadir' ? 'Hadir' : 'Sudah ditandai'}</span>
@@ -223,7 +223,7 @@
             }
 
             cari?.addEventListener('input', () => renderHasilCari(cari.value.trim().toLowerCase()));
-            cari?.addEventListener('focus', () => { if (cari.value.trim()) renderHasilCari(cari.value.trim().toLowerCase()); });
+            cari?.addEventListener('focus', () => renderHasilCari(cari.value.trim().toLowerCase()));
             document.addEventListener('click', (e) => {
                 if (hasil && !hasil.hidden && !e.target.closest('#hasil-cari-siswa') && e.target !== cari) {
                     hasil.hidden = true;
@@ -231,7 +231,14 @@
             });
             tampilkanSemua?.addEventListener('change', refresh);
             rows.forEach((row) => {
-                row.querySelectorAll('input[type="radio"]').forEach((r) => r.addEventListener('change', refresh));
+                row.querySelectorAll('input[type="radio"]').forEach((r) => r.addEventListener('change', () => {
+                    // Statusnya balik/tetap Hadir -> lepas dari daftar "kartu
+                    // yang lagi dibuka manual", biar refresh() nyembunyiin
+                    // lagi kayak kartu Hadir lainnya (bukan nyangkut nampil
+                    // selamanya cuma gara-gara pernah dicari & dibuka).
+                    if (statusRow(row) === 'hadir') dipilihManual.delete(row);
+                    refresh();
+                }));
             });
 
             refresh();
