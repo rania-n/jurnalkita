@@ -35,7 +35,6 @@
 <x-layouts.app title="Beranda Waka" width="wide">
     <x-page-header title="Beranda Waka Kesiswaan" subtitle="Persetujuan dispensasi tahap 2" />
 
-    <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
 
     @if ($adaJadwalWaka)
         @if ($bertugasHariIni)

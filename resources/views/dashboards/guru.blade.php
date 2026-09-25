@@ -121,10 +121,6 @@
          ditampilkan lagi sama sekali di sini. Badge piket (kalau ada) tetap
          ditampilkan, cukup lewat div ringkas -- nggak perlu x-page-header
          lagi kalau nggak ada judul yang mau ditampilkan. --}}
-    @if (! $piketHariIni)
-        <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
-    @endif
-
     @if ($tampilkanPilihanAwal)
         <dialog id="modal-pilihan-awal"
                 class="fixed inset-0 m-auto w-[min(26rem,calc(100vw-2rem))] rounded-2xl border-0 bg-card p-0 text-ink shadow-2xl backdrop:bg-navy/30 backdrop:backdrop-blur-sm">

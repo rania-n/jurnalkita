@@ -3,15 +3,7 @@
 @endphp
 
 <x-layouts.app title="Riwayat Jurnal" width="wide">
-    {{-- Judul size="sm" -- dikecilin (bukan dihilangin) biar halaman tetap
-         ada kop, walau isinya sama kayak yang udah disorot di navbar/sidebar.
-         alwaysRow -- tombol tetap di pojok kanan sejajar, nggak ikut melebar
-         penuh layar pas HP sempit (dulu numpuk di bawah judul). Ikon
-         disamakan sama menu "Isi Jurnal" di sidebar/navbar (edit_note),
-         bukan ikon "add" generik. --}}
-    <x-page-header title="Riwayat Jurnal" subtitle="Jurnal mengajar yang sudah Anda isi" size="sm" alwaysRow>
-        <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="!h-10 !px-4 !text-sm">Isi Jurnal</x-ui.button>
-    </x-page-header>
+    <x-page-header title="Riwayat Jurnal" subtitle="Jurnal mengajar yang sudah Anda isi" size="sm" />
 
     <x-ui.auto-refresh :url="route('jurnal.versi')" />
 
@@ -44,14 +36,8 @@
         <x-ui.cari-pilihan name="mapel_id" label="Mata Pelajaran" :options="$mapelList" all="Semua mapel" />
     </x-admin.filters>
 
-    {{-- Cari mapel/kelas -- langsung filter baris yang sudah dimuat di halaman
-         ini (tanpa reload), sama kayak pola di Monitor Piket/Rekap. --}}
-    <div class="mb-4">
-        <x-ui.search-bar id="cari-riwayat-jurnal" placeholder="Cari mata pelajaran atau kelas..." />
-    </div>
-
     @if ($jurnals->isEmpty())
-        <x-ui.empty icon="menu_book" title="Belum ada jurnal" desc="Mulai isi jurnal dari beranda atau tombol di atas." />
+        <x-ui.empty icon="menu_book" title="Belum ada jurnal" desc="Mulai isi jurnal dari beranda." />
     @else
         <x-ui.card-list id="daftar-riwayat-jurnal" class="grid-fill-last">
             @foreach ($jurnals as $j)
@@ -63,8 +49,6 @@
                     $statusBadges = $j->statusRingkas();
                 @endphp
                 <x-ui.list-card
-                    data-baris-riwayat-jurnal
-                    data-cari="{{ strtolower($judul) }}"
                     :title="$judul"
                     :meta="[$j->tanggal->translatedFormat('d M Y') . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai . ($jamJurnal ? ' (' . $jamJurnal . ')' : '')]"
                 >
@@ -87,10 +71,6 @@
                 </x-ui.list-card>
             @endforeach
         </x-ui.card-list>
-        <p id="riwayat-jurnal-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
-            Tidak ada jurnal yang cocok dengan pencarian.
-        </p>
-
         <div class="mt-4">{{ $jurnals->links() }}</div>
     @endif
 
@@ -135,25 +115,4 @@
         @endpush
     @endif
 
-    @push('scripts')
-        <script>
-            (function () {
-                const cari = document.getElementById('cari-riwayat-jurnal');
-                const rows = document.querySelectorAll('[data-baris-riwayat-jurnal]');
-                const kosong = document.getElementById('riwayat-jurnal-kosong');
-                if (!cari) return;
-
-                cari.addEventListener('input', () => {
-                    const q = cari.value.trim().toLowerCase();
-                    let ada = false;
-                    rows.forEach((row) => {
-                        const cocok = !q || row.dataset.cari.includes(q);
-                        row.hidden = !cocok;
-                        if (cocok) ada = true;
-                    });
-                    if (kosong) kosong.hidden = ada;
-                });
-            })();
-        </script>
-    @endpush
 </x-layouts.app>

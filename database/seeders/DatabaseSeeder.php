@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
         $waka2 = User::create([
             'name' => 'Retno Wulandari, S.Pd', 'email' => 'waka2@jurnalkita.test',
             'email_verified_at' => now(), 'password' => Hash::make('password'),
-            'role' => 'waka', 'status' => 'approved', 'no_hp' => '081211119999',
+            'role' => 'waka', 'status' => 'approved', 'no_hp' => '082330166057',
         ]);
         $hariIni = HariSekolah::hariIni() ?? 'senin';
         $hariLain = collect(['senin', 'selasa', 'rabu', 'kamis', 'jumat'])->reject(fn ($h) => $h === $hariIni)->values();
