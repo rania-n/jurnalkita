@@ -1,7 +1,6 @@
 <x-layouts.app title="Beranda Satpam">
     <x-page-header title="Beranda Satpam" subtitle="Scan QR dispensasi & catat siswa terlambat" />
 
-    <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
 
     <x-alert type="info" class="mb-4">
         Nggak perlu buka kamera di sini — scan QR pakai <strong>kamera bawaan HP</strong>

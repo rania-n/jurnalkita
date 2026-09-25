@@ -24,7 +24,6 @@
     <x-page-header title="Beranda" size="sm" :subtitle="$kelas?->nama ?? 'Pengurus Kelas'" />
 
     @if ($kelas)
-        <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
     @endif
 
     @unless ($kelas)
