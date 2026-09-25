@@ -19,7 +19,7 @@
 
     $hariLabel = ['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat'];
     $hariTabs = ['semua' => 'Semua'] + $hariLabel;
-    $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
+    $kelasList = \App\Models\Kelas::orderedByHierarchy()->get(['id', 'nama']);
     $mapelList = \App\Models\Mapel::orderBy('nama')->get(['id', 'nama']);
     $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);
     $ruangList = collect(config('akademik.ruangan'))->map(fn ($r) => ['id' => $r, 'nama' => $r]);

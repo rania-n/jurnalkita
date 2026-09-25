@@ -35,7 +35,7 @@ class SatpamController extends Controller
     {
         $kelasList = Kelas::aktif()
             ->with(['siswas' => fn ($q) => $q->where('status', 'aktif')->select('id', 'kelas_id', 'nama', 'nis')])
-            ->orderBy('nama')->get();
+            ->orderedByHierarchy()->get();
 
         // Diratakan jadi 1 daftar buat kotak "cari siswa" -- sama pola kayak
         // DispensasiController@create, biar nggak usah pilih kelas dulu.

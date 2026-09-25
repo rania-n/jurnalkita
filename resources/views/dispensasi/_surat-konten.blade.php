@@ -42,10 +42,37 @@
         <span class="shrink-0 text-muted">Jam</span>
         <span class="min-w-0 break-words text-right font-semibold text-ink">{{ $dispensasi->labelJam() }}</span>
     </div>
+    @if ($dispensasi->status_akhir === 'approved')
+        <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
+            <span class="shrink-0 text-muted">Disetujui oleh Waka Kesiswaan</span>
+            <span class="min-w-0 break-words text-right font-semibold text-ink">{{ $dispensasi->waka?->name ?? 'Nama Waka belum tercatat' }}</span>
+        </div>
+    @endif
     <div class="border-b border-surface-alt pb-2">
         <span class="text-muted">Alasan</span>
         <p class="mt-1 break-words font-semibold text-ink">{{ $dispensasi->alasan }}</p>
     </div>
+</div>
+
+<div class="mt-4 rounded-xl border border-surface-alt bg-card p-3">
+    <p class="mb-2 text-sm font-bold text-ink">Surat / Bukti Pengajuan</p>
+    @if ($dispensasi->surat_path)
+        @php
+            $buktiUrl = Storage::url($dispensasi->surat_path);
+            $buktiPdf = str_ends_with(strtolower($dispensasi->surat_path), '.pdf');
+        @endphp
+        @if ($buktiPdf)
+            <a href="{{ $buktiUrl }}" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-lg bg-surface px-3 py-2 text-sm font-semibold text-navy">
+                <x-icon name="picture_as_pdf" :size="20" /> Buka surat (PDF)
+            </a>
+        @else
+            <a href="{{ $buktiUrl }}" target="_blank" rel="noopener">
+                <img src="{{ $buktiUrl }}" alt="Surat / bukti pengajuan dispensasi" class="max-h-64 w-full rounded-lg border border-surface-alt object-contain">
+            </a>
+        @endif
+    @else
+        <p class="text-sm text-muted-2">Tidak ada surat atau bukti yang dilampirkan.</p>
+    @endif
 </div>
 
 @if ($qrUrl)

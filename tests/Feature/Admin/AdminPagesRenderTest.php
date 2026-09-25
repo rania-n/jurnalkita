@@ -27,4 +27,16 @@ class AdminPagesRenderTest extends TestCase
             $this->actingAs($admin)->get($path)->assertOk();
         }
     }
+
+    public function test_form_tambah_jadwal_piket_menyediakan_tanggal_mulai(): void
+    {
+        $this->seed();
+        $admin = User::where('role', 'admin')->firstOrFail();
+
+        $this->actingAs($admin)->get('/admin/jadwal-piket')
+            ->assertOk()
+            ->assertSee('Tanggal Mulai')
+            ->assertSee('name="tanggal"', false)
+            ->assertSee('Ulang Setiap');
+    }
 }

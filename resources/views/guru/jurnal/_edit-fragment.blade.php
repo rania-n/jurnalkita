@@ -107,7 +107,7 @@
             :value="$alasanTerpilih"
             required
         />
-        <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" required>{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
+        <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" required>{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
 
         {{-- id BEDA dari yang di blok-hadir (name-nya sama "foto_bukti") --
              lihat catatan lebih detail di guru/jurnal/create.blade.php. --}}

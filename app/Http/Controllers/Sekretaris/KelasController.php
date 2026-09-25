@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Jurnal;
 use App\Models\Kelas;
+use App\Models\PresensiPiket;
 use App\Support\HariSekolah;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,7 +35,12 @@ class KelasController extends Controller
             ->groupBy('siswa_id')
             ->map(fn ($rows) => $rows->sortBy('jurnal.jam_ke_mulai')->last());
 
-        return view('sekretaris.siswa', compact('kelas', 'siswas', 'absensiHariIni'));
+        $presensiPiketHariIni = PresensiPiket::whereIn('siswa_id', $siswas->pluck('id'))
+            ->whereDate('tanggal', today())
+            ->get()
+            ->keyBy('siswa_id');
+
+        return view('sekretaris.siswa', compact('kelas', 'siswas', 'absensiHariIni', 'presensiPiketHariIni'));
     }
 
     /** V2: jadwal pelajaran kelas, seminggu, dikelompokkan per hari -- hari ini ditandai & dikasih status jurnal (sama pola kayak Guru\JadwalController). */

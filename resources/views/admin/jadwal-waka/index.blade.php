@@ -16,7 +16,7 @@
 @endphp
 
 <x-layouts.admin title="Jadwal Waka" heading="Jadwal Waka">
-    <x-admin.page title="Jadwal Shift Waka Kesiswaan" subtitle="Waka mana yang bertugas konfirmasi dispensasi tiap hari">
+    <x-admin.page title="Jadwal Shift Waka Kesiswaan" subtitle="Waka yang dipilih bertugas berulang setiap minggu pada hari tersebut">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-waka" data-modal-title="Tambah Jadwal Waka">Tambah Jadwal</x-ui.button>
         </x-slot:action>

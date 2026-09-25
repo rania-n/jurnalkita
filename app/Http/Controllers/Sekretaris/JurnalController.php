@@ -48,25 +48,25 @@ class JurnalController extends Controller
             $sampai = $dari;
         }
 
-        // Sapu jurnal pending kelas ini yang udah kelewat hari -- otomatis
-        // terverifikasi, biar nggak numpuk pending berhari-hari kalau
-        // pengurus kelas nggak sempat periksa (lihat Jurnal::otomatisVerifikasiKalauLewatHari()).
-        Jurnal::verifikasiSemuaYangKadaluarsa(kelasId: $kelas->id);
-
         // Cuma mapel yang PERNAH diajarkan di kelas ini -- nggak ada gunanya
         // nawarin mapel sekolah lain yang nggak nyangkut di kelas ini.
         $mapelList = Mapel::whereIn('id', $kelas->jadwals()->distinct()->pluck('mapel_id'))->orderBy('nama')->get();
 
         $jurnals = Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
             ->with('jadwal.mapel', 'guru')
-            ->when($status, fn ($q) => $q->where('status_verifikasi', $status))
+            ->when($status === 'pending', fn ($q) => $q->inReviewQueue())
+            ->when($status && $status !== 'pending', fn ($q) => $q
+                ->when($status === 'terverifikasi', fn ($q) => $q->where(fn ($q) => $q
+                    ->where(fn ($q) => $q->where('status_verifikasi', 'terverifikasi')->whereNotNull('verifikator_id'))
+                    ->orWhere('status_guru', 'tidak_hadir')))
+                ->when($status !== 'terverifikasi', fn ($q) => $q->where('status_verifikasi', $status)))
             ->when($dari, fn ($q) => $q->whereDate('tanggal', '>=', $dari))
             ->when($sampai, fn ($q) => $q->whereDate('tanggal', '<=', $sampai))
             ->when($request->filled('mapel_id'), fn ($q) => $q->whereHas('jadwal', fn ($q2) => $q2->where('mapel_id', $request->query('mapel_id'))))
             // Yang masih "Perlu diperiksa" dimunculin paling atas duluan
             // (apapun tanggalnya) -- biar nggak kelewat/ketumpuk jurnal lama
             // yang udah diperiksa, baru diurutkan tanggal terbaru.
-            ->orderByRaw("status_verifikasi = 'pending' desc")
+            ->orderByRaw("CASE WHEN status_guru != 'tidak_hadir' AND status_verifikasi = 'pending' THEN 0 ELSE 1 END")
             ->latest('tanggal')->latest('id')
             ->paginate(15)->withQueryString();
 
@@ -87,7 +87,7 @@ class JurnalController extends Controller
             'mapelList' => $mapelList,
             'lihatJurnal' => $lihatJurnal,
             'jumlahPending' => Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
-                ->where('status_verifikasi', 'pending')->count(),
+                ->inReviewQueue()->count(),
         ]);
     }
 
@@ -111,7 +111,6 @@ class JurnalController extends Controller
     public function showFragment(Jurnal $jurnal): View
     {
         $this->pastikanKelasSaya($jurnal);
-        $jurnal->otomatisVerifikasiKalauLewatHari();
         $jurnal->load('jadwal.mapel', 'guru', 'absensis.siswa');
 
         return view('sekretaris.jurnal._detail-fragment', compact('jurnal'));
@@ -120,6 +119,7 @@ class JurnalController extends Controller
     public function verifikasi(Jurnal $jurnal, Request $request): RedirectResponse
     {
         $this->pastikanKelasSaya($jurnal);
+        abort_unless($jurnal->menungguPemeriksaan(), 403, 'Tugas guru tidak hadir otomatis disetujui dan tidak perlu diperiksa.');
 
         $data = $request->validate([
             'keputusan' => ['required', 'in:terima,revisi'],

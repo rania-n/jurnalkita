@@ -49,6 +49,7 @@ return [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'guru.dashboard'],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
+        ['label' => 'Presensi Siswa', 'icon' => 'how_to_reg', 'route' => 'piket.presensi-siswa.index', 'match' => 'piket.presensi-siswa.*'],
         ['label' => 'Dispensasi', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],

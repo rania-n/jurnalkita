@@ -30,4 +30,26 @@ class TahunAjaranController extends Controller
 
         return back()->with('success', "Kelas naik ke tahun ajaran {$data['nama']}. {$hasil['siswa_naik']} siswa naik tingkat, {$hasil['siswa_lulus']} siswa lulus.");
     }
+
+    public function updateSemester(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'semester' => ['required', 'integer', 'in:1,2'],
+        ]);
+
+        $tahunAjaran = TahunAjaran::aktif();
+        if (! $tahunAjaran) {
+            return back()->with('error', 'Tahun ajaran aktif belum tersedia.');
+        }
+
+        $semesterLama = $tahunAjaran->semester;
+        $tahunAjaran->update(['semester' => $data['semester']]);
+
+        AuditLog::catat(
+            'Perubahan Semester',
+            "Tahun ajaran {$tahunAjaran->nama}: Semester {$semesterLama} → Semester {$data['semester']}.",
+        );
+
+        return back()->with('success', "Semester tahun ajaran {$tahunAjaran->nama} diubah ke Semester {$data['semester']}.");
+    }
 }

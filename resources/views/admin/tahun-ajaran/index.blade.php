@@ -36,6 +36,27 @@
 
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div class="rounded-2xl bg-card p-5 shadow-[var(--shadow-soft)]">
+            <h3 class="text-base font-bold text-ink">Semester Aktif</h3>
+            <p class="mt-1 text-sm text-muted">
+                Atur semester yang sedang berjalan pada tahun ajaran {{ $aktif?->nama ?? 'aktif' }}.
+            </p>
+
+            @if ($aktif)
+                <form method="POST" action="{{ route('master.tahun-ajaran.semester') }}" class="mt-4 flex flex-col gap-3">
+                    @csrf
+                    @method('PUT')
+                    <x-ui.select id="semester" name="semester" label="Semester">
+                        <option value="1" @selected(old('semester', $aktif->semester) == 1)>Semester 1</option>
+                        <option value="2" @selected(old('semester', $aktif->semester) == 2)>Semester 2</option>
+                    </x-ui.select>
+                    <x-ui.button type="submit" icon="save">Simpan Semester</x-ui.button>
+                </form>
+            @else
+                <p class="mt-4 rounded-xl bg-surface p-4 text-sm text-muted">Buat tahun ajaran aktif terlebih dahulu.</p>
+            @endif
+        </div>
+
+        <div class="rounded-2xl bg-card p-5 shadow-[var(--shadow-soft)]">
             <h3 class="text-base font-bold text-ink">Naikkan Kelas</h3>
             <p class="mt-1 text-sm text-muted">
                 Kelas <strong>X</strong> naik jadi <strong>XI</strong>, <strong>XI</strong> naik jadi <strong>XII</strong>
@@ -57,10 +78,11 @@
             @if ($riwayat->isEmpty())
                 <x-ui.empty title="Belum ada tahun ajaran" />
             @else
-                <x-admin.table :head="['Tahun Ajaran', 'Status', 'Jml Kelas']">
+                <x-admin.table :head="['Tahun Ajaran', 'Semester', 'Status', 'Jml Kelas']">
                     @foreach ($riwayat as $ta)
                         <tr class="hover:bg-surface/60">
                             <td class="px-4 py-3 font-semibold text-ink">{{ $ta->nama }}</td>
+                            <td class="px-4 py-3 text-muted">Semester {{ $ta->semester }}</td>
                             <td class="px-4 py-3">
                                 @if ($ta->aktif)
                                     <x-ui.status-badge status="hadir">Aktif</x-ui.status-badge>

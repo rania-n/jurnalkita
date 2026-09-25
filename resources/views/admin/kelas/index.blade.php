@@ -12,10 +12,11 @@
         ))
         ->when($tingkat, fn ($b) => $b->where('tingkat', $tingkat))
         ->when($jurusan, fn ($b) => $b->where('jurusan', $jurusan))
-        ->orderBy('tingkat')->orderBy('jurusan')->orderBy('nomor')
+        ->orderedByHierarchy()
         ->get();
 
     $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);
+    $kelasAktifList = \App\Models\Kelas::aktif()->orderedByHierarchy()->get(['id', 'nama']);
 @endphp
 
 <x-layouts.admin title="Data Kelas" heading="Data Kelas">
@@ -30,6 +31,47 @@
         <x-admin.f-select name="tingkat" label="Tingkat" :options="['X' => 'X', 'XI' => 'XI', 'XII' => 'XII']" all="Semua Tingkat" />
         <x-admin.f-select name="jurusan" label="Jurusan" :options="$jurusanList" all="Semua Jurusan" />
     </x-admin.filters>
+
+    @if ($kelasAktifList->isNotEmpty())
+        <section class="mb-5 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
+            <h2 class="text-base font-bold text-ink">Ubah Status PKL Beberapa Kelas</h2>
+            <p class="mt-1 text-sm text-muted">Pilih beberapa kelas aktif sekaligus. Kelas arsip tidak ikut diubah.</p>
+
+            <form method="POST" action="{{ route('master.kelas.status-massal') }}" class="mt-4 grid gap-4 lg:grid-cols-2" data-confirm="Ubah status kelas yang dipilih?">
+                @csrf
+                @method('PATCH')
+                <div>
+                    <x-ui.cari-checkbox
+                        label="Kelas yang diubah"
+                        name="kelas_ids"
+                        :options="$kelasAktifList"
+                        hint="Cari nama kelas, lalu centang satu atau beberapa kelas."
+                    />
+                </div>
+                <div class="flex flex-col justify-between gap-4">
+                    <x-ui.choice
+                        label="Status baru"
+                        name="status"
+                        :options="['pkl' => 'PKL', 'aktif' => 'Aktif']"
+                        value="pkl"
+                        required
+                    />
+                    <x-ui.button type="submit" icon="save" class="w-full sm:w-auto">Terapkan ke Kelas Terpilih</x-ui.button>
+                </div>
+            </form>
+
+            <div class="mt-4 flex flex-col gap-3 border-t border-surface-alt pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm text-muted">Jadikan semua kelas XII pada tahun ajaran aktif berstatus PKL.</p>
+                <form method="POST" action="{{ route('master.kelas.status-massal') }}" data-confirm="Jadikan semua kelas XII tahun ajaran aktif sebagai PKL?">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="tingkat" value="XII">
+                    <input type="hidden" name="status" value="pkl">
+                    <x-ui.button type="submit" variant="secondary" icon="school" class="w-full sm:w-auto">Semua Kelas XII → PKL</x-ui.button>
+                </form>
+            </div>
+        </section>
+    @endif
 
     @if ($rows->isEmpty())
         <x-ui.empty title="Tidak ada kelas yang cocok" />
@@ -95,6 +137,7 @@
                 value="aktif"
                 required
             />
+            <p class="-mt-3 text-xs text-muted-2">Kelas XII pada tahun ajaran aktif otomatis berstatus PKL. Untuk kelas XI yang PKL, pilih PKL secara manual atau lewat ubah status massal.</p>
 
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>

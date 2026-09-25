@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Waktu;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -60,7 +61,7 @@ class Jadwal extends Model
         $penuh = [];
 
         foreach (['senin', 'selasa', 'rabu', 'kamis', 'jumat'] as $hari) {
-            $kategori = $hari === 'jumat' ? 'jumat' : 'senin_kamis';
+            $kategori = Waktu::kategoriUntukHari($hari);
 
             $jpTersedia = JamPelajaran::where('kategori', $kategori)->pluck('jam_ke');
             if ($jpTersedia->isEmpty()) {

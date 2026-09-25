@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
+use App\Models\Kelas;
+use App\Models\PresensiPiket;
+use App\Models\Siswa;
 use App\Support\Versi;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -32,6 +38,83 @@ class PiketController extends Controller
             403,
             'Hanya guru piket yang dapat mengakses ini.'
         );
+    }
+
+    private function pastikanBolehInputPresensi(): void
+    {
+        abort_unless(auth()->user()?->isPiket(), 403, 'Hanya guru piket yang dapat mencatat surat izin siswa.');
+    }
+
+    public function presensiSiswa(Request $request): View
+    {
+        $this->pastikanBolehInputPresensi();
+
+        $tanggal = $request->filled('tanggal') ? Carbon::parse($request->date('tanggal')) : today();
+        $kelasList = Kelas::orderedByHierarchy()->get();
+        $kelas = $request->filled('kelas_id') ? Kelas::findOrFail($request->integer('kelas_id')) : null;
+        $siswas = $kelas?->siswas()->where('status', 'aktif')->orderBy('no_absen')->get() ?? collect();
+        $catatanPresensi = PresensiPiket::whereDate('tanggal', $tanggal)
+            ->when($kelas, fn ($query) => $query->whereHas('siswa', fn ($q) => $q->where('kelas_id', $kelas->id)))
+            ->with('siswa.kelas', 'dicatatOleh')
+            ->latest('updated_at')
+            ->get();
+        $presensiTerpilih = $request->filled('siswa_id')
+            ? PresensiPiket::where('siswa_id', $request->integer('siswa_id'))
+                ->whereDate('tanggal', $tanggal)
+                ->when($kelas, fn ($query) => $query->whereHas('siswa', fn ($q) => $q->where('kelas_id', $kelas->id)))
+                ->first()
+            : null;
+
+        return view('piket.presensi-siswa', compact('tanggal', 'kelasList', 'kelas', 'siswas', 'catatanPresensi', 'presensiTerpilih'));
+    }
+
+    public function simpanPresensiSiswa(Request $request): RedirectResponse
+    {
+        $this->pastikanBolehInputPresensi();
+
+        $data = $request->validate([
+            'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            'siswa_id' => ['required', 'exists:siswas,id'],
+            'status' => ['required', 'in:sakit,izin'],
+            'catatan' => ['nullable', 'string', 'max:500'],
+            'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+        ]);
+
+        $siswa = Siswa::where('status', 'aktif')->findOrFail($data['siswa_id']);
+        $suratPath = $request->file('surat')?->store('presensi-piket', 'public');
+
+        DB::transaction(function () use ($data, $siswa, $suratPath) {
+            $presensi = PresensiPiket::updateOrCreate(
+                ['siswa_id' => $siswa->id, 'tanggal' => $data['tanggal']],
+                [
+                    'status' => $data['status'],
+                    'catatan' => $data['catatan'] ?? null,
+                    'surat_path' => $suratPath ?? PresensiPiket::where('siswa_id', $siswa->id)
+                        ->whereDate('tanggal', $data['tanggal'])->value('surat_path'),
+                    'dicatat_oleh_id' => auth()->id(),
+                ]
+            );
+
+            $jurnalsHariIni = Jurnal::whereDate('tanggal', $data['tanggal'])
+                ->whereHas('jadwal', fn ($query) => $query->where('kelas_id', $siswa->kelas_id))
+                ->with('absensis')
+                ->get();
+
+            foreach ($jurnalsHariIni as $jurnal) {
+                Absensi::updateOrCreate(
+                    ['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id],
+                    ['status' => $presensi->status, 'catatan' => $presensi->catatan]
+                );
+            }
+        });
+
+        AuditLog::catat('Catat Presensi Siswa oleh Piket', "{$siswa->nama} dicatat {$data['status']} pada {$data['tanggal']}");
+
+        return redirect()->route('piket.presensi-siswa.index', [
+            'tanggal' => $data['tanggal'],
+            'kelas_id' => $siswa->kelas_id,
+            'siswa_id' => $siswa->id,
+        ])->with('success', "Presensi {$siswa->nama} tersimpan dan disamakan ke jurnal kelas pada tanggal tersebut.");
     }
 
     public function index(Request $request): View

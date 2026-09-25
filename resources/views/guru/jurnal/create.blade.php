@@ -8,11 +8,31 @@
         size="sm"
     />
 
-    @if ($modeJurnal === 'bebas_kemarin')
-        {{-- Cuma muncul kalau admin udah ngizinin mode "bebas isi hari ini +
-             kemarin" -- lihat Admin\PengaturanJurnalController. Ganti tab
-             muat ulang halaman (bukan AJAX), biar semua data (jadwal, status
-             udah-diisi, dll) kerender ulang dari server sesuai tanggalnya. --}}
+    @if ($modeJurnal === 'bebas_selamanya')
+        <div class="mb-4 rounded-2xl border border-surface-alt bg-card p-3 sm:p-4 shadow-[var(--shadow-soft)]">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                        <x-icon name="history_edu" :size="20" />
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-ink">Bebas Isi Jurnal (Tanggal Custom)</h3>
+                        <p class="text-xs text-muted">Bisa mengisi jurnal dulu-dulu yang belum sempat dibuat. Pilih tanggal di sebelah kanan.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="pilih_tanggal_jurnal" class="text-xs font-semibold text-muted whitespace-nowrap">Tanggal:</label>
+                    <input
+                        type="date"
+                        id="pilih_tanggal_jurnal"
+                        value="{{ $tanggalAktif->toDateString() }}"
+                        max="{{ today()->toDateString() }}"
+                        class="rounded-xl border border-surface-alt bg-surface-alt/70 px-3 py-1.5 text-xs font-bold text-ink focus:border-navy focus:outline-none cursor-pointer"
+                    >
+                </div>
+            </div>
+        </div>
+    @elseif ($modeJurnal === 'bebas_kemarin')
         <div class="mb-4 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">
             <a href="{{ route('jurnal.create') }}"
                @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold transition-colors', 'bg-navy text-card' => ! $pakaiKemarin, 'text-muted-2 hover:text-ink' => $pakaiKemarin])>
@@ -29,8 +49,8 @@
         {{-- Jadwal yang udah ada jurnalnya di tanggal ini nggak muncul lagi di
              pilihan bawah -- baru bisa diisi ulang kalau jurnalnya dihapus. --}}
         <x-alert type="success" class="mb-4">
-            {{ $jumlahSudahDiisiHariIni }} jadwal {{ $pakaiKemarin ? 'kemarin' : 'hari ini' }} sudah Anda isi jurnalnya — nggak muncul lagi di pilihan bawah.
-            <a href="{{ route('jurnal.index') }}" class="font-bold underline">Lihat di Riwayat</a>.
+            {{ $jumlahSudahDiisiHariIni }} jadwal pada {{ $tanggalAktif->isToday() ? 'hari ini' : $tanggalAktif->translatedFormat('d M Y') }} sudah Anda isi jurnalnya — tidak muncul lagi di pilihan bawah.
+            <a href="{{ route('jurnal.index', ['dari' => $tanggalAktif->toDateString(), 'sampai' => $tanggalAktif->toDateString()]) }}" class="font-bold underline">Lihat di Riwayat</a>.
         </x-alert>
     @endif
 
@@ -58,6 +78,7 @@
     @else
         <form id="form-jurnal" method="POST" action="{{ route('jurnal.store') }}" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="tanggal" value="{{ $tanggalAktif->toDateString() }}">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             {{-- Info pengajar & tanggal (otomatis) --}}
@@ -69,7 +90,13 @@
                 <x-icon name="calendar_month" :size="18" class="text-navy" />
                 <span class="text-sm font-semibold text-ink">
                     {{ $tanggalAktif->translatedFormat('d M Y') }}
-                    @if ($pakaiKemarin) <span class="text-xs font-normal text-muted-2">(Kemarin)</span> @endif
+                    @if ($tanggalAktif->isToday())
+                        <span class="text-xs font-normal text-muted-2">(Hari Ini)</span>
+                    @elseif ($tanggalAktif->isYesterday())
+                        <span class="text-xs font-normal text-muted-2">(Kemarin)</span>
+                    @else
+                        <span class="text-xs font-normal text-muted-2">(Susulan {{ ucfirst($hariAktif ?? '') }})</span>
+                    @endif
                 </span>
             </div>
 
@@ -222,7 +249,7 @@
                          bawah yang nampilin/nyembunyiin & disable/enable-nya. --}}
                     <div id="blok-massal-kelas" class="flex flex-col gap-2" hidden>
                         <x-ui.label>Kelas yang Ditandai</x-ui.label>
-                        <p class="-mt-1 text-xs text-muted-2">Semua tercentang otomatis -- ketuk kartunya buat centang/batal. Alasan & Tugas Tambahan di bawah berlaku buat semua yang tercentang, kecuali diisi khusus.</p>
+                        <p class="-mt-1 text-xs text-muted-2">Semua tercentang otomatis -- ketuk kartunya buat centang/batal. Alasan & Tugas untuk Siswa di bawah berlaku buat semua yang tercentang, kecuali diisi khusus.</p>
 
                         <div class="flex flex-col gap-2">
                             @foreach ($jadwals as $j)
@@ -257,7 +284,7 @@
                     </div>
                 @endif
 
-                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
+                <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
 
                 @if ($jadwalTerpilih)
                     {{-- Opsional (BEDA dari foto suasana kelas di atas) -- guru
@@ -315,7 +342,7 @@
                 </div>
                 <div data-ringkasan-blok-tidak-hadir class="flex flex-col gap-3" hidden>
                     <x-ui.field-static label="Alasan"><span data-ringkasan="alasan">—</span></x-ui.field-static>
-                    <x-ui.field-static label="Tugas Tambahan"><span data-ringkasan="tugas">—</span></x-ui.field-static>
+                    <x-ui.field-static label="Tugas untuk Siswa"><span data-ringkasan="tugas">—</span></x-ui.field-static>
                     <x-ui.field-static label="Surat Izin/Sakit"><span data-ringkasan="surat">—</span></x-ui.field-static>
                 </div>
 
@@ -483,16 +510,30 @@
                             inputSelesai.value = selesai;
                         }
 
+                        const datePicker = document.getElementById('pilih_tanggal_jurnal');
+                        if (datePicker) {
+                            datePicker.addEventListener('change', () => {
+                                if (!datePicker.value) return;
+                                const params = new URLSearchParams(window.location.search);
+                                params.set('tanggal', datePicker.value);
+                                params.delete('jadwal');
+                                window.location.href = '{{ route('jurnal.create') }}?' + params.toString();
+                            });
+                        }
+
                         // Ganti jadwal -> presensi kelas yang beda perlu dirender ulang
                         // dari server, jadi muat ulang halaman dengan jadwal itu. Ikut
                         // sisipin status_guru yang LAGI kepilih (dan pertahanin query
-                        // lain kayak ?hari=kemarin) -- kalau nggak, pilihan "Tidak
+                        // lain kayak ?hari=kemarin atau ?tanggal=...) -- kalau nggak, pilihan "Tidak
                         // Hadir" yang udah dipilih duluan ke-reset balik ke "Hadir"
                         // begitu halaman render ulang (bug yang sempat dilaporkan).
                         jadwal.addEventListener('change', () => {
                             if (!jadwal.value) return;
                             const params = new URLSearchParams(window.location.search);
                             params.set('jadwal', jadwal.value);
+                            if (datePicker && datePicker.value) {
+                                params.set('tanggal', datePicker.value);
+                            }
                             const statusGuru = document.querySelector('input[name="status_guru"]:checked')?.value;
                             if (statusGuru) params.set('status_guru', statusGuru);
                             window.location.href = '{{ route('jurnal.create') }}?' + params.toString();

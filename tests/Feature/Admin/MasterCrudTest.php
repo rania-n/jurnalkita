@@ -8,6 +8,7 @@ use App\Models\JamPelajaran;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -84,6 +85,62 @@ class MasterCrudTest extends TestCase
         $this->assertDatabaseHas('kelas', ['nama' => 'X RPL 2', 'jurusan' => 'RPL', 'nomor' => 2]);
     }
 
+    public function test_kelas_xii_baru_otomatis_diberi_status_pkl(): void
+    {
+        $wali = Guru::create(['nama' => 'Bu Wali']);
+
+        $this->actingAs($this->admin())->post('/admin/kelas', [
+            'tingkat' => 'XII', 'jurusan' => 'RPL', 'nomor' => 1, 'wali_id' => $wali->id, 'status' => 'aktif',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('kelas', ['nama' => 'XII RPL 1', 'status' => 'pkl']);
+    }
+
+    public function test_admin_bisa_mengubah_status_beberapa_kelas_aktif_sekaligus(): void
+    {
+        $kelasSatu = Kelas::create(['nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL', 'status' => 'aktif']);
+        $kelasDua = Kelas::create(['nama' => 'XI TKJ 1', 'tingkat' => 'XI', 'jurusan' => 'TKJ', 'status' => 'aktif']);
+
+        $this->actingAs($this->admin())->patch('/admin/kelas/status-massal', [
+            'kelas_ids' => [$kelasSatu->id, $kelasDua->id], 'status' => 'pkl',
+        ])->assertRedirect()->assertSessionHas('success');
+
+        $this->assertSame('pkl', $kelasSatu->fresh()->status);
+        $this->assertSame('pkl', $kelasDua->fresh()->status);
+    }
+
+    public function test_kelas_xii_tahun_ajaran_aktif_tidak_bisa_diubah_ke_status_aktif(): void
+    {
+        $kelas = Kelas::create(['nama' => 'XII RPL 1', 'tingkat' => 'XII', 'jurusan' => 'RPL', 'status' => 'pkl']);
+
+        $this->actingAs($this->admin())->patch('/admin/kelas/status-massal', [
+            'kelas_ids' => [$kelas->id], 'status' => 'aktif',
+        ])->assertRedirect()->assertSessionHas('error');
+
+        $this->assertSame('pkl', $kelas->fresh()->status);
+    }
+
+    public function test_pengaturan_status_massal_melindungi_kelas_arsip(): void
+    {
+        $tahunLama = TahunAjaran::create(['nama' => '2025/2026']);
+        $tahunAktif = TahunAjaran::create(['nama' => '2026/2027', 'aktif' => true]);
+        $kelasLama = Kelas::create([
+            'nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL',
+            'tahun_ajaran_id' => $tahunLama->id, 'status' => 'aktif',
+        ]);
+        $kelasAktif = Kelas::create([
+            'nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL',
+            'tahun_ajaran_id' => $tahunAktif->id, 'status' => 'aktif',
+        ]);
+
+        $this->actingAs($this->admin())->patch('/admin/kelas/status-massal', [
+            'kelas_ids' => [$kelasLama->id, $kelasAktif->id], 'status' => 'pkl',
+        ])->assertRedirect()->assertSessionHas('error');
+
+        $this->assertSame('aktif', $kelasLama->fresh()->status);
+        $this->assertSame('aktif', $kelasAktif->fresh()->status);
+    }
+
     public function test_detail_kelas_menampilkan_roster_dan_jadwal(): void
     {
         $wali = Guru::create(['nama' => 'Bu Wali']);
@@ -111,6 +168,32 @@ class MasterCrudTest extends TestCase
 
         $this->actingAs($this->admin())->get('/admin/kelas')
             ->assertOk()->assertSee(route('master.kelas.show', $kelas), false);
+    }
+
+    public function test_urutan_kelas_menggunakan_nomor_numerik_dan_tingkat(): void
+    {
+        Kelas::create(['nama' => 'X RPL 10', 'tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 10]);
+        Kelas::create(['nama' => 'X TKI 1', 'tingkat' => 'X', 'jurusan' => 'TKI', 'nomor' => 1]);
+        Kelas::create(['nama' => 'X AN 1', 'tingkat' => 'X', 'jurusan' => 'AN', 'nomor' => 1]);
+        Kelas::create(['nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL', 'nomor' => 1]);
+        Kelas::create(['nama' => 'X RPL 2', 'tingkat' => 'X', 'jurusan' => 'RPL', 'nomor' => 2]);
+        Kelas::create(['nama' => 'X PSPT 1', 'tingkat' => 'X', 'jurusan' => 'PSPT', 'nomor' => 1]);
+
+        $this->actingAs($this->admin())->get('/admin/kelas')
+            ->assertOk()
+            ->assertSeeInOrder(['X TKI 1', 'X RPL 2', 'X RPL 10', 'X PSPT 1', 'X AN 1', 'XI RPL 1']);
+    }
+
+    public function test_status_pkl_bisa_disimpan_dan_ditampilkan(): void
+    {
+        $wali = Guru::create(['nama' => 'Bu Wali']);
+
+        $this->actingAs($this->admin())->post('/admin/kelas', [
+            'tingkat' => 'XII', 'jurusan' => 'RPL', 'nomor' => 1, 'wali_id' => $wali->id, 'status' => 'pkl',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('kelas', ['nama' => 'XII RPL 1', 'status' => 'pkl']);
+        $this->actingAs($this->admin())->get('/admin/kelas')->assertOk()->assertSee('PKL');
     }
 
     public function test_guru_utama_and_tambahan_mapel(): void
@@ -149,6 +232,46 @@ class MasterCrudTest extends TestCase
 
         $this->assertDatabaseCount('jam_pelajarans', 2);
         $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'jumat', 'jam_ke' => 1]);
+    }
+
+    public function test_generator_jp_membuat_jam_40_menit_dan_menyisipkan_jeda(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran/generate', [
+            'kategori' => 'senin_kamis', 'mulai' => '07:00', 'durasi_jp' => 40, 'jumlah_jp' => 4,
+            'jeda' => [['setelah' => 2, 'durasi' => 20, 'label' => 'MBG']],
+        ])->assertRedirect(route('master.jam-pelajaran.index', ['set' => 'senin_kamis']))
+            ->assertSessionHas('success');
+
+        $this->assertSame(4, JamPelajaran::where('kategori', 'senin_kamis')->count());
+        $this->assertDatabaseHas('jam_pelajarans', [
+            'kategori' => 'senin_kamis', 'jam_ke' => 3, 'mulai' => '08:40', 'selesai' => '09:20',
+            'keterangan' => 'MBG (20 menit)',
+        ]);
+    }
+
+    public function test_generator_menolak_jeda_setelah_jp_terakhir(): void
+    {
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:40']);
+
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran/generate', [
+            'kategori' => 'senin_kamis', 'mulai' => '07:00', 'durasi_jp' => 40, 'jumlah_jp' => 2,
+            'jeda' => [['setelah' => 2, 'durasi' => 20, 'label' => 'Istirahat']],
+        ])->assertSessionHasErrors('jeda');
+
+        $this->assertDatabaseCount('jam_pelajarans', 1);
+    }
+
+    public function test_admin_bisa_memajukan_semua_jp_dengan_jeda_tetap(): void
+    {
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:40']);
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '07:50', 'selesai' => '08:30']);
+
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran/geser', [
+            'kategori' => 'senin_kamis', 'arah' => 'maju', 'menit' => 5,
+        ])->assertRedirect()->assertSessionHas('success');
+
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '06:55', 'selesai' => '07:35']);
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '07:45', 'selesai' => '08:25']);
     }
 
     public function test_admin_bisa_tambah_kategori_jam_pelajaran_baru(): void

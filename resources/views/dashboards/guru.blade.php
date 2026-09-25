@@ -17,9 +17,9 @@
         $jadwalHariIni = $hari && $guru
             ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hari)->orderBy('jam_ke_mulai')->get()
             : collect();
-        $sudahDiisi = $guru
-            ? $guru->jurnals()->whereDate('tanggal', today())->pluck('jadwal_id')->all()
-            : [];
+        $jurnalGuruHariIni = $guru
+            ? $guru->jurnals()->whereDate('tanggal', today())->get()->keyBy('jadwal_id')
+            : collect();
 
         // Jam berakhir JP TERAKHIR hari ini -- dipakai buat kasih tau "piket
         // sampai jam berapa" di badge atas (piket nggak punya jam sendiri di
@@ -102,9 +102,9 @@
             : collect();
 
         // Jadwal yang jurnalnya sudah diisi hari ini
-        $sudahDiisi = $guru
-            ? $guru->jurnals()->whereDate('tanggal', today())->pluck('jadwal_id')->all()
-            : [];
+        $jurnalGuruHariIni = $guru
+            ? $guru->jurnals()->whereDate('tanggal', today())->get()->keyBy('jadwal_id')
+            : collect();
     }
 
     // Pilihan awal cuma ditampilkan SEKALI per login (bukan tiap kali buka
@@ -561,30 +561,41 @@
                 @foreach ($jadwalHariIni as $j)
                     @php
                         $statusJamAsli = \App\Support\Waktu::statusJpHariIni($j->jam_ke_mulai, $j->jam_ke_selesai);
-                        $sudahIsiIni = in_array($j->id, $sudahDiisi);
+                        $jurnalUntukJadwal = $jurnalGuruHariIni->get($j->id);
+                        $sudahIsiIni = $jurnalUntukJadwal !== null;
                         // "Sudah Lewat" polos itu ambigu -- guru bisa salah
                         // kira jamnya emang udah kelewatan padahal jurnalnya
                         // UDAH diisi, atau sebaliknya nyangka masih bisa
                         // nyusul padahal mode disiplin udah beneran nolak.
-                        // Kalau udah diisi, badge jam nggak usah ditampilin
-                        // lagi (tombol "Sudah diisi" di bawah udah cukup
-                        // jelas). Kalau BELUM diisi & mode disiplin (jamnya
+                        // Kalau jurnal sudah diisi, tampilkan status
+                        // verifikasinya. Kalau BELUM diisi & mode disiplin (jamnya
                         // beneran kekunci, nggak bisa diisi lagi lewat form
                         // biasa), tegasin "Terlewat" -- beda dari "Sudah
                         // Lewat" yang kesannya masih bisa nyusul kapan aja.
                         $terlewatTerkunci = $statusJamAsli === 'lewat' && ! $sudahIsiIni
                             && \App\Models\PengaturanJurnal::mode() === 'disiplin';
-                        $statusJam = $statusJamAsli === 'lewat'
-                            ? ($sudahIsiIni ? null : ($terlewatTerkunci ? 'terlewat' : 'lewat'))
-                            : $statusJamAsli;
+                        $statusJam = $sudahIsiIni
+                            ? null
+                            : ($statusJamAsli === 'lewat'
+                                ? ($terlewatTerkunci ? 'terlewat' : 'lewat')
+                                : $statusJamAsli);
+                        $statusBadges = $jurnalUntukJadwal?->statusRingkas() ?? [];
                     @endphp
                     <x-ui.list-card
                         :title="$j->mapel->nama"
                         :meta="[$j->kelas->nama . ' · JP ' . $j->jam_ke_mulai . '–' . $j->jam_ke_selesai, 'Ruang ' . ($j->ruang ?? '-')]"
                     >
-                        @if ($statusJam)
+                        @if ($jurnalUntukJadwal || $statusJam)
                             <x-slot:badge>
-                                <x-ui.status-badge :status="$statusJam" />
+                                @if ($jurnalUntukJadwal)
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach ($statusBadges as $statusBadge)
+                                            <x-ui.status-badge :status="$statusBadge['status']">{{ $statusBadge['label'] }}</x-ui.status-badge>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <x-ui.status-badge :status="$statusJam" />
+                                @endif
                             </x-slot:badge>
                         @endif
                         <x-slot:actions>

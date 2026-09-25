@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -53,11 +54,54 @@ class KelasController extends Controller
         $kelas = $request->filled('id') ? Kelas::findOrFail($data['id']) : new Kelas;
         $baru = ! $kelas->exists;
 
+        $tahunAktif = TahunAjaran::aktif();
+        $kelasDalamTahunAktif = $baru || ($tahunAktif
+            ? $kelas->tahun_ajaran_id === $tahunAktif->id
+            : $kelas->tahun_ajaran_id === null);
+        if ($kelasDalamTahunAktif && $data['tingkat'] === 'XII') {
+            $data['status'] = 'pkl';
+        }
+
         $kelas->fill($data)->save();
 
         AuditLog::catat($baru ? 'Tambah Kelas' : 'Ubah Kelas', "Kelas: {$kelas->nama}", $kelas);
 
         return back()->with('success', $baru ? 'Kelas ditambahkan.' : 'Kelas diperbarui.');
+    }
+
+    public function updateStatusBulk(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in(['aktif', 'pkl'])],
+            'tingkat' => ['nullable', 'required_without:kelas_ids', Rule::in(config('akademik.tingkat'))],
+            'kelas_ids' => ['nullable', 'required_without:tingkat', 'array', 'min:1'],
+            'kelas_ids.*' => ['required', 'integer', 'distinct', 'exists:kelas,id'],
+        ]);
+
+        $query = Kelas::aktif();
+        if (isset($data['tingkat'])) {
+            $query->where('tingkat', $data['tingkat']);
+        } else {
+            $query->whereIn('id', $data['kelas_ids']);
+        }
+
+        $kelas = $query->get(['id', 'nama', 'tingkat']);
+        $jumlahDiminta = isset($data['tingkat']) ? $kelas->count() : count($data['kelas_ids']);
+        if ($kelas->isEmpty() || $kelas->count() !== $jumlahDiminta) {
+            return back()->with('error', 'Pilih kelas yang masih berada di tahun ajaran aktif. Data kelas arsip tidak diubah.');
+        }
+
+        if ($data['status'] === 'aktif' && $kelas->contains('tingkat', 'XII')) {
+            return back()->with('error', 'Kelas XII tahun ajaran aktif harus berstatus PKL.');
+        }
+
+        Kelas::whereIn('id', $kelas->pluck('id'))->update(['status' => $data['status']]);
+
+        $labelStatus = $data['status'] === 'pkl' ? 'PKL' : 'Aktif';
+        $labelTarget = isset($data['tingkat']) ? "semua kelas tingkat {$data['tingkat']}" : $kelas->pluck('nama')->implode(', ');
+        AuditLog::catat('Ubah Status Kelas Massal', "{$labelTarget} diubah ke status {$labelStatus}.");
+
+        return back()->with('success', "Status {$kelas->count()} kelas diubah ke {$labelStatus}.");
     }
 
     public function destroy(Kelas $kelas): RedirectResponse

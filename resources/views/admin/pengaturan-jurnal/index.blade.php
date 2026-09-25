@@ -2,9 +2,9 @@
     $deskripsi = [
         'disiplin' => 'Guru cuma bisa isi jurnal pas jam pelajarannya BENERAN lagi jalan -- dikunci otomatis ke jadwal itu. Istirahat/pergantian jam diblokir total, nggak bisa isi apa-apa. Baru bebas pilih jadwal lain kalau udah beneran pulang sekolah (buat susulan/testing).',
         'bebas_hari_ini' => 'Guru bebas pilih jadwal HARI INI kapan aja sepanjang hari -- nggak dikunci ke jam pelajaran yang lagi jalan, nggak diblokir pas istirahat. Cocok kalau sekolah belum siap disiplin ketat soal jam.',
-        'bebas_kemarin' => 'Sama kayak "Bebas isi hari ini", DITAMBAH guru bisa isi susulan buat jadwal KEMARIN juga. Cocok buat kelas yang nggak rutin masuk tiap hari (mis. lagi PKL/prakerin) -- guru piket/wali tetap bisa isi jurnal susulan pas balik ngajar.',
+        'bebas_selamanya' => 'Guru bebas isi jurnal kapan saja dan untuk tanggal berapa pun (tanggal bisa custom). Cocok agar jurnal yang dulu-dulu belum sempat dibuat bisa diakses dan dilengkapi.',
     ];
-    $icon = ['disiplin' => 'lock_clock', 'bebas_hari_ini' => 'today', 'bebas_kemarin' => 'event_repeat'];
+    $icon = ['disiplin' => 'lock_clock', 'bebas_hari_ini' => 'today', 'bebas_selamanya' => 'event_repeat'];
 @endphp
 
 <x-layouts.admin title="Pengaturan Isi Jurnal" heading="Pengaturan Isi Jurnal">

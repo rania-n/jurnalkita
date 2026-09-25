@@ -12,6 +12,7 @@
         'alpha' => ['bg-alpha-soft text-alpha', 'Alpha'],
         'dispen' => ['bg-dispen-soft text-dispen', 'Dispen'],
         'dispensasi' => ['bg-dispen-soft text-dispen', 'Dispensasi'],
+        'tugas' => ['bg-izin-soft text-izin', 'Tugas'],
         'pending' => ['bg-sakit-soft text-sakit', 'Menunggu'],
         'terverifikasi' => ['bg-hadir-soft text-hadir', 'Terverifikasi'],
         'revisi' => ['bg-alpha-soft text-alpha', 'Revisi'],

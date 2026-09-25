@@ -12,17 +12,15 @@
     $statusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
     $statusAbsen = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
     $rekap = $jurnal->absensis->countBy('status');
-    $bisaVerifikasi = $jurnal->isPending();
+    $bisaVerifikasi = $jurnal->menungguPemeriksaan();
     $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp
 
 <div class="flex flex-col gap-4">
     @if (! $bisaVerifikasi)
-        <x-alert :type="$jurnal->otomatisDiverifikasi() ? 'info' : ($jurnal->status_verifikasi === 'terverifikasi' ? 'success' : 'error')">
-            @if ($jurnal->otomatisDiverifikasi())
-                <strong>Otomatis terverifikasi sistem</strong> — pengurus kelas nggak sempat periksa sampai hari berikutnya.
-            @elseif ($jurnal->status_verifikasi === 'terverifikasi' && $jurnal->verifikasiAbsen())
-                Laporan tidak hadir sudah disetujui{{ $jurnal->verifikator ? ' oleh '.$jurnal->verifikator->nama : '' }}.
+        <x-alert :type="$jurnal->verifikasiAbsen() || $jurnal->status_verifikasi === 'terverifikasi' ? 'success' : ($jurnal->otomatisDiverifikasi() ? 'info' : 'error')">
+            @if ($jurnal->verifikasiAbsen())
+                Tugas untuk siswa otomatis disetujui. Pengurus kelas tidak perlu memeriksa.
             @elseif ($jurnal->status_verifikasi === 'terverifikasi')
                 Sudah diverifikasi{{ $jurnal->verifikator ? ' oleh '.$jurnal->verifikator->nama : '' }}.
             @else
@@ -56,7 +54,7 @@
             <x-ui.field-static label="Metode" class="sm:col-span-2">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
         @else
             <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
-            <x-ui.field-static label="Tugas Tambahan" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
+            <x-ui.field-static label="Tugas untuk Siswa" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
         @endif
     </div>
 

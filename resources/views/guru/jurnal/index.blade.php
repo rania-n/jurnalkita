@@ -1,6 +1,5 @@
 @php
-    $statusLabel = ['pending' => 'menunggu', 'terverifikasi' => 'disetujui', 'revisi' => 'ditolak'];
-    $tabs = ['semua' => 'Semua', 'pending' => 'Menunggu', 'terverifikasi' => 'Berhasil', 'revisi' => 'Perlu Revisi'];
+    $tabs = ['semua' => 'Semua', 'tugas' => 'Tugas', 'pending' => 'Belum diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu Revisi'];
 @endphp
 
 <x-layouts.app title="Riwayat Jurnal" width="wide">
@@ -61,21 +60,7 @@
                     $judul = $j->jadwal->mapel->nama . ' — ' . $j->jadwal->kelas->nama;
                 @endphp
                 @php
-                    // Tidak Hadir cuma pernyataan "saya nggak masuk", bukan
-                    // laporan yang beneran perlu "diverifikasi" isinya -- dari
-                    // sudut pandang GURU, itu udah selesai begitu dikirim,
-                    // bukan lagi "menggantung nunggu keputusan orang". Beda
-                    // sama Verifikasi Jurnal punya pengurus kelas (TETAP ada
-                    // antrean "Perlu diperiksa" di sana, nggak berubah) --
-                    // cuma framing di Riwayat guru sendiri yang disesuaikan.
-                    if ($j->status_verifikasi === 'pending' && $j->verifikasiAbsen()) {
-                        [$badgeStatus, $badgeLabel] = ['otomatis', 'Terkirim'];
-                    } elseif ($j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen()) {
-                        [$badgeStatus, $badgeLabel] = ['disetujui', 'Disetujui'];
-                    } else {
-                        $badgeStatus = $statusLabel[$j->status_verifikasi] ?? 'menunggu';
-                        $badgeLabel = ['pending' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu revisi'][$j->status_verifikasi] ?? $j->status_verifikasi;
-                    }
+                    $statusBadges = $j->statusRingkas();
                 @endphp
                 <x-ui.list-card
                     data-baris-riwayat-jurnal
@@ -85,10 +70,9 @@
                 >
                     <x-slot:badge>
                         <div class="flex flex-wrap items-center gap-1.5">
-                            <x-ui.status-badge :status="$badgeStatus">{{ $badgeLabel }}</x-ui.status-badge>
-                            @if ($j->otomatisDiverifikasi())
-                                <x-ui.status-badge status="otomatis">Otomatis</x-ui.status-badge>
-                            @endif
+                            @foreach ($statusBadges as $statusBadge)
+                                <x-ui.status-badge :status="$statusBadge['status']">{{ $statusBadge['label'] }}</x-ui.status-badge>
+                            @endforeach
                         </div>
                     </x-slot:badge>
                     <x-slot:actions>

@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Jadwal;
 use App\Models\JadwalPiket;
 use App\Models\JamPelajaran;
+use App\Support\Waktu;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -104,7 +105,7 @@ class JadwalController extends Controller
     /** Cek apakah jam jadwal (jam ke-) bentrok dengan shift piket guru di hari yang sama. */
     private function konflikPiket(int $guruId, string $hari, int $jamMulai, int $jamSelesai): ?string
     {
-        $kategori = $hari === 'jumat' ? 'jumat' : 'senin_kamis';
+        $kategori = Waktu::kategoriUntukHari($hari);
 
         $rentang = JamPelajaran::where('kategori', $kategori)
             ->whereBetween('jam_ke', [$jamMulai, $jamSelesai])

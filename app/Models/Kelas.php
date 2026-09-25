@@ -64,4 +64,20 @@ class Kelas extends Model
             ? $query->where('tahun_ajaran_id', $aktif->id)
             : $query->whereNull('tahun_ajaran_id');
     }
+
+    /** Urutan kelas yang konsisten: tingkat, jurusan, lalu nomor secara numerik. */
+    public function scopeOrderedByHierarchy(Builder $query): Builder
+    {
+        $urutanJurusan = array_keys(config('akademik.jurusan', []));
+        $caseJurusan = 'CASE jurusan '.collect($urutanJurusan)
+            ->map(fn ($jurusan, $urutan) => "WHEN ? THEN {$urutan}")
+            ->implode(' ')
+            .' ELSE '.count($urutanJurusan).' END';
+
+        return $query
+            ->orderByRaw("CASE tingkat WHEN 'X' THEN 1 WHEN 'XI' THEN 2 WHEN 'XII' THEN 3 ELSE 4 END")
+            ->orderByRaw($caseJurusan, $urutanJurusan)
+            ->orderBy('nomor')
+            ->orderBy('nama');
+    }
 }

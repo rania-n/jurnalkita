@@ -1,8 +1,8 @@
 @php
     $hariLabel = config('akademik.hari');
     $tabsHari = ['semua' => 'Semua'] + $hariLabel;
-    $labelStatusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
-    $toneStatusGuru = ['hadir' => 'hadir', 'tidak_hadir' => 'alpha'];
+    $labelStatusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tugas'];
+    $toneStatusGuru = ['hadir' => 'hadir', 'tidak_hadir' => 'tugas'];
 
     // Hari ini ditaruh paling atas (biar langsung kelihatan tanpa scroll),
     // sisanya tetap urut Senin-Jumat kayak biasa -- sama pola kayak

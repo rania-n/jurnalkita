@@ -16,7 +16,7 @@
 
     $guruTanpaAkun = \App\Models\Guru::whereNull('user_id')->orderBy('nama')->get(['id', 'nama', 'nip']);
     $siswaTanpaAkun = \App\Models\Siswa::whereNull('user_id')->where('jabatan', 'pengurus')->with('kelas')->orderBy('nama')->get();
-    $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
+    $kelasList = \App\Models\Kelas::orderedByHierarchy()->get(['id', 'nama']);
 
     // Dipisah jadi variable (bukan langsung di atribut :options="...") --
     // string berkutip di dalam atribut Blade bikin compiler gagal parse tag

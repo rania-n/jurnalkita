@@ -29,7 +29,7 @@
                  field 1-kolom lain buat dipasangin setelah Materi (span2). --}}
             <x-ui.field-static label="Metode" icon="school" class="sm:col-span-2">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
         @else
-            <x-ui.field-static label="Tugas Tambahan" icon="assignment" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
+            <x-ui.field-static label="Tugas untuk Siswa" icon="assignment" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
             <x-ui.field-static label="Alasan" icon="info" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
         @endif
     </div>

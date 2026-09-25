@@ -62,7 +62,7 @@ class TahunAjaranTest extends TestCase
 
         $this->actingAs($this->admin())->post('/admin/tahun-ajaran/naik-kelas', ['nama' => '2027/2028']);
 
-        $this->assertDatabaseHas('kelas', ['tingkat' => 'XII', 'nama' => 'XII RPL 1']);
+        $this->assertDatabaseHas('kelas', ['tingkat' => 'XII', 'nama' => 'XII RPL 1', 'status' => 'pkl']);
     }
 
     public function test_kelas_xii_siswa_ditandai_lulus_tanpa_kelas_baru(): void
@@ -100,6 +100,30 @@ class TahunAjaranTest extends TestCase
 
         $this->assertFalse($tahunLama->fresh()->aktif);
         $this->assertSame('2027/2028', TahunAjaran::aktif()->nama);
+        $this->assertSame(1, TahunAjaran::aktif()->semester);
+    }
+
+    public function test_admin_bisa_mengubah_semester_tahun_ajaran_aktif(): void
+    {
+        $tahunAjaran = TahunAjaran::create(['nama' => '2026/2027', 'aktif' => true]);
+
+        $this->actingAs($this->admin())
+            ->put('/admin/tahun-ajaran/semester', ['semester' => 2])
+            ->assertRedirect()->assertSessionHas('success');
+
+        $this->assertSame(2, $tahunAjaran->fresh()->semester);
+        $this->assertDatabaseHas('audit_logs', ['aksi' => 'Perubahan Semester']);
+    }
+
+    public function test_semester_harus_satu_atau_dua(): void
+    {
+        $tahunAjaran = TahunAjaran::create(['nama' => '2026/2027', 'aktif' => true]);
+
+        $this->actingAs($this->admin())
+            ->put('/admin/tahun-ajaran/semester', ['semester' => 3])
+            ->assertSessionHasErrors('semester');
+
+        $this->assertSame(1, $tahunAjaran->fresh()->semester);
     }
 
     public function test_kenaikan_kelas_tercatat_di_audit_log(): void

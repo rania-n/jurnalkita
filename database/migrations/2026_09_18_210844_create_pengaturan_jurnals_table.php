@@ -21,7 +21,7 @@ return new class extends Migration
     {
         Schema::create('pengaturan_jurnals', function (Blueprint $table) {
             $table->id();
-            $table->enum('mode', ['disiplin', 'bebas_hari_ini', 'bebas_kemarin'])->default('disiplin');
+            $table->enum('mode', ['disiplin', 'bebas_hari_ini', 'bebas_selamanya', 'bebas_kemarin'])->default('disiplin');
             $table->timestamps();
         });
     }

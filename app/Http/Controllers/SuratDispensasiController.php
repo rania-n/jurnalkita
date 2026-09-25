@@ -54,7 +54,9 @@ class SuratDispensasiController extends Controller
     {
         $user = $request->user();
         abort_unless(
-            in_array($user->role, ['waka', 'admin'], true) || $dispensasi->diajukan_oleh_id === $user->id,
+            in_array($user->role, ['waka', 'admin'], true)
+                || $user->piketHariIni()
+                || $dispensasi->diajukan_oleh_id === $user->id,
             403
         );
 

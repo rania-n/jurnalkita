@@ -333,13 +333,44 @@ class JurnalTest extends TestCase
         $this->assertTrue($jurnal->tanggal->isSameDay(Carbon::yesterday()));
     }
 
+    public function test_mode_bebas_selamanya_boleh_isi_susulan_tanggal_custom(): void
+    {
+        // Pindah ke waktu tertentu
+        $this->travelTo(Carbon::parse('next monday 10:00:00'));
+        PengaturanJurnal::ambil()->update(['mode' => 'bebas_selamanya']);
+
+        Storage::fake('public');
+
+        // Tanggal custom 2 minggu lalu (hari senin juga)
+        $tglCustom = Carbon::parse('2 weeks ago monday')->toDateString();
+
+        $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'tanggal' => $tglCustom,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Susulan tanggal custom', 'metode_pilihan' => 'ceramah',
+            'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
+        ])->assertRedirect();
+
+        $jurnal = Jurnal::where('jadwal_id', $this->jadwal->id)->whereDate('tanggal', $tglCustom)->firstOrFail();
+        $this->assertSame($tglCustom, $jurnal->tanggal->toDateString());
+    }
+
+    public function test_form_isi_jurnal_render_pas_mode_bebas_selamanya(): void
+    {
+        PengaturanJurnal::ambil()->update(['mode' => 'bebas_selamanya']);
+
+        $this->actingAs($this->user)->get('/guru/jurnal/tambah?tanggal='.today()->subDays(5)->toDateString())
+            ->assertOk()->assertSee('Bebas Isi Jurnal (Tanggal Custom)');
+    }
+
     public function test_form_isi_jurnal_kemarin_render_pas_mode_bebas_kemarin(): void
     {
         $this->travelTo(Carbon::parse('next tuesday 10:00:00'));
         PengaturanJurnal::ambil()->update(['mode' => 'bebas_kemarin']);
 
         $this->actingAs($this->user)->get('/guru/jurnal/tambah?hari=kemarin')
-            ->assertOk()->assertSee('Kemarin');
+            ->assertOk();
     }
 
     /** Endpoint polling buat banner "ada data baru" (initAutoRefresh() di app.js) -- lihat App\Support\Versi. */

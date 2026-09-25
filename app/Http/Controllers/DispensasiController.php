@@ -125,7 +125,7 @@ class DispensasiController extends Controller
             'tab' => $request->get('tab', 'semua'),
             'bolehAjukan' => $user->isPiket(),
             'bolehEkspor' => in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
-            'kelasList' => Kelas::orderBy('nama')->get(),
+            'kelasList' => Kelas::orderedByHierarchy()->get(),
             'jumlahTab' => $jumlahTab,
             'waLinkAutoKirim' => $waLinkAutoKirim,
             'lihatDispensasi' => $lihatDispensasi,
@@ -181,7 +181,7 @@ class DispensasiController extends Controller
 
         $kelasList = Kelas::aktif()
             ->with(['siswas' => fn ($q) => $q->where('status', 'aktif')->select('id', 'kelas_id', 'nama', 'nis')])
-            ->orderBy('nama')->get();
+            ->orderedByHierarchy()->get();
 
         // Diratakan jadi 1 daftar buat kotak "cari siswa" -- ketik nama/NIS
         // langsung, nggak perlu tahu/pilih kelasnya dulu (dulu 1 <select>

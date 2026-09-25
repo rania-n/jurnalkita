@@ -120,19 +120,17 @@ class VerifikasiJurnalTest extends TestCase
         $this->assertSame('Materi tidak sesuai', $jurnal->fresh()->catatan_verifikasi);
     }
 
-    /**
-     * Jurnal pending yang tanggalnya udah kelewat hari (bukan hari ini lagi)
-     * otomatis terverifikasi -- pengurus kelas nggak sempat periksa, daripada
-     * numpuk jadi pending berhari-hari (sama pola kayak auto-batal dispensasi).
-     */
-    public function test_jurnal_pending_yang_udah_lewat_hari_otomatis_terverifikasi(): void
+    /** Jurnal tetap menunggu pemeriksaan sekre walau tanggal mengajarnya sudah lewat. */
+    public function test_jurnal_pending_yang_udah_lewat_hari_tetap_menunggu_pemeriksaan(): void
     {
         $jurnal = $this->jurnalBaru(['tanggal' => today()->subDay()]);
 
-        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal')->assertOk();
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal')
+            ->assertOk()
+            ->assertSee("jurnal/{$jurnal->id}/fragment");
 
-        $this->assertSame('terverifikasi', $jurnal->fresh()->status_verifikasi);
-        $this->assertStringContainsString('Otomatis diverifikasi', $jurnal->fresh()->catatan_verifikasi);
+        $this->assertSame('pending', $jurnal->fresh()->status_verifikasi);
+        $this->assertTrue($jurnal->fresh()->menungguPemeriksaan());
     }
 
     public function test_jurnal_pending_hari_ini_belum_diotomatis_verifikasi(): void
@@ -148,9 +146,7 @@ class VerifikasiJurnalTest extends TestCase
      * Jurnal "pending" (perlu diperiksa) muncul PALING ATAS, walau dibuat
      * duluan (id lebih kecil, biasanya kalah kalau urut cuma "terbaru
      * duluan") -- nggak kelewat ketumpuk jurnal lain yang udah diperiksa.
-     * Sengaja dua-duanya tanggal HARI INI (bukan kemarin) biar nggak kena
-     * sapu auto-verifikasi (lihat test_jurnal_pending_yang_udah_lewat_hari...)
-     * duluan sebelum sempat dicek urutannya.
+     * Keduanya tanggal HARI INI agar urutan diuji dalam satu antrean pemeriksaan.
      */
     public function test_jurnal_pending_ditampilkan_paling_atas(): void
     {
@@ -169,6 +165,17 @@ class VerifikasiJurnalTest extends TestCase
                 "jurnal/{$pending->id}/fragment",
                 "jurnal/{$terverifikasi->id}/fragment",
             ]);
+    }
+
+    public function test_laporan_guru_tidak_hadir_tidak_masuk_antrean_pemeriksaan(): void
+    {
+        $jurnal = $this->jurnalBaru([
+            'status_guru' => 'tidak_hadir',
+            'status_verifikasi' => 'terverifikasi',
+        ]);
+
+        $this->assertFalse($jurnal->menungguPemeriksaan());
+        $this->assertSame(0, Jurnal::query()->inReviewQueue()->count());
     }
 
     public function test_sekretaris_lain_tidak_bisa_verifikasi_jurnal_bukan_kelasnya(): void

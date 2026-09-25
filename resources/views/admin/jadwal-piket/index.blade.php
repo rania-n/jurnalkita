@@ -96,6 +96,8 @@
                 name="guru_ids"
                 :options="$guruList"
             />
+            <x-ui.input label="Tanggal Mulai" name="tanggal" type="date" :value="old('tanggal', today()->isWeekend() ? today()->nextWeekday()->toDateString() : today()->toDateString())" required />
+            <p class="-mt-2 text-xs text-muted-2">Hari piket ditentukan otomatis dari tanggal. Jadwal berulang mengikuti interval yang dipilih.</p>
             {{-- Sesi -- shortcut isi Jam Mulai/Selesai otomatis (2 sesi yang
                  beneran dipakai sekolah), tapi field jamnya sendiri tetap
                  bisa diubah manual sesudahnya kalau memang beda. --}}

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Dispensasi;
 use App\Models\Jurnal;
+use App\Models\PresensiPiket;
 use Illuminate\Support\Collection;
 
 /**
@@ -13,12 +14,10 @@ use Illuminate\Support\Collection;
  *
  *   1. Dispensasi disetujui buat hari itu (opsional dipersempit ke jam
  *      tertentu) -> menang, paling spesifik/akurat.
- *   2. Kalau nggak ada, ikut presensi dari jurnal LAIN yang sudah diisi
- *      hari ini di kelas yang sama (jam berapa pun) -- biar guru/pengurus
- *      kelas berikutnya nggak perlu nandain ulang dari nol siswa yang
- *      tadi sudah ketahuan sakit/izin/alpha, tinggal ubah kalau memang
- *      ada yang berubah.
- *   3. Kalau nggak ada dua-duanya sama sekali -> default "Hadir".
+ *   2. Kalau nggak ada, ikuti catatan sakit/izin yang dimasukkan piket.
+ *   3. Kalau nggak ada juga, ikut presensi dari jurnal lain yang sudah diisi
+ *      hari ini di kelas yang sama (jam berapa pun).
+ *   4. Kalau belum ada sumber status -> default "Hadir".
  *
  * Reset otomatis tiap hari beda karena semuanya di-query per tanggal.
  */
@@ -30,9 +29,10 @@ class PresensiDefault
     public static function untukKelas(Collection $siswas, int $kelasId, string $tanggal, ?int $jamMulai = null, ?int $jamSelesai = null): array
     {
         $siswaDispensasi = self::siswaDispensasi($kelasId, $tanggal, $jamMulai, $jamSelesai);
+        $presensiPiket = self::presensiPiket($kelasId, $tanggal);
         $presensiSebelumnya = self::presensiTerakhirHariIni($kelasId, $tanggal);
 
-        return $siswas->mapWithKeys(function ($s) use ($siswaDispensasi, $presensiSebelumnya, $jamMulai, $jamSelesai) {
+        return $siswas->mapWithKeys(function ($s) use ($siswaDispensasi, $presensiPiket, $presensiSebelumnya, $jamMulai, $jamSelesai) {
             if ($siswaDispensasi->has($s->id)) {
                 $d = $siswaDispensasi[$s->id];
                 $catatan = $d->alasan ?: 'Dispensasi (otomatis dari sistem)';
@@ -59,6 +59,12 @@ class PresensiDefault
                 return [$s->id => ['status' => 'dispensasi', 'catatan' => $catatan]];
             }
 
+            if ($presensiPiket->has($s->id)) {
+                $piket = $presensiPiket[$s->id];
+
+                return [$s->id => ['status' => $piket->status, 'catatan' => $piket->catatan]];
+            }
+
             $sebelumnya = $presensiSebelumnya[$s->id] ?? null;
 
             // Dispensasi itu ADA BATAS WAKTUNYA (nggak kayak sakit/izin/alpha yang
@@ -75,6 +81,15 @@ class PresensiDefault
 
             return [$s->id => $sebelumnya ?? ['status' => 'hadir', 'catatan' => null]];
         })->all();
+    }
+
+    /** Catatan sakit/izin dari piket untuk kelas dan tanggal ini, keyed by siswa_id. */
+    public static function presensiPiket(int $kelasId, string $tanggal): Collection
+    {
+        return PresensiPiket::whereDate('tanggal', $tanggal)
+            ->whereHas('siswa', fn ($q) => $q->where('kelas_id', $kelasId))
+            ->get(['siswa_id', 'status', 'catatan'])
+            ->keyBy('siswa_id');
     }
 
     /**

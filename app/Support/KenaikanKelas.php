@@ -30,7 +30,7 @@ class KenaikanKelas
             $kelasLama = Kelas::aktif()->get();
 
             TahunAjaran::where('aktif', true)->update(['aktif' => false]);
-            $baru = TahunAjaran::create(['nama' => $namaTahunBaru, 'aktif' => true]);
+            $baru = TahunAjaran::create(['nama' => $namaTahunBaru, 'semester' => 1, 'aktif' => true]);
 
             $kelasNaik = 0;
             $siswaNaik = 0;
@@ -54,6 +54,7 @@ class KenaikanKelas
                     'nomor' => $kelas->nomor,
                     'wali_id' => $kelas->wali_id,
                     'tahun_ajaran_id' => $baru->id,
+                    'status' => $tingkatBaru === 'XII' ? 'pkl' : 'aktif',
                 ]);
 
                 $siswaNaik += Siswa::where('kelas_id', $kelas->id)->where('status', 'aktif')

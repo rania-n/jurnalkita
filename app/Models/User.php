@@ -127,7 +127,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /** Kelas-kelas yang diampu guru ini sebagai wali (biasanya cuma 1, tapi bisa lebih). */
     public function kelasWaliList(): Collection
     {
-        return $this->guru?->kelasWali()->orderBy('nama')->get() ?? collect();
+        return $this->guru?->kelasWali()->orderedByHierarchy()->get() ?? collect();
     }
 
     /** Siswa pengurus kelas (akun kelas / "sekretaris"). */

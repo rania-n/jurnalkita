@@ -24,12 +24,21 @@
         ->orderBy('nama')
         ->paginate(20)->withQueryString();
 
-    $kelasList = \App\Models\Kelas::orderBy('nama')->get(['id', 'nama']);
+    $kelasList = \App\Models\Kelas::orderedByHierarchy()->get(['id', 'nama']);
+    $urutanTingkat = array_flip(config('akademik.tingkat'));
+    $urutanJurusan = array_flip(array_keys(config('akademik.jurusan')));
     // Dropdown tambah/ubah: kelas tahun ajaran aktif + kelas siswa yang lagi ditampilkan
     // (supaya siswa yang sudah lulus/pindah tetap kepilih saat modal Ubah dibuka).
-    $kelasAktifList = \App\Models\Kelas::aktif()->orderBy('nama')->get(['id', 'nama'])
+    $kelasAktifList = \App\Models\Kelas::aktif()->orderedByHierarchy()->get(['id', 'nama', 'tingkat', 'jurusan', 'nomor'])
         ->concat($rows->pluck('kelas')->filter())
-        ->unique('id')->sortBy('nama')->values();
+        ->unique('id')
+        ->sortBy(fn ($kelas) => [
+            $urutanTingkat[$kelas->tingkat] ?? PHP_INT_MAX,
+            $urutanJurusan[$kelas->jurusan] ?? PHP_INT_MAX,
+            $kelas->nomor,
+            $kelas->nama,
+        ])
+        ->values();
 @endphp
 
 <x-layouts.admin title="Data Siswa" heading="Data Siswa">

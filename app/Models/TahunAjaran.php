@@ -12,11 +12,14 @@ class TahunAjaran extends Model
 
     protected $table = 'tahun_ajarans';
 
-    protected $fillable = ['nama', 'aktif'];
+    protected $fillable = ['nama', 'semester', 'aktif'];
 
     protected function casts(): array
     {
-        return ['aktif' => 'boolean'];
+        return [
+            'aktif' => 'boolean',
+            'semester' => 'integer',
+        ];
     }
 
     public function kelas(): HasMany

@@ -44,6 +44,9 @@
     @else
         <x-ui.card-list id="daftar-verifikasi-jurnal" class="grid-fill-last">
             @foreach ($jurnals as $j)
+                @php
+                    $statusTampilan = $j->verifikasiAbsen() ? 'terverifikasi' : ($j->menungguPemeriksaan() ? 'pending' : $j->status_verifikasi);
+                @endphp
                 <x-ui.list-card
                     data-baris-verifikasi-jurnal
                     data-cari="{{ strtolower($j->jadwal->mapel->nama.' '.$j->guru->nama) }}"
@@ -55,26 +58,22 @@
                 >
                     <x-slot:badge>
                         <div class="flex flex-wrap items-center gap-1.5">
-                            <x-ui.status-badge :status="$badge[$j->status_verifikasi]">
+                            <x-ui.status-badge :status="$badge[$statusTampilan]">
                                 {{-- Tidak Hadir nggak ada materi buat "diverifikasi"
                                      beneran -- pengurus kelas cuma nyetujuin dia
                                      udah tahu gurunya nggak masuk, bukan meriksa
                                      konten (lihat Jurnal::verifikasiAbsen()). --}}
-                                {{ $j->status_verifikasi === 'terverifikasi' && $j->verifikasiAbsen() ? 'Disetujui' : ['pending' => 'Perlu diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Diminta revisi'][$j->status_verifikasi] }}
+                                {{ $statusTampilan === 'terverifikasi' && $j->verifikasiAbsen() ? 'Disetujui' : ['pending' => 'Perlu diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Diminta revisi'][$statusTampilan] }}
                             </x-ui.status-badge>
-                            {{-- Beda dari verifikasi manusia beneran -- biar
-                                 pengurus kelas nggak salah kira udah ada yang
-                                 meriksa padahal cuma kesapu otomatis (lihat
-                                 Jurnal::otomatisVerifikasiKalauLewatHari()). --}}
-                            @if ($j->otomatisDiverifikasi())
-                                <x-ui.status-badge status="otomatis">Otomatis</x-ui.status-badge>
+                            @if ($j->verifikasiAbsen())
+                                <x-ui.status-badge status="tugas">Tugas</x-ui.status-badge>
                             @endif
                         </div>
                     </x-slot:badge>
                     <x-slot:actions>
                         <x-ui.action-button
-                            label="Periksa"
-                            icon="fact_check"
+                            :label="$j->verifikasiAbsen() ? 'Lihat' : 'Periksa'"
+                            :icon="$j->verifikasiAbsen() ? 'visibility' : 'fact_check'"
                             variant="info"
                             data-modal-open="modal-jurnal-sekretaris"
                             data-modal-title="{{ $j->jadwal->mapel->nama }}"

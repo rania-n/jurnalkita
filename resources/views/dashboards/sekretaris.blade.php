@@ -3,7 +3,7 @@
     $kelas = $user->isSekretaris() ? $user->kelasSekretaris() : null;
     $pending = $kelas
         ? \App\Models\Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
-            ->where('status_verifikasi', 'pending')->count()
+            ->inReviewQueue()->count()
         : 0;
 
     // K: dulu dasbor ini cuma 3 kotak menu doang -- ditambah jadwal hari ini
@@ -16,8 +16,8 @@
     $jurnalHariIni = $jadwalHariIni->isNotEmpty()
         ? \App\Models\Jurnal::whereIn('jadwal_id', $jadwalHariIni->pluck('id'))->whereDate('tanggal', today())->get()->keyBy('jadwal_id')
         : collect();
-    $labelStatusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
-    $toneStatusGuru = ['hadir' => 'hadir', 'tidak_hadir' => 'alpha'];
+    $labelStatusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tugas'];
+    $toneStatusGuru = ['hadir' => 'hadir', 'tidak_hadir' => 'tugas'];
 @endphp
 
 <x-layouts.app title="Beranda Pengurus Kelas" width="wide">

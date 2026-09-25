@@ -72,7 +72,7 @@ class RegisterController extends Controller
     public function createKelas(): View
     {
         return view('auth.register_pengurus_kelas', [
-            'kelasList' => Kelas::orderBy('nama')->get(),
+            'kelasList' => Kelas::orderedByHierarchy()->get(),
         ]);
     }
 

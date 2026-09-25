@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,21 +57,44 @@ class Jurnal extends Model
         return $this->status_verifikasi === 'pending';
     }
 
+    /** Hanya jurnal guru hadir yang perlu masuk antrean pemeriksaan pengurus. */
+    public function scopeInReviewQueue(Builder $query): Builder
+    {
+        return $query->where('status_guru', '!=', 'tidak_hadir')
+            ->where('status_verifikasi', 'pending');
+    }
+
+    public function menungguPemeriksaan(): bool
+    {
+        return ! $this->verifikasiAbsen() && $this->status_verifikasi === 'pending';
+    }
+
     /** Guru masih boleh mengubah jurnal selama belum terverifikasi (pending) atau saat diminta revisi. */
     public function bisaDiubah(): bool
     {
         return in_array($this->status_verifikasi, ['pending', 'revisi'], true);
     }
 
-    /**
-     * true kalau status "Terverifikasi"-nya OTOMATIS dari sistem (lewat
-     * otomatisVerifikasiKalauLewatHari()), BUKAN pengurus kelas beneran
-     * meriksa -- verifikator_id sengaja dibiarkan null cuma buat kasus ini,
-     * verifikasi manusia asli SELALU ngisi verifikator_id.
-     */
+    /** True untuk status otomatis tanpa pemeriksa manusia, seperti laporan guru tidak hadir. */
     public function otomatisDiverifikasi(): bool
     {
         return $this->status_verifikasi === 'terverifikasi' && $this->verifikator_id === null;
+    }
+
+    /** Ringkasan status yang ditampilkan pada kartu riwayat guru. */
+    public function statusRingkas(): array
+    {
+        $status = $this->verifikasiAbsen()
+            ? ['status' => 'terverifikasi', 'label' => 'Disetujui']
+            : match ($this->status_verifikasi) {
+                'terverifikasi' => ['status' => 'terverifikasi', 'label' => 'Terverifikasi'],
+                'revisi' => ['status' => 'revisi', 'label' => 'Perlu Revisi'],
+                default => ['status' => 'pending', 'label' => 'Belum diperiksa'],
+            };
+
+        return $this->verifikasiAbsen()
+            ? [$status, ['status' => 'tugas', 'label' => 'Tugas']]
+            : [$status];
     }
 
     /**
@@ -83,43 +107,6 @@ class Jurnal extends Model
     public function verifikasiAbsen(): bool
     {
         return $this->status_guru === 'tidak_hadir';
-    }
-
-    /**
-     * Otomatis verifikasi kalau masih "pending" tapi tanggalnya udah kelewat
-     * hari (bukan hari ini lagi) -- pengurus kelas nggak sempat periksa,
-     * daripada numpuk jadi pending berhari-hari. verifikator_id SENGAJA
-     * dibiarkan null (bukan verifikasi manusia beneran) -- view yang nampilin
-     * nama verifikator udah null-safe (lihat guru/jurnal/_detail-fragment).
-     */
-    public function otomatisVerifikasiKalauLewatHari(): bool
-    {
-        if ($this->status_verifikasi !== 'pending' || $this->tanggal->copy()->startOfDay()->gte(today())) {
-            return false;
-        }
-
-        $this->update([
-            'status_verifikasi' => 'terverifikasi',
-            'catatan_verifikasi' => 'Otomatis diverifikasi sistem — pengurus kelas tidak sempat memeriksa sampai hari berikutnya.',
-        ]);
-
-        return true;
-    }
-
-    /** Sapu semua jurnal pending yang udah kelewat hari sekaligus -- opsional dipersempit ke 1 kelas/guru. */
-    public static function verifikasiSemuaYangKadaluarsa(?int $kelasId = null, ?int $guruId = null): int
-    {
-        $daftar = static::where('status_verifikasi', 'pending')
-            ->whereDate('tanggal', '<', today())
-            ->when($kelasId, fn ($q) => $q->whereHas('jadwal', fn ($q2) => $q2->where('kelas_id', $kelasId)))
-            ->when($guruId, fn ($q) => $q->where('guru_id', $guruId))
-            ->get();
-
-        foreach ($daftar as $j) {
-            $j->otomatisVerifikasiKalauLewatHari();
-        }
-
-        return $daftar->count();
     }
 
     /** null = belum bisa dinilai (lokasi sekolah belum diatur / guru tidak kirim lokasi). */

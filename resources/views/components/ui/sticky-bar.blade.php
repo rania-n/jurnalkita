@@ -18,7 +18,7 @@
 >
     {{-- Lebar penuh baik di HP (nempel bawah) maupun desktop (ngalir biasa) --
          nggak dikunci sempit lagi biar nggak nyisain ruang kosong di sampingnya. --}}
-    <div class="mx-auto flex w-full max-w-lg flex-col gap-2 lg:mx-0 lg:max-w-none">
+    <div class="mx-auto flex w-full flex-col gap-2 lg:mx-0">
         {{ $slot }}
     </div>
 </div>

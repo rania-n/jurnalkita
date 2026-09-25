@@ -10,7 +10,7 @@
         <div class="hidden sm:block">
             <x-admin.table :head="['No. Absen', 'Nama', 'NIS', 'Jabatan', 'Kehadiran Hari Ini']">
                 @foreach ($siswas as $s)
-                    @php $absenHariIni = $absensiHariIni->get($s->id); @endphp
+                    @php $absenHariIni = $absensiHariIni->get($s->id); $statusHariIni = $presensiPiketHariIni->get($s->id)?->status ?? $absenHariIni?->status; @endphp
                     <tr data-siswa-kelas-row data-nama="{{ strtolower($s->nama) }}">
                         <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
                         <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
@@ -23,8 +23,8 @@
                             @endif
                         </td>
                         <td class="px-4 py-2.5">
-                            @if ($absenHariIni)
-                                <x-ui.status-badge :status="$absenHariIni->status" />
+                            @if ($statusHariIni)
+                                <x-ui.status-badge :status="$statusHariIni" />
                             @else
                                 <span class="text-muted-2">Belum ada jurnal</span>
                             @endif
@@ -36,13 +36,13 @@
 
         <div class="flex flex-col gap-2 sm:hidden">
             @foreach ($siswas as $s)
-                @php $absenHariIni = $absensiHariIni->get($s->id); @endphp
+                @php $absenHariIni = $absensiHariIni->get($s->id); $statusHariIni = $presensiPiketHariIni->get($s->id)?->status ?? $absenHariIni?->status; @endphp
                 <div data-siswa-kelas-row data-nama="{{ strtolower($s->nama) }}">
                     <x-ui.list-card :title="$s->nama" :meta="['No. ' . ($s->no_absen ?? '—') . ' · NIS ' . $s->nis]">
                         <x-slot:badge>
                             <div class="flex flex-col items-end gap-1">
-                                @if ($absenHariIni)
-                                    <x-ui.status-badge :status="$absenHariIni->status" />
+                                @if ($statusHariIni)
+                                    <x-ui.status-badge :status="$statusHariIni" />
                                 @else
                                     <span class="text-[11px] text-muted-2">Belum ada jurnal</span>
                                 @endif

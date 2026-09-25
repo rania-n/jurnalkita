@@ -5,7 +5,7 @@
         :back="route('sekretaris.jurnal.index')"
     />
 
-    <x-alert type="info" class="mb-4">Hanya untuk guru yang <strong>Tidak Hadir</strong> dan tidak sempat mengisi sendiri. Jurnal ini otomatis terverifikasi.</x-alert>
+    <x-alert type="info" class="mb-4">Hanya untuk guru yang <strong>Tidak Hadir</strong> dan tidak sempat mengisi sendiri. Tugas langsung tercatat disetujui.</x-alert>
 
     @if ($jadwals->isEmpty())
         <x-ui.empty icon="event_busy" title="Tidak ada jadwal kelas ini hari ini" />
@@ -35,10 +35,10 @@
                 {{-- status_guru nggak lagi dipilih di sini -- pengganti = guru
                      nggak hadir, jadi server selalu simpen 'tidak_hadir'
                      (lihat Sekretaris\JurnalController::storePengganti()).
-                     Yang diisi itu Tugas Tambahan (apa yang dikasih ke siswa)
+                     Yang diisi itu tugas untuk siswa.
                      + Alasan (kenapa gurunya nggak hadir), bukan "Materi"
                      (itu khusus kalau gurunya beneran hadir). --}}
-                <x-ui.textarea label="Tugas Tambahan" name="tugas_tambahan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengerjakan LKS halaman 12–15." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
+                <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengerjakan LKS halaman 12–15." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
                 <x-ui.textarea label="Alasan" name="alasan" :rows="2" class="sm:col-span-2" placeholder="Contoh: rapat dinas luar kota, izin sakit, dll." required>{{ old('alasan') }}</x-ui.textarea>
             </div>
 

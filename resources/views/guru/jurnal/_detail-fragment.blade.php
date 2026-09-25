@@ -17,26 +17,19 @@
 @endphp
 
 <div class="flex flex-col gap-4">
-    <x-alert :type="$jurnal->otomatisDiverifikasi() ? 'info' : ($vs === 'terverifikasi' ? 'success' : ($vs === 'revisi' ? 'error' : 'info'))">
-        @if ($jurnal->otomatisDiverifikasi())
-            Jurnal <strong>otomatis terverifikasi sistem</strong> — pengurus kelas nggak sempat periksa sampai hari berikutnya. Tidak bisa diubah lagi.
-        @elseif ($vs === 'terverifikasi' && $jurnal->verifikasiAbsen())
-            Laporan tidak hadir sudah <strong>disetujui</strong> oleh pengurus kelas
-            @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.
+    <x-alert :type="$jurnal->verifikasiAbsen() || $vs === 'terverifikasi' ? 'success' : ($jurnal->otomatisDiverifikasi() ? 'info' : ($vs === 'revisi' ? 'error' : 'info'))">
+        @if ($jurnal->verifikasiAbsen())
+            Tugas untuk siswa otomatis disetujui. Tidak perlu diperiksa sekre; jurnal masih bisa diubah.
+        @elseif ($jurnal->otomatisDiverifikasi())
+                Jurnal <strong>belum diperiksa oleh sekre</strong>. Jurnal tetap menunggu keputusan dan masih bisa diubah.
         @elseif ($vs === 'terverifikasi')
             Jurnal sudah <strong>diverifikasi</strong> oleh pengurus kelas
             @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.
         @elseif ($vs === 'revisi')
             Pengurus kelas meminta <strong>perbaikan</strong>: {{ $jurnal->catatan_verifikasi ?: 'tidak ada catatan.' }}
             Perbaiki lalu simpan — jurnal akan diperiksa ulang.
-        @elseif ($jurnal->verifikasiAbsen())
-            {{-- Beda framing dari Hadir -- Tidak Hadir cuma pernyataan, bukan
-                 laporan yang perlu "ditunggu" keputusannya. Dari sisi guru
-                 udah selesai (tetap bisa diubah kalau ada yang salah),
-                 pengurus kelas yang meriksa di baliknya nggak berubah. --}}
-            Terkirim ke pengurus kelas. Jurnal masih bisa diubah kalau ada yang salah.
         @else
-            Menunggu verifikasi pengurus kelas. Selama menunggu, jurnal masih bisa diubah.
+            Belum diperiksa sekre. Jurnal masih bisa diubah selama menunggu.
         @endif
     </x-alert>
 
@@ -67,7 +60,7 @@
             <x-ui.field-static label="Metode" class="sm:col-span-2">{{ $jurnal->metode ?: '—' }}</x-ui.field-static>
         @else
             <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $jurnal->alasan ?: '—' }}</x-ui.field-static>
-            <x-ui.field-static label="Tugas Tambahan" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
+            <x-ui.field-static label="Tugas untuk Siswa" class="sm:col-span-2">{{ $jurnal->tugas_tambahan ?: '—' }}</x-ui.field-static>
         @endif
     </div>
 

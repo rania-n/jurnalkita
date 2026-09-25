@@ -6,16 +6,16 @@ return [
 
     // kode => nama lengkap
     'jurusan' => [
+        'TKI' => 'Teknik Kimia Industri',
         'RPL' => 'Rekayasa Perangkat Lunak',
         'TKJ' => 'Teknik Komputer dan Jaringan',
-        'AN' => 'Animasi',
         'BD' => 'Bisnis Digital',
         'MP' => 'Manajemen Perkantoran',
-        'TKI' => 'Teknik Kimia Industri',
-        'ULW' => 'Usaha Layanan Wisata',
         'AK' => 'Akuntansi',
+        'ULW' => 'Usaha Layanan Wisata',
         'DKV' => 'Desain Komunikasi Visual',
         'PSPT' => 'Produksi dan Siaran Program Televisi',
+        'AN' => 'Animasi',
     ],
 
     // Daftar ruangan untuk jadwal pelajaran. R1-R20/Lab RPL 1 dst di baris pertama

@@ -22,7 +22,7 @@
 --}}
 <div {{ $attributes->only('class')->class('flex flex-col gap-1.5') }} data-kamera-wrap>
     @if ($label)
-        <x-ui.label :for="$id">{{ $label }}</x-ui.label>
+        <x-ui.label :for="$id" :required="$required">{{ $label }}</x-ui.label>
     @endif
 
     <input type="file" name="{{ $name }}" id="{{ $id }}" accept="image/*" class="sr-only" data-kamera-input @if ($required) required @endif>

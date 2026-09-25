@@ -4,16 +4,25 @@ namespace App\Support;
 
 use App\Models\JamPelajaran;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Waktu
 {
     /** Kategori jam pelajaran untuk sebuah tanggal. */
     public static function kategori(?Carbon $tanggal = null): string
     {
-        return match (($tanggal ?? now())->dayOfWeek) {
-            Carbon::FRIDAY => 'jumat',
-            default => 'senin_kamis',
-        };
+        $hari = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'][($tanggal ?? now())->dayOfWeek];
+
+        return self::kategoriUntukHari($hari);
+    }
+
+    /** Kategori JP yang dipakai pada hari tertentu; mendukung kategori admin tambahan. */
+    public static function kategoriUntukHari(string $hari): string
+    {
+        $hari = strtolower($hari);
+        $default = $hari === 'jumat' ? 'jumat' : 'senin_kamis';
+
+        return DB::table('jam_pelajaran_hari')->where('hari', $hari)->value('kategori') ?? $default;
     }
 
     /**
@@ -146,7 +155,7 @@ class Waktu
      */
     public static function rentangJamUntukHari(string $hari, int $jamKeMulai, ?int $jamKeSelesai = null): ?string
     {
-        return self::rentangJamDenganKategori($hari === 'jumat' ? 'jumat' : 'senin_kamis', $jamKeMulai, $jamKeSelesai);
+        return self::rentangJamDenganKategori(self::kategoriUntukHari($hari), $jamKeMulai, $jamKeSelesai);
     }
 
     private static function rentangJamDenganKategori(string $kategori, int $jamKeMulai, ?int $jamKeSelesai = null): ?string

@@ -31,7 +31,7 @@ class RekapController extends Controller
             'terlambat' => $terlambat,
             'dari' => $dari,
             'sampai' => $sampai,
-            'kelasList' => Kelas::orderBy('nama')->get(),
+            'kelasList' => Kelas::orderedByHierarchy()->get(),
             'ambangAlpha' => self::AMBANG_ALPHA,
         ]);
     }

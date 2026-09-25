@@ -105,6 +105,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/guru', [GuruController::class, 'save'])->name('master.guru.save');
         Route::delete('/admin/guru/{guru}', [GuruController::class, 'destroy'])->name('master.guru.destroy');
         Route::post('/admin/kelas', [KelasController::class, 'save'])->name('master.kelas.save');
+        Route::patch('/admin/kelas/status-massal', [KelasController::class, 'updateStatusBulk'])->name('master.kelas.status-massal');
         Route::delete('/admin/kelas/{kelas}', [KelasController::class, 'destroy'])->name('master.kelas.destroy');
         Route::post('/admin/siswa', [SiswaController::class, 'save'])->name('master.siswa.save');
         Route::delete('/admin/siswa/{siswa}', [SiswaController::class, 'destroy'])->name('master.siswa.destroy');
@@ -117,8 +118,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/jadwal-waka', [JadwalWakaController::class, 'save'])->name('master.jadwal-waka.save');
         Route::delete('/admin/jadwal-waka/{jadwalWaka}', [JadwalWakaController::class, 'destroy'])->name('master.jadwal-waka.destroy');
         Route::post('/admin/jam-pelajaran', [JamPelajaranController::class, 'save'])->name('master.jam-pelajaran.save');
+        Route::post('/admin/jam-pelajaran/generate', [JamPelajaranController::class, 'generate'])->name('master.jam-pelajaran.generate');
+        Route::post('/admin/jam-pelajaran/maju', [JamPelajaranController::class, 'maju'])->name('master.jam-pelajaran.maju');
+        Route::post('/admin/jam-pelajaran/reset', [JamPelajaranController::class, 'resetSebelumnya'])->name('master.jam-pelajaran.reset');
+        Route::post('/admin/jam-pelajaran/kategori-hari', [JamPelajaranController::class, 'simpanKategoriHari'])->name('master.jam-pelajaran.kategori-hari');
         Route::delete('/admin/jam-pelajaran/{kategori}', [JamPelajaranController::class, 'destroyKategori'])->name('master.jam-pelajaran.destroy-kategori');
         Route::post('/admin/tahun-ajaran/naik-kelas', [TahunAjaranController::class, 'naikKelas'])->name('master.tahun-ajaran.naik-kelas');
+        Route::put('/admin/tahun-ajaran/semester', [TahunAjaranController::class, 'updateSemester'])->name('master.tahun-ajaran.semester');
     });
 
     /* =============================== GURU =============================== */
@@ -203,6 +209,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/ekspor', [PiketController::class, 'ekspor'])->name('ekspor');
         Route::get('/ekspor/{tipe}/{id}', [PiketController::class, 'eksporDetail'])->name('ekspor.detail');
         Route::get('/jurnal/{jurnal}', [PiketController::class, 'jurnalDetail'])->name('jurnal');
+    });
+
+    Route::middleware('role:guru')->prefix('piket/presensi-siswa')->name('piket.presensi-siswa.')->group(function () {
+        Route::get('/', [PiketController::class, 'presensiSiswa'])->name('index');
+        Route::post('/', [PiketController::class, 'simpanPresensiSiswa'])->name('store');
     });
 
     /* ===== REKAP KEHADIRAN SISWA (lintas kelas — waka + admin) ===== */
