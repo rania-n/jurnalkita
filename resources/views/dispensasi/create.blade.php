@@ -1,4 +1,4 @@
-<x-layouts.app title="Ajukan Dispensasi">
+<x-layouts.app title="Buat Dispen">
     <x-page-header
         title="Form Pengajuan Dispensasi"
         subtitle="Diajukan oleh guru piket"

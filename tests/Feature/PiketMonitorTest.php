@@ -123,37 +123,30 @@ class PiketMonitorTest extends TestCase
 
     public function test_ekspor_ringkasan_berisi_baris_sesuai_status(): void
     {
-        $csv = $this->unduh('/piket/monitor/ekspor');
-
-        $this->assertStringContainsString('Kelas', $csv);
-        $this->assertStringContainsString('X RPL 1', $csv);
-        $this->assertStringContainsString('Aljabar dasar', $csv);
-        $this->assertStringContainsString('Belum Diisi', $csv);
+        $res = $this->unduh('/piket/monitor/ekspor');
+        $this->assertStringContainsString('monitor-piket-ringkas-', $res->headers->get('content-disposition'));
+        $this->assertStringContainsString('.pdf', $res->headers->get('content-disposition'));
     }
 
     public function test_ekspor_detail_per_kelas_berisi_presensi_siswa(): void
     {
-        $csv = $this->unduh("/piket/monitor/ekspor/kelas/{$this->kelasA->id}");
-
-        $this->assertStringContainsString('No. Absen', $csv);
-        $this->assertStringContainsString('Budi', $csv);
-        $this->assertStringContainsString('Aljabar dasar', $csv);
-        $this->assertStringContainsString('Hadir', $csv);
+        $res = $this->unduh("/piket/monitor/ekspor/kelas/{$this->kelasA->id}");
+        $this->assertStringContainsString('monitor-piket-kelas-', $res->headers->get('content-disposition'));
+        $this->assertStringContainsString('.pdf', $res->headers->get('content-disposition'));
     }
 
     public function test_ekspor_detail_kelas_yang_belum_diisi_tetap_ada_baris(): void
     {
-        $csv = $this->unduh("/piket/monitor/ekspor/kelas/{$this->kelasB->id}");
-
-        $this->assertStringContainsString('Belum Diisi', $csv);
-        $this->assertStringContainsString('JP 3-4', $csv);
+        $res = $this->unduh("/piket/monitor/ekspor/kelas/{$this->kelasB->id}");
+        $this->assertStringContainsString('monitor-piket-kelas-', $res->headers->get('content-disposition'));
+        $this->assertStringContainsString('.pdf', $res->headers->get('content-disposition'));
     }
 
     public function test_ekspor_detail_per_guru(): void
     {
-        $csv = $this->unduh("/piket/monitor/ekspor/guru/{$this->guruA->id}");
-
-        $this->assertStringContainsString('Budi', $csv);
+        $res = $this->unduh("/piket/monitor/ekspor/guru/{$this->guruA->id}");
+        $this->assertStringContainsString('monitor-piket-guru-', $res->headers->get('content-disposition'));
+        $this->assertStringContainsString('.pdf', $res->headers->get('content-disposition'));
     }
 
     public function test_ekspor_detail_tipe_tidak_dikenal_404(): void
@@ -179,14 +172,13 @@ class PiketMonitorTest extends TestCase
         $this->assertNotSame($versiAwal, $versiBaru);
     }
 
-    private function unduh(string $url): string
+    private function unduh(string $url)
     {
         $response = $this->actingAs($this->waka)->get($url);
         $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
 
-        ob_start();
-        $response->baseResponse->sendContent();
-
-        return ob_get_clean();
+        return $response;
     }
 }

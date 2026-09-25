@@ -121,24 +121,9 @@
          ditampilkan lagi sama sekali di sini. Badge piket (kalau ada) tetap
          ditampilkan, cukup lewat div ringkas -- nggak perlu x-page-header
          lagi kalau nggak ada judul yang mau ditampilkan. --}}
-    @if ($piketHariIni)
-        {{-- "Sampai jam berapa" eksplisit ditulis (bukan cuma "Petugas Piket
-             Hari Ini" doang) -- guru piket paling sering nanya itu duluan.
-             Piket sendiri nggak punya jam di data (berlaku 1 hari penuh),
-             jadi dipakein jam pulang sekolah (JP terakhir hari ini) yang
-             paling representatif buat "sampai kapan". --}}
-        <div class="mb-4 flex justify-end">
-            <span class="flex items-center gap-1.5 rounded-full bg-hadir-soft px-3 py-1 text-xs font-bold text-hadir">
-                <span class="flex h-2 w-2 rounded-full bg-hadir animate-pulse"></span>
-                Petugas Piket Hari Ini
-                @if ($jpTerakhirHariIni)
-                    <span class="font-semibold opacity-80">· Sampai {{ $jpTerakhirHariIni->selesai->format('H:i') }}</span>
-                @endif
-            </span>
-        </div>
+    @if (! $piketHariIni)
+        <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
     @endif
-
-    <x-ui.jam-sekarang :jp-sekarang="\App\Support\Waktu::jpAktifSekarang()" />
 
     @if ($tampilkanPilihanAwal)
         <dialog id="modal-pilihan-awal"
@@ -233,7 +218,7 @@
                     <x-icon name="add_circle" :size="24" />
                 </span>
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-ink">Ajukan Dispensasi</p>
+                    <p class="text-sm font-bold text-ink">Buat Dispen</p>
                     <p class="truncate text-xs text-muted">Izin keluar siswa / lomba</p>
                 </div>
                 <x-icon name="chevron_right" :size="20" class="shrink-0 text-muted" />
@@ -245,7 +230,7 @@
                 </span>
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-bold text-ink">Unduh Rekap</p>
-                    <p class="truncate text-xs text-muted">Ekspor CSV rekap piket hari ini</p>
+                    <p class="truncate text-xs text-muted">Ekspor PDF rekap piket hari ini</p>
                 </div>
                 <x-icon name="chevron_right" :size="20" class="shrink-0 text-muted" />
             </a>
