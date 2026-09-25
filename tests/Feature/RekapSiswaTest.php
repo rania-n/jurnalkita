@@ -66,19 +66,16 @@ class RekapSiswaTest extends TestCase
         $this->actingAs($guru)->get('/rekap/siswa')->assertRedirect(route('guru.dashboard'));
     }
 
-    public function test_ekspor_csv(): void
+    public function test_ekspor_pdf(): void
     {
         $waka = User::factory()->role('waka')->create();
 
         $response = $this->actingAs($waka)->get('/rekap/siswa/ekspor');
         $response->assertOk();
-
-        ob_start();
-        $response->baseResponse->sendContent();
-        $csv = ob_get_clean();
-
-        $this->assertStringContainsString('Budi', $csv);
-        $this->assertStringContainsString('X RPL 1', $csv);
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
+        $this->assertStringContainsString('rekap-kehadiran-siswa-', $response->headers->get('content-disposition'));
+        $this->assertStringContainsString('.pdf', $response->headers->get('content-disposition'));
     }
 
     public function test_filter_kelas(): void

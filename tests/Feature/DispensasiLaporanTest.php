@@ -109,19 +109,19 @@ class DispensasiLaporanTest extends TestCase
         $response = $this->actingAs($this->piket)->get('/dispensasi');
         $response->assertOk()->assertSee('Budi')->assertSee('Sinta');
 
-        $csv = $this->streamedCsv($this->piket);
-        $this->assertStringContainsString('Budi', $csv);
-        $this->assertStringContainsString('Sinta', $csv);
+        $res = $this->actingAs($this->piket)->get('/dispensasi/ekspor');
+        $res->assertOk();
+        $res->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $res->getContent());
     }
 
     public function test_waka_ekspor_berisi_semua_baris_sesuai_filter(): void
     {
-        $csv = $this->streamedCsv($this->waka);
-
-        $this->assertStringContainsString('Tanggal', $csv);
-        $this->assertStringContainsString('Nama Siswa', $csv);
-        $this->assertStringContainsString('Budi', $csv);
-        $this->assertStringContainsString('Sinta', $csv);
+        $res = $this->actingAs($this->waka)->get('/dispensasi/ekspor');
+        $res->assertOk();
+        $res->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $res->getContent());
+        $this->assertStringContainsString('.pdf', $res->headers->get('content-disposition'));
     }
 
     public function test_guru_bukan_piket_tidak_bisa_ekspor(): void
@@ -134,20 +134,9 @@ class DispensasiLaporanTest extends TestCase
 
     public function test_ekspor_tercatat_di_audit_log(): void
     {
-        $this->streamedCsv($this->waka);
+        $res = $this->actingAs($this->waka)->get('/dispensasi/ekspor');
+        $res->assertOk();
 
         $this->assertDatabaseHas('audit_logs', ['aksi' => 'Ekspor Laporan Dispensasi']);
-    }
-
-    /** Ambil isi CSV dari StreamedResponse (testResponse tidak bisa getContent() langsung). */
-    private function streamedCsv(User $user): string
-    {
-        $response = $this->actingAs($user)->get('/dispensasi/ekspor');
-        $response->assertOk();
-
-        ob_start();
-        $response->baseResponse->sendContent();
-
-        return ob_get_clean();
     }
 }

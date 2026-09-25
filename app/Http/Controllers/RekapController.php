@@ -7,10 +7,10 @@ use App\Models\AuditLog;
 use App\Models\CatatanTerlambat;
 use App\Models\Kelas;
 use App\Models\Siswa;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Response;
 use Illuminate\View\View;
 
 /**
@@ -42,21 +42,40 @@ class RekapController extends Controller
 
         AuditLog::catat('Ekspor Rekap Siswa', "Ekspor rekap kehadiran siswa {$dari->toDateString()} s/d {$sampai->toDateString()}");
 
-        return Response::streamDownload(function () use ($siswas, $rekap, $terlambat) {
-            $out = fopen('php://output', 'w');
-            fputcsv($out, ['Kelas', 'No. Absen', 'Nama', 'NIS', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi', 'Terlambat']);
+        $daftar = [];
+        foreach ($siswas as $s) {
+            $r = $rekap[$s->id] ?? collect();
+            $daftar[] = [
+                'kelas' => $s->kelas?->nama ?? '-',
+                'no_absen' => $s->no_absen ?? '-',
+                'nama' => $s->nama,
+                'nis' => $s->nis,
+                'hadir' => $r['hadir'] ?? 0,
+                'sakit' => $r['sakit'] ?? 0,
+                'izin' => $r['izin'] ?? 0,
+                'alpha' => $r['alpha'] ?? 0,
+                'dispensasi' => $r['dispensasi'] ?? 0,
+                'terlambat' => $terlambat[$s->id] ?? 0,
+            ];
+        }
 
-            foreach ($siswas as $s) {
-                $r = $rekap[$s->id] ?? collect();
-                fputcsv($out, [
-                    $s->kelas?->nama ?? '-', $s->no_absen ?? '-', $s->nama, $s->nis,
-                    $r['hadir'] ?? 0, $r['sakit'] ?? 0, $r['izin'] ?? 0, $r['alpha'] ?? 0, $r['dispensasi'] ?? 0,
-                    $terlambat[$s->id] ?? 0,
-                ]);
+        $kelasNama = 'Semua Kelas';
+        if ($request->filled('kelas_id')) {
+            $k = Kelas::find($request->kelas_id);
+            if ($k) {
+                $kelasNama = $k->nama;
             }
+        }
 
-            fclose($out);
-        }, 'rekap-kehadiran-siswa-'.$dari->toDateString().'-sd-'.$sampai->toDateString().'.csv', ['Content-Type' => 'text/csv']);
+        $pdf = Pdf::loadView('pdf.rekap-kehadiran-siswa', [
+            'judul' => 'Rekap Kehadiran Siswa',
+            'dari' => $dari,
+            'sampai' => $sampai,
+            'kelasNama' => $kelasNama,
+            'daftar' => $daftar,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('rekap-kehadiran-siswa-'.$dari->toDateString().'-sd-'.$sampai->toDateString().'.pdf');
     }
 
     /** @return array{0: Carbon, 1: Carbon, 2: Collection, 3: Collection, 4: Collection} */
