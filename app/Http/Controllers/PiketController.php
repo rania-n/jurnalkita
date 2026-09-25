@@ -10,13 +10,13 @@ use App\Models\Kelas;
 use App\Models\PresensiPiket;
 use App\Models\Siswa;
 use App\Support\Versi;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -172,20 +172,34 @@ class PiketController extends Controller
 
         AuditLog::catat('Ekspor Ringkasan Piket', "Ekspor ringkas monitor piket {$tanggal->toDateString()} ({$baris->count()} baris)");
 
-        return Response::streamDownload(function () use ($baris) {
-            $out = fopen('php://output', 'w');
-            fputcsv($out, ['Tanggal', 'Jam', 'Kelas', 'Mata Pelajaran', 'Guru', 'Status', 'Materi']);
+        $totalHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'hadir') && ! str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
+        $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
+        $totalBelumDiisi = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'belum'))->count();
 
-            foreach ($baris as $b) {
-                fputcsv($out, [
-                    $b['tanggal'], "JP {$b['jadwal']->jam_ke_mulai}-{$b['jadwal']->jam_ke_selesai}",
-                    $b['jadwal']->kelas->nama, $b['jadwal']->mapel->nama, $b['jadwal']->guru->nama,
-                    $b['statusLabel'], $b['jurnal']->materi ?? '-',
-                ]);
-            }
+        $rows = $baris->map(function ($b) {
+            return [
+                'tanggal' => $b['tanggal'],
+                'jamKe' => "{$b['jadwal']->jam_ke_mulai}-{$b['jadwal']->jam_ke_selesai}",
+                'kelas' => $b['jadwal']->kelas->nama,
+                'mapel' => $b['jadwal']->mapel->nama,
+                'guru' => $b['jadwal']->guru->nama,
+                'statusLabel' => $b['statusLabel'],
+                'materi' => $b['jurnal']->materi ?? '-',
+            ];
+        })->values()->all();
 
-            fclose($out);
-        }, 'monitor-piket-ringkas-'.$tanggal->toDateString().'.csv', ['Content-Type' => 'text/csv']);
+        $pdf = Pdf::loadView('pdf.monitor-piket-ringkas', [
+            'judul' => 'Laporan Ringkasan Monitor Piket',
+            'tanggal' => $tanggal,
+            'rekap' => [
+                'baris' => $rows,
+                'totalHadir' => $totalHadir,
+                'totalTidakHadir' => $totalTidakHadir,
+                'totalBelumDiisi' => $totalBelumDiisi,
+            ],
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('monitor-piket-ringkas-'.$tanggal->toDateString().'.pdf');
     }
 
     /**
@@ -205,44 +219,77 @@ class PiketController extends Controller
         abort_if($baris->isEmpty(), 404);
 
         $label = $tipe === 'guru' ? $baris->first()['jadwal']->guru->nama : $baris->first()['jadwal']->kelas->nama;
-        $kolomLawan = $tipe === 'guru' ? 'Kelas' : 'Guru';
 
         AuditLog::catat('Ekspor Detail Piket', "Ekspor detail monitor piket — {$tipe} {$label}, {$tanggal->toDateString()}");
 
-        return Response::streamDownload(function () use ($baris, $tipe) {
-            $out = fopen('php://output', 'w');
-            fputcsv($out, ['Jam', 'Mata Pelajaran', $tipe === 'guru' ? 'Kelas' : 'Guru', 'Status Guru', 'Materi', 'Metode', 'No. Absen', 'Nama Siswa', 'Status Siswa', 'Catatan Siswa']);
+        $barisData = [];
+        foreach ($baris as $b) {
+            $jadwal = $b['jadwal'];
+            $jam = "JP {$jadwal->jam_ke_mulai}-{$jadwal->jam_ke_selesai}";
+            $lawan = $tipe === 'guru' ? $jadwal->kelas->nama : $jadwal->guru->nama;
 
-            foreach ($baris as $b) {
-                $jadwal = $b['jadwal'];
-                $jam = "JP {$jadwal->jam_ke_mulai}-{$jadwal->jam_ke_selesai}";
-                $lawan = $tipe === 'guru' ? $jadwal->kelas->nama : $jadwal->guru->nama;
+            if (! $b['jurnal']) {
+                $barisData[] = [
+                    'jam' => $jam,
+                    'mapel' => $jadwal->mapel->nama,
+                    'lawan' => $lawan,
+                    'statusGuru' => 'Belum Diisi',
+                    'materi' => '-',
+                    'metode' => '-',
+                    'noAbsen' => '-',
+                    'siswa' => '-',
+                    'statusSiswa' => '-',
+                    'catatanSiswa' => '-',
+                ];
 
-                if (! $b['jurnal']) {
-                    fputcsv($out, [$jam, $jadwal->mapel->nama, $lawan, 'Belum Diisi', '-', '-', '-', '-', '-', '-']);
-
-                    continue;
-                }
-
-                $jurnal = $b['jurnal'];
-                $absensis = $jurnal->absensis->sortBy('siswa.no_absen');
-
-                if ($absensis->isEmpty()) {
-                    fputcsv($out, [$jam, $jadwal->mapel->nama, $lawan, $b['statusLabel'], $jurnal->materi, $jurnal->metode ?? '-', '-', '-', '-', '-']);
-
-                    continue;
-                }
-
-                foreach ($absensis as $a) {
-                    fputcsv($out, [
-                        $jam, $jadwal->mapel->nama, $lawan, $b['statusLabel'], $jurnal->materi, $jurnal->metode ?? '-',
-                        $a->siswa->no_absen ?? '-', $a->siswa->nama, ucfirst($a->status), $a->catatan ?? '-',
-                    ]);
-                }
+                continue;
             }
 
-            fclose($out);
-        }, "monitor-piket-{$tipe}-".Str::slug($label).'-'.$tanggal->toDateString().'.csv', ['Content-Type' => 'text/csv']);
+            $jurnal = $b['jurnal'];
+            $absensis = $jurnal->absensis->sortBy('siswa.no_absen');
+
+            if ($absensis->isEmpty()) {
+                $barisData[] = [
+                    'jam' => $jam,
+                    'mapel' => $jadwal->mapel->nama,
+                    'lawan' => $lawan,
+                    'statusGuru' => $b['statusLabel'],
+                    'materi' => $jurnal->materi,
+                    'metode' => $jurnal->metode ?? '-',
+                    'noAbsen' => '-',
+                    'siswa' => '-',
+                    'statusSiswa' => '-',
+                    'catatanSiswa' => '-',
+                ];
+
+                continue;
+            }
+
+            foreach ($absensis as $a) {
+                $barisData[] = [
+                    'jam' => $jam,
+                    'mapel' => $jadwal->mapel->nama,
+                    'lawan' => $lawan,
+                    'statusGuru' => $b['statusLabel'],
+                    'materi' => $jurnal->materi,
+                    'metode' => $jurnal->metode ?? '-',
+                    'noAbsen' => $a->siswa->no_absen ?? '-',
+                    'siswa' => $a->siswa->nama,
+                    'statusSiswa' => ucfirst($a->status),
+                    'catatanSiswa' => $a->catatan ?? '-',
+                ];
+            }
+        }
+
+        $pdf = Pdf::loadView('pdf.monitor-piket-detail', [
+            'judul' => "Laporan Detail Monitor Piket - {$label}",
+            'tanggal' => $tanggal,
+            'tipe' => $tipe,
+            'targetNama' => $label,
+            'baris' => $barisData,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download("monitor-piket-{$tipe}-".Str::slug($label).'-'.$tanggal->toDateString().'.pdf');
     }
 
     /**

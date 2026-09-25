@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Guru;
 use App\Models\JadwalPiket;
+use App\Models\JamPelajaran;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -76,14 +77,16 @@ class NavigasiGuruPiketTest extends TestCase
     {
         $this->travelTo(Carbon::parse('next monday 08:00'));
 
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 10, 'mulai' => '14:55', 'selesai' => '15:35']);
+
         $guru = User::factory()->role('guru')->create();
-        $g = Guru::create(['user_id' => $guru->id, 'nama' => 'Guru Piket']);
+        $g = Guru::create(['user_id' => $guru->id, 'nama' => 'Guru Pengajar']);
         JadwalPiket::create(['guru_id' => $g->id, 'hari' => 'senin']);
 
-        $this->actingAs($guru)->get('/guru')->assertOk()->assertSee('Guru Piket');
+        $this->actingAs($guru)->get('/guru')->assertOk()->assertSee('Bertugas Piket s/d 15.35');
 
         JadwalPiket::query()->update(['hari' => 'rabu']); // pindah, bukan hari ini lagi
-        $this->actingAs($guru)->get('/guru')->assertOk()->assertDontSee('Guru Piket');
+        $this->actingAs($guru)->get('/guru')->assertOk()->assertDontSee('Bertugas Piket');
     }
 
     public function test_akses_fitur_dispensasi_tetap_kebuka_walau_bukan_hari_piketnya(): void
@@ -98,5 +101,22 @@ class NavigasiGuruPiketTest extends TestCase
         // isPiket() (permanen) yang dipakai buat akses, bukan piketHariIni() (cuma nav).
         $this->actingAs($guru)->get('/dispensasi-ajukan/baru')->assertOk();
         $this->actingAs($guru)->get('/dispensasi')->assertOk();
+    }
+
+    public function test_sticky_bar_waktu_muncul_di_semua_halaman_guru_piket(): void
+    {
+        $this->travelTo(Carbon::parse('next monday 08:00'));
+
+        $guru = User::factory()->role('guru')->create();
+        $g = Guru::create(['user_id' => $guru->id, 'nama' => 'Guru Piket']);
+        JadwalPiket::create(['guru_id' => $g->id, 'hari' => 'senin']);
+
+        // Bar sticky waktu nempel di bawah header di semua halaman guru piket
+        foreach (['/guru', '/guru/jadwal', '/piket/monitor', '/dispensasi', '/profil'] as $url) {
+            $this->actingAs($guru)->get($url)
+                ->assertOk()
+                ->assertSee('data-jam-sekarang', false)
+                ->assertSee('Bertugas Piket');
+        }
     }
 }

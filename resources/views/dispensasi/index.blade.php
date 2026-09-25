@@ -46,7 +46,7 @@
                     <a href="{{ route('dispensasi.create') }}"
                        class="press inline-flex h-7 w-full shrink-0 items-center justify-center gap-1 rounded-md bg-navy px-2.5 text-xs font-semibold text-card hover:bg-navy-hover sm:w-auto">
                         <x-icon name="add" :size="13" class="shrink-0" />
-                        Ajukan Dispensasi
+                        Buat Dispen
                     </a>
                 @endif
             </x-slot:action>
@@ -65,7 +65,7 @@
                     <a href="{{ route('dispensasi.create') }}"
                        class="press inline-flex h-7 w-full shrink-0 items-center justify-center gap-1 rounded-md bg-navy px-2.5 text-xs font-semibold text-card hover:bg-navy-hover">
                         <x-icon name="add" :size="13" class="shrink-0" />
-                        Ajukan Dispensasi
+                        Buat Dispen
                     </a>
                 @endif
             </div>

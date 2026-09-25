@@ -12,12 +12,11 @@ use App\Notifications\DispensasiDiputuskan;
 use App\Notifications\SiswaDispensasiDiKelasAnda;
 use App\Support\Versi;
 use App\Support\WaLink;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DispensasiController extends Controller
@@ -140,39 +139,38 @@ class DispensasiController extends Controller
         return response()->json(['versi' => Versi::dari(Dispensasi::where('status_piket', 'approved'))]);
     }
 
-    /** Ekspor laporan dispensasi (kegiatan piket) sebagai CSV, ikut filter yang sedang aktif. */
+    /** Ekspor laporan dispensasi (kegiatan piket) sebagai PDF, ikut filter yang sedang aktif. */
     public function ekspor(Request $request)
     {
         $this->pastikanBolehLihat();
 
         $rows = $this->terfilter($request)->get();
 
-        $namaFile = 'laporan-dispensasi-'.now()->format('Y-m-d_His').'.csv';
+        $namaFile = 'laporan-dispensasi-'.now()->format('Y-m-d_His').'.pdf';
 
         AuditLog::catat('Ekspor Laporan Dispensasi', "Ekspor laporan dispensasi ({$rows->count()} baris)");
 
-        return Response::streamDownload(function () use ($rows) {
-            $out = fopen('php://output', 'w');
-            fputcsv($out, ['Tanggal', 'Nama Siswa', 'Kelas', 'Jam', 'Alasan', 'Diajukan Oleh (Piket)', 'Status Piket', 'Status Waka', 'Status Akhir', 'Catatan Waka', 'Bukti']);
-
-            foreach ($rows as $d) {
-                fputcsv($out, [
-                    $d->tanggal->format('Y-m-d').($d->multiHari() ? ' s/d '.$d->tanggal_selesai->format('Y-m-d') : ''),
-                    $d->siswa->nama,
-                    $d->siswa->kelas?->nama ?? '-',
-                    $d->labelJam(),
-                    $d->alasan,
-                    $d->pengaju->name,
-                    $d->status_piket,
-                    $d->status_waka,
-                    $d->status_akhir,
-                    $d->catatan_waka ?? '-',
-                    $d->surat_path ? url(Storage::url($d->surat_path)) : 'Tidak ada',
-                ]);
+        $filterInfo = [];
+        if ($request->filled('status')) {
+            $filterInfo[] = 'Status: '.ucfirst($request->status);
+        }
+        if ($request->filled('kelas_id')) {
+            $kelas = Kelas::find($request->kelas_id);
+            if ($kelas) {
+                $filterInfo[] = 'Kelas: '.$kelas->nama;
             }
+        }
+        if ($request->filled('tanggal')) {
+            $filterInfo[] = 'Tanggal: '.$request->tanggal;
+        }
 
-            fclose($out);
-        }, $namaFile, ['Content-Type' => 'text/csv']);
+        $pdf = Pdf::loadView('pdf.laporan-dispensasi', [
+            'judul' => 'Laporan Dispensasi Siswa',
+            'daftar' => $rows,
+            'filterInfo' => implode(' | ', $filterInfo),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($namaFile);
     }
 
     public function create(): View
