@@ -501,7 +501,20 @@ function initCariSiswa() {
  */
 function initCariPilihan() {
     document.querySelectorAll('[data-cari-pilihan]').forEach((wrap) => {
-        const data = JSON.parse(wrap.dataset.list || '[]');
+        // Guard -- fungsi ini kepanggil lagi tiap kali ada baris baru
+        // ditambah secara dinamis (mis. "+ Tambah Jeda" di Jam Pelajaran),
+        // biar wrap yang BARU ikut ke-wire. Tanpa guard ini, wrap yang UDAH
+        // pernah di-init bakal kepasangin listener DOBEL tiap kali dipanggil
+        // ulang (submit ganda, hasil render dobel, dll).
+        if (wrap.dataset.cariPilihanReady) return;
+        wrap.dataset.cariPilihanReady = '1';
+
+        // Data dibaca ULANG dari data-list tiap kali dipakai (bukan disimpan
+        // sekali di closure) -- biar caller bisa update pilihan yang
+        // tersedia belakangan (mis. opsi "Setelah JP" ngikut Jumlah JP yang
+        // baru diubah) cukup dengan ganti atribut data-list-nya, tanpa perlu
+        // init ulang.
+        const dataSekarang = () => JSON.parse(wrap.dataset.list || '[]');
         const input = wrap.querySelector('[data-cari-pilihan-input]');
         const hidden = wrap.querySelector('[data-cari-pilihan-value]');
         const hasil = wrap.querySelector('[data-cari-pilihan-hasil]');
@@ -544,19 +557,20 @@ function initCariPilihan() {
             if (tombolClear) tombolClear.hidden = true;
 
             const q = input.value.trim().toLowerCase();
+            const data = dataSekarang();
             const cocok = q ? data.filter((s) => s.nama.toLowerCase().includes(q)) : data;
             render(cocok);
             hasil.hidden = false;
         });
 
         input.addEventListener('focus', () => {
-            if (!hidden.value) { render(data); hasil.hidden = false; }
+            if (!hidden.value) { render(dataSekarang()); hasil.hidden = false; }
         });
 
         daftar.addEventListener('click', (e) => {
             const btn = e.target.closest('[data-id]');
             if (!btn) return;
-            const s = data.find((x) => String(x.id) === btn.dataset.id);
+            const s = dataSekarang().find((x) => String(x.id) === btn.dataset.id);
             if (s) pilih(s);
         });
 
@@ -592,6 +606,17 @@ function initCariCheckbox() {
         });
     });
 }
+
+// Diekspos ke window -- app.js ini di-load sebagai <script type="module">,
+// jadi function di dalamnya nggak otomatis kepanggil dari <script> biasa di
+// halaman (mis. @push('scripts') per-halaman). initCariPilihan() SENGAJA
+// diekspos (bukan yang lain) karena ini satu-satunya yang perlu dipanggil
+// ULANG dari luar -- pas ada baris baru ditambah lewat JS halaman (mis.
+// "+ Tambah Jeda" di Jam Pelajaran) yang isinya x-ui.cari-pilihan, baris
+// itu perlu di-wire manual karena nggak ada pas DOMContentLoaded tadi.
+// Aman dipanggil berkali-kali -- ada guard dataset.cariPilihanReady di
+// dalamnya, jadi yang udah ke-init nggak kepasangin listener dobel.
+window.initCariPilihan = initCariPilihan;
 
 function init() {
     initPasswordToggles();

@@ -15,41 +15,49 @@ use Illuminate\Validation\Rule;
 
 class JamPelajaranController extends Controller
 {
-    /** Simpan ulang seluruh baris untuk satu kategori (editor multi-baris). */
+    /**
+     * Simpan ulang seluruh baris untuk satu kategori (editor multi-baris,
+     * mode "Manual" di modal Jam Pelajaran). Kategori BOLEH nama baru (admin
+     * ketik bebas, mis. "Ramadhan") atau kategori yang udah ada -- satu field
+     * "kategori" doang, nggak ada lagi field kategori_baru terpisah (dulu
+     * modal Edit & Kategori Baru itu 2 modal beda, sekarang udah digabung
+     * jadi 1 modal Jam Pelajaran, jadi nggak perlu bedain lagi mana yang
+     * "baru" mana yang "sudah ada" -- selalu di-upsert berdasarkan nama).
+     */
     public function save(Request $request): RedirectResponse
     {
-        // Bag beda tergantung modal yang disubmit (dibedain dari ada/nggaknya
-        // kategori_baru) -- 2 modal (Edit & Kategori Baru) share route ini, kalau
-        // pakai bag default gagal validasi di satu modal ikut mbukain modal lain.
-        $bag = $request->filled('kategori_baru') ? 'jpBaru' : 'jpEdit';
-
-        $data = $request->validateWithBag($bag, [
-            // Bukan enum lagi -- boleh kategori baru (mis. "Ramadhan", "Ujian"), bukan
-            // cuma senin_kamis/jumat/khusus bawaan. Salah satu wajib: kategori (pilih yang
-            // sudah ada) atau kategori_baru (ketik nama baru, lihat modal "Kategori Baru").
-            'kategori' => ['required_without:kategori_baru', 'nullable', 'string', 'max:50'],
-            'kategori_baru' => ['required_without:kategori', 'nullable', 'string', 'max:50'],
+        $data = $request->validate([
+            'kategori' => ['required', 'string', 'max:50'],
             'mulai' => ['required', 'array', 'min:1'],
             'mulai.*' => ['required', 'date_format:H:i'],
             'selesai' => ['required', 'array'],
             'selesai.*' => ['required', 'date_format:H:i'],
             'keterangan' => ['nullable', 'array'],
             'keterangan.*' => ['nullable', 'string', 'max:100'],
+            // Jeda per baris -- checkbox "Ada jeda sebelum baris ini" di view
+            // ngirim jeda_menit[i] cuma kalau dicentang (lihat syncJeda() di
+            // JS), jadi array-nya bisa "bolong" (nggak semua index keisi).
+            'jeda_menit' => ['nullable', 'array'],
+            'jeda_menit.*' => ['nullable', 'integer', 'min:1', 'max:180'],
+            'jeda_label' => ['nullable', 'array'],
+            'jeda_label.*' => ['nullable', 'string', 'max:40'],
         ]);
 
-        // Kategori baru ditulis manual admin (mis. "Ramadhan") -> disimpan sebagai slug
-        // rapi (huruf kecil, spasi jadi underscore) supaya konsisten dipakai balik.
-        if ($request->filled('kategori_baru')) {
-            $data['kategori'] = Str::slug($request->string('kategori_baru'), '_');
-        }
+        // Slug rapi (huruf kecil, spasi jadi underscore) -- konsisten dipakai
+        // balik sebagai key kategori, idempotent kalau kategorinya emang
+        // udah slug (edit kategori yang sudah ada nggak berubah apa-apa).
+        $data['kategori'] = Str::slug($data['kategori'], '_');
 
         $baris = [];
         foreach (array_values($data['mulai']) as $i => $mulai) {
+            $jedaMenit = $data['jeda_menit'][$i] ?? null;
             $baris[] = [
                 'jam_ke' => $i + 1,
                 'mulai' => $mulai,
                 'selesai' => $data['selesai'][$i] ?? $mulai,
                 'keterangan' => $data['keterangan'][$i] ?? null,
+                'jeda_sebelum_menit' => $jedaMenit,
+                'jeda_label' => $jedaMenit ? (trim($data['jeda_label'][$i] ?? '') ?: 'Jeda') : null,
             ];
         }
 
@@ -74,6 +82,29 @@ class JamPelajaranController extends Controller
             'jeda.*.label' => ['nullable', 'string', 'max:40'],
         ]);
 
+        // Slug rapi -- samain sama save(), biar kategori yang sama ditulis beda
+        // kapital/spasi (mis. "Bulan Ramadhan" vs "bulan_ramadhan") tetap
+        // dianggap kategori yang sama persis, nggak kebentuk 2 kategori beda.
+        $data['kategori'] = Str::slug($data['kategori'], '_');
+
+        // request()->validate() TIDAK nge-cast tipe -- 'integer' cuma ngecek
+        // isinya angka, hasilnya tetap STRING kayak dari form. Carbon versi
+        // ini nolak string di addMinutes() (dulu 500 error "Argument #3 must
+        // be int|float, string given"), jadi di-cast eksplisit ke int di sini.
+        // "?? []" di foreach-by-reference SENGAJA dihindari -- operator "??"
+        // selalu ngasih hasil BY VALUE (salinan), bukan referensi ke array
+        // aslinya, jadi &$ref di situ ngubah salinan doang, $data['jeda'] asli
+        // nggak ikut ke-cast (kejadian beneran, ketauan dari test).
+        $data['durasi_jp'] = (int) $data['durasi_jp'];
+        $data['jumlah_jp'] = (int) $data['jumlah_jp'];
+        if (! empty($data['jeda'])) {
+            foreach ($data['jeda'] as &$slotJedaRef) {
+                $slotJedaRef['durasi'] = (int) $slotJedaRef['durasi'];
+                $slotJedaRef['setelah'] = (int) $slotJedaRef['setelah'];
+            }
+            unset($slotJedaRef);
+        }
+
         foreach ($data['jeda'] ?? [] as $slotJeda) {
             if ($slotJeda['setelah'] >= $data['jumlah_jp']) {
                 return back()->withErrors(['jeda' => 'Jeda harus ditempatkan di antara jam pelajaran, bukan setelah JP terakhir.'])->withInput();
@@ -97,9 +128,8 @@ class JamPelajaranController extends Controller
                 'jam_ke' => $jamKe,
                 'mulai' => $mulai->format('H:i'),
                 'selesai' => $selesai->format('H:i'),
-                'keterangan' => $jedaSebelum
-                    ? ($labelJeda !== '' ? $labelJeda : 'Jeda').' ('.$jedaSebelum['durasi'].' menit)'
-                    : null,
+                'jeda_sebelum_menit' => $jedaSebelum['durasi'] ?? null,
+                'jeda_label' => $jedaSebelum ? ($labelJeda !== '' ? $labelJeda : 'Jeda') : null,
             ];
 
             $waktu = $selesai;
@@ -150,16 +180,38 @@ class JamPelajaranController extends Controller
         ]);
         $jpBaru = $baris->slice($data['jumlah_jp'])->values();
 
-        DB::transaction(function () use ($baris, $jpBaru, $jadwals, $jadwalSnapshot, $data) {
+        // Jam-nya (bukan cuma nomor JP-nya) ikut dipadetin maju, ngisi slot yang
+        // kosong ditinggal JP yang dihapus -- durasi tiap baris TETAP sama
+        // persis, cuma jam mulainya yang maju. KECUALI baris yang emang punya
+        // jeda sebelumnya (jeda_sebelum_menit keisi) -- jam-nya SENGAJA dikunci
+        // di posisi asli, nggak ikut dipadetin, karena istirahat terikat jam
+        // beneran (mis. jam makan), bukan urutan pelajaran. Baris-baris
+        // SETELAH jeda itu lanjut dipadetin lagi dari situ.
+        $cursor = $jpBaru->isNotEmpty() ? $baris->first()->mulai->copy() : null;
+        $jpBaruDenganJam = $jpBaru->map(function (JamPelajaran $jp) use (&$cursor) {
+            $durasiMenit = $jp->mulai->diffInMinutes($jp->selesai);
+            if ($jp->jeda_sebelum_menit) {
+                $cursor = $jp->mulai->copy();
+            }
+            $mulaiBaru = $cursor->copy();
+            $selesaiBaru = $mulaiBaru->copy()->addMinutes($durasiMenit);
+            $cursor = $selesaiBaru->copy();
+
+            return ['jp' => $jp, 'mulai' => $mulaiBaru->format('H:i'), 'selesai' => $selesaiBaru->format('H:i')];
+        });
+
+        DB::transaction(function () use ($baris, $jpBaruDenganJam, $jadwals, $jadwalSnapshot, $data) {
             $this->simpanSnapshot($data['kategori'], $baris, $jadwalSnapshot);
             JamPelajaran::where('kategori', $data['kategori'])->delete();
-            foreach ($jpBaru as $jp) {
+            foreach ($jpBaruDenganJam as $i => $baru) {
                 JamPelajaran::create([
                     'kategori' => $data['kategori'],
-                    'jam_ke' => $jp->jam_ke - $data['jumlah_jp'],
-                    'mulai' => $jp->mulai,
-                    'selesai' => $jp->selesai,
-                    'keterangan' => $jp->keterangan,
+                    'jam_ke' => $i + 1,
+                    'mulai' => $baru['mulai'],
+                    'selesai' => $baru['selesai'],
+                    'keterangan' => $baru['jp']->keterangan,
+                    'jeda_sebelum_menit' => $baru['jp']->jeda_sebelum_menit,
+                    'jeda_label' => $baru['jp']->jeda_label,
                 ]);
             }
 
@@ -174,7 +226,7 @@ class JamPelajaranController extends Controller
         AuditLog::catat('Majukan Jam Pelajaran', "Majukan kategori {$data['kategori']} dan {$jadwals->count()} jadwal kelas sebanyak {$data['jumlah_jp']} JP.");
 
         return redirect()->route('master.jam-pelajaran.index', ['set' => $data['kategori']])
-            ->with('success', "JP dan {$jadwals->count()} jadwal kelas dimajukan {$data['jumlah_jp']} JP. Slot terakhir kini tidak digunakan.");
+            ->with('success', "JP dan {$jadwals->count()} jadwal kelas dimajukan {$data['jumlah_jp']} JP -- jamnya ikut maju ngisi slot kosong (istirahat tetap di jam aslinya). Slot nomor terakhir kini tidak digunakan.");
     }
 
     public function resetSebelumnya(Request $request): RedirectResponse
@@ -203,6 +255,8 @@ class JamPelajaranController extends Controller
                     'mulai' => $jp['mulai'],
                     'selesai' => $jp['selesai'],
                     'keterangan' => $jp['keterangan'] ?? null,
+                    'jeda_sebelum_menit' => $jp['jeda_sebelum_menit'] ?? null,
+                    'jeda_label' => $jp['jeda_label'] ?? null,
                 ]);
             }
             foreach ($jadwalSebelumnya as $jadwal) {
@@ -221,21 +275,29 @@ class JamPelajaranController extends Controller
             ->with('success', 'Jadwal sebelumnya berhasil dipulihkan.');
     }
 
+    /**
+     * Simpan hari sekolah mana aja yang pakai kategori JP ini. Dulu cuma bisa
+     * pilih 1 dari 2 "kelompok" (Senin-Kamis / Jumat) yang dipaksa dari kode,
+     * padahal tabel jam_pelajaran_hari aslinya udah per-hari -- sekarang admin
+     * bebas centang kombinasi hari apa aja (termasuk cuma 1 hari, atau semua).
+     * Hari yang DICENTANG dipindah ke kategori ini (walau sebelumnya kepake
+     * kategori lain); hari yang sebelumnya kategori ini tapi nggak dicentang
+     * lagi jadi bebas (dihapus dari tabel, bisa dipakai kategori lain).
+     */
     public function simpanKategoriHari(Request $request): RedirectResponse
     {
         $kategoriValid = JamPelajaran::query()->select('kategori')->distinct()->pluck('kategori')->all();
         $data = $request->validate([
             'kategori' => ['required', 'string', Rule::in($kategoriValid)],
-            'kelompok_hari' => ['required', 'in:senin_kamis,jumat'],
+            'hari' => ['nullable', 'array'],
+            'hari.*' => ['string', 'in:senin,selasa,rabu,kamis,jumat'],
             'set' => ['nullable', 'string', 'max:50'],
         ]);
+        $hariDipilih = $data['hari'] ?? [];
 
-        $hariUntukKelompok = $data['kelompok_hari'] === 'jumat'
-            ? ['jumat']
-            : ['senin', 'selasa', 'rabu', 'kamis'];
-
-        DB::transaction(function () use ($hariUntukKelompok, $data) {
-            foreach ($hariUntukKelompok as $hari) {
+        DB::transaction(function () use ($hariDipilih, $data) {
+            DB::table('jam_pelajaran_hari')->where('kategori', $data['kategori'])->delete();
+            foreach ($hariDipilih as $hari) {
                 DB::table('jam_pelajaran_hari')->updateOrInsert(
                     ['hari' => $hari],
                     ['kategori' => $data['kategori'], 'updated_at' => now(), 'created_at' => now()]
@@ -243,13 +305,16 @@ class JamPelajaranController extends Controller
             }
         });
 
-        AuditLog::catat('Atur Kategori JP per Hari', "Gunakan kategori {$data['kategori']} untuk kelompok {$data['kelompok_hari']}.");
+        $pesan = $hariDipilih === []
+            ? 'Kategori ini nggak dipakai hari manapun sekarang.'
+            : 'Hari yang memakai kategori JP ini berhasil disimpan.';
+        AuditLog::catat('Atur Kategori JP per Hari', "Kategori {$data['kategori']} sekarang dipakai hari: ".($hariDipilih ? implode(', ', $hariDipilih) : '(tidak ada)').'.');
 
         return redirect()->route('master.jam-pelajaran.index', ['set' => $data['set'] ?: $data['kategori']])
-            ->with('success', 'Kategori JP berhasil digunakan untuk kelompok hari tersebut.');
+            ->with('success', $pesan);
     }
 
-    /** @param array<int, array{jam_ke: int, mulai: string, selesai: string, keterangan: ?string}> $baris */
+    /** @param array<int, array{jam_ke: int, mulai: string, selesai: string, keterangan: ?string, jeda_sebelum_menit?: ?int, jeda_label?: ?string}> $baris */
     private function gantiBaris(string $kategori, array $baris): void
     {
         DB::transaction(function () use ($kategori, $baris) {
@@ -269,6 +334,8 @@ class JamPelajaranController extends Controller
             'mulai' => $jp->mulai->format('H:i:s'),
             'selesai' => $jp->selesai->format('H:i:s'),
             'keterangan' => $jp->keterangan,
+            'jeda_sebelum_menit' => $jp->jeda_sebelum_menit,
+            'jeda_label' => $jp->jeda_label,
         ])->values()->all();
 
         if ($data !== []) {

@@ -10,7 +10,7 @@ class JamPelajaran extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['jam_ke', 'mulai', 'selesai', 'kategori', 'keterangan'];
+    protected $fillable = ['jam_ke', 'mulai', 'selesai', 'kategori', 'keterangan', 'jeda_sebelum_menit', 'jeda_label'];
 
     protected function casts(): array
     {

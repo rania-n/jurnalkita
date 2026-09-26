@@ -11,6 +11,7 @@ use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class MasterCrudTest extends TestCase
@@ -236,16 +237,20 @@ class MasterCrudTest extends TestCase
 
     public function test_generator_jp_membuat_jam_40_menit_dan_menyisipkan_jeda(): void
     {
+        // Semua nilai SENGAJA dikirim sebagai string (kayak form HTML beneran
+        // -- browser selalu ngirim string, bukan int PHP) -- pernah 500 karena
+        // Carbon::addMinutes() versi ini nolak string, validate() nggak
+        // nge-cast tipe otomatis. Lihat fix-nya di generate().
         $this->actingAs($this->admin())->post('/admin/jam-pelajaran/generate', [
-            'kategori' => 'senin_kamis', 'mulai' => '07:00', 'durasi_jp' => 40, 'jumlah_jp' => 4,
-            'jeda' => [['setelah' => 2, 'durasi' => 20, 'label' => 'MBG']],
+            'kategori' => 'senin_kamis', 'mulai' => '07:00', 'durasi_jp' => '40', 'jumlah_jp' => '4',
+            'jeda' => [['setelah' => '2', 'durasi' => '20', 'label' => 'MBG']],
         ])->assertRedirect(route('master.jam-pelajaran.index', ['set' => 'senin_kamis']))
             ->assertSessionHas('success');
 
         $this->assertSame(4, JamPelajaran::where('kategori', 'senin_kamis')->count());
         $this->assertDatabaseHas('jam_pelajarans', [
             'kategori' => 'senin_kamis', 'jam_ke' => 3, 'mulai' => '08:40', 'selesai' => '09:20',
-            'keterangan' => 'MBG (20 menit)',
+            'jeda_sebelum_menit' => 20, 'jeda_label' => 'MBG',
         ]);
     }
 
@@ -261,23 +266,36 @@ class MasterCrudTest extends TestCase
         $this->assertDatabaseCount('jam_pelajarans', 1);
     }
 
-    public function test_admin_bisa_memajukan_semua_jp_dengan_jeda_tetap(): void
+    /**
+     * Kasus nyata: JP1 "Kegiatan" (07.00-07.40) nggak ada hari itu -> Matematika
+     * yang tadinya JP2 (07.50-08.30, TANPA jeda dari JP1) maju jadi JP1 ngisi
+     * slot 07.00-07.40 -- bukan cuma nomornya doang, jamnya beneran maju.
+     * JP3 yang emang abis istirahat (keterangan "Jeda ...") jam-nya TETAP di
+     * posisi asli (09.10), nggak ikut dipadetin ke jam berapa pun.
+     */
+    public function test_maju_geser_jam_beneran_kecuali_baris_abis_jeda(): void
     {
-        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:40']);
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:40', 'keterangan' => 'Kegiatan']);
         JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '07:50', 'selesai' => '08:30']);
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 3, 'mulai' => '09:10', 'selesai' => '09:50', 'jeda_sebelum_menit' => 20, 'jeda_label' => 'Istirahat']);
+        DB::table('jam_pelajaran_hari')->updateOrInsert(['hari' => 'senin'], ['kategori' => 'senin_kamis', 'updated_at' => now(), 'created_at' => now()]);
 
-        $this->actingAs($this->admin())->post('/admin/jam-pelajaran/geser', [
-            'kategori' => 'senin_kamis', 'arah' => 'maju', 'menit' => 5,
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran/maju', [
+            'kategori' => 'senin_kamis', 'jumlah_jp' => 1,
         ])->assertRedirect()->assertSessionHas('success');
 
-        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '06:55', 'selesai' => '07:35']);
-        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '07:45', 'selesai' => '08:25']);
+        // Matematika (dulu JP2) jadi JP1, ngisi 07.00-07.40 (durasi 40 menit tetap).
+        // JamPelajaran pakai SoftDeletes -- filter whereNull('deleted_at') biar
+        // nggak ketuker sama baris lama yang cuma disoft-delete, bukan beneran hilang.
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:40', 'deleted_at' => null]);
+        // JP abis-jeda (dulu JP3) jadi JP2, jamnya TETAP 09.10 (nggak dipadetin ke 07.40).
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '09:10', 'selesai' => '09:50', 'deleted_at' => null]);
     }
 
     public function test_admin_bisa_tambah_kategori_jam_pelajaran_baru(): void
     {
         $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
-            'kategori_baru' => 'Bulan Ramadhan',
+            'kategori' => 'Bulan Ramadhan',
             'mulai' => ['07:30'], 'selesai' => ['08:00'],
         ])->assertRedirect();
 
@@ -290,7 +308,7 @@ class MasterCrudTest extends TestCase
     public function test_admin_bisa_hapus_kategori_custom(): void
     {
         $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
-            'kategori_baru' => 'Ujian',
+            'kategori' => 'Ujian',
             'mulai' => ['07:30'], 'selesai' => ['08:00'],
         ]);
 
