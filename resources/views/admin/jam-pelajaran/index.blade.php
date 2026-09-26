@@ -36,7 +36,7 @@
     // mana yang error (save() pakai "mulai.0" array, generate() pakai "mulai"
     // tunggal) -- biar admin nggak balik ke mode yang beda dari yang tadi
     // disubmit, errornya jadi kelihatan lagi di tempat yang tepat.
-    $modeAwal = $errors->has('mulai.0') ? 'manual' : 'otomatis';
+    $modeAwal = $errors->getBag('jp')->has('mulai.0') ? 'manual' : 'otomatis';
 
     // Opsi "Jeda setelah JP..." pas render server (baris re-tampil abis gagal
     // validasi) -- JS (syncOpsiJeda) yang ngurus nyesuain ulang pas Jumlah JP
@@ -159,14 +159,6 @@
         </div>
     </section>
 
-    {{-- Bag "default" -- validasi bar hari/Majukan/Reset (nggak pakai bag
-         khusus kayak modal "jp"). Pesan error hasil aksi (mis. "kategori ini
-         belum dipakai") sendiri udah tampil otomatis lewat flash session di
-         layout admin, nggak perlu dicek lagi di sini. --}}
-    @if ($errors->getBag('default')->any())
-        <x-alert type="error" class="mb-4">{{ $errors->getBag('default')->first() }}</x-alert>
-    @endif
-
     @if ($rows->isEmpty())
         <x-ui.empty title="Belum ada konfigurasi jam untuk kategori ini" />
     @else
@@ -207,6 +199,15 @@
          dipakai bareng buat kategori baru maupun yang udah ada (lihat
          data-jp-trigger di tombol atas). --}}
     <x-admin.modal id="modal-jp" size="lg" title="Jam Pelajaran" errorBag="jp">
+        {{-- Beberapa error validasi (mis. "jeda harus ditempatkan di antara
+             jam pelajaran") nggak nempel ke satu field tertentu, jadi nggak
+             ada @error() field yang bisa nampilinnya -- ringkasan generik
+             ini jaring-jaring terakhir biar TETAP kelihatan, bukan cuma
+             modal kebuka lagi tanpa keterangan apa-apa. --}}
+        @if ($errors->getBag('jp')->any())
+            <x-alert type="error" class="mb-4">{{ $errors->getBag('jp')->first() }}</x-alert>
+        @endif
+
         <x-ui.input id="jp-kategori-nama" label="Nama Kategori" placeholder="Contoh: Senin–Kamis, Ramadhan" required class="mb-4" />
 
         <x-ui.choice
@@ -229,9 +230,9 @@
                 Isi JP berurutan dengan durasi standar 40 menit. Tambahkan jeda istirahat atau MBG di antara JP; waktu JP berikutnya otomatis bergeser setelah jeda.
             </x-alert>
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <x-ui.input label="JP pertama mulai" name="mulai" type="time" :value="old('mulai', $rows->first()?->mulai?->format('H:i') ?? '07:00')" required />
-                <x-ui.input label="Durasi tiap JP (menit)" name="durasi_jp" type="number" min="20" max="120" :value="old('durasi_jp', 40)" required />
-                <x-ui.input label="Jumlah JP" name="jumlah_jp" type="number" min="1" max="20" :value="old('jumlah_jp', $rows->count() ?: 10)" required data-jp-jumlah />
+                <x-ui.input label="JP pertama mulai" name="mulai" type="time" :value="old('mulai', $rows->first()?->mulai?->format('H:i') ?? '07:00')" required errorBag="jp" />
+                <x-ui.input label="Durasi tiap JP (menit)" name="durasi_jp" type="number" min="20" max="120" :value="old('durasi_jp', 40)" required errorBag="jp" />
+                <x-ui.input label="Jumlah JP" name="jumlah_jp" type="number" min="1" max="20" :value="old('jumlah_jp', $rows->count() ?: 10)" required data-jp-jumlah errorBag="jp" />
             </div>
 
             <div>
@@ -258,6 +259,7 @@
                                 :value="$jedaLama['setelah'] ?? null"
                                 placeholder="Ketik atau pilih JP..."
                                 required
+                                errorBag="jp"
                                 data-jeda-setelah
                             />
                             <label class="flex flex-col gap-1.5 text-sm font-semibold text-ink">Durasi (menit) <span class="text-alpha" aria-hidden="true">*</span>

@@ -26,7 +26,16 @@ class JamPelajaranController extends Controller
      */
     public function save(Request $request): RedirectResponse
     {
-        $data = $request->validate([
+        // validateWithBag('jp', ...) -- BUKAN validate() polos. Modal ini
+        // (lihat errorBag="jp" di index.blade.php) sengaja dipisah dari bag
+        // "default" biar auto-reopen-nya cuma bereaksi ke gagal validasi
+        // form modal ini sendiri, nggak ikut kebuka gara-gara form LAIN di
+        // halaman yang sama gagal (mis. "Dipakai untuk hari"/Majukan/Reset).
+        // Dulu masih validate() polos -- errornya nyasar ke bag "default",
+        // errorBag="jp" modal nggak pernah ketemu apa-apa, jadi modal SAMA
+        // SEKALI nggak pernah otomatis kebuka lagi pas validasi gagal (bug
+        // beneran, baru ketauan pas ditelusuri kenapa error nggak muncul).
+        $data = $request->validateWithBag('jp', [
             'kategori' => ['required', 'string', 'max:50'],
             'mulai' => ['required', 'array', 'min:1'],
             'mulai.*' => ['required', 'date_format:H:i'],
@@ -71,7 +80,7 @@ class JamPelajaranController extends Controller
 
     public function generate(Request $request): RedirectResponse
     {
-        $data = $request->validate([
+        $data = $request->validateWithBag('jp', [
             'kategori' => ['required', 'string', 'max:50'],
             'mulai' => ['required', 'date_format:H:i'],
             'durasi_jp' => ['required', 'integer', 'min:20', 'max:120'],
@@ -107,7 +116,7 @@ class JamPelajaranController extends Controller
 
         foreach ($data['jeda'] ?? [] as $slotJeda) {
             if ($slotJeda['setelah'] >= $data['jumlah_jp']) {
-                return back()->withErrors(['jeda' => 'Jeda harus ditempatkan di antara jam pelajaran, bukan setelah JP terakhir.'])->withInput();
+                return back()->withErrors(['jeda' => 'Jeda harus ditempatkan di antara jam pelajaran, bukan setelah JP terakhir.'], 'jp')->withInput();
             }
         }
 
@@ -119,7 +128,7 @@ class JamPelajaranController extends Controller
             $mulai = $waktu->copy();
             $selesai = $mulai->copy()->addMinutes($data['durasi_jp']);
             if ($selesai->format('Y-m-d') !== $mulai->format('Y-m-d')) {
-                return back()->withErrors(['mulai' => 'Rentang jam pelajaran melewati tengah malam. Kurangi jumlah JP atau durasi jeda.'])->withInput();
+                return back()->withErrors(['mulai' => 'Rentang jam pelajaran melewati tengah malam. Kurangi jumlah JP atau durasi jeda.'], 'jp')->withInput();
             }
 
             $jedaSebelum = $jedaSetelah->get($jamKe - 1);

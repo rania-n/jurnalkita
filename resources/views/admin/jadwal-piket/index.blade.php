@@ -58,7 +58,11 @@
                             <span class="italic">Berulang tiap minggu</span>
                         @endif
                     </td>
-                    <td class="px-4 py-3 {{ $semua ? 'text-muted' : 'font-semibold text-ink' }}">{{ $p->guru?->nama }}</td>
+                    <td class="px-4 py-3 {{ $semua ? 'text-muted' : 'font-semibold text-ink' }}">
+                        @if ($p->guru)
+                            <a href="{{ route('master.guru.show', $p->guru) }}" class="text-navy hover:underline">{{ $p->guru->nama }}</a>
+                        @endif
+                    </td>
                     <td class="px-4 py-3 text-muted">{{ $p->mulai?->format('H:i') ?? '—' }} – {{ $p->selesai?->format('H:i') ?? '—' }}</td>
                     <td class="px-4 py-3 text-muted">{{ $p->keterangan ?: '—' }}</td>
                     <td class="px-4 py-3">

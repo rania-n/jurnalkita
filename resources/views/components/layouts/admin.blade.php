@@ -161,6 +161,19 @@
                 @endif
             @endforeach
 
+            {{-- Bag "default" -- gagal validasi (mis. hari Waka yang sudah
+                 terisi) SEBELUMNYA nggak kelihatan sama sekali di halaman
+                 admin manapun: form-nya redirect back dengan $errors, tapi
+                 nggak ada satupun yang nampilinnya (cuma flash session
+                 di atas yang ke-render, itu beda mekanisme dari $errors
+                 validasi) -- admin ngerasa submit-nya nggak ngefek tanpa
+                 tau kenapa. Bag khusus (mis. errorBag="jp" di modal Jam
+                 Pelajaran) SENGAJA nggak ikut di sini -- itu bag punya
+                 modal sendiri, biar nggak dobel ditampilin. --}}
+            @if ($errors->getBag('default')->any())
+                <x-alert type="error" class="mb-4">{{ $errors->getBag('default')->first() }}</x-alert>
+            @endif
+
             {{ $slot }}
         </main>
     </div>

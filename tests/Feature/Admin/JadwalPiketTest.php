@@ -161,6 +161,26 @@ class JadwalPiketTest extends TestCase
         $this->assertDatabaseHas('jadwal_pikets', ['guru_id' => $guruLain->id, 'tanggal' => '2026-09-21']);
     }
 
+    /**
+     * Regresi: x-ui.choice dulu cuma nerusin atribut "class" ke elemen
+     * pembungkusnya, jadi data-sesi-piket (dipasang buat dipegang JS
+     * shortcut Pagi/Siang) diam-diam kebuang -- listener-nya nggak pernah
+     * ketemu elemennya, tombol Sesi kelihatan normal tapi nggak ngefek
+     * sama sekali. Baru ketauan pas dites beneran di browser, bukan dari
+     * baca kode doang. Test ini cuma mastiin atributnya beneran nyampe ke
+     * HTML (bukan test JS-nya, itu udah dicek manual lewat browser).
+     */
+    public function test_atribut_data_sesi_piket_beneran_kerender_di_html(): void
+    {
+        // Cek pola ATRIBUT HTML-nya persis (bukan cuma teks "data-sesi-piket"
+        // di mana pun) -- string itu SELALU ada di <script> sebagai bagian
+        // dari selector JS-nya walau atributnya sendiri gagal kerender, jadi
+        // assertSee biasa nggak bakal nangkep regresi ini sama sekali.
+        $this->actingAs($this->admin)->get('/admin/jadwal-piket')
+            ->assertOk()
+            ->assertSee('data-sesi-piket="data-sesi-piket"', false);
+    }
+
     /*
     |--------------------------------------------------------------------
     | berlakuPada() -- piket per tanggal spesifik (ulang tiap 2 minggu,

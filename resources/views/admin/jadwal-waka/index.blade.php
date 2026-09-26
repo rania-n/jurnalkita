@@ -4,7 +4,7 @@
     $hariLabel = config('akademik.hari');
     $tabs = ['semua' => 'Semua'] + $hariLabel;
 
-    $rows = \App\Models\JadwalWaka::with('user')
+    $rows = \App\Models\JadwalWaka::with('user.guru')
         ->when($hari !== 'semua', fn ($b) => $b->where('hari', $hari))
         ->when($q, fn ($b) => $b->whereHas('user', fn ($u) => $u->where('name', 'like', "%{$q}%")))
         ->orderByRaw(\App\Support\Db::hariOrder())
@@ -56,7 +56,13 @@
                     @if ($semua)
                         <td class="px-4 py-3 font-semibold text-ink">{{ $hariLabel[$j->hari] ?? $j->hari }}</td>
                     @endif
-                    <td class="px-4 py-3 {{ $semua ? 'text-muted' : 'font-semibold text-ink' }}">{{ $j->user?->name }}</td>
+                    <td class="px-4 py-3 {{ $semua ? 'text-muted' : 'font-semibold text-ink' }}">
+                        @if ($j->user?->guru)
+                            <a href="{{ route('master.guru.show', $j->user->guru) }}" class="text-navy hover:underline">{{ $j->user->name }}</a>
+                        @else
+                            {{ $j->user?->name }}
+                        @endif
+                    </td>
                     <td class="px-4 py-3">
                         <x-admin.row-actions
                             edit-modal="modal-waka"

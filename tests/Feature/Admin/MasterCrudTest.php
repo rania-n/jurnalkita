@@ -261,7 +261,7 @@ class MasterCrudTest extends TestCase
         $this->actingAs($this->admin())->post('/admin/jam-pelajaran/generate', [
             'kategori' => 'senin_kamis', 'mulai' => '07:00', 'durasi_jp' => 40, 'jumlah_jp' => 2,
             'jeda' => [['setelah' => 2, 'durasi' => 20, 'label' => 'Istirahat']],
-        ])->assertSessionHasErrors('jeda');
+        ])->assertSessionHasErrors('jeda', null, 'jp');
 
         $this->assertDatabaseCount('jam_pelajarans', 1);
     }

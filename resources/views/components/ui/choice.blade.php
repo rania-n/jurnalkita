@@ -27,9 +27,19 @@
         'dispen' => 'peer-checked:border-dispen peer-checked:bg-dispen-soft peer-checked:text-dispen',
     ];
     $pad = $size === 'sm' ? 'px-2.5 py-1.5 text-xs' : 'px-3.5 py-2.5 text-[13px]';
+
+    // class/hidden/data-* -> wrapper (pola yang sama kayak x-ui.input,
+    // x-ui.select, x-ui.field-static) -- dulu di sini cuma "class" doang yang
+    // diteruskan, jadi atribut data-* yang dipasang buat dipegang JS (mis.
+    // data-sesi-piket di Jadwal Piket) diam-diam kebuang, listener-nya nggak
+    // pernah ketemu elemennya sama sekali (bug beneran, ketauan pas dites).
+    $wrapKeys = collect($attributes->getAttributes())
+        ->keys()
+        ->filter(fn ($k) => $k === 'class' || $k === 'hidden' || str_starts_with($k, 'data-'))
+        ->all();
 @endphp
 
-<div {{ $attributes->only('class')->class('flex flex-col gap-1.5') }}>
+<div {{ $attributes->only($wrapKeys)->class('flex flex-col gap-1.5') }}>
     @if ($label)
         <x-ui.label :required="$required">{{ $label }}</x-ui.label>
     @endif
