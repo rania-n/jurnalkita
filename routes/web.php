@@ -75,6 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin', 'admin.dashboard')->name('admin.dashboard');
 
         Route::view('/admin/guru', 'admin.guru.index')->name('master.guru.index');
+        Route::get('/admin/guru/{guru}', [GuruController::class, 'show'])->name('master.guru.show');
         Route::view('/admin/kelas', 'admin.kelas.index')->name('master.kelas.index');
         Route::get('/admin/kelas/{kelas}', [KelasController::class, 'show'])->name('master.kelas.show');
         Route::view('/admin/siswa', 'admin.siswa.index')->name('master.siswa.index');

@@ -81,7 +81,7 @@ class JadwalController extends Controller
             return null;
         }
 
-        return "Guru ini udah punya jadwal lain di jam yang sama hari {$data['hari']}: {$bentrok->kelas->nama} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Satu guru nggak bisa ngajar 2 kelas sekaligus — ubah jamnya atau pilih guru lain.";
+        return "Guru ini sudah memiliki jadwal lain pada jam yang sama hari {$data['hari']}: {$bentrok->kelas->nama} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Satu guru tidak dapat mengajar 2 kelas sekaligus — ubah jamnya atau pilih guru lain.";
     }
 
     /** Cek apakah jam jadwal ini numpuk sama jadwal MAPEL LAIN di kelas yang sama, hari yang sama. */
@@ -99,7 +99,7 @@ class JadwalController extends Controller
             return null;
         }
 
-        return "Kelas ini udah ada jadwal lain di jam yang sama hari {$data['hari']}: {$bentrok->mapel->nama} — {$bentrok->guru->nama} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Satu kelas nggak bisa 2 mapel sekaligus — ubah jamnya atau hapus/ubah jadwal yang lama dulu.";
+        return "Kelas ini sudah memiliki jadwal lain pada jam yang sama hari {$data['hari']}: {$bentrok->mapel->nama} — {$bentrok->guru->nama} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Satu kelas tidak dapat memiliki 2 mata pelajaran sekaligus — ubah jamnya atau hapus/ubah jadwal yang lama terlebih dahulu.";
     }
 
     /** Cek apakah jam jadwal (jam ke-) bentrok dengan shift piket guru di hari yang sama. */

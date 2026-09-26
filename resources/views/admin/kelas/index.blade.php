@@ -95,7 +95,11 @@
                     <td class="px-4 py-3 text-muted">{{ $k->tingkat }}</td>
                     <td class="px-4 py-3 text-muted">{{ $k->jurusanNama() }}</td>
                     <td class="px-4 py-3 text-muted">{{ $k->siswas_count }}</td>
-                    <td class="px-4 py-3 text-muted">{{ $k->wali?->nama ?: '—' }}</td>
+                    <td class="px-4 py-3 text-muted">
+                        @if ($k->wali)
+                            <a href="{{ route('master.guru.show', $k->wali) }}" class="text-navy hover:underline">{{ $k->wali->nama }}</a>
+                        @else — @endif
+                    </td>
                     <td class="px-4 py-3">
                         <x-admin.row-actions
                             :detail="route('master.kelas.show', $k)"

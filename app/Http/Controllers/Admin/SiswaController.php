@@ -86,7 +86,7 @@ class SiswaController extends Controller
                     ->when($request->filled('id'), fn ($q) => $q->where('id', '!=', $request->integer('id')))
                     ->exists();
                 if ($sudahAdaPengurus) {
-                    $fail('Kelas ini sudah punya pengurus kelas. Ubah pengurus lama jadi "Anggota" dulu kalau mau ganti.');
+                    $fail('Kelas ini sudah memiliki pengurus kelas. Ubah pengurus lama menjadi "Anggota" terlebih dahulu apabila ingin menggantinya.');
                 }
             }],
             'status' => ['nullable', 'in:aktif,lulus,pindah'],
@@ -129,9 +129,9 @@ class SiswaController extends Controller
         Siswa::whereIn('id', $siswas->pluck('id'))->update(['pkl' => $data['pkl']]);
 
         $label = $data['pkl'] ? 'PKL' : 'bukan PKL';
-        AuditLog::catat('Ubah Status PKL Siswa Massal', "{$siswas->count()} siswa diubah jadi {$label}.");
+        AuditLog::catat('Ubah Status PKL Siswa Massal', "{$siswas->count()} siswa diubah menjadi {$label}.");
 
-        return back()->with('success', "Status PKL {$siswas->count()} siswa diperbarui jadi {$label}.");
+        return back()->with('success', "Status PKL {$siswas->count()} siswa berhasil diperbarui menjadi {$label}.");
     }
 
     public function destroy(Siswa $siswa): RedirectResponse

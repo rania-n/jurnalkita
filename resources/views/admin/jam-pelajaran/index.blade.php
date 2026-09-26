@@ -85,7 +85,7 @@
 
         <div class="mt-3">
             <p class="text-sm font-semibold text-ink">Dipakai untuk hari</p>
-            <p class="mt-0.5 text-xs text-muted">Pilih hari sekolah mana saja yang pakai kategori {{ $labelSet }} ini -- bisa dicentang bebas (mis. cuma Rabu, atau semua hari). Tiap hari cuma bisa pakai 1 kategori; kalau hari yang dicentang lagi dipakai kategori lain, otomatis pindah ke kategori ini.</p>
+            <p class="mt-0.5 text-xs text-muted">Pilih hari sekolah yang menggunakan kategori {{ $labelSet }} ini -- dapat dicentang secara bebas (misalnya hanya hari Rabu, atau seluruh hari). Setiap hari hanya dapat menggunakan 1 kategori; apabila hari yang dicentang sedang digunakan oleh kategori lain, hari tersebut akan otomatis berpindah ke kategori ini.</p>
 
             {{-- Dulu bar 2 pilihan (Senin-Kamis / Jumat) yang auto-submit --
                  ternyata di sekolah ini hari nggak selalu ngelompok rapi kayak
@@ -132,7 +132,7 @@
         <div class="mt-5 grid gap-3 border-t border-surface-alt pt-4 sm:grid-cols-2">
             <div>
                 <p class="text-sm font-semibold text-ink">Majukan per JP</p>
-                <p class="mt-0.5 text-xs text-muted">Nomor, jam, dan jadwal kelas ikut maju ngisi slot kosong (mis. JP kegiatan ditiadakan). Istirahat tetap di jam aslinya.</p>
+                <p class="mt-0.5 text-xs text-muted">Nomor, jam, dan jadwal kelas ikut maju mengisi slot kosong (misalnya JP kegiatan ditiadakan). Waktu istirahat tetap berada pada jam aslinya.</p>
                 {{-- data-confirm di tombol, bukan di <form> -- kalau di
                      form, ngetik di kotak "Jumlah JP" ikut kepicu konfirmasi
                      (klik masuk ke input aja udah kehitung "klik di dalam

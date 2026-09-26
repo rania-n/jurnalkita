@@ -118,7 +118,7 @@
                 value="2"
             />
             <x-ui.input label="Jumlah Kali" name="jumlah_kali" type="number" min="1" max="52" value="10" required />
-            <p class="-mt-2 text-xs text-muted-2">Sistem otomatis bikin jadwal sebanyak "Jumlah Kali", masing-masing berjarak sesuai "Ulang Setiap" dari Tanggal Mulai.</p>
+            <p class="-mt-2 text-xs text-muted-2">Sistem otomatis membuat jadwal sebanyak "Jumlah Kali", masing-masing berjarak sesuai "Ulang Setiap" dari Tanggal Mulai.</p>
             <x-ui.input label="Keterangan (opsional)" name="keterangan" />
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>

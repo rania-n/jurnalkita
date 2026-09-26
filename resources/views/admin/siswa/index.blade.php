@@ -71,13 +71,13 @@
     <section class="mb-5 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
         <h2 class="text-base font-bold text-ink">Ubah Status PKL Beberapa Siswa</h2>
         <p class="mt-1 text-sm text-muted">
-            Kelas yang semua siswanya PKL cukup diatur lewat status kelas di menu Data Kelas.
-            Ini buat kelas yang PKL-nya cuma sebagian siswa -- pilih dulu kelasnya lewat filter
-            "Kelas" di atas, baru pilih siswa mana yang PKL.
+            Kelas yang seluruh siswanya berstatus PKL dapat diatur melalui status kelas pada menu Data Kelas.
+            Bagian ini digunakan untuk kelas yang status PKL-nya hanya berlaku bagi sebagian siswa -- pilih
+            kelas terlebih dahulu melalui filter "Kelas" di atas, kemudian pilih siswa yang berstatus PKL.
         </p>
 
         @if ($siswaAktifPklOptions->isEmpty())
-            <p class="mt-4 text-sm text-muted-2">Pilih salah satu kelas lewat filter "Kelas" di atas untuk mulai.</p>
+            <p class="mt-4 text-sm text-muted-2">Pilih salah satu kelas melalui filter "Kelas" di atas untuk memulai.</p>
         @else
             {{-- data-confirm di TOMBOL, bukan di <form> -- kalau di form,
                  konfirmasi kepicu di SETIAP klik di dalamnya (kotak cari,
@@ -115,7 +115,11 @@
                 <tr class="hover:bg-surface/60">
                     <td class="px-4 py-3 text-muted">{{ $s->nis }}</td>
                     <td class="px-4 py-3 font-semibold text-ink">{{ $s->nama }}</td>
-                    <td class="px-4 py-3 text-muted">{{ $s->kelas?->nama ?: '—' }}</td>
+                    <td class="px-4 py-3 text-muted">
+                        @if ($s->kelas)
+                            <a href="{{ route('master.kelas.show', $s->kelas) }}" class="text-navy hover:underline">{{ $s->kelas->nama }}</a>
+                        @else — @endif
+                    </td>
                     <td class="px-4 py-3 text-muted">{{ $s->jenis_kelamin }}</td>
                     <td class="px-4 py-3">
                         <x-ui.status-badge :status="$s->jabatan === 'pengurus' ? 'pengurus' : 'anggota'" />

@@ -17,7 +17,11 @@
 
     <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <x-ui.field-static label="NIS" icon="badge">{{ $siswa->nis }}</x-ui.field-static>
-        <x-ui.field-static label="Kelas" icon="school">{{ $siswa->kelas?->nama ?? '—' }}</x-ui.field-static>
+        <x-ui.field-static label="Kelas" icon="school">
+            @if ($siswa->kelas)
+                <a href="{{ route('master.kelas.show', $siswa->kelas) }}" class="text-navy hover:underline">{{ $siswa->kelas->nama }}</a>
+            @else — @endif
+        </x-ui.field-static>
         <x-ui.field-static label="Jenis Kelamin" icon="wc">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</x-ui.field-static>
         <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
     </div>

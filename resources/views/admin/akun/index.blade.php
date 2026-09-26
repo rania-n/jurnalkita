@@ -67,8 +67,10 @@
                     <td class="px-4 py-3 text-muted">{{ $u->email }}</td>
                     <td class="px-4 py-3 text-muted">{{ $roleLabel[$u->role] ?? $u->role }}</td>
                     <td class="px-4 py-3 text-muted">
-                        @if ($u->guru) Guru
-                        @elseif ($u->siswa) Siswa · {{ $u->siswa->kelas?->nama }}
+                        @if ($u->guru)
+                            <a href="{{ route('master.guru.show', $u->guru) }}" class="text-navy hover:underline">Guru · {{ $u->guru->nama }}</a>
+                        @elseif ($u->siswa)
+                            <a href="{{ route('master.siswa.show', $u->siswa) }}" class="text-navy hover:underline">Siswa · {{ $u->siswa->kelas?->nama }}</a>
                         @else — @endif
                     </td>
                     <td class="px-4 py-3">

@@ -1,14 +1,14 @@
 @php
     $deskripsi = [
-        'disiplin' => 'Guru cuma bisa isi jurnal pas jam pelajarannya BENERAN lagi jalan -- dikunci otomatis ke jadwal itu. Istirahat/pergantian jam diblokir total, nggak bisa isi apa-apa. Baru bebas pilih jadwal lain kalau udah beneran pulang sekolah (buat susulan/testing).',
-        'bebas_hari_ini' => 'Guru bebas pilih jadwal HARI INI kapan aja sepanjang hari -- nggak dikunci ke jam pelajaran yang lagi jalan, nggak diblokir pas istirahat. Cocok kalau sekolah belum siap disiplin ketat soal jam.',
-        'bebas_selamanya' => 'Guru bebas isi jurnal kapan saja dan untuk tanggal berapa pun (tanggal bisa custom). Cocok agar jurnal yang dulu-dulu belum sempat dibuat bisa diakses dan dilengkapi.',
+        'disiplin' => 'Guru hanya dapat mengisi jurnal saat jam pelajarannya benar-benar sedang berlangsung -- dikunci otomatis ke jadwal tersebut. Istirahat dan pergantian jam diblokir sepenuhnya, tidak dapat mengisi apa pun. Guru baru bebas memilih jadwal lain apabila sudah benar-benar pulang sekolah (untuk susulan/pengujian).',
+        'bebas_hari_ini' => 'Guru bebas memilih jadwal HARI INI kapan saja sepanjang hari -- tidak dikunci ke jam pelajaran yang sedang berlangsung, tidak diblokir saat istirahat. Cocok apabila sekolah belum siap menerapkan disiplin ketat terhadap jam.',
+        'bebas_selamanya' => 'Guru bebas mengisi jurnal kapan saja dan untuk tanggal berapa pun (tanggal dapat dipilih bebas). Cocok agar jurnal yang sebelumnya belum sempat dibuat dapat diakses dan dilengkapi.',
     ];
     $icon = ['disiplin' => 'lock_clock', 'bebas_hari_ini' => 'today', 'bebas_selamanya' => 'event_repeat'];
 @endphp
 
 <x-layouts.admin title="Pengaturan Isi Jurnal" heading="Pengaturan Isi Jurnal">
-    <x-admin.page title="Pengaturan Isi Jurnal" subtitle="Atur seberapa ketat aturan JAM buat guru isi jurnal mengajar" />
+    <x-admin.page title="Pengaturan Isi Jurnal" subtitle="Atur seberapa ketat aturan jam untuk guru mengisi jurnal mengajar" />
 
     <form method="POST" action="{{ route('master.pengaturan-jurnal.save') }}">
         @csrf

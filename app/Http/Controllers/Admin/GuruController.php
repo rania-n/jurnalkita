@@ -10,9 +10,26 @@ use App\Models\JadwalPiket;
 use App\Models\Kelas;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class GuruController extends Controller
 {
+    public function show(Guru $guru): View
+    {
+        $guru->load('mapelUtama', 'mapels', 'user');
+
+        $jadwalPerHari = $guru->jadwals()
+            ->with('mapel', 'kelas')
+            ->orderBy('jam_ke_mulai')
+            ->get()
+            ->groupBy('hari');
+
+        $kelasWali = $guru->kelasWali()->orderedByHierarchy()->get(['id', 'nama', 'status']);
+        $hariLabel = config('akademik.hari');
+
+        return view('admin.guru.show', compact('guru', 'jadwalPerHari', 'kelasWali', 'hariLabel'));
+    }
+
     public function save(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -89,6 +106,6 @@ class GuruController extends Controller
             return null;
         }
 
-        return "Guru {$guru->nama} belum bisa dihapus: ".implode('; ', $masalah).'. Ubah/hapus dulu jadwal & status wali kelasnya sebelum menghapus data guru ini.';
+        return "Guru {$guru->nama} belum bisa dihapus: ".implode('; ', $masalah).'. Ubah atau hapus terlebih dahulu jadwal dan status wali kelasnya sebelum menghapus data guru ini.';
     }
 }

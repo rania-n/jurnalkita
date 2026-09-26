@@ -108,12 +108,12 @@ class KelasController extends Controller
     {
         $jumlahSiswa = Siswa::where('kelas_id', $kelas->id)->count();
         if ($jumlahSiswa > 0) {
-            return back()->with('error', "Kelas {$kelas->nama} masih punya {$jumlahSiswa} siswa. Pindahkan atau hapus dulu data siswanya sebelum menghapus kelas ini.");
+            return back()->with('error', "Kelas {$kelas->nama} masih memiliki {$jumlahSiswa} siswa. Pindahkan atau hapus terlebih dahulu data siswanya sebelum menghapus kelas ini.");
         }
 
         $jumlahJadwal = Jadwal::where('kelas_id', $kelas->id)->count();
         if ($jumlahJadwal > 0) {
-            return back()->with('error', "Kelas {$kelas->nama} masih punya {$jumlahJadwal} jadwal pelajaran. Hapus dulu jadwalnya sebelum menghapus kelas ini.");
+            return back()->with('error', "Kelas {$kelas->nama} masih memiliki {$jumlahJadwal} jadwal pelajaran. Hapus terlebih dahulu jadwalnya sebelum menghapus kelas ini.");
         }
 
         $nama = $kelas->nama;

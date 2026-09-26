@@ -226,7 +226,7 @@ class JamPelajaranController extends Controller
         AuditLog::catat('Majukan Jam Pelajaran', "Majukan kategori {$data['kategori']} dan {$jadwals->count()} jadwal kelas sebanyak {$data['jumlah_jp']} JP.");
 
         return redirect()->route('master.jam-pelajaran.index', ['set' => $data['kategori']])
-            ->with('success', "JP dan {$jadwals->count()} jadwal kelas dimajukan {$data['jumlah_jp']} JP -- jamnya ikut maju ngisi slot kosong (istirahat tetap di jam aslinya). Slot nomor terakhir kini tidak digunakan.");
+            ->with('success', "JP dan {$jadwals->count()} jadwal kelas dimajukan {$data['jumlah_jp']} JP -- jamnya ikut maju mengisi slot kosong (waktu istirahat tetap berada pada jam aslinya). Slot nomor terakhir kini tidak digunakan.");
     }
 
     public function resetSebelumnya(Request $request): RedirectResponse
@@ -357,7 +357,7 @@ class JamPelajaranController extends Controller
         if (! empty($hariTerkait)) {
             $jumlahJadwal = Jadwal::whereIn('hari', $hariTerkait)->count();
             if ($jumlahJadwal > 0) {
-                return back()->with('error', "Kategori ini masih dipakai {$jumlahJadwal} jadwal pelajaran (hari ".implode(', ', $hariTerkait).'). Hapus/pindahkan dulu jadwalnya sebelum menghapus kategori jam ini.');
+                return back()->with('error', "Kategori ini masih digunakan oleh {$jumlahJadwal} jadwal pelajaran (hari ".implode(', ', $hariTerkait).'). Hapus atau pindahkan terlebih dahulu jadwalnya sebelum menghapus kategori jam ini.');
             }
         }
 

@@ -23,8 +23,10 @@
                     <td class="px-4 py-3 text-muted">{{ $u->email }}</td>
                     <td class="px-4 py-3 text-muted">{{ $roleLabel[$u->role] ?? $u->role }}</td>
                     <td class="px-4 py-3 text-muted">
-                        @if ($u->guru) Guru
-                        @elseif ($u->siswa) Siswa · {{ $u->siswa->kelas?->nama }}
+                        @if ($u->guru)
+                            <a href="{{ route('master.guru.show', $u->guru) }}" class="text-navy hover:underline">Guru · {{ $u->guru->nama }}</a>
+                        @elseif ($u->siswa)
+                            <a href="{{ route('master.siswa.show', $u->siswa) }}" class="text-navy hover:underline">Siswa · {{ $u->siswa->kelas?->nama }}</a>
                         @else — @endif
                     </td>
                     <td class="px-4 py-3">
@@ -33,9 +35,11 @@
                                 @csrf
                                 <button class="flex h-8 items-center gap-1 rounded-lg bg-hadir-soft px-2.5 text-xs font-bold text-hadir hover:bg-[#bef3ab]">Setujui</button>
                             </form>
-                            <form method="POST" action="{{ route('master.akun.reject', $u) }}" class="contents" data-confirm="Tolak pendaftaran {{ $u->name }}?">
+                            {{-- data-confirm di tombol, bukan di <form> -- pola yang sama
+                                 dengan perbaikan bug di halaman lain hari ini. --}}
+                            <form method="POST" action="{{ route('master.akun.reject', $u) }}" class="contents">
                                 @csrf
-                                <button class="flex h-8 items-center gap-1 rounded-lg bg-alpha-soft px-2.5 text-xs font-bold text-alpha hover:bg-[#fecdd3]">Tolak</button>
+                                <button class="flex h-8 items-center gap-1 rounded-lg bg-alpha-soft px-2.5 text-xs font-bold text-alpha hover:bg-[#fecdd3]" data-confirm="Tolak pendaftaran {{ $u->name }}?">Tolak</button>
                             </form>
                         </div>
                     </td>

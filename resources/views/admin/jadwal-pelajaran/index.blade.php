@@ -108,6 +108,7 @@
                 :options="$kelasList"
                 :value="$kelasDipilih"
                 placeholder="Ketik nama kelas..."
+                required
             />
             <div class="flex flex-col gap-1.5">
                 <x-ui.choice
@@ -120,9 +121,9 @@
                 @if ($kelasDipilih)
                     <p class="text-xs text-muted-2">
                         @if (count($hariPenuh) > 0)
-                            Hari yang ditandai "(Penuh)" udah nggak ada celah JP kosong buat kelas ini, nggak bisa dipilih.
+                            Hari yang ditandai "(Penuh)" sudah tidak memiliki celah jam pelajaran kosong untuk kelas ini, sehingga tidak dapat dipilih.
                         @else
-                            Semua hari masih ada celah JP kosong buat kelas ini.
+                            Semua hari masih memiliki celah jam pelajaran kosong untuk kelas ini.
                         @endif
                     </p>
                 @endif
@@ -144,11 +145,11 @@
                 required
             />
             <div class="flex gap-3">
-                <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai" class="flex-1">
+                <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai" class="flex-1" required>
                     <option value="" disabled selected hidden>Pilih</option>
                     @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
                 </x-ui.select>
-                <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" class="flex-1">
+                <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" class="flex-1" required>
                     <option value="" disabled selected hidden>Pilih</option>
                     @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
                 </x-ui.select>

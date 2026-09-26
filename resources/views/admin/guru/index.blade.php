@@ -38,6 +38,7 @@
                     </td>
                     <td class="px-4 py-3">
                         <x-admin.row-actions
+                            :detail="route('master.guru.show', $g)"
                             edit-modal="modal-guru"
                             edit-title="Ubah Guru"
                             :edit-id="$g->id"

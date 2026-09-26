@@ -55,7 +55,7 @@ class JadwalPiketController extends Controller
             ->whereKeyNot($data['id'])
             ->exists();
         if ($sudahAda) {
-            return back()->with('error', 'Jadwal piket ini udah ada -- guru, tanggal, dan jamnya persis sama kayak yang sudah tersimpan.')->withInput();
+            return back()->with('error', 'Jadwal piket ini sudah ada -- guru, tanggal, dan jamnya sama persis seperti yang sudah tersimpan.')->withInput();
         }
 
         $piket = JadwalPiket::findOrFail($data['id']);
@@ -127,7 +127,7 @@ class JadwalPiketController extends Controller
             }
         }
         if (! empty($pesanBentrok)) {
-            return back()->with('error', 'Udah ada jadwal piket di jam yang sama buat: '.implode('; ', $pesanBentrok).'. Ubah tanggal mulai atau hapus dulu yang bentrok.')->withInput();
+            return back()->with('error', 'Sudah ada jadwal piket pada jam yang sama untuk: '.implode('; ', $pesanBentrok).'. Ubah tanggal mulai atau hapus terlebih dahulu jadwal yang bentrok.')->withInput();
         }
 
         $baris = [];

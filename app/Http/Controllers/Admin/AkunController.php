@@ -85,7 +85,7 @@ class AkunController extends Controller
                         // tapi cuma boleh 1 pengurus per kelas.
                         function ($attribute, $value, $fail) {
                             if (Siswa::where('kelas_id', $value)->where('jabatan', 'pengurus')->exists()) {
-                                $fail('Kelas ini sudah punya pengurus kelas. Ubah pengurus lama jadi "Anggota" dulu lewat menu Data Siswa.');
+                                $fail('Kelas ini sudah memiliki pengurus kelas. Ubah pengurus lama menjadi "Anggota" terlebih dahulu melalui menu Data Siswa.');
                             }
                         },
                     ],

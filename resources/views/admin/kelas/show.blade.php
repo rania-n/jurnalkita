@@ -8,7 +8,13 @@
     <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <x-ui.field-static label="Tingkat" icon="school">{{ $kelas->tingkat }}</x-ui.field-static>
         <x-ui.field-static label="Jurusan" icon="menu_book">{{ $kelas->jurusanNama() }}</x-ui.field-static>
-        <x-ui.field-static label="Wali Kelas" icon="badge">{{ $kelas->wali?->nama ?: '— belum ditentukan —' }}</x-ui.field-static>
+        <x-ui.field-static label="Wali Kelas" icon="badge">
+            @if ($kelas->wali)
+                <a href="{{ route('master.guru.show', $kelas->wali) }}" class="text-navy hover:underline">{{ $kelas->wali->nama }}</a>
+            @else
+                — belum ditentukan —
+            @endif
+        </x-ui.field-static>
     </div>
 
     <h2 class="mb-2 text-sm font-bold text-ink">Roster Siswa ({{ $siswas->count() }})</h2>
@@ -20,7 +26,7 @@
                 @foreach ($siswas as $s)
                     <tr>
                         <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
-                        <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
+                        <td class="px-4 py-2.5 font-semibold"><a href="{{ route('master.siswa.show', $s) }}" class="text-navy hover:underline">{{ $s->nama }}</a></td>
                         <td class="px-4 py-2.5 text-muted">{{ $s->nis }}</td>
                         <td class="px-4 py-2.5">
                             <x-ui.status-badge :status="$s->jabatan === 'pengurus' ? 'pengurus' : 'anggota'" />
