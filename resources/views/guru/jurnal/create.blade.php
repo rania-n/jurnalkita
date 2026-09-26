@@ -566,7 +566,18 @@
                         blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
                         blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
                     }
-                    document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
+                    // Ganti ke "Tidak Hadir" ngaktifin ULANG semua field di blok itu
+                    // (termasuk checklist massal di dalamnya) -- syncMassal() dipanggil
+                    // lagi sesudahnya biar keadaan "Cuma Kelas Ini" (checklist massal
+                    // dinonaktifkan) kepasang balik dengan benar, bukan kebuka semua
+                    // lagi kayak abis di-reset. Tanpa ini, popup ringkasan salah nunjuk
+                    // "berlaku buat semua kelas" walau cuma 1 kelas yang ditandai (bug
+                    // beneran, ketauan pas dites -- tapi cuma tampilan doang, data yang
+                    // beneran kesimpen tetap benar 1 kelas).
+                    document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', () => {
+                        syncStatusGuru();
+                        syncMassal?.();
+                    }));
                     syncStatusGuru();
 
                     // "Tidak Hadir 1 Hari Penuh?" -> pilih "Ya" munculin checklist

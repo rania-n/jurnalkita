@@ -223,6 +223,7 @@ return [
         'jadwal_id' => 'Jadwal',
         'surat_path' => 'Surat/Bukti',
         'jam_datang' => 'Jam Datang',
+        'siswa_id' => 'Siswa',
     ],
 
 ];

@@ -90,8 +90,28 @@
                 <x-ui.button type="submit" name="keputusan" value="terima" variant="success" icon="check" class="flex-1">
                     {{ $jurnal->verifikasiAbsen() ? 'Setujui' : 'Sesuai — Verifikasi' }}
                 </x-ui.button>
-                <x-ui.button type="submit" name="keputusan" value="revisi" variant="danger" icon="edit" class="flex-1">Minta Revisi</x-ui.button>
+                <x-ui.button type="submit" name="keputusan" value="revisi" variant="danger" icon="edit" class="flex-1" data-tombol-minta-revisi>Minta Revisi</x-ui.button>
             </div>
         </form>
+
+        {{-- Server sebenarnya udah nolak submit "Minta Revisi" tanpa Catatan
+             (required_if:keputusan,revisi), TAPI penolakannya bikin halaman
+             reload penuh -- popup ini kebuka otomatis lagi (errorBag), tapi
+             ISINYA cuma keisi lewat fetch AJAX yang kepicu pas tombol
+             "Periksa" diklik, jadi pas kebuka ulang gini isinya kosong
+             melompong tanpa pesan apa-apa (kelihatan kayak nge-hang). Dicegah
+             dari sini sebelum sempat kekirim ke server sama sekali. --}}
+        <script>
+            (function () {
+                document.querySelector('[data-tombol-minta-revisi]')?.addEventListener('click', (e) => {
+                    const catatan = document.getElementById('catatan');
+                    if (!catatan?.value.trim()) {
+                        e.preventDefault();
+                        alert('Catatan wajib diisi kalau mau minta revisi.');
+                        catatan?.focus();
+                    }
+                });
+            })();
+        </script>
     @endif
 </div>

@@ -37,7 +37,13 @@
         </x-alert>
     @endif
 
-    @if ($siswas->isEmpty())
+    @if ($terlaluBanyakTanpaFilter)
+        {{-- Total siswa sekolah kebanyakan buat 1 halaman tanpa filter (lihat
+             catatan di RekapController::siswa()) -- diminta pilih kelas dulu,
+             bukan diam-diam render belasan ribu baris. --}}
+        <x-ui.empty icon="filter_alt" title="Pilih kelas dulu"
+            desc="Ada {{ $terlaluBanyakTanpaFilter }} siswa di sekolah ini -- terlalu banyak buat ditampilkan sekaligus. Pilih salah satu kelas lewat filter di atas." />
+    @elseif ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa" />
     @else
         {{-- Desktop: tabel biasa. HP: kartu ringkas (bukan tabel) -- 9 kolom

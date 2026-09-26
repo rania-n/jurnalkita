@@ -189,10 +189,23 @@ class JurnalTest extends TestCase
 
     public function test_jurnal_terverifikasi_tidak_bisa_diubah(): void
     {
+        // verifikator_id WAJIB diisi di sini -- itu yang bedain "beneran
+        // diverifikasi manual sama pengurus kelas" (harusnya kekunci) dari
+        // "otomatis terverifikasi tanpa verifikator" (mis. laporan Tidak
+        // Hadir, itu justru HARUS tetap bisa diubah -- lihat
+        // Jurnal::otomatisDiverifikasi() & bisaDiubah()). Kalau di sini
+        // verifikator_id dibiarkan kosong, test ini nggak nyerupain kondisi
+        // manual-verified yang beneran (di app aslinya verifikator_id selalu
+        // keisi pas pengurus kelas verifikasi -- lihat Sekretaris\JurnalController).
+        $pengurus = Siswa::create([
+            'kelas_id' => $this->jadwal->kelas_id, 'nis' => '999', 'nama' => 'Pengurus',
+            'jenis_kelamin' => 'L', 'jabatan' => 'pengurus',
+        ]);
         $jurnal = Jurnal::create([
             'jadwal_id' => $this->jadwal->id, 'guru_id' => $this->guru->id,
             'tanggal' => today(), 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
             'status_guru' => 'hadir', 'materi' => 'x', 'status_verifikasi' => 'terverifikasi',
+            'verifikator_id' => $pengurus->id,
         ]);
 
         $this->actingAs($this->user)->post("/guru/jurnal/{$jurnal->id}", [

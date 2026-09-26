@@ -23,6 +23,28 @@ class RekapController extends Controller
 
     public function siswa(Request $request): View
     {
+        // Sama kayak eksporSiswa() -- tanpa filter kelas, sekolah yang siswanya
+        // ribuan bikin halaman ini nge-render tabel DUA KALI (versi desktop +
+        // versi kartu HP, dua-duanya selalu ada di DOM sekaligus, cuma
+        // disembunyiin CSS) jadi puluhan ribu baris & belasan MB HTML sekali
+        // buka (dites langsung: ~5200 baris, ~8.6MB, halaman setinggi ratusan
+        // ribu piksel). Nggak sampai crash kayak PDF-nya, tapi berat &
+        // kelihatan "nggak beres" -- dicegat SEBELUM narik seluruh datanya
+        // (count() doang, bukan get() lengkap), bukan cuma dibatasi di tampilan.
+        if (! $request->filled('kelas_id')) {
+            $jumlahSiswa = Siswa::count();
+            if ($jumlahSiswa > self::BATAS_EKSPOR_SISWA) {
+                return view('rekap.siswa', [
+                    'siswas' => collect(), 'rekap' => collect(), 'terlambat' => collect(),
+                    'dari' => $request->filled('dari') ? Carbon::parse($request->date('dari')) : now()->startOfMonth(),
+                    'sampai' => $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : now(),
+                    'kelasList' => Kelas::orderedByHierarchy()->get(),
+                    'ambangAlpha' => self::AMBANG_ALPHA,
+                    'terlaluBanyakTanpaFilter' => $jumlahSiswa,
+                ]);
+            }
+        }
+
         [$dari, $sampai, $siswas, $rekap, $terlambat] = $this->data($request);
 
         return view('rekap.siswa', [
@@ -33,6 +55,7 @@ class RekapController extends Controller
             'sampai' => $sampai,
             'kelasList' => Kelas::orderedByHierarchy()->get(),
             'ambangAlpha' => self::AMBANG_ALPHA,
+            'terlaluBanyakTanpaFilter' => null,
         ]);
     }
 

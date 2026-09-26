@@ -71,9 +71,16 @@
                         </div>
                     </x-slot:badge>
                     <x-slot:actions>
+                        {{-- Dulu pakai verifikasiAbsen() doang buat nentuin label -- itu
+                             cuma ngecek "tugas/tidak hadir yg auto-approved", BUKAN
+                             "udah pernah diperiksa apa belum". Akibatnya jurnal hadir
+                             yang UDAH diverifikasi/diminta revisi tetap kelihatan
+                             "Periksa" selamanya (padahal tombolnya cuma nampilin
+                             popup read-only). menungguPemeriksaan() yang bener --
+                             true CUMA kalau memang belum diperiksa sama sekali. --}}
                         <x-ui.action-button
-                            :label="$j->verifikasiAbsen() ? 'Lihat' : 'Periksa'"
-                            :icon="$j->verifikasiAbsen() ? 'visibility' : 'fact_check'"
+                            :label="$j->menungguPemeriksaan() ? 'Periksa' : 'Lihat'"
+                            :icon="$j->menungguPemeriksaan() ? 'fact_check' : 'visibility'"
                             variant="info"
                             data-modal-open="modal-jurnal-sekretaris"
                             data-modal-title="{{ $j->jadwal->mapel->nama }}"

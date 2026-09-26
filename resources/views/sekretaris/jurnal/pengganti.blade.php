@@ -19,7 +19,7 @@
                     @foreach ($jadwals as $j)
                         @php $jamOpsi = \App\Support\Waktu::rentangJam($j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
                         <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected(old('jadwal_id') == $j->id)>
-                            {{ $j->mapel->nama }} — {{ $j->guru->nama }} (JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " · {$jamOpsi}" : '' }})
+                            {{ ucfirst($j->hari) }} · {{ $j->mapel->nama }} — {{ $j->guru->nama }} (JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " · {$jamOpsi}" : '' }})
                         </option>
                     @endforeach
                 </x-ui.select>

@@ -69,10 +69,20 @@ class Jurnal extends Model
         return ! $this->verifikasiAbsen() && $this->status_verifikasi === 'pending';
     }
 
-    /** Guru masih boleh mengubah jurnal selama belum terverifikasi (pending) atau saat diminta revisi. */
+    /**
+     * Guru masih boleh mengubah jurnal selama belum terverifikasi (pending),
+     * saat diminta revisi, ATAU kalau "terverifikasi"-nya itu otomatis tanpa
+     * pemeriksa manusia (mis. laporan Tidak Hadir) -- itu bukan keputusan
+     * sekre yang harus dihormati, cuma status default sistem. Sebelumnya
+     * cuma cek pending/revisi doang, jadi jurnal Tidak Hadir nggak PERNAH
+     * bisa diubah/dihapus guru sendiri walau teksnya di popup Lihat jelas-
+     * jelas bilang "jurnal masih bisa diubah" -- tombolnya nggak pernah
+     * muncul (bug beneran, ketauan pas dites: pesannya ada tapi janjinya
+     * nggak ditepatin).
+     */
     public function bisaDiubah(): bool
     {
-        return in_array($this->status_verifikasi, ['pending', 'revisi'], true);
+        return in_array($this->status_verifikasi, ['pending', 'revisi'], true) || $this->otomatisDiverifikasi();
     }
 
     /** True untuk status otomatis tanpa pemeriksa manusia, seperti laporan guru tidak hadir. */
