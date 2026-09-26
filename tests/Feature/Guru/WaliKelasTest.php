@@ -88,4 +88,81 @@ class WaliKelasTest extends TestCase
         $this->actingAs($wali)->get('/guru/wali-kelas')
             ->assertOk()->assertSee('text-navy">1</span>', false);
     }
+
+    public function test_wali_kelas_bisa_lihat_jurnal_harian_kelasnya(): void
+    {
+        $wali = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $wali->id, 'nama' => 'Wali Kelas']);
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guru->id]);
+
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'ruang' => 'R1', 'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Aljabar',
+        ]);
+
+        $this->actingAs($wali)->get("/guru/wali-kelas/{$kelas->id}/jurnal")
+            ->assertOk()->assertSee('Matematika')->assertSee('Wali Kelas');
+    }
+
+    public function test_wali_kelas_lain_tidak_bisa_lihat_jurnal_kelas_orang(): void
+    {
+        $waliA = User::factory()->role('guru')->create();
+        $guruA = Guru::create(['user_id' => $waliA->id, 'nama' => 'Wali A']);
+        $kelasA = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guruA->id]);
+
+        $waliB = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $waliB->id, 'nama' => 'Wali B']);
+
+        $this->actingAs($waliB)->get("/guru/wali-kelas/{$kelasA->id}/jurnal")->assertForbidden();
+    }
+
+    /** Wali kelas cuma LIHAT -- form Setujui/Minta Revisi TIDAK boleh muncul walau jurnalnya masih pending. */
+    public function test_fragmen_jurnal_wali_kelas_tidak_ada_tombol_verifikasi(): void
+    {
+        $wali = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $wali->id, 'nama' => 'Wali Kelas']);
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guru->id]);
+
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'ruang' => 'R1', 'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Aljabar',
+        ]);
+
+        $this->actingAs($wali)->get(route('guru.wali-kelas.jurnal.fragment', $jurnal))
+            ->assertOk()
+            ->assertSee('Belum diperiksa pengurus kelas')
+            ->assertDontSee('Sesuai — Verifikasi')
+            ->assertDontSee('Minta Revisi');
+    }
+
+    public function test_fragmen_jurnal_wali_kelas_lain_ditolak(): void
+    {
+        $waliA = User::factory()->role('guru')->create();
+        $guruA = Guru::create(['user_id' => $waliA->id, 'nama' => 'Wali A']);
+        $kelasA = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guruA->id]);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $kelasA->id, 'mapel_id' => $mapel->id, 'guru_id' => $guruA->id,
+            'ruang' => 'R1', 'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guruA->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Aljabar',
+        ]);
+
+        $waliB = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $waliB->id, 'nama' => 'Wali B']);
+
+        $this->actingAs($waliB)->get(route('guru.wali-kelas.jurnal.fragment', $jurnal))->assertForbidden();
+    }
 }

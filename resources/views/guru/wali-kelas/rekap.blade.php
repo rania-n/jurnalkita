@@ -5,6 +5,17 @@
         :back="$adaKelasLain ? route('guru.wali-kelas.index') : null"
     />
 
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">
+        <a href="{{ route('guru.wali-kelas.rekap', $kelas) }}"
+           class="flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap bg-navy text-card">
+            Rekap Kehadiran
+        </a>
+        <a href="{{ route('guru.wali-kelas.jurnal', $kelas) }}"
+           class="flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold whitespace-nowrap text-muted-2 hover:text-ink">
+            Jurnal Harian
+        </a>
+    </div>
+
     @if ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa di kelas ini" />
     @else

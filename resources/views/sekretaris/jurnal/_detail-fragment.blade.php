@@ -7,17 +7,23 @@
     data-modal-title).
 
     Variabel yang wajib ada di scope pemanggil: $jurnal
+    Variabel opsional: $readOnly (default false) -- true buat dipakai di luar
+    Sekretaris (misal Wali Kelas cuma boleh LIHAT, bukan memeriksa/verifikasi).
 --}}
 @php
     $statusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
     $statusAbsen = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
     $rekap = $jurnal->absensis->countBy('status');
-    $bisaVerifikasi = $jurnal->menungguPemeriksaan();
+    // Dua hal beda: "sudah diputuskan" (buat pesan status) vs "boleh isi form
+    // verifikasi" (readOnly, mis. Wali Kelas, sengaja nggak pernah boleh --
+    // dia cuma LIHAT, bukan pengurus kelas yang berwenang memutuskan).
+    $sudahDiputuskan = ! $jurnal->menungguPemeriksaan();
+    $bisaVerifikasi = ! ($readOnly ?? false) && ! $sudahDiputuskan;
     $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp
 
 <div class="flex flex-col gap-4">
-    @if (! $bisaVerifikasi)
+    @if ($sudahDiputuskan)
         <x-alert :type="$jurnal->verifikasiAbsen() || $jurnal->status_verifikasi === 'terverifikasi' ? 'success' : ($jurnal->otomatisDiverifikasi() ? 'info' : 'error')">
             @if ($jurnal->verifikasiAbsen())
                 Tugas untuk siswa otomatis disetujui. Pengurus kelas tidak perlu memeriksa.
@@ -27,6 +33,8 @@
                 Sudah diminta revisi: {{ $jurnal->catatan_verifikasi }}
             @endif
         </x-alert>
+    @elseif ($readOnly ?? false)
+        <x-alert type="info">Belum diperiksa pengurus kelas.</x-alert>
     @endif
 
     {{-- Ringkasan Hadir/Sakit/Izin/Alpha/Dispensasi ditaruh paling atas --

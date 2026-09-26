@@ -135,7 +135,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/guru', 'dashboards.guru')->name('guru.dashboard');
 
         Route::get('/guru/wali-kelas', [WaliKelasController::class, 'index'])->name('guru.wali-kelas.index');
+        Route::get('/guru/wali-kelas/jurnal/{jurnal}/fragment', [WaliKelasController::class, 'jurnalFragment'])->name('guru.wali-kelas.jurnal.fragment');
         Route::get('/guru/wali-kelas/{kelas}', [WaliKelasController::class, 'rekap'])->name('guru.wali-kelas.rekap');
+        Route::get('/guru/wali-kelas/{kelas}/jurnal', [WaliKelasController::class, 'jurnal'])->name('guru.wali-kelas.jurnal');
     });
 
     // Isi Jurnal + Jadwal Mengajar -- Waka ikut dikasih akses karena di dunia

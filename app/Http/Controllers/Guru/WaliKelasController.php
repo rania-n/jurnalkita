@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\CatatanTerlambat;
+use App\Models\Jurnal;
 use App\Models\Kelas;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -49,5 +51,38 @@ class WaliKelasController extends Controller
         $adaKelasLain = auth()->user()->kelasWaliList()->count() > 1;
 
         return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'terlambat', 'adaKelasLain'));
+    }
+
+    /**
+     * Jurnal harian kelas -- wali kelas cuma LIHAT (bukan pengurus kelas,
+     * nggak berwenang memeriksa/verifikasi). Default hari ini, karena yang
+     * paling relevan buat wali kelas adalah "apa yang terjadi di kelasnya
+     * hari ini", bukan riwayat panjang seperti punya pengurus kelas.
+     */
+    public function jurnal(Kelas $kelas, Request $request): View
+    {
+        abort_unless($kelas->wali_id === auth()->user()->guru?->id, 403, 'Anda bukan wali kelas ini.');
+
+        $dari = $request->query('dari', today()->toDateString());
+        $sampai = $request->query('sampai') ?: $dari;
+
+        $jurnals = Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
+            ->with('jadwal.mapel', 'guru')
+            ->whereDate('tanggal', '>=', $dari)
+            ->whereDate('tanggal', '<=', $sampai)
+            ->orderByRaw("CASE WHEN status_guru != 'tidak_hadir' AND status_verifikasi = 'pending' THEN 0 ELSE 1 END")
+            ->latest('tanggal')->latest('id')
+            ->paginate(15)->withQueryString();
+
+        $adaKelasLain = auth()->user()->kelasWaliList()->count() > 1;
+
+        return view('guru.wali-kelas.jurnal', compact('kelas', 'jurnals', 'dari', 'sampai', 'adaKelasLain'));
+    }
+
+    public function jurnalFragment(Jurnal $jurnal): View
+    {
+        abort_unless($jurnal->jadwal->kelas->wali_id === auth()->user()->guru?->id, 403, 'Anda bukan wali kelas ini.');
+
+        return view('sekretaris.jurnal._detail-fragment', ['jurnal' => $jurnal, 'readOnly' => true]);
     }
 }
