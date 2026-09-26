@@ -78,6 +78,32 @@ class RekapSiswaTest extends TestCase
         $this->assertStringContainsString('.pdf', $response->headers->get('content-disposition'));
     }
 
+    /**
+     * Regresi: ekspor tanpa filter kelas pada sekolah yang siswanya banyak
+     * dulu bener-bener 500 (dompdf kehabisan memori ngerender tabel
+     * seribuan baris sekaligus, ketauan pas dites langsung dengan data
+     * sekolah asli ~2600 siswa). Sekarang dicegah lebih awal dengan pesan
+     * yang jelas, bukan crash.
+     */
+    public function test_ekspor_ditolak_dengan_pesan_kalau_siswa_kebanyakan_tanpa_filter(): void
+    {
+        $kelas = Kelas::create(['nama' => 'X TKJ 2', 'tingkat' => 'X', 'jurusan' => 'TKJ']);
+        $baris = [];
+        for ($i = 1; $i <= 501; $i++) {
+            $baris[] = [
+                'kelas_id' => $kelas->id, 'nis' => "banyak-{$i}", 'nama' => "Siswa Ke-{$i}",
+                'jenis_kelamin' => 'L', 'status' => 'aktif', 'created_at' => now(), 'updated_at' => now(),
+            ];
+        }
+        \Illuminate\Support\Facades\DB::table('siswas')->insert($baris);
+
+        $waka = User::factory()->role('waka')->create();
+
+        $this->actingAs($waka)->get('/rekap/siswa/ekspor')
+            ->assertRedirect()
+            ->assertSessionHas('error');
+    }
+
     public function test_filter_kelas(): void
     {
         $kelasLain = Kelas::create(['nama' => 'X TKJ 1', 'tingkat' => 'X', 'jurusan' => 'TKJ']);
