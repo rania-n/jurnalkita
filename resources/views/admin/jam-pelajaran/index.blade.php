@@ -133,20 +133,24 @@
             <div>
                 <p class="text-sm font-semibold text-ink">Majukan per JP</p>
                 <p class="mt-0.5 text-xs text-muted">Nomor, jam, dan jadwal kelas ikut maju ngisi slot kosong (mis. JP kegiatan ditiadakan). Istirahat tetap di jam aslinya.</p>
-                <form method="POST" action="{{ route('master.jam-pelajaran.maju') }}" class="mt-2 flex flex-wrap items-end gap-2" data-confirm="Majukan seluruh jadwal kategori {{ $labelSet }}?">
+                {{-- data-confirm di tombol, bukan di <form> -- kalau di
+                     form, ngetik di kotak "Jumlah JP" ikut kepicu konfirmasi
+                     (klik masuk ke input aja udah kehitung "klik di dalam
+                     form"). --}}
+                <form method="POST" action="{{ route('master.jam-pelajaran.maju') }}" class="mt-2 flex flex-wrap items-end gap-2">
                     @csrf
                     <input type="hidden" name="kategori" value="{{ $set }}">
                     <x-ui.input label="Jumlah JP" name="jumlah_jp" type="number" min="1" max="5" value="1" required class="!h-10 w-24" />
-                    <x-ui.button type="submit" variant="secondary" icon="schedule" class="!h-10">Majukan</x-ui.button>
+                    <x-ui.button type="submit" variant="secondary" icon="schedule" class="!h-10" data-confirm="Majukan seluruh jadwal kategori {{ $labelSet }}?">Majukan</x-ui.button>
                 </form>
             </div>
             <div>
                 <p class="text-sm font-semibold text-ink">Reset ke sebelumnya</p>
                 <p class="mt-0.5 text-xs text-muted">Pulihkan salinan jadwal sebelum perubahan terakhir untuk kategori ini.</p>
-                <form method="POST" action="{{ route('master.jam-pelajaran.reset') }}" class="mt-2" data-confirm="Pulihkan {{ $labelSet }} ke salinan jadwal sebelumnya? Perubahan saat ini akan diganti.">
+                <form method="POST" action="{{ route('master.jam-pelajaran.reset') }}" class="mt-2">
                     @csrf
                     <input type="hidden" name="kategori" value="{{ $set }}">
-                    <x-ui.button type="submit" variant="secondary" icon="restart_alt" class="!h-10" :disabled="! $adaJadwalSebelumnya">Reset Jadwal</x-ui.button>
+                    <x-ui.button type="submit" variant="secondary" icon="restart_alt" class="!h-10" :disabled="! $adaJadwalSebelumnya" data-confirm="Pulihkan {{ $labelSet }} ke salinan jadwal sebelumnya? Perubahan saat ini akan diganti.">Reset Jadwal</x-ui.button>
                     @unless ($adaJadwalSebelumnya)
                         <span class="ml-2 text-xs text-muted">Belum ada salinan.</span>
                     @endunless
@@ -191,10 +195,9 @@
     @endif
 
     @if ($bisaHapusKategori)
-        <form method="POST" action="{{ route('master.jam-pelajaran.destroy-kategori', $set) }}" class="mt-3"
-              data-confirm="Hapus kategori &quot;{{ $labelSet }}&quot; beserta semua jamnya?">
+        <form method="POST" action="{{ route('master.jam-pelajaran.destroy-kategori', $set) }}" class="mt-3">
             @csrf @method('DELETE')
-            <x-ui.button type="submit" variant="danger" icon="delete">Hapus Kategori Ini</x-ui.button>
+            <x-ui.button type="submit" variant="danger" icon="delete" data-confirm="Hapus kategori &quot;{{ $labelSet }}&quot; beserta semua jamnya?">Hapus Kategori Ini</x-ui.button>
         </form>
     @endif
 

@@ -37,7 +37,14 @@
             <h2 class="text-base font-bold text-ink">Ubah Status PKL Beberapa Kelas</h2>
             <p class="mt-1 text-sm text-muted">Pilih beberapa kelas aktif sekaligus. Kelas arsip tidak ikut diubah.</p>
 
-            <form method="POST" action="{{ route('master.kelas.status-massal') }}" class="mt-4 grid gap-4 lg:grid-cols-2" data-confirm="Ubah status kelas yang dipilih?">
+            {{-- data-confirm SENGAJA dipasang di TOMBOLnya, bukan di <form> --
+                 dulu nempel di <form>, akibatnya konfirmasi muncul di SETIAP
+                 klik di dalam form ini (klik kotak cari, checkbox, radio pun
+                 kena), bukan cuma pas klik submit. initConfirm() di app.js
+                 nyari ancestor terdekat yang punya [data-confirm] dari
+                 elemen manapun yang diklik -- kalau itu <form>, semua
+                 turunannya ikut kena. --}}
+            <form method="POST" action="{{ route('master.kelas.status-massal') }}" class="mt-4 grid gap-4 lg:grid-cols-2">
                 @csrf
                 @method('PATCH')
                 <div>
@@ -52,22 +59,22 @@
                     <x-ui.choice
                         label="Status baru"
                         name="status"
-                        :options="['pkl' => 'PKL', 'aktif' => 'Aktif']"
+                        :options="['pkl' => 'PKL', 'aktif' => 'Bukan PKL']"
                         value="pkl"
                         required
                     />
-                    <x-ui.button type="submit" icon="save" class="w-full sm:w-auto">Terapkan ke Kelas Terpilih</x-ui.button>
+                    <x-ui.button type="submit" icon="save" class="w-full sm:w-auto" data-confirm="Ubah status kelas yang dipilih?">Terapkan ke Kelas Terpilih</x-ui.button>
                 </div>
             </form>
 
             <div class="mt-4 flex flex-col gap-3 border-t border-surface-alt pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-sm text-muted">Jadikan semua kelas XII pada tahun ajaran aktif berstatus PKL.</p>
-                <form method="POST" action="{{ route('master.kelas.status-massal') }}" data-confirm="Jadikan semua kelas XII tahun ajaran aktif sebagai PKL?">
+                <form method="POST" action="{{ route('master.kelas.status-massal') }}">
                     @csrf
                     @method('PATCH')
                     <input type="hidden" name="tingkat" value="XII">
                     <input type="hidden" name="status" value="pkl">
-                    <x-ui.button type="submit" variant="secondary" icon="school" class="w-full sm:w-auto">Semua Kelas XII → PKL</x-ui.button>
+                    <x-ui.button type="submit" variant="secondary" icon="school" class="w-full sm:w-auto" data-confirm="Jadikan semua kelas XII tahun ajaran aktif sebagai PKL?">Semua Kelas XII → PKL</x-ui.button>
                 </form>
             </div>
         </section>

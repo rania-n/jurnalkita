@@ -604,6 +604,26 @@ function initCariCheckbox() {
             });
             if (kosong) kosong.hidden = ada;
         });
+
+        // Cegah submit kalau belum ada satupun yang dicentang -- server
+        // juga nolak (validasi min:1), tapi tanpa ini tombolnya kepencet +
+        // munculin dialog konfirmasi (data-confirm) buat "0 data" yang
+        // jelas nggak masuk akal (kejadian beneran, ketauan dari laporan
+        // bug). Listener dipasang di <form> (BUKAN document) supaya jalan
+        // SEBELUM klik-nya sempat sampai ke initConfirm() (yang dengerin di
+        // document, lebih jauh dari elemen yang diklik) -- stopPropagation
+        // di sini nahan event-nya nyampe ke situ sama sekali, jadi dialog
+        // konfirmasinya nggak sempat muncul kalau memang mau ditolak.
+        const form = wrap.closest('form');
+        form?.addEventListener('click', (e) => {
+            if (!e.target.closest('button[type="submit"], input[type="submit"]')) return;
+            const adaCentang = wrap.querySelectorAll('input[type="checkbox"]:checked').length > 0;
+            if (!adaCentang) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('Pilih dulu minimal 1 sebelum diterapkan.');
+            }
+        });
     });
 }
 

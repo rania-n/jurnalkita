@@ -39,6 +39,18 @@
             $kelas->nama,
         ])
         ->values();
+
+    // Buat form "Ubah Status PKL Beberapa Siswa" -- SENGAJA nunggu filter
+    // "Kelas" di atas dipilih dulu, baru daftar checkbox-nya kebentuk.
+    // Sekolah ini siswa aktifnya ribuan; nge-render checkbox buat SEMUA
+    // siswa sekaligus di tiap buka halaman ini bakal berat + kepanjangan buat
+    // discroll, padahal butuhnya emang cuma 1 kelas dalam sekali jalan (kasus
+    // asli: kelas XI yang PKL-nya sebagian). Dropdown "Kelas" yang sama di
+    // filter atas dipakai ulang, bukan bikin filter baru lagi.
+    $siswaAktifPklOptions = $kelasId
+        ? \App\Models\Siswa::where('kelas_id', $kelasId)->where('status', 'aktif')
+            ->orderBy('nama')->get(['id', 'nama'])
+        : collect();
 @endphp
 
 <x-layouts.admin title="Data Siswa" heading="Data Siswa">
@@ -55,6 +67,45 @@
         <x-admin.f-select name="jk" label="Jenis Kelamin" :options="['L' => 'Laki-laki', 'P' => 'Perempuan']" all="Semua" />
         <x-admin.f-select name="status" label="Status" :options="['aktif' => 'Aktif', 'lulus' => 'Lulus', 'pindah' => 'Pindah']" all="Semua Status" />
     </x-admin.filters>
+
+    <section class="mb-5 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
+        <h2 class="text-base font-bold text-ink">Ubah Status PKL Beberapa Siswa</h2>
+        <p class="mt-1 text-sm text-muted">
+            Kelas yang semua siswanya PKL cukup diatur lewat status kelas di menu Data Kelas.
+            Ini buat kelas yang PKL-nya cuma sebagian siswa -- pilih dulu kelasnya lewat filter
+            "Kelas" di atas, baru pilih siswa mana yang PKL.
+        </p>
+
+        @if ($siswaAktifPklOptions->isEmpty())
+            <p class="mt-4 text-sm text-muted-2">Pilih salah satu kelas lewat filter "Kelas" di atas untuk mulai.</p>
+        @else
+            {{-- data-confirm di TOMBOL, bukan di <form> -- kalau di form,
+                 konfirmasi kepicu di SETIAP klik di dalamnya (kotak cari,
+                 checkbox, radio pun kena), bukan cuma pas klik submit. --}}
+            <form method="POST" action="{{ route('master.siswa.pkl-massal') }}" class="mt-4 grid gap-4 lg:grid-cols-2">
+                @csrf
+                @method('PATCH')
+                <div>
+                    <x-ui.cari-checkbox
+                        label="Siswa yang diubah ({{ $kelasList->firstWhere('id', (int) $kelasId)?->nama }})"
+                        name="siswa_ids"
+                        :options="$siswaAktifPklOptions"
+                        hint="Cari nama, lalu centang satu atau beberapa siswa."
+                    />
+                </div>
+                <div class="flex flex-col justify-between gap-4">
+                    <x-ui.choice
+                        label="Status baru"
+                        name="pkl"
+                        :options="['1' => 'PKL', '0' => 'Bukan PKL']"
+                        value="1"
+                        required
+                    />
+                    <x-ui.button type="submit" icon="save" class="w-full sm:w-auto" data-confirm="Ubah status PKL siswa yang dipilih?">Terapkan ke Siswa Terpilih</x-ui.button>
+                </div>
+            </form>
+        @endif
+    </section>
 
     @if ($rows->isEmpty())
         <x-ui.empty title="Tidak ada siswa yang cocok" />
@@ -77,13 +128,17 @@
                         @else
                             <x-ui.status-badge status="alpha">Pindah</x-ui.status-badge>
                         @endif
+                        @if ($s->isPkl())
+                            <x-ui.status-badge status="pkl" class="ml-1" />
+                        @endif
                     </td>
                     <td class="px-4 py-3">
                         <x-admin.row-actions
+                            :detail="route('master.siswa.show', $s)"
                             edit-modal="modal-siswa"
                             edit-title="Ubah Siswa"
                             :edit-id="$s->id"
-                            :edit-fill="['nis' => $s->nis, 'nama' => $s->nama, 'kelas_id' => $s->kelas_id, 'no_absen' => $s->no_absen, 'jenis_kelamin' => $s->jenis_kelamin, 'jabatan' => $s->jabatan, 'status' => $s->status]"
+                            :edit-fill="['nis' => $s->nis, 'nama' => $s->nama, 'kelas_id' => $s->kelas_id, 'no_absen' => $s->no_absen, 'jenis_kelamin' => $s->jenis_kelamin, 'jabatan' => $s->jabatan, 'status' => $s->status, 'pkl' => $s->pkl ? '1' : '0']"
                             :delete-action="route('master.siswa.destroy', $s)"
                             delete-confirm="Yakin hapus {{ $s->nama }}?"
                         />
@@ -127,6 +182,11 @@
             <p class="-mt-2 text-xs text-muted-2">
                 Biasanya biarkan "Aktif" — "Lulus" otomatis diisi lewat Kenaikan Kelas,
                 "Pindah" dipakai kalau siswa pindah sekolah.
+            </p>
+            <x-ui.choice label="Status PKL" name="pkl" :options="['0' => 'Bukan PKL', '1' => 'PKL']" value="0" />
+            <p class="-mt-2 text-xs text-muted-2">
+                Kelas yang semua siswanya PKL cukup diatur di status kelas (Data Kelas).
+                Ini buat siswa yang PKL-nya beda sendiri dari teman sekelasnya.
             </p>
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>

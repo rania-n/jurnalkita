@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/kelas/{kelas}', [KelasController::class, 'show'])->name('master.kelas.show');
         Route::view('/admin/siswa', 'admin.siswa.index')->name('master.siswa.index');
         Route::get('/admin/siswa/no-absen-otomatis', [SiswaController::class, 'noAbsenOtomatis'])->name('master.siswa.no-absen-otomatis');
+        Route::get('/admin/siswa/{siswa}', [SiswaController::class, 'show'])->name('master.siswa.show');
         Route::view('/admin/mapel', 'admin.mapel.index')->name('master.mapel.index');
         Route::view('/admin/jadwal-pelajaran', 'admin.jadwal-pelajaran.index')->name('master.jadwal-pelajaran.index');
         Route::view('/admin/jam-pelajaran', 'admin.jam-pelajaran.index')->name('master.jam-pelajaran.index');
@@ -108,6 +109,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/admin/kelas/status-massal', [KelasController::class, 'updateStatusBulk'])->name('master.kelas.status-massal');
         Route::delete('/admin/kelas/{kelas}', [KelasController::class, 'destroy'])->name('master.kelas.destroy');
         Route::post('/admin/siswa', [SiswaController::class, 'save'])->name('master.siswa.save');
+        Route::patch('/admin/siswa/pkl-massal', [SiswaController::class, 'updatePklBulk'])->name('master.siswa.pkl-massal');
         Route::delete('/admin/siswa/{siswa}', [SiswaController::class, 'destroy'])->name('master.siswa.destroy');
         Route::post('/admin/mapel', [MapelController::class, 'save'])->name('master.mapel.save');
         Route::delete('/admin/mapel/{mapel}', [MapelController::class, 'destroy'])->name('master.mapel.destroy');

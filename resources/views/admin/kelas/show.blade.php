@@ -1,6 +1,10 @@
 <x-layouts.admin title="Detail Kelas" :heading="$kelas->nama">
     <x-admin.page :title="$kelas->nama" :subtitle="$kelas->jurusanNama() . ' · ' . $siswas->count() . ' siswa'" :back="route('master.kelas.index')" />
 
+    <div class="mb-4 flex flex-wrap gap-1.5">
+        <x-ui.status-badge :status="$kelas->pkl() ? 'pkl' : 'anggota'">{{ $kelas->pkl() ? 'PKL' : 'Bukan PKL' }}</x-ui.status-badge>
+    </div>
+
     <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <x-ui.field-static label="Tingkat" icon="school">{{ $kelas->tingkat }}</x-ui.field-static>
         <x-ui.field-static label="Jurusan" icon="menu_book">{{ $kelas->jurusanNama() }}</x-ui.field-static>
@@ -20,6 +24,9 @@
                         <td class="px-4 py-2.5 text-muted">{{ $s->nis }}</td>
                         <td class="px-4 py-2.5">
                             <x-ui.status-badge :status="$s->jabatan === 'pengurus' ? 'pengurus' : 'anggota'" />
+                            @if ($s->isPkl())
+                                <x-ui.status-badge status="pkl" class="ml-1" />
+                            @endif
                         </td>
                     </tr>
                 @endforeach

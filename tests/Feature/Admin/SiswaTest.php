@@ -2,8 +2,12 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Absensi;
 use App\Models\Guru;
+use App\Models\Jadwal;
+use App\Models\Jurnal;
 use App\Models\Kelas;
+use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -106,5 +110,73 @@ class SiswaTest extends TestCase
 
         $this->actingAs($admin)->delete("/admin/kelas/{$kelas->id}")->assertRedirect();
         $this->assertSoftDeleted('kelas', ['id' => $kelas->id]);
+    }
+
+    public function test_admin_bisa_lihat_detail_siswa_mana_saja(): void
+    {
+        $admin = $this->admin();
+        $guru = Guru::create(['nama' => 'Pak Guru']);
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+        $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L', 'no_absen' => 1]);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'x',
+        ]);
+        Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id, 'status' => 'sakit']);
+
+        // Admin nggak dibatasi ngajar/nggak kayak guru -- bisa buka siswa kelas manapun.
+        $this->actingAs($admin)->get("/admin/siswa/{$siswa->id}")
+            ->assertOk()
+            ->assertSee('Budi')
+            ->assertSee('Matematika');
+    }
+
+    public function test_pkl_bisa_diubah_satuan_lewat_form_ubah_siswa(): void
+    {
+        $kelas = Kelas::create(['nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL']);
+        $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L']);
+        $this->assertFalse($siswa->fresh()->isPkl());
+
+        $this->actingAs($this->admin())->post('/admin/siswa', [
+            'id' => $siswa->id, 'kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi',
+            'jenis_kelamin' => 'L', 'jabatan' => 'anggota', 'pkl' => '1',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertTrue($siswa->fresh()->isPkl());
+    }
+
+    public function test_pkl_bisa_diubah_massal_buat_sebagian_siswa_di_kelas(): void
+    {
+        // Skenario asli: kelas XI PKL-nya cuma sebagian siswa (beda dari
+        // kelas XII yang semua siswanya PKL lewat status kelas).
+        $kelas = Kelas::create(['nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL']);
+        $pkl1 = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L']);
+        $pkl2 = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '002', 'nama' => 'Citra', 'jenis_kelamin' => 'P']);
+        $tetapSekolah = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '003', 'nama' => 'Dedi', 'jenis_kelamin' => 'L']);
+
+        $this->actingAs($this->admin())->patch('/admin/siswa/pkl-massal', [
+            'siswa_ids' => [$pkl1->id, $pkl2->id], 'pkl' => '1',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertTrue($pkl1->fresh()->isPkl());
+        $this->assertTrue($pkl2->fresh()->isPkl());
+        $this->assertFalse($tetapSekolah->fresh()->isPkl());
+    }
+
+    public function test_pkl_massal_siswa_yang_sudah_lulus_atau_pindah_ditolak(): void
+    {
+        $kelas = Kelas::create(['nama' => 'XII RPL 1', 'tingkat' => 'XII', 'jurusan' => 'RPL']);
+        $sudahLulus = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L', 'status' => 'lulus']);
+
+        $this->actingAs($this->admin())->patch('/admin/siswa/pkl-massal', [
+            'siswa_ids' => [$sudahLulus->id], 'pkl' => '1',
+        ])->assertSessionHas('error');
+
+        $this->assertFalse($sudahLulus->fresh()->isPkl());
     }
 }
