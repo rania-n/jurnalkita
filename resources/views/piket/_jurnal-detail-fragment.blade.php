@@ -45,7 +45,7 @@
 
         @if ($jurnal->absensis->isNotEmpty())
             <div class="max-h-[40vh] overflow-y-auto rounded-xl border border-surface-alt sm:border-0">
-                <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" />
+                <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" :jurnal="$jurnal" />
             </div>
         @endif
     </div>

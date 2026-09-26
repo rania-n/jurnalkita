@@ -34,12 +34,6 @@
         <x-ui.stat label="Dispensasi" tone="dispen" :value="$rekap['dispensasi'] ?? 0" />
     </div>
 
-    @if ($terlambat > 0)
-        <x-alert type="warning" class="mb-4">
-            Tercatat <strong>{{ $terlambat }}x</strong> terlambat masuk sekolah.
-        </x-alert>
-    @endif
-
     {{-- "Hadir" udah kehitung di ringkasan stat di atas -- di daftar detail
          ini cuma yang SELAIN hadir (sakit/izin/alpha/dispensasi/tugas) yang
          ditampilin, biar nggak kepanjangan baris "Hadir" doang yang nggak

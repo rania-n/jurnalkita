@@ -6,7 +6,6 @@
     'izin' => 0,
     'alpha' => 0,
     'dispensasi' => 0,
-    'terlambat' => null,
     'sorot' => false,
 ])
 
@@ -29,8 +28,5 @@
         <x-ui.rekap-badge tone="izin">{{ $izin }}</x-ui.rekap-badge>
         <x-ui.rekap-badge tone="alpha">{{ $alpha }}</x-ui.rekap-badge>
         <x-ui.rekap-badge tone="dispensasi">{{ $dispensasi }}</x-ui.rekap-badge>
-        @if (! is_null($terlambat))
-            <x-ui.rekap-badge tone="terlambat">{{ $terlambat }}</x-ui.rekap-badge>
-        @endif
     </div>
 </div>

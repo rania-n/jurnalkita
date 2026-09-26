@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AuditLog;
-use App\Models\CatatanTerlambat;
 use App\Models\Siswa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,11 +16,11 @@ class SiswaController extends Controller
 {
     /**
      * Detail satu siswa buat admin -- data + akunnya emang saling terhubung
-     * (kelas, riwayat kehadiran dari jurnal, keterlambatan), jadi ditampilkan
-     * kumpul di sini. Sama semangatnya kayak Guru\SiswaController@show, cuma
-     * di sini admin boleh lihat siswa mana saja (nggak dibatasi kelas yang
-     * diajar) dan read-only sama persis (perubahan tetap lewat modal Ubah
-     * atau form PKL massal, bukan dari halaman ini).
+     * (kelas, riwayat kehadiran dari jurnal), jadi ditampilkan kumpul di
+     * sini. Sama semangatnya kayak Guru\SiswaController@show, cuma di sini
+     * admin boleh lihat siswa mana saja (nggak dibatasi kelas yang diajar)
+     * dan read-only sama persis (perubahan tetap lewat modal Ubah atau form
+     * PKL massal, bukan dari halaman ini).
      */
     public function show(Siswa $siswa): View
     {
@@ -35,9 +34,8 @@ class SiswaController extends Controller
             ->values();
 
         $rekap = $absensis->countBy('status');
-        $terlambat = CatatanTerlambat::where('siswa_id', $siswa->id)->count();
 
-        return view('admin.siswa.show', compact('siswa', 'absensis', 'rekap', 'terlambat'));
+        return view('admin.siswa.show', compact('siswa', 'absensis', 'rekap'));
     }
 
     /**

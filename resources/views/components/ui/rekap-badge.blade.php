@@ -7,7 +7,6 @@
         'izin' => 'bg-izin-soft text-izin',
         'alpha' => 'bg-alpha-soft text-alpha',
         'dispensasi' => 'bg-dispen-soft text-dispen',
-        'terlambat' => 'bg-surface-alt text-navy',
         default => 'bg-surface-alt text-ink',
     };
 @endphp

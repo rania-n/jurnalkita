@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\AuditLog;
-use App\Models\CatatanTerlambat;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -35,7 +34,7 @@ class RekapController extends Controller
             $jumlahSiswa = Siswa::count();
             if ($jumlahSiswa > self::BATAS_EKSPOR_SISWA) {
                 return view('rekap.siswa', [
-                    'siswas' => collect(), 'rekap' => collect(), 'terlambat' => collect(),
+                    'siswas' => collect(), 'rekap' => collect(),
                     'dari' => $request->filled('dari') ? Carbon::parse($request->date('dari')) : now()->startOfMonth(),
                     'sampai' => $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : now(),
                     'kelasList' => Kelas::orderedByHierarchy()->get(),
@@ -45,12 +44,11 @@ class RekapController extends Controller
             }
         }
 
-        [$dari, $sampai, $siswas, $rekap, $terlambat] = $this->data($request);
+        [$dari, $sampai, $siswas, $rekap] = $this->data($request);
 
         return view('rekap.siswa', [
             'siswas' => $siswas,
             'rekap' => $rekap,
-            'terlambat' => $terlambat,
             'dari' => $dari,
             'sampai' => $sampai,
             'kelasList' => Kelas::orderedByHierarchy()->get(),
@@ -69,7 +67,7 @@ class RekapController extends Controller
 
     public function eksporSiswa(Request $request)
     {
-        [$dari, $sampai, $siswas, $rekap, $terlambat] = $this->data($request);
+        [$dari, $sampai, $siswas, $rekap] = $this->data($request);
 
         if ($siswas->count() > self::BATAS_EKSPOR_SISWA) {
             return back()->with('error', "Terlalu banyak siswa untuk 1 laporan PDF ({$siswas->count()} siswa). Pilih kelas tertentu dulu lewat filter \"Kelas\", atau persempit rentang tanggalnya, baru ekspor lagi.");
@@ -94,7 +92,6 @@ class RekapController extends Controller
                 'izin' => $r['izin'] ?? 0,
                 'alpha' => $r['alpha'] ?? 0,
                 'dispensasi' => $r['dispensasi'] ?? 0,
-                'terlambat' => $terlambat[$s->id] ?? 0,
             ];
         }
 
@@ -117,7 +114,7 @@ class RekapController extends Controller
         return $pdf->download('rekap-kehadiran-siswa-'.$dari->toDateString().'-sd-'.$sampai->toDateString().'.pdf');
     }
 
-    /** @return array{0: Carbon, 1: Carbon, 2: Collection, 3: Collection, 4: Collection} */
+    /** @return array{0: Carbon, 1: Carbon, 2: Collection, 3: Collection} */
     private function data(Request $request): array
     {
         $dari = $request->filled('dari') ? Carbon::parse($request->date('dari')) : now()->startOfMonth();
@@ -140,12 +137,6 @@ class RekapController extends Controller
             ->groupBy('siswa_id')
             ->map(fn ($rows) => $rows->countBy('status'));
 
-        $terlambat = CatatanTerlambat::whereIn('siswa_id', $siswas->pluck('id'))
-            ->whereDate('tanggal', '>=', $dari->toDateString())
-            ->whereDate('tanggal', '<=', $sampai->toDateString())
-            ->get()
-            ->countBy('siswa_id');
-
-        return [$dari, $sampai, $siswas, $rekap, $terlambat];
+        return [$dari, $sampai, $siswas, $rekap];
     }
 }

@@ -50,7 +50,7 @@
              kalau ditumpuk per-field kepanjangan, jadi diganti badge angka
              sejajar tanpa label per kartu (lihat x-ui.rekap-chip-card). --}}
         <div class="hidden sm:block">
-            <x-admin.table :head="['Kelas', 'No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi', 'Terlambat']">
+            <x-admin.table :head="['Kelas', 'No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi']">
                 @foreach ($siswas as $s)
                     @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
                     <tr data-baris-rekap data-cari="{{ strtolower($s->nama.' '.$s->nis) }}" @class(['bg-alpha-soft/30' => $alphaTinggi])>
@@ -62,14 +62,13 @@
                         <td class="px-4 py-2.5"><x-ui.rekap-badge tone="izin">{{ $r['izin'] ?? 0 }}</x-ui.rekap-badge></td>
                         <td class="px-4 py-2.5"><x-ui.rekap-badge tone="alpha" :class="$alphaTinggi ? 'ring-2 ring-alpha' : ''">{{ $r['alpha'] ?? 0 }}</x-ui.rekap-badge></td>
                         <td class="px-4 py-2.5"><x-ui.rekap-badge tone="dispensasi">{{ $r['dispensasi'] ?? 0 }}</x-ui.rekap-badge></td>
-                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="terlambat">{{ $terlambat[$s->id] ?? 0 }}</x-ui.rekap-badge></td>
                     </tr>
                 @endforeach
             </x-admin.table>
         </div>
 
         <div class="sm:hidden">
-            <x-ui.rekap-legend terlambat />
+            <x-ui.rekap-legend />
             <div class="flex flex-col gap-2">
                 @foreach ($siswas as $s)
                     @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
@@ -83,7 +82,6 @@
                         :izin="$r['izin'] ?? 0"
                         :alpha="$r['alpha'] ?? 0"
                         :dispensasi="$r['dispensasi'] ?? 0"
-                        :terlambat="$terlambat[$s->id] ?? 0"
                         :sorot="$alphaTinggi"
                     />
                 @endforeach

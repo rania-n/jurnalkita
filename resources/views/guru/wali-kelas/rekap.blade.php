@@ -20,7 +20,7 @@
         <x-ui.empty icon="school" title="Belum ada siswa di kelas ini" />
     @else
         <div class="hidden sm:block">
-            <x-admin.table :head="['No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi', 'Terlambat']">
+            <x-admin.table :head="['No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi']">
                 @foreach ($siswas as $s)
                     @php $r = $rekap[$s->id] ?? collect(); @endphp
                     <tr>
@@ -31,14 +31,13 @@
                         <td class="px-4 py-2.5"><x-ui.rekap-badge tone="izin">{{ $r['izin'] ?? 0 }}</x-ui.rekap-badge></td>
                         <td class="px-4 py-2.5"><x-ui.rekap-badge tone="alpha">{{ $r['alpha'] ?? 0 }}</x-ui.rekap-badge></td>
                         <td class="px-4 py-2.5"><x-ui.rekap-badge tone="dispensasi">{{ $r['dispensasi'] ?? 0 }}</x-ui.rekap-badge></td>
-                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="terlambat">{{ $terlambat[$s->id] ?? 0 }}</x-ui.rekap-badge></td>
                     </tr>
                 @endforeach
             </x-admin.table>
         </div>
 
         <div class="sm:hidden">
-            <x-ui.rekap-legend terlambat />
+            <x-ui.rekap-legend />
             <div class="flex flex-col gap-2">
                 @foreach ($siswas as $s)
                     @php $r = $rekap[$s->id] ?? collect(); @endphp
@@ -50,7 +49,6 @@
                         :izin="$r['izin'] ?? 0"
                         :alpha="$r['alpha'] ?? 0"
                         :dispensasi="$r['dispensasi'] ?? 0"
-                        :terlambat="$terlambat[$s->id] ?? 0"
                     />
                 @endforeach
             </div>

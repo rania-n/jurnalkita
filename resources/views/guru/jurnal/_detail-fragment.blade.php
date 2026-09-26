@@ -76,7 +76,7 @@
 
     <div>
         <p class="mb-2 text-sm font-bold text-ink">Presensi ({{ $jurnal->absensis->count() }} siswa)</p>
-        <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" />
+        <x-ui.presensi-list :absensis="$jurnal->absensis->sortBy('siswa.no_absen')" :jurnal="$jurnal" />
     </div>
 
     @if ($bisaUbah)

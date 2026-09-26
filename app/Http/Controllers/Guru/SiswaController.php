@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
-use App\Models\CatatanTerlambat;
 use App\Models\Siswa;
 use Illuminate\View\View;
 
@@ -33,8 +32,7 @@ class SiswaController extends Controller
             ->values();
 
         $rekap = $absensis->countBy('status');
-        $terlambat = CatatanTerlambat::where('siswa_id', $siswa->id)->count();
 
-        return view('guru.siswa.show', compact('siswa', 'absensis', 'rekap', 'terlambat'));
+        return view('guru.siswa.show', compact('siswa', 'absensis', 'rekap'));
     }
 }

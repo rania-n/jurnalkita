@@ -115,7 +115,6 @@
                 <th style="width: 35px;" class="text-center">I</th>
                 <th style="width: 35px;" class="text-center">A</th>
                 <th style="width: 40px;" class="text-center">Disp</th>
-                <th style="width: 40px;" class="text-center">Terc</th>
             </tr>
         </thead>
         <tbody>
@@ -131,18 +130,17 @@
                     <td class="text-center" style="color: #b45309;">{{ $d['izin'] }}</td>
                     <td class="text-center" style="color: #b91c1c; font-weight: bold;">{{ $d['alpha'] }}</td>
                     <td class="text-center" style="color: #7e22ce;">{{ $d['dispensasi'] }}</td>
-                    <td class="text-center" style="color: #64748b;">{{ $d['terlambat'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="11" class="text-center" style="padding: 15px; color: #94a3b8;">Tidak ada data siswa untuk rentang ini.</td>
+                    <td colspan="10" class="text-center" style="padding: 15px; color: #94a3b8;">Tidak ada data siswa untuk rentang ini.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
     <div class="footer">
-        <span>Keterangan: H = Hadir, S = Sakit, I = Izin, A = Alpha, Disp = Dispensasi, Terc = Terlambat</span>
+        <span>Keterangan: H = Hadir, S = Sakit, I = Izin, A = Alpha, Disp = Dispensasi</span>
     </div>
 </body>
 </html>
