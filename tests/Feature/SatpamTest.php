@@ -14,15 +14,11 @@ class SatpamTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $satpam;
-
     private Dispensasi $disetujui;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->satpam = User::factory()->role('satpam')->create();
 
         $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
         $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L']);
@@ -39,15 +35,13 @@ class SatpamTest extends TestCase
     {
         $token = QrDispensasi::token($this->disetujui->id);
 
-        $this->actingAs($this->satpam)
-            ->get("/satpam/scan?id={$this->disetujui->id}&token={$token}")
+        $this->get("/satpam/scan?id={$this->disetujui->id}&token={$token}")
             ->assertOk()->assertSee('Disetujui')->assertSee('Budi');
     }
 
     public function test_scan_token_salah_tidak_berlaku(): void
     {
-        $this->actingAs($this->satpam)
-            ->get("/satpam/scan?id={$this->disetujui->id}&token=ngawurbanget")
+        $this->get("/satpam/scan?id={$this->disetujui->id}&token=ngawurbanget")
             ->assertOk()->assertSee('Tidak Berlaku')->assertDontSee('Budi');
     }
 
@@ -62,36 +56,26 @@ class SatpamTest extends TestCase
         ]);
         $token = QrDispensasi::token($pending->id);
 
-        $this->actingAs($this->satpam)
-            ->get("/satpam/scan?id={$pending->id}&token={$token}")
+        $this->get("/satpam/scan?id={$pending->id}&token={$token}")
             ->assertOk()->assertSee('Tidak Berlaku');
     }
 
     public function test_setiap_scan_tercatat_di_audit_log(): void
     {
         $token = QrDispensasi::token($this->disetujui->id);
-        $this->actingAs($this->satpam)->get("/satpam/scan?id={$this->disetujui->id}&token={$token}");
+        $this->get("/satpam/scan?id={$this->disetujui->id}&token={$token}");
 
-        $this->assertDatabaseHas('audit_logs', ['aksi' => 'Scan QR Dispensasi', 'user_id' => $this->satpam->id]);
-    }
-
-    public function test_dashboard_satpam_menampilkan_riwayat_hari_ini(): void
-    {
-        $token = QrDispensasi::token($this->disetujui->id);
-        $this->actingAs($this->satpam)->get("/satpam/scan?id={$this->disetujui->id}&token={$token}");
-
-        $this->actingAs($this->satpam)->get('/satpam')
-            ->assertOk()->assertSee('Valid');
+        $this->assertDatabaseHas('audit_logs', ['aksi' => 'Scan QR Dispensasi']);
     }
 
     /**
-     * Scan QR TANPA login -- ini yang justru diharapkan. Satpam buka QR-nya
-     * dari kamera HP langsung (belum tentu punya sesi login di browser HP-nya
-     * saat itu), keamanannya dijamin token QR yang ganti tiap 10 detik
-     * sendiri (lihat QrDispensasi), bukan dari sesi/role. Dulu route ini
-     * kepentok middleware role:satpam, jadi malah kelempar ke halaman login
-     * dulu -- padahal view-nya (satpam.hasil-scan) sendiri udah dari awal
-     * dirancang tanpa shell/sidebar (layout guest).
+     * Scan QR TANPA login -- ini yang justru diharapkan, dan satu-satunya cara
+     * scan dilakukan sekarang (peran satpam sudah dihapus dari sistem). Yang
+     * scan buka QR-nya dari kamera HP langsung, keamanannya dijamin token QR
+     * yang ganti tiap 10 detik sendiri (lihat QrDispensasi), bukan dari
+     * sesi/role. Dulu route ini kepentok middleware role:satpam, jadi malah
+     * kelempar ke halaman login dulu -- padahal view-nya (satpam.hasil-scan)
+     * sendiri udah dari awal dirancang tanpa shell/sidebar (layout guest).
      */
     public function test_scan_bisa_diakses_tanpa_login_sama_sekali(): void
     {
@@ -101,7 +85,7 @@ class SatpamTest extends TestCase
             ->assertOk()->assertSee('Disetujui')->assertSee('Budi');
     }
 
-    /** Role lain (bukan satpam) tetap boleh scan juga -- token QR-nya yang jadi penjamin, bukan role. */
+    /** Role apapun yang lagi login tetap boleh scan juga -- token QR-nya yang jadi penjamin, bukan role. */
     public function test_scan_boleh_diakses_role_apapun_yang_lagi_login(): void
     {
         $guru = User::factory()->role('guru')->create();
@@ -123,8 +107,7 @@ class SatpamTest extends TestCase
         ]);
         $token = QrDispensasi::token($kadaluwarsa->id);
 
-        $this->actingAs($this->satpam)
-            ->get("/satpam/scan?id={$kadaluwarsa->id}&token={$token}")
+        $this->get("/satpam/scan?id={$kadaluwarsa->id}&token={$token}")
             ->assertOk()->assertSee('Tidak Berlaku');
     }
 
@@ -140,8 +123,7 @@ class SatpamTest extends TestCase
         ]);
         $token = QrDispensasi::token($multiHari->id);
 
-        $this->actingAs($this->satpam)
-            ->get("/satpam/scan?id={$multiHari->id}&token={$token}")
+        $this->get("/satpam/scan?id={$multiHari->id}&token={$token}")
             ->assertOk()->assertSee('Disetujui');
     }
 }

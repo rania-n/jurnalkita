@@ -55,12 +55,6 @@ class DatabaseSeeder extends Seeder
         JadwalWaka::create(['user_id' => $waka2->id, 'hari' => $hariLain[2]]);
         JadwalWaka::create(['user_id' => $waka2->id, 'hari' => $hariLain[3]]);
 
-        $satpam = User::create([
-            'name' => 'Slamet Riyadi', 'email' => 'satpam@jurnalkita.test',
-            'email_verified_at' => now(), 'password' => Hash::make('password'),
-            'role' => 'satpam', 'status' => 'approved', 'no_hp' => '08970022883',
-        ]);
-
         // ----------------------------------------------------------------- Mapel
         $mapels = collect([
             ['kode' => 'MAT', 'nama' => 'Matematika'],

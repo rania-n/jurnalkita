@@ -19,7 +19,6 @@
         $role === 'guru' => 'guru',
         $role === 'siswa' => 'sekretaris',
         $role === 'waka' => 'waka',
-        $role === 'satpam' => 'satpam',
         default => 'default',
     };
 @endphp

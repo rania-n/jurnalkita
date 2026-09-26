@@ -30,7 +30,7 @@ class AkunController extends Controller
         // modal Ubah Akun (DAN modal notifikasi di header) ikut kebuka juga
         // -- lihat catatan di x-admin.modal.
         $data = $request->validateWithBag('buatAkun', [
-            'role' => ['required', 'in:guru,siswa,waka,satpam'],
+            'role' => ['required', 'in:guru,siswa,waka'],
             'sumber' => ['nullable', 'string'],
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'lowercase', Rule::unique('users', 'email')->withoutTrashed()],
@@ -52,9 +52,9 @@ class AkunController extends Controller
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
             'no_hp' => $data['no_hp'] ?? null,
-            // NIP di sini cuma dipakai buat waka/satpam -- guru punya NIP sendiri di
+            // NIP di sini cuma dipakai buat waka -- guru punya NIP sendiri di
             // tabel gurus (diisi di bawah), siswa punya NIS.
-            'nip' => in_array($data['role'], ['waka', 'satpam'], true) ? ($data['nip'] ?? null) : null,
+            'nip' => $data['role'] === 'waka' ? ($data['nip'] ?? null) : null,
             'status' => 'approved',
             'email_verified_at' => now(),
         ]);
@@ -133,7 +133,7 @@ class AkunController extends Controller
             'name' => $data['nama'],
             'email' => $data['email'],
             'no_hp' => $data['no_hp'] ?? null,
-            'nip' => in_array($user->role, ['waka', 'satpam'], true) ? ($data['nip'] ?? null) : $user->nip,
+            'nip' => $user->role === 'waka' ? ($data['nip'] ?? null) : $user->nip,
             ...(filled($data['password'] ?? null) ? ['password' => Hash::make($data['password'])] : []),
         ]);
 

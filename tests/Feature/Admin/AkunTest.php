@@ -64,14 +64,15 @@ class AkunTest extends TestCase
         $this->assertTrue(\Hash::check('rahasia-kuat-123', $user->password));
     }
 
-    public function test_buat_akun_satpam_dengan_no_hp(): void
+    /** Peran satpam sudah dihapus dari sistem -- role ini tidak boleh bisa dibuat lagi. */
+    public function test_buat_akun_dengan_role_satpam_ditolak(): void
     {
         $this->actingAs($this->admin())->post('/admin/akun', $this->akunPayload([
             'role' => 'satpam', 'sumber' => 'baru', 'nama' => 'Pak Satpam',
             'email' => 'satpam@sekolah.test', 'no_hp' => '081234567890',
-        ]))->assertRedirect();
+        ]))->assertSessionHasErrorsIn('buatAkun', ['role']);
 
-        $this->assertDatabaseHas('users', ['email' => 'satpam@sekolah.test', 'role' => 'satpam', 'no_hp' => '081234567890']);
+        $this->assertDatabaseMissing('users', ['email' => 'satpam@sekolah.test']);
     }
 
     public function test_buat_akun_waka_dengan_nip(): void

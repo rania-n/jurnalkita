@@ -154,7 +154,6 @@ class User extends Authenticatable implements MustVerifyEmail
             'guru' => $this->piketHariIni() ? 'Guru Piket' : 'Guru',
             'siswa' => $this->kelasSekretaris() ? 'Pengurus '.$this->kelasSekretaris()->nama : 'Pengurus Kelas',
             'waka' => 'Waka Kesiswaan',
-            'satpam' => 'Satpam',
             default => 'Pengguna',
         };
     }
@@ -166,7 +165,6 @@ class User extends Authenticatable implements MustVerifyEmail
             'admin' => 'admin.dashboard',
             'waka' => 'waka.dashboard',
             'siswa' => 'sekretaris.dashboard',
-            'satpam' => 'satpam.dashboard',
             default => 'guru.dashboard',
         };
     }

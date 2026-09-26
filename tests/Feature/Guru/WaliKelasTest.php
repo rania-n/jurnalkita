@@ -80,9 +80,9 @@ class WaliKelasTest extends TestCase
         $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guru->id]);
         $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L']);
 
-        $satpam = User::factory()->role('satpam')->create();
+        $pencatat = User::factory()->role('admin')->create();
         CatatanTerlambat::create([
-            'siswa_id' => $siswa->id, 'tanggal' => today(), 'jam_datang' => '07:15', 'dicatat_oleh_id' => $satpam->id,
+            'siswa_id' => $siswa->id, 'tanggal' => today(), 'jam_datang' => '07:15', 'dicatat_oleh_id' => $pencatat->id,
         ]);
 
         $this->actingAs($wali)->get('/guru/wali-kelas')

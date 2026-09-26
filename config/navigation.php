@@ -76,11 +76,6 @@ return [
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
-    'satpam' => [
-        ['label' => 'Beranda', 'icon' => 'home', 'route' => 'satpam.dashboard'],
-        ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
-    ],
-
     // Sumber tunggal buat sidebar admin (dipakai x-layouts.admin) SEKALIGUS buat
     // halaman oversight (dispensasi/monitor-piket/rekap-siswa, yang templatenya
     // masih x-layouts.app) -- biar admin lihat sidebar yang SAMA PERSIS di mana

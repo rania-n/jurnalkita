@@ -225,11 +225,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/siswa/ekspor', [RekapController::class, 'eksporSiswa'])->name('siswa.ekspor');
     });
 
-    /* =============================== SATPAM =============================== */
-    Route::middleware('role:satpam')->prefix('satpam')->name('satpam.')->group(function () {
-        Route::get('/', [SatpamController::class, 'dashboard'])->name('dashboard');
-        Route::get('/terlambat', [SatpamController::class, 'terlambatCreate'])->name('terlambat.create');
-        Route::post('/terlambat', [SatpamController::class, 'terlambatStore'])->name('terlambat.store');
-        Route::delete('/terlambat/{catatan}', [SatpamController::class, 'terlambatDestroy'])->name('terlambat.destroy');
-    });
 });

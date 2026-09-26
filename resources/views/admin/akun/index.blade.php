@@ -2,7 +2,7 @@
     // Manajemen Akun = akun yang SUDAH ada (approved/rejected) doang -- pendaftaran
     // yang masih menunggu diputuskan ada di halaman terpisah "Persetujuan Akun"
     // (master.akun.persetujuan), biar nggak campur aksi "putuskan" sama "kelola".
-    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan', 'satpam' => 'Satpam'];
+    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan'];
 
     $users = \App\Models\User::with('guru', 'siswa.kelas')
         ->where('status', '!=', 'pending')
@@ -122,7 +122,7 @@
             <x-ui.choice
                 label="Jenis Akun"
                 name="role"
-                :options="['guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan', 'satpam' => 'Satpam']"
+                :options="['guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan']"
                 value="guru"
             />
 
@@ -155,7 +155,7 @@
             <x-ui.input label="Nama Lengkap" name="nama" id="akun-nama" errorBag="buatAkun" required />
             <x-ui.input label="Email" name="email" type="email" placeholder="email@sekolah.sch.id" errorBag="buatAkun" required />
 
-            {{-- guru baru & waka: NIP (siswa punya NIS sendiri di bawah, satpam tidak perlu) --}}
+            {{-- guru baru & waka: NIP (siswa punya NIS sendiri di bawah) --}}
             <x-ui.input label="NIP (opsional)" name="nip" data-grup="nip" errorBag="buatAkun" />
 
             {{-- semua peran: no. WhatsApp, dipakai kirim link/notifikasi lewat WA --
@@ -206,11 +206,11 @@
             <x-ui.input label="Email" name="email" type="email" errorBag="ubahAkun" required />
             <x-ui.input label="No. WhatsApp (opsional)" name="no_hp" inputmode="numeric" placeholder="08xxxxxxxxxx" errorBag="ubahAkun" />
 
-            {{-- Cuma relevan buat Waka/Satpam (guru punya NIP sendiri di data
+            {{-- Cuma relevan buat Waka (guru punya NIP sendiri di data
                  guru, siswa/pengurus kelas nggak punya NIP sama sekali) --
                  dulu field ini selalu tampil buat SEMUA peran walau labelnya
                  udah bilang "khusus Waka", isinya diam-diam diabaikan server
-                 kalau bukan waka/satpam -- bingung-in, sekarang disembunyiin
+                 kalau bukan waka -- bingung-in, sekarang disembunyiin
                  beneran sesuai peran akun yang lagi diubah (lihat script bawah). --}}
             <div data-grup="nip-ubah">
                 <x-ui.input label="NIP (opsional)" name="nip" errorBag="ubahAkun" />
@@ -281,11 +281,11 @@
                 // Modal Ubah Akun nggak punya pemilih "Jenis Akun" (role akun
                 // nggak bisa diganti dari sini) -- peran akun yang lagi diubah
                 // dibaca dari tombol yang diklik (data-modal-role), dipakai buat
-                // nampilin/nyembunyiin NIP (cuma relevan buat Waka/Satpam).
+                // nampilin/nyembunyiin NIP (cuma relevan buat Waka).
                 const grupNipUbah = document.querySelector('#modal-akun-ubah [data-grup="nip-ubah"]');
                 document.querySelectorAll('[data-modal-open="modal-akun-ubah"]').forEach((btn) => {
                     btn.addEventListener('click', () => {
-                        const tampil = ['waka', 'satpam'].includes(btn.dataset.modalRole);
+                        const tampil = btn.dataset.modalRole === 'waka';
                         grupNipUbah.hidden = !tampil;
                         grupNipUbah.querySelectorAll('input').forEach((i) => (i.disabled = !tampil));
                     });

@@ -36,7 +36,7 @@
 
     @if ($terlambat > 0)
         <x-alert type="warning" class="mb-4">
-            Tercatat <strong>{{ $terlambat }}x</strong> terlambat masuk sekolah (dicatat satpam).
+            Tercatat <strong>{{ $terlambat }}x</strong> terlambat masuk sekolah.
         </x-alert>
     @endif
 

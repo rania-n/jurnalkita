@@ -9,7 +9,7 @@ class ProfilController extends Controller
 {
     /**
      * No. WhatsApp sendiri -- SATU-SATUNYA field akun yang boleh diubah
-     * mandiri oleh guru/siswa/waka/satpam tanpa lewat Admin (nama, email, dll
+     * mandiri oleh guru/siswa/waka tanpa lewat Admin (nama, email, dll
      * tetap harus lewat Manajemen Akun, lihat alert di profil.blade.php).
      * Admin sendiri sudah punya jalur ubah profil sendiri lewat
      * master.akun.update (form terpisah di halaman ini, khusus admin).
