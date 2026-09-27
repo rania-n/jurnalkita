@@ -34,8 +34,8 @@
 
     <x-admin.filters :action="route('guru.wali-kelas.jurnal', $kelas)">
         <input type="hidden" name="status_guru" value="{{ $statusGuru }}">
-        <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" max="{{ today()->toDateString() }}" data-pasangan="sampai" />
-        <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+        <x-admin.f-date name="dari" label="Dari tanggal" max="{{ today()->toDateString() }}" data-pasangan="sampai" />
+        <x-admin.f-date name="sampai" label="Sampai tanggal" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
     </x-admin.filters>
 
     <div class="mb-4 mt-4">

@@ -31,8 +31,8 @@
              kejalanin, nggak ada gunanya nawarin guru milih tanggal masa
              depan (pasti kosong). --}}
         <div class="flex w-full gap-2">
-            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" max="{{ today()->toDateString() }}" data-pasangan="sampai" />
-            <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+            <x-admin.f-date name="dari" label="Dari tanggal" max="{{ today()->toDateString() }}" data-pasangan="sampai" />
+            <x-admin.f-date name="sampai" label="Sampai tanggal" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
         </div>
 
         <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua kelas" />
