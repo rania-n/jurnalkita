@@ -11,7 +11,15 @@
         ->when($kelasId, fn ($b) => $b->where('kelas_id', $kelasId))
         ->when($guruId, fn ($b) => $b->where('guru_id', $guruId))
         ->when($mapelId, fn ($b) => $b->where('mapel_id', $mapelId))
-        ->when($ruang, fn ($b) => $b->where('ruang', $ruang))
+        ->when($ruang, function ($b, $ruang) {
+            $norm = preg_replace('/^r\s*(\d+)$/i', 'R$1', trim($ruang));
+            $spaced = preg_replace('/^r\s*(\d+)$/i', 'R $1', trim($ruang));
+            $b->where(function ($q) use ($ruang, $norm, $spaced) {
+                $q->where('ruang', $ruang)
+                    ->orWhere('ruang', $norm)
+                    ->orWhere('ruang', $spaced);
+            });
+        })
         ->when($jp, fn ($b) => $b->where('jam_ke_mulai', '<=', $jp)->where('jam_ke_selesai', '>=', $jp))
         ->orderByRaw(\App\Support\Db::hariOrder())
         ->orderBy('jam_ke_mulai')
@@ -21,27 +29,49 @@
     $hariTabs = ['semua' => 'Semua'] + $hariLabel;
     $kelasList = \App\Models\Kelas::orderedByHierarchy()->get(['id', 'nama']);
     $mapelList = \App\Models\Mapel::orderBy('nama')->get(['id', 'nama']);
-    $guruList = \App\Models\Guru::orderBy('nama')->get(['id', 'nama']);
+    $guruList = \App\Models\Guru::with('mapels:id')->orderBy('nama')->get(['id', 'nama', 'mapel_utama_id']);
+    $guruMapelMap = $guruList->map(fn ($g) => [
+        'id' => $g->id,
+        'nama' => $g->nama,
+        'mapel_ids' => array_values(array_filter(array_unique(array_merge(
+            $g->mapel_utama_id ? [(int) $g->mapel_utama_id] : [],
+            $g->mapels->pluck('id')->map(fn ($id) => (int) $id)->all()
+        )))),
+    ])->values()->all();
     $ruangList = collect(config('akademik.ruangan'))->map(fn ($r) => ['id' => $r, 'nama' => $r]);
     $jpList = collect(range(1, 13))->mapWithKeys(fn ($i) => [$i => "Jam ke-{$i}"]);
     $queryTanpaHari = request()->except('page', 'hari');
 
-    // Modal Tambah/Ubah Jadwal -- Kelas dipilih DULUAN (bukan Hari), biar begitu
-    // kelasnya diketahui, hari yang buat kelas itu JP-nya udah penuh semua bisa
-    // langsung dikunci di dropdown Hari (nggak ngasih celah bikin jadwal yang
-    // jelas-jelas bakal bentrok). Ganti Kelas nge-reload halaman (bukan AJAX) --
-    // sengaja gitu, biar itungan "hari penuh"-nya seger dari server, bukan JS.
-    // Dibaca dari 'kelas_id' -- SAMA PERSIS sama nama field select-nya di modal
-    // (lihat onchange di bawah, cuma nge-set 1 param ini doang, bukan submit
-    // seluruh form, biar field lain yang masih kosong nggak ikut kebawa jadi
-    // query string & bikin salah kefilter di tabel atas).
     $kelasDipilih = request()->query('kelas_id');
     $hariPenuh = $kelasDipilih ? \App\Models\Jadwal::hariPenuhUntukKelas((int) $kelasDipilih) : [];
     $hariOptions = collect($hariLabel)->map(fn ($l, $v) => in_array($v, $hariPenuh, true) ? "{$l} (Penuh)" : $l)->all();
+
+    // Hitung hari penuh untuk semua kelas sekaligus secara cepat (2 query) untuk update instan di browser tanpa reload
+    $jpSeninKamis = \App\Models\JamPelajaran::where('kategori', 'senin_kamis')->pluck('jam_ke')->all();
+    $jpJumat = \App\Models\JamPelajaran::where('kategori', 'jumat')->pluck('jam_ke')->all();
+    $jadwalsGrouped = \App\Models\Jadwal::all(['kelas_id', 'hari', 'jam_ke_mulai', 'jam_ke_selesai'])->groupBy(['kelas_id', 'hari']);
+    $hariPenuhSemuaKelas = [];
+    foreach ($jadwalsGrouped as $kId => $hariGroup) {
+        foreach ($hariGroup as $h => $jList) {
+            $jpTersedia = ($h === 'jumat') ? $jpJumat : $jpSeninKamis;
+            if (empty($jpTersedia)) {
+                continue;
+            }
+            $terpakai = [];
+            foreach ($jList as $j) {
+                for ($i = $j->jam_ke_mulai; $i <= $j->jam_ke_selesai; $i++) {
+                    $terpakai[$i] = true;
+                }
+            }
+            if (empty(array_diff($jpTersedia, array_keys($terpakai)))) {
+                $hariPenuhSemuaKelas[$kId][] = $h;
+            }
+        }
+    }
 @endphp
 
 <x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran">
-    <x-admin.page title="Jadwal Pelajaran" subtitle="{{ $rows->count() }} jadwal">
+    <x-admin.page title="Jadwal Pelajaran" :subtitle="$rows->count() . ' jadwal'">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-jadwal" data-modal-title="Tambah Jadwal">Tambah Jadwal</x-ui.button>
         </x-slot:action>
@@ -95,18 +125,12 @@
     @endif
 
     <x-admin.modal id="modal-jadwal" title="Tambah Jadwal">
-        {{-- Kelas dipilih DULUAN -- ganti nilainya nge-reload halaman ini (GET,
-             bukan submit beneran) biar server bisa itung ulang hari mana yang
-             buat kelas itu udah penuh (lihat $hariPenuh di atas), lalu modal
-             kebuka lagi otomatis (data-auto-open-jadwal di bawah) dengan Kelas
-             udah kepilih & opsi Hari yang penuh otomatis kekunci. --}}
         <form method="POST" action="{{ route('master.jadwal-pelajaran.save') }}" class="flex flex-col gap-4">
             @csrf
             <x-ui.cari-pilihan
                 label="Kelas"
                 name="kelas_id"
                 :options="$kelasList"
-                :value="$kelasDipilih"
                 placeholder="Ketik nama kelas..."
                 required
             />
@@ -118,19 +142,20 @@
                     :disabled="$hariPenuh"
                     required
                 />
-                @if ($kelasDipilih)
-                    <p class="text-xs text-muted-2">
+                <p data-hari-hint class="text-xs text-muted-2">
+                    @if ($kelasDipilih)
                         @if (count($hariPenuh) > 0)
                             Hari yang ditandai "(Penuh)" sudah tidak memiliki celah jam pelajaran kosong untuk kelas ini, sehingga tidak dapat dipilih.
                         @else
                             Semua hari masih memiliki celah jam pelajaran kosong untuk kelas ini.
                         @endif
-                    </p>
-                @endif
+                    @endif
+                </p>
             </div>
             <x-ui.cari-pilihan
                 label="Mata Pelajaran"
                 name="mapel_id"
+                data-cari-pilihan-mapel
                 :options="$mapelList->map(fn ($m) => ['id' => $m->id, 'nama' => $m->nama])"
                 placeholder="Ketik nama mapel..."
                 tambah-label="Tambah Mata Pelajaran Baru"
@@ -140,6 +165,7 @@
             <x-ui.cari-pilihan
                 label="Guru Pengajar"
                 name="guru_id"
+                data-cari-pilihan-guru
                 :options="$guruList->map(fn ($g) => ['id' => $g->id, 'nama' => $g->nama])"
                 placeholder="Ketik nama guru..."
                 required
@@ -158,7 +184,8 @@
                 label="Ruang"
                 name="ruang"
                 :options="$ruangList"
-                placeholder="Ketik nama ruang... (opsional)"
+                placeholder="Ketik nama ruang..."
+                required
             />
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan</x-ui.button>
@@ -168,8 +195,6 @@
     </x-admin.modal>
 
     @if ($kelasDipilih)
-        {{-- Abis reload gara-gara ganti Kelas (lihat onchange di atas) -- buka
-             lagi modalnya otomatis, jangan nyangkut balik ke tabel biasa. --}}
         <button
             type="button"
             hidden
@@ -177,20 +202,93 @@
             data-modal-open="modal-jadwal"
             data-modal-title="Tambah Jadwal"
         ></button>
-        @push('scripts')
-            <script>window.addEventListener('load', () => document.querySelector('[data-auto-open-jadwal]')?.click());</script>
-        @endpush
     @endif
 
-    {{-- Ganti Kelas (dropdown yang bisa dicari) -> reload halaman ini bawa
-         ?kelas_id=..., sama kayak dulu pas masih <select onchange>, biar
-         "hari penuh" keitung seger dari server (bukan JS). --}}
     @push('scripts')
         <script>
-            document.querySelector('[data-cari-pilihan] input[name="kelas_id"][data-cari-pilihan-value]')?.addEventListener('change', function () {
-                if (!this.value) return;
-                location.href = '{{ route('master.jadwal-pelajaran.index') }}?kelas_id=' + this.value;
-            });
+            (function () {
+                const hariPenuhMap = @json($hariPenuhSemuaKelas);
+                const hariNamaMap = @json($hariLabel);
+                const semuaGuru = @json($guruMapelMap);
+                const modal = document.getElementById('modal-jadwal');
+                const kelasInput = modal?.querySelector('[data-cari-pilihan-value][name="kelas_id"]');
+                const mapelInput = modal?.querySelector('[data-cari-pilihan-value][name="mapel_id"]');
+                const wrapGuru = modal?.querySelector('[data-cari-pilihan-guru]');
+                const inputGuru = wrapGuru?.querySelector('[data-cari-pilihan-input]');
+                const hiddenGuru = wrapGuru?.querySelector('[data-cari-pilihan-value]');
+                const clearBtnGuru = wrapGuru?.querySelector('[data-cari-pilihan-clear]');
+
+                function filterGuruByMapel(mapelId, keepSelection = false) {
+                    if (!wrapGuru) return;
+                    const mId = parseInt(mapelId, 10);
+                    let guruTersedia = semuaGuru;
+                    if (mId) {
+                        const guruCocok = semuaGuru.filter((g) => g.mapel_ids && g.mapel_ids.includes(mId));
+                        if (guruCocok.length > 0) {
+                            guruTersedia = guruCocok;
+                        }
+                    }
+
+                    wrapGuru.dataset.list = JSON.stringify(guruTersedia.map((g) => ({ id: g.id, nama: g.nama })));
+
+                    if (!keepSelection && hiddenGuru && hiddenGuru.value) {
+                        const masihAda = guruTersedia.some((g) => String(g.id) === String(hiddenGuru.value));
+                        if (!masihAda) {
+                            hiddenGuru.value = '';
+                            if (inputGuru) inputGuru.value = '';
+                            if (clearBtnGuru) clearBtnGuru.hidden = true;
+                        }
+                    }
+                }
+
+                function updateHariPenuh(kelasId) {
+                    if (!modal) return;
+                    const penuh = (kelasId && hariPenuhMap[kelasId]) ? hariPenuhMap[kelasId] : [];
+                    const radios = modal.querySelectorAll('input[name="hari"]');
+                    radios.forEach((radio) => {
+                        const isPenuh = penuh.includes(radio.value);
+                        radio.disabled = isPenuh;
+                        const label = radio.closest('label');
+                        if (label) {
+                            label.classList.toggle('cursor-not-allowed', isPenuh);
+                            label.classList.toggle('opacity-40', isPenuh);
+                            label.classList.toggle('cursor-pointer', !isPenuh);
+                            const span = label.querySelector('span');
+                            if (span) {
+                                const baseName = hariNamaMap[radio.value] || radio.value;
+                                span.textContent = isPenuh ? (baseName + ' (Penuh)') : baseName;
+                            }
+                        }
+                        if (isPenuh && radio.checked) {
+                            radio.checked = false;
+                        }
+                    });
+
+                    const hint = modal.querySelector('[data-hari-hint]');
+                    if (hint) {
+                        if (kelasId) {
+                            hint.textContent = penuh.length > 0
+                                ? 'Hari yang ditandai "(Penuh)" sudah tidak memiliki celah jam pelajaran kosong untuk kelas ini, sehingga tidak dapat dipilih.'
+                                : 'Semua hari masih memiliki celah jam pelajaran kosong untuk kelas ini.';
+                        } else {
+                            hint.textContent = '';
+                        }
+                    }
+                }
+
+                kelasInput?.addEventListener('change', function () {
+                    updateHariPenuh(this.value);
+                });
+
+                mapelInput?.addEventListener('change', function () {
+                    filterGuruByMapel(this.value, false);
+                });
+
+                modal?.addEventListener('modal:open', function () {
+                    filterGuruByMapel(mapelInput?.value || '', true);
+                    updateHariPenuh(kelasInput?.value || '');
+                });
+            })();
         </script>
     @endpush
 </x-layouts.admin>

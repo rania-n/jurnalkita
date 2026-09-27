@@ -12,7 +12,7 @@
 @endphp
 
 <x-layouts.admin title="Data Guru" heading="Data Guru">
-    <x-admin.page title="Data Guru" subtitle="{{ $rows->count() }} guru">
+    <x-admin.page title="Data Guru" :subtitle="$rows->count() . ' guru'">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-guru" data-modal-title="Tambah Guru">Tambah Guru</x-ui.button>
         </x-slot:action>

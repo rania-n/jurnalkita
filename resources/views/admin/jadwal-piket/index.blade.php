@@ -99,6 +99,7 @@
                 label="Guru Piket (boleh pilih lebih dari 1)"
                 name="guru_ids"
                 :options="$guruList"
+                required
             />
             <x-ui.input label="Tanggal Mulai" name="tanggal" type="date" :value="old('tanggal', today()->isWeekend() ? today()->nextWeekday()->toDateString() : today()->toDateString())" required />
             <p class="-mt-2 text-xs text-muted-2">Hari piket ditentukan otomatis dari tanggal. Jadwal berulang mengikuti interval yang dipilih.</p>

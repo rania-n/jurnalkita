@@ -10,7 +10,7 @@
 <x-layouts.admin title="Persetujuan Akun" heading="Persetujuan Akun">
     <x-admin.page
         title="Persetujuan Akun"
-        subtitle="{{ $users->count() }} pendaftaran menunggu diputuskan"
+        :subtitle="$users->count() . ' pendaftaran menunggu diputuskan'"
     />
 
     @if ($users->isEmpty())

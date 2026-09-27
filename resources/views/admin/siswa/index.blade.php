@@ -54,7 +54,7 @@
 @endphp
 
 <x-layouts.admin title="Data Siswa" heading="Data Siswa">
-    <x-admin.page title="Data Siswa" subtitle="{{ $rows->total() }} siswa">
+    <x-admin.page title="Data Siswa" :subtitle="$rows->total() . ' siswa'">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-siswa" data-modal-title="Tambah Siswa">Tambah Siswa</x-ui.button>
         </x-slot:action>
@@ -91,6 +91,7 @@
                         name="siswa_ids"
                         :options="$siswaAktifPklOptions"
                         hint="Cari nama, lalu centang satu atau beberapa siswa."
+                        required
                     />
                 </div>
                 <div class="flex flex-col justify-between gap-4">
