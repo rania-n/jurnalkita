@@ -373,7 +373,7 @@ class JurnalController extends Controller
                 ->with('info', 'Jurnal untuk jadwal ini di tanggal itu sudah dibuat.');
         }
 
-        $presensiSubmit = $data['presensi'] ?? [];
+        $presensiSubmit = $data['status_guru'] === 'tidak_hadir' ? [] : ($data['presensi'] ?? []);
         $presensiFallback = PresensiDefault::untukKelas(
             $jadwal->kelas->siswas, $jadwal->kelas_id, $tanggal->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
         );
@@ -389,9 +389,9 @@ class JurnalController extends Controller
             ]);
 
             // Presensi ikut isi jurnal sendiri, bukan langkah terpisah lagi. Kalau
-            // guru nggak sempat sentuh grid presensinya (mis. kirim manual lewat
-            // API), tetap jatuh ke default (dispensasi/carry-over/hadir, lihat
-            // PresensiDefault).
+            // guru tidak hadir atau nggak sempat sentuh grid presensinya (mis. kirim
+            // manual lewat API), tetap jatuh ke default (dispensasi/carry-over/hadir,
+            // lihat PresensiDefault).
             foreach ($jadwal->kelas->siswas as $siswa) {
                 if (isset($presensiSubmit[$siswa->id])) {
                     $isi = $presensiSubmit[$siswa->id];
@@ -416,8 +416,12 @@ class JurnalController extends Controller
             $jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal));
         }
 
+        $pesanSukses = $data['status_guru'] === 'tidak_hadir'
+            ? 'Laporan ketidakhadiran tersimpan.'
+            : 'Jurnal & presensi tersimpan.';
+
         return redirect()->route('jurnal.index', ['lihat' => $jurnal->id])
-            ->with('success', 'Jurnal & presensi tersimpan.');
+            ->with('success', $pesanSukses);
     }
 
     /* --------------------------------------------------- Tidak hadir, massal */

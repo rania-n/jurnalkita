@@ -116,6 +116,44 @@ class JurnalTest extends TestCase
             ->assertOk()->assertSee('Presensi')->assertSee('A')->assertSee('B');
     }
 
+    public function test_form_jurnal_menyembunyikan_presensi_saat_status_guru_tidak_hadir(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->get('/guru/jurnal/tambah?jadwal='.$this->jadwal->id.'&status_guru=tidak_hadir')
+            ->assertOk();
+
+        $response->assertSee('id="blok-presensi"', false);
+        $this->assertMatchesRegularExpression('/id="blok-presensi"\s+hidden/', $response->getContent());
+        $response->assertSee('Simpan Jurnal');
+    }
+
+    public function test_simpan_jurnal_tidak_hadir_tidak_memerlukan_presensi_manual(): void
+    {
+        Storage::fake('public');
+
+        $response = $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1,
+            'jam_ke_selesai' => 2,
+            'status_guru' => 'tidak_hadir',
+            'alasan' => 'sakit',
+            'tugas_tambahan' => 'Kerjakan LKS halaman 10-15',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Laporan ketidakhadiran tersimpan.');
+
+        $jurnal = Jurnal::first();
+        $this->assertNotNull($jurnal);
+        $this->assertSame($this->guru->id, $jurnal->guru_id);
+        $this->assertSame('tidak_hadir', $jurnal->status_guru);
+        $this->assertSame('Sakit', $jurnal->alasan);
+        $this->assertSame('Kerjakan LKS halaman 10-15', $jurnal->tugas_tambahan);
+        $this->assertSame('terverifikasi', $jurnal->status_verifikasi);
+        $this->assertCount(2, $jurnal->absensis);
+        $this->assertTrue($jurnal->absensis->every(fn ($a) => $a->status === 'hadir'));
+    }
+
     public function test_simpan_jurnal_dengan_presensi_manual_dalam_satu_form(): void
     {
         Storage::fake('public');
