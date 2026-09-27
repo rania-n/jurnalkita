@@ -1,7 +1,7 @@
 <x-layouts.app title="Wali Kelas">
     {{-- Judul size="sm" -- dikecilin (bukan dihilangin) biar halaman tetap
          ada kop. --}}
-    <x-page-header title="Wali Kelas" subtitle="Anda wali di beberapa kelas — pilih dulu" size="sm" />
+    <x-page-header title="Wali Kelas" subtitle="Anda adalah wali di beberapa kelas, silakan pilih salah satu" size="sm" />
 
     <x-ui.card-list class="grid-fill-last">
         @foreach ($kelasList as $k)

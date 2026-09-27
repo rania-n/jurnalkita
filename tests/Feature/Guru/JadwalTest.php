@@ -95,7 +95,7 @@ class JadwalTest extends TestCase
         $this->actingAs($piket)->get('/guru')
             ->assertOk()
             ->assertSee('Monitor Piket')
-            ->assertSee('Buat Dispen');
+            ->assertSee('Ajukan Dispensasi');
 
         $bukanPiket = User::factory()->role('guru')->create();
         Guru::create(['user_id' => $bukanPiket->id, 'nama' => 'Guru Biasa']);

@@ -1,7 +1,7 @@
 <x-layouts.app title="Jurnal Kelas Wali" width="wide">
     <x-page-header
         title="Jurnal Kelas {{ $kelas->nama }}"
-        subtitle="Lihat materi & presensi yang diisi guru -- Anda wali kelas ini"
+        subtitle="Lihat materi dan presensi yang diisi guru — Anda adalah wali kelas ini"
         :back="$adaKelasLain ? route('guru.wali-kelas.index') : null"
         size="sm"
     />

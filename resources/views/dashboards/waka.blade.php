@@ -38,12 +38,12 @@
 
     @if ($adaJadwalWaka)
         @if ($bertugasHariIni)
-            <x-alert type="info" class="mb-4">Anda bertugas konfirmasi dispensasi <strong>hari ini</strong>.</x-alert>
+            <x-alert type="info" class="mb-4">Anda bertugas mengonfirmasi dispensasi <strong>hari ini</strong>.</x-alert>
         @else
             <x-alert type="info" class="mb-4">
                 Bukan giliran Anda hari ini
-                @if ($wakaBertugas) — link WA persetujuan otomatis dikirim ke <strong>{{ $wakaBertugas->name }}</strong>. @endif
-                Anda tetap bisa membuka &amp; memutuskan dispensasi kapan saja kalau perlu.
+                @if ($wakaBertugas) — tautan WhatsApp untuk persetujuan dikirim otomatis ke <strong>{{ $wakaBertugas->name }}</strong>. @endif
+                Anda tetap dapat membuka dan memutuskan dispensasi kapan saja jika diperlukan.
             </x-alert>
         @endif
     @endif
@@ -77,7 +77,7 @@
             </span>
             <div class="flex-1">
                 <p class="text-sm font-bold text-ink">Rekap Kehadiran Siswa</p>
-                <p class="text-xs text-muted">Lintas kelas, buat evaluasi kedisiplinan</p>
+                <p class="text-xs text-muted">Lintas kelas, untuk evaluasi kedisiplinan</p>
             </div>
             <x-icon name="chevron_right" :size="20" class="text-muted" />
         </a>
@@ -90,7 +90,7 @@
         </div>
 
         @if ($jadwalHariIniWaka->isEmpty())
-            <x-ui.empty icon="event_busy" title="Tidak ada jadwal mengajar hari ini" desc="Mau isi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.">
+            <x-ui.empty icon="event_busy" title="Tidak ada jadwal mengajar hari ini" desc="Ingin mengisi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.">
                 <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
             </x-ui.empty>
         @else
@@ -136,7 +136,7 @@
                 >
                     <x-slot:badge>
                         @if ($d->sudahKadaluarsa())
-                            <x-ui.status-badge status="kadaluarsa">Kadaluarsa</x-ui.status-badge>
+                            <x-ui.status-badge status="kadaluarsa">Kedaluwarsa</x-ui.status-badge>
                         @else
                             <x-ui.status-badge :status="['pending' => 'menunggu', 'approved' => 'disetujui', 'rejected' => 'ditolak'][$d->status_akhir]">
                                 {{ ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$d->status_akhir] }}

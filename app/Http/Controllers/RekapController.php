@@ -70,7 +70,7 @@ class RekapController extends Controller
         [$dari, $sampai, $siswas, $rekap] = $this->data($request);
 
         if ($siswas->count() > self::BATAS_EKSPOR_SISWA) {
-            return back()->with('error', "Terlalu banyak siswa untuk 1 laporan PDF ({$siswas->count()} siswa). Pilih kelas tertentu dulu lewat filter \"Kelas\", atau persempit rentang tanggalnya, baru ekspor lagi.");
+            return back()->with('error', "Terlalu banyak siswa untuk satu laporan PDF ({$siswas->count()} siswa). Silakan pilih kelas tertentu melalui filter \"Kelas\", atau persempit rentang tanggal, kemudian ekspor kembali.");
         }
 
         // Margin aman tambahan buat sisi atas ambang (mis. 400-500 siswa) --

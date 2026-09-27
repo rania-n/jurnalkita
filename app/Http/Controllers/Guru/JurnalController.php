@@ -430,7 +430,7 @@ class JurnalController extends Controller
         abort_unless($jadwal->guru_id === $guru->id, 403);
 
         $tanggal = $this->tanggalUntukJadwal($jadwal, $mode, $request);
-        abort_unless($this->jadwalBolehDiisi($jadwal, $mode, $tanggal), 403, 'Belum waktunya isi jurnal untuk jadwal ini -- tunggu jam pelajarannya berlangsung.');
+        abort_unless($this->jadwalBolehDiisi($jadwal, $mode, $tanggal), 403, 'Belum waktunya mengisi jurnal untuk jadwal ini. Silakan coba lagi setelah jam pelajarannya berlangsung.');
 
         // Jam mulai & selesai SELALU ikut jadwal yang dipilih (bukan input klien) --
         // ini yang beneran dijadwalkan, guru nggak bisa ngarang jam sendiri lewat
@@ -444,7 +444,7 @@ class JurnalController extends Controller
             ->first();
         if ($sudahAda) {
             return $this->redirectRiwayat(['lihat' => $sudahAda->id])
-                ->with('info', 'Jurnal untuk jadwal ini di tanggal itu sudah dibuat.');
+                ->with('info', 'Jurnal untuk jadwal ini pada tanggal tersebut sudah dibuat.');
         }
 
         $presensiSubmit = $data['status_guru'] === 'tidak_hadir' ? [] : ($data['presensi'] ?? []);

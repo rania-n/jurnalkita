@@ -237,7 +237,7 @@ class VerifikasiJurnalTest extends TestCase
 
         // Default (belum ada baris PengaturanJurnal sama sekali) -> 'disiplin'.
         $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti')
-            ->assertOk()->assertSee('Belum waktunya isi jurnal');
+            ->assertOk()->assertSee('Belum waktunya mengisi jurnal');
 
         $ketua = Siswa::where('nis', '001')->firstOrFail();
         $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
@@ -266,7 +266,7 @@ class VerifikasiJurnalTest extends TestCase
         // selalu tampil apa pun kondisinya).
         $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti')
             ->assertOk()->assertSee('Matematika')
-            ->assertSee('Otomatis ikut jam pelajaran yang lagi berlangsung sekarang.');
+            ->assertSee('Otomatis mengikuti jam pelajaran yang sedang berlangsung sekarang.');
 
         $ketua = Siswa::where('nis', '001')->firstOrFail();
         $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
@@ -288,7 +288,7 @@ class VerifikasiJurnalTest extends TestCase
         $tglCustom = Carbon::parse('2 weeks ago monday')->toDateString();
 
         $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti?tanggal='.$tglCustom)
-            ->assertOk()->assertSee('Bebas Isi Jurnal (Tanggal Custom)')->assertSee('Matematika');
+            ->assertOk()->assertSee('Bebas Isi Jurnal (Tanggal Pilihan Sendiri)')->assertSee('Matematika');
 
         $ketua = Siswa::where('nis', '001')->firstOrFail();
         $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [

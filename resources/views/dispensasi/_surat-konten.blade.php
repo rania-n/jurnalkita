@@ -82,7 +82,7 @@
         <img src="{{ $qrUrl }}" alt="QR dispensasi" class="h-auto w-[200px] max-w-full rounded-lg">
         <p class="text-center text-xs text-muted-2">
             Tunjukkan QR ini ke satpam saat keluar sekolah.<br>
-            Kode berganti tiap 10 detik — kalau tidak terbaca, tunggu sebentar lalu coba lagi.
+            Kode berganti setiap 10 detik. Jika tidak terbaca, tunggu sebentar lalu coba lagi.
         </p>
     </div>
 @elseif ($dispensasi->status_akhir === 'pending')

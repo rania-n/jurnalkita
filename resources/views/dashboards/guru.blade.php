@@ -130,9 +130,9 @@
                 </span>
                 <h3 class="mt-2 text-lg font-bold text-ink">Halo, {{ auth()->user()->name }}!</h3>
                 @if ($piketHariIni)
-                    <p class="text-sm text-muted">Anda bertugas piket hari ini. Mau langsung pantau piket, atau lihat ringkasan beranda dulu?</p>
+                    <p class="text-sm text-muted">Anda bertugas piket hari ini. Ingin langsung memantau piket, atau melihat ringkasan beranda terlebih dahulu?</p>
                 @else
-                    <p class="text-sm text-muted">Mau langsung isi jurnal, atau lihat-lihat beranda dulu?</p>
+                    <p class="text-sm text-muted">Ingin langsung mengisi jurnal, atau melihat-lihat beranda terlebih dahulu?</p>
                 @endif
             </div>
 
@@ -142,7 +142,7 @@
                 @else
                     <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="w-full">Isi Jurnal Sekarang</x-ui.button>
                 @endif
-                <x-ui.button type="button" variant="secondary" data-modal-close class="w-full">Lihat Beranda Dulu</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="w-full">Lihat Beranda Saja</x-ui.button>
             </div>
         </dialog>
 
@@ -214,7 +214,7 @@
                     <x-icon name="add_circle" :size="24" />
                 </span>
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-ink">Buat Dispen</p>
+                    <p class="text-sm font-bold text-ink">Ajukan Dispensasi</p>
                     <p class="truncate text-xs text-muted">Izin keluar siswa / lomba</p>
                 </div>
                 <x-icon name="chevron_right" :size="20" class="shrink-0 text-muted" />
@@ -391,7 +391,7 @@
                             </span>
                             <div class="min-w-0">
                                 <h3 class="text-sm font-bold text-ink">Tim Piket & Koordinasi</h3>
-                                <p class="truncate text-[11px] text-muted">{{ $rekanPiket->count() }} guru piket hari ini + Waka standby</p>
+                                <p class="truncate text-[11px] text-muted">{{ $rekanPiket->count() }} guru piket hari ini + Waka siap dihubungi</p>
                             </div>
                         </div>
                         <span class="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-alt text-muted transition-colors group-hover:text-ink">
@@ -435,7 +435,7 @@
                                 </div>
                             @endif
 
-                            <p class="mt-2 text-[11px] font-bold tracking-wide text-muted-2 uppercase">Waka Kesiswaan Standby</p>
+                            <p class="mt-2 text-[11px] font-bold tracking-wide text-muted-2 uppercase">Waka Kesiswaan Siap Dihubungi</p>
                             @if ($wakaBertugas)
                                 <div class="flex items-center justify-between gap-2 rounded-xl border border-surface-alt/50 bg-surface/50 p-2.5">
                                     <div class="min-w-0">
@@ -534,7 +534,7 @@
         </div>
 
         @if ($jadwalHariIni->isEmpty())
-            <x-ui.empty icon="event_busy" title="Tidak ada jadwal hari ini" desc="Mau isi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.">
+            <x-ui.empty icon="event_busy" title="Tidak ada jadwal hari ini" desc="Ingin mengisi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.">
                 <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
             </x-ui.empty>
         @else

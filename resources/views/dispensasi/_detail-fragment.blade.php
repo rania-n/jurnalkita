@@ -72,7 +72,7 @@
             <p class="text-sm font-bold text-ink">
                 Waka Kesiswaan: {{ $waText }}
                 @if ($dispensasi->sudahKadaluarsa())
-                    <x-ui.status-badge status="kadaluarsa" class="ml-1 align-middle">Kadaluarsa</x-ui.status-badge>
+                    <x-ui.status-badge status="kadaluarsa" class="ml-1 align-middle">Kedaluwarsa</x-ui.status-badge>
                 @endif
             </p>
             @if ($dispensasi->waka)<p class="text-xs text-muted">Oleh {{ $dispensasi->waka->name }}</p>@endif

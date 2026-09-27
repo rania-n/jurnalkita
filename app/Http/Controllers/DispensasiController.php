@@ -348,7 +348,7 @@ class DispensasiController extends Controller
 
         if ($dispensasi->batalkanKalauKadaluarsa()) {
             return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])
-                ->with('error', 'Dispensasi ini sudah kadaluarsa (melewati tanggal berlaku tanpa keputusan) dan otomatis dibatalkan.');
+                ->with('error', 'Dispensasi ini sudah kedaluwarsa (melewati tanggal berlaku tanpa keputusan) dan otomatis dibatalkan.');
         }
         abort_unless($dispensasi->status_waka === 'pending', 403);
 

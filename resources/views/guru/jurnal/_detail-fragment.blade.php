@@ -19,9 +19,9 @@
 <div class="flex flex-col gap-4">
     <x-alert :type="$jurnal->verifikasiAbsen() || $vs === 'terverifikasi' ? 'success' : ($jurnal->otomatisDiverifikasi() ? 'info' : ($vs === 'revisi' ? 'error' : 'info'))">
         @if ($jurnal->verifikasiAbsen())
-            Tugas untuk siswa otomatis disetujui. Tidak perlu diperiksa sekre; jurnal masih bisa diubah.
+            Tugas untuk siswa otomatis disetujui. Tidak perlu diperiksa pengurus kelas; jurnal tetap bisa diubah.
         @elseif ($jurnal->otomatisDiverifikasi())
-                Jurnal <strong>belum diperiksa oleh sekre</strong>. Jurnal tetap menunggu keputusan dan masih bisa diubah.
+                Jurnal <strong>belum diperiksa oleh pengurus kelas</strong>. Jurnal masih menunggu keputusan dan tetap bisa diubah.
         @elseif ($vs === 'terverifikasi')
             Jurnal sudah <strong>diverifikasi</strong> oleh pengurus kelas
             @if ($jurnal->verifikator) ({{ $jurnal->verifikator->nama }}) @endif. Tidak bisa diubah lagi.
@@ -29,7 +29,7 @@
             Pengurus kelas meminta <strong>perbaikan</strong>: {{ $jurnal->catatan_verifikasi ?: 'tidak ada catatan.' }}
             Perbaiki lalu simpan — jurnal akan diperiksa ulang.
         @else
-            Belum diperiksa sekre. Jurnal masih bisa diubah selama menunggu.
+            Belum diperiksa pengurus kelas. Jurnal masih bisa diubah selama menunggu.
         @endif
     </x-alert>
 
@@ -90,7 +90,7 @@
                  lain, biar keliatan masih popup yang sama persis. --}}
             <x-ui.button type="button" data-modal-ajax-swap="{{ route('jurnal.edit.fragment', $jurnal) }}" icon="edit" class="flex-1">Ubah Jurnal</x-ui.button>
             <form method="POST" action="{{ route('jurnal.destroy', $jurnal) }}" class="flex-1"
-                  data-confirm="Hapus jurnal ini beserta presensinya? Tindakan ini tidak bisa dibatalkan lewat aplikasi.">
+                  data-confirm="Hapus jurnal ini beserta presensinya? Tindakan ini tidak dapat dibatalkan melalui aplikasi.">
                 @csrf @method('DELETE')
                 <x-ui.button type="submit" variant="danger" icon="delete" class="w-full">Hapus Jurnal</x-ui.button>
             </form>

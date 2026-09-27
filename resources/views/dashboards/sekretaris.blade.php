@@ -49,7 +49,7 @@
                 </span>
                 <div class="flex-1">
                     <p class="text-sm font-bold text-ink">Isi Jurnal Pengganti</p>
-                    <p class="text-xs text-muted">Untuk guru tidak hadir yang memberi tugas via WA</p>
+                    <p class="text-xs text-muted">Untuk guru tidak hadir yang memberi tugas melalui WhatsApp</p>
                 </div>
                 <x-icon name="chevron_right" :size="20" class="text-muted" />
             </a>

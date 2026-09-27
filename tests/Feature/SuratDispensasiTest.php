@@ -144,7 +144,7 @@ class SuratDispensasiTest extends TestCase
 
         // Halaman persetujuan tetap kebuka (link 48 jam masih valid), tapi
         // dispensasinya sendiri udah kesapu jadi rejected pas halaman ini diload.
-        $this->get($tautan)->assertOk()->assertSee('kadaluarsa')->assertDontSee('Setujui');
+        $this->get($tautan)->assertOk()->assertSee('kedaluwarsa')->assertDontSee('Setujui');
         $this->assertSame('rejected', $lewat->fresh()->status_waka);
 
         $this->post($tautan, ['keputusan' => 'approved'])->assertStatus(409);

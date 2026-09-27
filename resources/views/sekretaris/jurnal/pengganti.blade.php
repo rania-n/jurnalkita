@@ -1,7 +1,7 @@
 <x-layouts.app title="Jurnal Pengganti">
     <x-page-header
         title="Isi Jurnal Pengganti"
-        subtitle="Untuk guru yang memberi tugas via WA & tidak sempat mengisi sendiri"
+        subtitle="Untuk guru yang memberi tugas melalui WhatsApp dan tidak sempat mengisi sendiri"
         :back="route('sekretaris.jurnal.index')"
         size="sm"
     />
@@ -19,8 +19,8 @@
                         <x-icon name="history_edu" :size="20" />
                     </span>
                     <div>
-                        <h3 class="text-sm font-bold text-ink">Bebas Isi Jurnal (Tanggal Custom)</h3>
-                        <p class="text-xs text-muted">Bisa mengisi jurnal pengganti dulu-dulu yang belum sempat dibuat. Pilih tanggal di sebelah kanan.</p>
+                        <h3 class="text-sm font-bold text-ink">Bebas Isi Jurnal (Tanggal Pilihan Sendiri)</h3>
+                        <p class="text-xs text-muted">Anda dapat mengisi jurnal pengganti untuk hari-hari sebelumnya yang belum sempat dibuat. Pilih tanggal di sebelah kanan.</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -58,14 +58,14 @@
     @if ($jurnalDiblokirIstirahat)
         <x-ui.empty
             icon="hourglass_empty"
-            title="Belum waktunya isi jurnal"
+            title="Belum waktunya mengisi jurnal"
             desc="Sedang di luar jam pelajaran (istirahat/pergantian jam). Coba lagi begitu jam pelajaran berikutnya mulai."
         />
     @elseif ($jadwals->isEmpty())
         <x-ui.empty
             icon="event_busy"
-            :title="$jumlahSudahDiisi > 0 ? 'Semua jadwal sudah diisi' : 'Tidak ada jadwal kelas ini di tanggal itu'"
-            :desc="$jumlahSudahDiisi > 0 ? 'Mantap, kelar semua! Kalau ada yang perlu diubah, buka dari Riwayat.' : null"
+            :title="$jumlahSudahDiisi > 0 ? 'Semua jadwal sudah diisi' : 'Tidak ada jadwal kelas ini pada tanggal tersebut'"
+            :desc="$jumlahSudahDiisi > 0 ? 'Semua jadwal pada tanggal ini sudah diisi. Jika ada yang perlu diubah, buka dari Riwayat.' : null"
         />
     @else
         <form method="POST" action="{{ route('sekretaris.jurnal.pengganti.store') }}">
@@ -79,7 +79,7 @@
                         {{ $jadwalTunggalTerkunci->mapel->nama }} — {{ $jadwalTunggalTerkunci->guru->nama }} (JP {{ $jadwalTunggalTerkunci->jam_ke_mulai }}–{{ $jadwalTunggalTerkunci->jam_ke_selesai }}{{ $jamOpsi ? " · {$jamOpsi}" : '' }})
                     </x-ui.field-static>
                     <input type="hidden" name="jadwal_id" id="jadwal_id" value="{{ $jadwalTunggalTerkunci->id }}" data-mulai="{{ $jadwalTunggalTerkunci->jam_ke_mulai }}" data-selesai="{{ $jadwalTunggalTerkunci->jam_ke_selesai }}">
-                    <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Otomatis ikut jam pelajaran yang lagi berlangsung sekarang.</p>
+                    <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Otomatis mengikuti jam pelajaran yang sedang berlangsung sekarang.</p>
                 @else
                     <x-ui.select label="Mata Pelajaran (jadwal)" name="jadwal_id" id="jadwal_id" class="sm:col-span-2" required>
                         <option value="" disabled selected hidden>Pilih jadwal</option>
@@ -98,7 +98,7 @@
                 <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" id="jam_ke_selesai">
                     @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_selesai') == $i)>Jam ke-{{ $i }}</option>@endfor
                 </x-ui.select>
-                <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">Pilih jadwal dulu — jam mulai & selesai otomatis mengikuti jadwal itu. Boleh diubah manual kalau perlu.</p>
+                <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">Pilih jadwal terlebih dahulu — jam mulai dan selesai otomatis mengikuti jadwal tersebut. Dapat diubah manual jika perlu.</p>
 
                 {{-- status_guru nggak lagi dipilih di sini -- pengganti = guru
                      nggak hadir, jadi server selalu simpen 'tidak_hadir'
@@ -136,7 +136,7 @@
                         const jpMulai = jamPelajaran[selectMulai.value];
                         const jpSelesai = jamPelajaran[selectSelesai.value];
                         const waktu = (jpMulai && jpSelesai) ? ` Waktunya ${jpMulai.mulai}–${jpSelesai.selesai}.` : '';
-                        keterangan.textContent = 'Jam otomatis ikut jadwal yang dipilih.' + waktu + ' Boleh diubah manual kalau perlu.';
+                        keterangan.textContent = 'Jam otomatis mengikuti jadwal yang dipilih.' + waktu + ' Dapat diubah manual jika perlu.';
                     }
 
                     function sync() {

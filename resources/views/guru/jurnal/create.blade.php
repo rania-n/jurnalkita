@@ -16,8 +16,8 @@
                         <x-icon name="history_edu" :size="20" />
                     </span>
                     <div>
-                        <h3 class="text-sm font-bold text-ink">Bebas Isi Jurnal (Tanggal Custom)</h3>
-                        <p class="text-xs text-muted">Bisa mengisi jurnal dulu-dulu yang belum sempat dibuat. Pilih tanggal di sebelah kanan.</p>
+                        <h3 class="text-sm font-bold text-ink">Bebas Isi Jurnal (Tanggal Pilihan Sendiri)</h3>
+                        <p class="text-xs text-muted">Anda dapat mengisi jurnal untuk hari-hari sebelumnya yang belum sempat dibuat. Pilih tanggal di sebelah kanan.</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -58,7 +58,7 @@
         <x-ui.empty
             icon="event_busy"
             :title="$jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi' : 'Belum ada jadwal mengajar'"
-            :desc="$jumlahSudahDiisiHariIni > 0 ? 'Mantap, kelar semua! Kalau ada yang perlu diubah, buka dari Riwayat.' : 'Hubungi admin untuk menambahkan jadwal Anda.'"
+            :desc="$jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi. Jika ada yang perlu diubah, buka dari Riwayat.' : 'Hubungi admin untuk menambahkan jadwal Anda.'"
         />
     @elseif ($jurnalDiblokirIstirahat)
         {{-- Lagi istirahat/pergantian jam (masih dalam rentang jam sekolah,
@@ -72,7 +72,7 @@
              jadi celah buat "ngisi jurnal" jam yang nggak beneran dijalani. --}}
         <x-ui.empty
             icon="hourglass_empty"
-            title="Belum waktunya isi jurnal"
+            title="Belum waktunya mengisi jurnal"
             desc="Sedang di luar jam pelajaran (istirahat/pergantian jam). Coba lagi begitu jam pelajaran Anda mulai."
         />
     @else
@@ -161,7 +161,7 @@
                     <x-ui.choice
                         label="Tidak Hadir 1 Hari Penuh?"
                         name="tidak_hadir_sehari_penuh"
-                        :options="['tidak' => 'Cuma Kelas Ini', 'ya' => 'Ya, Semua Kelas']"
+                        :options="['tidak' => 'Hanya Kelas Ini', 'ya' => 'Ya, Semua Kelas']"
                         value="tidak"
                         data-toggle-massal
                     />
@@ -171,7 +171,7 @@
                          bawah yang nampilin/nyembunyiin & disable/enable-nya. --}}
                     <div id="blok-massal-kelas" class="flex flex-col gap-2" hidden>
                         <x-ui.label>Kelas yang Ditandai</x-ui.label>
-                        <p class="-mt-1 text-xs text-muted-2">Semua tercentang otomatis -- ketuk kartunya buat centang/batal. Alasan & Tugas untuk Siswa di bawah berlaku buat semua yang tercentang, kecuali diisi khusus.</p>
+                        <p class="-mt-1 text-xs text-muted-2">Semua kelas tercentang otomatis — ketuk kartu untuk mencentang atau membatalkannya. Alasan dan Tugas untuk Siswa di bawah berlaku untuk semua kelas yang tercentang, kecuali diisi khusus.</p>
 
                         <div class="flex flex-col gap-2">
                             @foreach ($jadwals as $j)
@@ -201,10 +201,10 @@
                                     <div class="border-t border-surface-alt pt-2">
                                         <button type="button" data-toggle-khusus="{{ $j->id }}" class="flex items-center gap-1 text-xs font-semibold text-navy hover:underline">
                                             <x-icon name="add_circle" :size="14" />
-                                            Tugas khusus buat kelas ini
+                                            Tugas khusus untuk kelas ini
                                         </button>
                                         <div id="tugas-khusus-{{ $j->id }}" class="mt-2" hidden>
-                                            <x-ui.input name="tugas_khusus[{{ $j->id }}]" placeholder="Tugas khusus (kosongkan buat pakai default di bawah)" />
+                                            <x-ui.input name="tugas_khusus[{{ $j->id }}]" placeholder="Tugas khusus (kosongkan untuk memakai default di bawah)" />
                                         </div>
                                     </div>
                                 </div>
@@ -238,7 +238,7 @@
                         @endif
                     </x-ui.field-static>
                     <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
-                    <p class="-mt-1 text-xs text-muted-2">Otomatis ikut jadwal Anda sekarang. Salah jadwal? Hubungi Admin.</p>
+                    <p class="-mt-1 text-xs text-muted-2">Otomatis mengikuti jadwal Anda saat ini. Jika jadwal ini salah, hubungi Admin.</p>
                 @else
                     {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
                          yang tepat ikut kerender dari server. Materi/dll yang sudah
@@ -348,7 +348,7 @@
                 </div>
             @else
                 <div id="blok-alert-pilih-jadwal" @if($statusGuruAwal !== 'hadir') hidden @endif>
-                    <x-alert type="info" class="mt-6">Pilih kelas & mata pelajaran dulu di atas untuk mengisi presensi siswa.</x-alert>
+                    <x-alert type="info" class="mt-6">Pilih kelas dan mata pelajaran terlebih dahulu di atas untuk mengisi presensi siswa.</x-alert>
                 </div>
             @endif
 

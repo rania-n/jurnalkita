@@ -1,7 +1,7 @@
 <x-layouts.app title="Rekap Kelas Wali" width="wide">
     <x-page-header
         title="Rekap Kehadiran Kelas"
-        :subtitle="$kelas->nama . ' · Anda wali kelas ini'"
+        :subtitle="$kelas->nama . ' · Anda adalah wali kelas ini'"
         :back="$adaKelasLain ? route('guru.wali-kelas.index') : null"
         size="sm"
     />

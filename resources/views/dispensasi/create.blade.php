@@ -1,4 +1,4 @@
-<x-layouts.app title="Buat Dispen">
+<x-layouts.app title="Ajukan Dispensasi">
     <x-page-header
         title="Form Pengajuan Dispensasi"
         subtitle="Diajukan oleh guru piket"
@@ -13,7 +13,7 @@
 
             <x-ui.input label="Tanggal" name="tanggal" type="date" :value="old('tanggal', now()->toDateString())" required />
             <x-ui.input label="Sampai Tanggal (opsional)" name="tanggal_selesai" type="date" :value="old('tanggal_selesai')" />
-            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Kosongkan "Sampai Tanggal" kalau dispensasinya cuma 1 hari. Isi kalau lebih dari 1 hari (mis. sakit 3 hari).</p>
+            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Kosongkan "Sampai Tanggal" jika dispensasi hanya berlaku 1 hari. Isi jika berlaku lebih dari 1 hari (mis. sakit 3 hari).</p>
 
             <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai">
                 <option value="">Sehari penuh</option>
@@ -24,7 +24,7 @@
                 @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_selesai') == $i)>Jam ke-{{ $i }}</option>@endfor
             </x-ui.select>
             <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">
-                Kosongkan keduanya kalau izin berlaku sehari penuh. Kalau cuma tahu jam
+                Kosongkan keduanya jika izin berlaku sehari penuh. Jika hanya mengetahui jam
                 mulainya (mis. keluar dari jam ke-4), boleh isi "mulai" saja dan biarkan
                 "selesai" kosong — otomatis berarti sampai selesai hari itu.
             </p>

@@ -115,7 +115,7 @@
                     const catatan = document.getElementById('catatan');
                     if (!catatan?.value.trim()) {
                         e.preventDefault();
-                        alert('Catatan wajib diisi kalau mau minta revisi.');
+                        alert('Catatan wajib diisi jika Anda ingin meminta revisi.');
                         catatan?.focus();
                     }
                 });

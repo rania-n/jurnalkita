@@ -5,13 +5,13 @@
 
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Rekap Kehadiran Siswa" heading="Rekap Kehadiran Siswa" width="wide">
     @if ($admin)
-        <x-admin.page title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan">
+        <x-admin.page title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, untuk evaluasi kedisiplinan">
             <x-slot:action>
                 <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download" class="!h-10 !px-4 !text-sm">Ekspor Ringkasan</x-ui.button>
             </x-slot:action>
         </x-admin.page>
     @else
-        <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan" always-row size="sm">
+        <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, untuk evaluasi kedisiplinan" always-row size="sm">
             <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
         </x-page-header>
     @endif
@@ -60,7 +60,7 @@
 
     @if ($totalAlphaTinggi > 0)
         <x-alert type="warning" class="mb-4">
-            <strong>{{ $totalAlphaTinggi }} siswa</strong> alpha {{ $ambangAlpha }}x atau lebih pada rentang ini — perlu perhatian.
+            <strong>{{ $totalAlphaTinggi }} siswa</strong> memiliki alpha {{ $ambangAlpha }} kali atau lebih pada rentang ini — perlu perhatian.
         </x-alert>
     @endif
 
@@ -68,8 +68,8 @@
         {{-- Total siswa sekolah kebanyakan buat 1 halaman tanpa filter (lihat
              catatan di RekapController::siswa()) -- diminta pilih kelas dulu,
              bukan diam-diam render belasan ribu baris. --}}
-        <x-ui.empty icon="filter_alt" title="Pilih kelas dulu"
-            desc="Ada {{ $terlaluBanyakTanpaFilter }} siswa di sekolah ini -- terlalu banyak buat ditampilkan sekaligus. Pilih salah satu kelas lewat filter di atas." />
+        <x-ui.empty icon="filter_alt" title="Pilih Kelas Terlebih Dahulu"
+            desc="Ada {{ $terlaluBanyakTanpaFilter }} siswa di sekolah ini, terlalu banyak untuk ditampilkan sekaligus. Silakan pilih salah satu kelas melalui filter di atas." />
     @elseif ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa" />
     @else
@@ -117,7 +117,7 @@
         <p id="rekap-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
             Tidak ada siswa yang cocok dengan pencarian.
         </p>
-        <p class="mt-3 text-xs text-muted-2">Merah muda = alpha {{ $ambangAlpha }}x atau lebih {{ ($dari || $sampai) ? 'pada rentang tanggal ini' : 'sepanjang riwayat' }}.</p>
+        <p class="mt-3 text-xs text-muted-2">Merah muda menandai siswa dengan alpha {{ $ambangAlpha }} kali atau lebih {{ ($dari || $sampai) ? 'pada rentang tanggal ini' : 'sepanjang riwayat' }}.</p>
     @endif
 
     @push('scripts')

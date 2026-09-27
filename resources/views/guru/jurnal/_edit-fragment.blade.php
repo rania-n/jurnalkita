@@ -100,8 +100,8 @@
         <x-ui.upload-kamera
             :label="$jurnal->foto_bukti ? 'Ganti Foto Suasana Kelas (opsional)' : 'Foto Suasana Kelas'"
             name="foto_bukti"
-            :placeholder="$jurnal->foto_bukti ? 'Buka kamera buat ganti foto' : 'Wajib buka kamera'"
-            :hint="$jurnal->foto_bukti ? 'Opsional — biarin kosong kalau foto lama masih dipakai' : ($fotoWajib ? 'Wajib diisi — bukti pembelajaran sedang berlangsung' : 'Opsional untuk jurnal susulan (tanggal lampau)')"
+            :placeholder="$jurnal->foto_bukti ? 'Buka kamera untuk mengganti foto' : 'Wajib buka kamera'"
+            :hint="$jurnal->foto_bukti ? 'Opsional — biarkan kosong jika foto lama masih ingin dipakai' : ($fotoWajib ? 'Wajib diisi — bukti pembelajaran sedang berlangsung' : 'Opsional untuk jurnal susulan (tanggal lampau)')"
             :required="$fotoWajib"
         />
     </div>

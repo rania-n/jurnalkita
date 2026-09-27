@@ -300,7 +300,7 @@ class JurnalController extends Controller
 
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
         abort_unless($jadwal->kelas_id === $kelas->id, 403);
-        abort_unless($this->jadwalBolehDiisi($jadwal, $mode, $tanggalAktif), 403, 'Belum waktunya isi jurnal untuk jadwal ini -- tunggu jam pelajarannya berlangsung.');
+        abort_unless($this->jadwalBolehDiisi($jadwal, $mode, $tanggalAktif), 403, 'Belum waktunya mengisi jurnal untuk jadwal ini. Silakan coba lagi setelah jam pelajarannya berlangsung.');
 
         // Jam mulai SELALU ikut jadwal aslinya (bukan input form) -- sama kayak
         // aturan Guru\JurnalController::store(). jam_ke_selesai boleh lebih lama
@@ -315,7 +315,7 @@ class JurnalController extends Controller
             ->first();
         if ($sudahAda) {
             return redirect()->route('sekretaris.jurnal.index', ['lihat' => $sudahAda->id])
-                ->with('info', 'Jurnal untuk jadwal ini di tanggal itu sudah ada.');
+                ->with('info', 'Jurnal untuk jadwal ini pada tanggal tersebut sudah ada.');
         }
 
         $presensiFallback = PresensiDefault::untukKelas(

@@ -1,5 +1,5 @@
 @php
-    $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'kadaluarsa' => 'Kadaluarsa', 'ditolak' => 'Ditolak'];
+    $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'kadaluarsa' => 'Kedaluwarsa', 'ditolak' => 'Ditolak'];
     // Admin lihat halaman ini lewat sidebar admin -- pakai shell admin (topbar,
     // sidebar) yang sama biar nggak berasa pindah ke "app lain". Guru piket & waka
     // tetap pakai shell mobile mereka sendiri.
@@ -20,9 +20,9 @@
         <x-alert type="info" class="mb-4">
             Dispensasi diajukan —
             <a href="{{ $waLinkAutoKirim }}" id="link-wa-auto-kirim" target="_blank" rel="noopener" class="font-bold underline">
-                buka WhatsApp buat kirim ke Waka
+                buka WhatsApp untuk mengirim ke Waka
             </a>
-            kalau nggak otomatis kebuka.
+            jika tidak terbuka secara otomatis.
         </x-alert>
         @push('scripts')
             <script>document.getElementById('link-wa-auto-kirim')?.click();</script>
@@ -61,7 +61,7 @@
                 <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
             @endif
             @if ($bolehAjukan)
-                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Buat Dispen</x-ui.button>
+                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ajukan Dispensasi</x-ui.button>
             @endif
         </x-page-header>
     @endif
@@ -138,7 +138,7 @@
     </div>
 
     @if ($items->isEmpty())
-        <x-ui.empty icon="fact_check" title="Belum ada dispensasi" desc="Coba ubah filter kalau sedang mencari data tertentu." />
+        <x-ui.empty icon="fact_check" title="Belum ada dispensasi" desc="Coba ubah filter jika Anda sedang mencari data tertentu." />
     @else
         <x-ui.card-list class="grid-fill-last">
             @foreach ($items as $d)
@@ -162,7 +162,7 @@
                 >
                     <x-slot:badge>
                         @if ($d->sudahKadaluarsa())
-                            <x-ui.status-badge status="kadaluarsa">Kadaluarsa</x-ui.status-badge>
+                            <x-ui.status-badge status="kadaluarsa">Kedaluwarsa</x-ui.status-badge>
                         @else
                             <x-ui.status-badge :status="['pending' => 'menunggu', 'approved' => 'disetujui', 'rejected' => 'ditolak'][$d->status_akhir]">
                                 {{ ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$d->status_akhir] }}

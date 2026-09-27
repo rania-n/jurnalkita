@@ -13,7 +13,7 @@
     {{-- Judul size="sm" -- dikecilin (bukan dihilangin) biar halaman tetap
          ada kop. Subtitle nambah info baru: ini jadwal SEMINGGU, termasuk
          piket. --}}
-    <x-page-header title="Jadwal Mengajar" subtitle="Jadwal mengajar & piket Anda seminggu" size="sm" />
+    <x-page-header title="Jadwal Mengajar" subtitle="Jadwal mengajar dan piket Anda selama seminggu" size="sm" />
 
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabsHari as $key => $label)
@@ -42,7 +42,7 @@
                         @if ($jadwalWakaPerHari->has($key))
                             <x-ui.list-card
                                 title="Piket Waka Kesiswaan"
-                                :meta="['Sepanjang hari', 'Standby konfirmasi dispensasi']"
+                                :meta="['Sepanjang hari', 'Siap dihubungi untuk konfirmasi dispensasi']"
                             >
                                 <x-slot:badge>
                                     <x-ui.status-badge status="izin">Piket</x-ui.status-badge>
@@ -93,8 +93,8 @@
 
     @if ($adaPiket)
         <x-alert type="info" class="mt-6">
-            Saat bertugas piket, Anda bisa mengajukan dispensasi siswa lewat menu <strong>Dispensasi</strong>.
-            Pengajuan diteruskan ke Waka Kesiswaan untuk disetujui.
+            Saat bertugas piket, Anda dapat mengajukan dispensasi siswa melalui menu <strong>Dispensasi</strong>.
+            Pengajuan akan diteruskan ke Waka Kesiswaan untuk disetujui.
         </x-alert>
     @endif
 </x-layouts.app>

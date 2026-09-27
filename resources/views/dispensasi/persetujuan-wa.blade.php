@@ -30,7 +30,7 @@
 
     @if ($otomatisKadaluarsa ?? false)
         <x-alert type="warning" class="mt-5">
-            Pengajuan ini sudah <strong>kadaluarsa</strong> — melewati tanggal berlaku tanpa sempat diputuskan, jadi otomatis dibatalkan sistem.
+            Pengajuan ini sudah <strong>kedaluwarsa</strong> — melewati tanggal berlaku tanpa sempat diputuskan, sehingga otomatis dibatalkan oleh sistem.
         </x-alert>
     @elseif ($sudahDiputuskan)
         <x-alert type="info" class="mt-5">

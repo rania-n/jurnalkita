@@ -442,7 +442,7 @@ class JurnalTest extends TestCase
         PengaturanJurnal::ambil()->update(['mode' => 'bebas_selamanya']);
 
         $this->actingAs($this->user)->get('/guru/jurnal/tambah?tanggal='.today()->subDays(5)->toDateString())
-            ->assertOk()->assertSee('Bebas Isi Jurnal (Tanggal Custom)');
+            ->assertOk()->assertSee('Bebas Isi Jurnal (Tanggal Pilihan Sendiri)');
     }
 
     public function test_form_isi_jurnal_kemarin_render_pas_mode_bebas_kemarin(): void

@@ -14,7 +14,7 @@
 
 <div class="mt-6">
     <h2 class="mb-1 text-sm font-bold text-ink">Presensi ({{ $siswas->count() }} siswa)</h2>
-    <p class="mb-3 text-xs text-muted-2">Semua siswa otomatis <strong>Hadir</strong> (kecuali yang udah otomatis kesorot dari dispensasi/jurnal lain di bawah). Ketik nama buat cari & tandai yang Sakit/Izin/Alpha/Dispensasi.</p>
+    <p class="mb-3 text-xs text-muted-2">Semua siswa otomatis berstatus <strong>Hadir</strong>, kecuali yang sudah otomatis ditandai berdasarkan dispensasi/jurnal lain di bawah. Ketik nama untuk mencari, lalu tandai siswa yang Sakit/Izin/Alpha/Dispensasi.</p>
 
     {{-- Dropdown beneran (bukan filter kartu langsung) -- ketik nama, muncul
          daftar nama melayang di bawah kotaknya (pola sama kayak x-ui.cari-siswa),
