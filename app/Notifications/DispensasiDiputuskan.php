@@ -28,6 +28,7 @@ class DispensasiDiputuskan extends Notification
         $disetujui = $this->dispensasi->status_akhir === 'approved';
 
         return [
+            'icon' => $disetujui ? 'check_circle' : 'cancel',
             'title' => $disetujui ? 'Dispensasi disetujui' : 'Dispensasi ditolak',
             'body' => 'Dispensasi '.($this->dispensasi->siswa->nama ?? 'siswa')
                 .' '.($disetujui ? 'disetujui' : 'ditolak').' oleh Waka Kesiswaan.',

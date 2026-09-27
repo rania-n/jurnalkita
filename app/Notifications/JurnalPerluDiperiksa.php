@@ -26,6 +26,7 @@ class JurnalPerluDiperiksa extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'icon' => 'menu_book',
             'title' => $this->hasilRevisi ? 'Jurnal hasil revisi perlu diperiksa' : 'Jurnal baru perlu diperiksa',
             'body' => ($this->jurnal->jadwal->mapel->nama ?? 'Jurnal').' — '.($this->jurnal->guru->nama ?? ''),
             'url' => route('sekretaris.jurnal.index', ['lihat' => $this->jurnal->id]),

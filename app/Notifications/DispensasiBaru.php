@@ -26,6 +26,7 @@ class DispensasiBaru extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'icon' => 'fact_check',
             'title' => 'Dispensasi baru menunggu persetujuan',
             'body' => $this->dispensasi->siswa->nama.' ('.($this->dispensasi->siswa->kelas?->nama ?? '—').') — '
                 .str($this->dispensasi->alasan)->limit(60),

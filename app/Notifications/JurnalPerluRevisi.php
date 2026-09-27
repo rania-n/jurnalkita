@@ -26,6 +26,7 @@ class JurnalPerluRevisi extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'icon' => 'edit_note',
             'title' => 'Jurnal perlu direvisi',
             'body' => ($this->jurnal->jadwal->mapel->nama ?? 'Jurnal').' — '.($this->jurnal->jadwal->kelas->nama ?? '')
                 .': '.($this->jurnal->catatan_verifikasi ?: 'Pengurus kelas minta perbaikan.'),

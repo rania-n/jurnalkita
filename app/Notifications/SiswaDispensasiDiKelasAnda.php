@@ -26,6 +26,7 @@ class SiswaDispensasiDiKelasAnda extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'icon' => 'badge',
             'title' => 'Siswa dispensasi di jam Anda mengajar',
             'body' => $this->dispensasi->siswa->nama.' ('.($this->dispensasi->siswa->kelas?->nama ?? '—').') dispensasi '
                 .$this->dispensasi->labelTanggal().' · '.$this->dispensasi->labelJam(),
