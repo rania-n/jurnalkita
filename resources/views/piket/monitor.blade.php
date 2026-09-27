@@ -21,12 +21,12 @@
     @if ($admin)
         <x-admin.page title="Monitor Piket" :subtitle="$subtitle">
             <x-slot:action>
-                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor Ringkasan</x-ui.button>
+                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
             </x-slot:action>
         </x-admin.page>
     @else
         <x-page-header title="Monitor Piket" :subtitle="$subtitle" always-row size="sm">
-            <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor Ringkasan</x-ui.button>
+            <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
         </x-page-header>
     @endif
 

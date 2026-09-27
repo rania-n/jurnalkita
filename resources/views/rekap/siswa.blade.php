@@ -7,12 +7,12 @@
     @if ($admin)
         <x-admin.page title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan">
             <x-slot:action>
-                <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download">Ekspor Ringkasan</x-ui.button>
+                <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download" class="!h-10 !px-4 !text-sm">Ekspor Ringkasan</x-ui.button>
             </x-slot:action>
         </x-admin.page>
     @else
         <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan" always-row size="sm">
-            <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor Ringkasan</x-ui.button>
+            <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
         </x-page-header>
     @endif
 

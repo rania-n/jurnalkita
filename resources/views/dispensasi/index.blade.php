@@ -52,16 +52,16 @@
             </x-slot:action>
         </x-admin.page>
     @else
-        {{-- Ukuran tombol disamakan sama pola header lain di app (x-ui.button,
-             bukan lagi desain kecil kustom) -- Ekspor Ringkasan sebelumnya
-             kelihatan nyempil kecil sendiri dibanding tombol Ekspor di
-             halaman lain (Monitor Piket, Rekap Siswa). --}}
+        {{-- Ukuran tombol disamakan sama pola header lain di app (x-ui.button)
+             -- !h-10 dkk override h-12 bawaan komponen (pola yang sama kayak
+             notifikasi/index.blade.php), biar nggak sebesar tombol form biasa
+             tapi tetap lebih jelas dari desain kecil kustom sebelumnya. --}}
         <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran" always-row size="sm">
             @if ($bolehEkspor)
-                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor Ringkasan</x-ui.button>
+                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
             @endif
             @if ($bolehAjukan)
-                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full sm:w-auto">Buat Dispen</x-ui.button>
+                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Buat Dispen</x-ui.button>
             @endif
         </x-page-header>
     @endif
