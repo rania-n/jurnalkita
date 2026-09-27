@@ -74,48 +74,56 @@
 
     <x-ui.auto-refresh :url="route('dispensasi.versi')" />
 
-    {{-- Filter & status -- mirip monitor piket --}}
-    <div class="mb-4 flex flex-col gap-2">
-        {{-- Search bar -- filter langsung di DOM, tanpa reload (seperti monitor) --}}
-        <x-ui.search-bar id="input-cari-dispen" value="{{ request('cari') }}" placeholder="Nama atau NIS siswa..." autocomplete="off" />
+    {{-- Filter status -- paling atas, gaya tab disamakan dengan Riwayat
+         Jurnal/Monitor Piket (bg-navy pas aktif), bukan warna per-status
+         kayak sebelumnya. Jumlah disembunyikan kalau 0. --}}
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+        @foreach ($tabs as $key => $label)
+            @php $jumlah = $jumlahTab[$key] ?? 0; @endphp
+            <a href="{{ route('dispensasi.index', array_merge(request()->except('tab', 'page'), ['tab' => $key])) }}"
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $tab === $key, 'text-muted-2 hover:text-ink' => $tab !== $key])>
+                {{ $label }}
+                @if ($jumlah > 0)
+                    <span class="opacity-70">({{ $jumlah }})</span>
+                @endif
+            </a>
+        @endforeach
+    </div>
 
-        {{-- Tombol filter status (berwarna) --}}
-        @php
-            $tabConfig = [
-                'semua'     => ['Semua', 'bg-navy text-card',            'bg-surface-alt text-muted-2',     'bg-navy text-card',            'bg-surface-alt text-muted-2'],
-                'menunggu'  => ['Menunggu', 'bg-sakit text-card',        'bg-sakit-soft text-sakit',        'bg-sakit text-card',           'bg-sakit-soft text-sakit'],
-                'disetujui' => ['Disetujui', 'bg-hadir text-card',       'bg-hadir-soft text-hadir',        'bg-hadir text-card',           'bg-hadir-soft text-hadir'],
-                'kadaluarsa'=> ['Kadaluarsa', 'bg-muted text-card', 'bg-surface-alt text-muted', 'bg-muted text-card', 'bg-surface-alt text-muted'],                'ditolak'   => ['Ditolak', 'bg-alpha text-card',         'bg-alpha-soft text-alpha',        'bg-alpha text-card',           'bg-alpha-soft text-alpha'],
-            ];
-        @endphp
-        <div class="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-1.5">
-            @foreach ($tabConfig as $key => [$label, $aktif, $nonAktif])
-                <a href="{{ route('dispensasi.index', array_merge(request()->except('tab', 'page'), ['tab' => $key])) }}"
-                   class="flex-auto sm:flex-1 rounded-md sm:rounded-lg px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-center text-[10.5px] sm:text-xs font-bold whitespace-nowrap {{ $tab === $key ? $aktif : $nonAktif }}">
-                    {{ $label }}
-                    @if(isset($jumlahTab[$key]))
-                        <span class="opacity-70">({{ $jumlahTab[$key] }})</span>
-                    @endif
-                </a>
-            @endforeach
+    {{-- Kelas & Cari sejajar kanan-kiri, lalu Dari/Sampai tanggal sejajar
+         kanan-kiri di baris bawahnya. Search bar SENGAJA di luar <form>
+         (class="contents" di form bikin child-nya ikut jadi flex item wadah
+         luar, tanpa form-nya sendiri ganggu layout) -- soalnya x-ui.search-bar
+         defaultnya punya atribut name="q" yang nggak dipakai controller ini
+         (filternya client-side, lihat script bawah); kalau dia di DALAM form,
+         "q" bakal ikut kekirim & numpuk jadi query string nggak berguna
+         tiap Kelas/Tanggal diganti. Teks cari tetap dibawa lewat hidden
+         input "cari" yang sudah ada. --}}
+    <div class="mb-4 flex flex-col gap-2">
+        <div class="flex w-full gap-2">
+            <div class="flex-1">
+                <x-ui.search-bar id="input-cari-dispen" value="{{ request('cari') }}" placeholder="Nama atau NIS siswa..." autocomplete="off" />
+            </div>
+            <form method="GET" action="{{ route('dispensasi.index') }}" class="contents">
+                <input type="hidden" name="tab" value="{{ $tab }}">
+                @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
+                @if(request('dari')) <input type="hidden" name="dari" value="{{ request('dari') }}"> @endif
+                @if(request('sampai')) <input type="hidden" name="sampai" value="{{ request('sampai') }}"> @endif
+                <div class="flex-1">
+                    <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua Kelas" />
+                </div>
+            </form>
         </div>
 
-        {{-- Filter kelas & tanggal --}}
-        <form method="GET" action="{{ route('dispensasi.index') }}" class="flex flex-wrap items-end gap-2">
+        <form method="GET" action="{{ route('dispensasi.index') }}" class="flex w-full gap-2">
             <input type="hidden" name="tab" value="{{ $tab }}">
             @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
-
-            <div class="w-full">
-                <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua Kelas" />
+            @if(request('kelas_id')) <input type="hidden" name="kelas_id" value="{{ request('kelas_id') }}"> @endif
+            <div class="flex-1">
+                <x-admin.f-date name="dari" label="Dari tanggal" onchange="this.form.submit()" />
             </div>
-
-            <div class="flex w-full gap-2">
-                <div class="flex-1">
-                    <x-admin.f-date name="dari" label="Dari tanggal" onchange="this.form.submit()" />
-                </div>
-                <div class="flex-1">
-                    <x-admin.f-date name="sampai" label="Sampai tanggal" onchange="this.form.submit()" />
-                </div>
+            <div class="flex-1">
+                <x-admin.f-date name="sampai" label="Sampai tanggal" onchange="this.form.submit()" />
             </div>
         </form>
     </div>
@@ -216,6 +224,13 @@
                 const kartuList = document.querySelectorAll('[data-dispen-card]');
                 const kosong   = document.getElementById('dispen-kosong');
                 if (!input) return;
+
+                // Kotak cari ini sekarang nempel di dalam <form> (biar sejajar
+                // sama Kelas) -- cegah Enter ikut nge-submit form (reload),
+                // soalnya filternya emang cuma client-side, nggak perlu reload.
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') e.preventDefault();
+                });
 
                 function terapkan() {
                     const q = input.value.trim().toLowerCase();
