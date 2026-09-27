@@ -534,6 +534,9 @@ function initCariPilihan() {
 
         const autoSubmit = wrap.hasAttribute('data-auto-submit');
 
+        // Flag: kosongkan() baru saja dipanggil -- cegah restore di blur
+        let sedangKosongkan = false;
+
         function pilih(s) {
             input.value = s.nama;
             hidden.value = s.id;
@@ -544,10 +547,12 @@ function initCariPilihan() {
         }
 
         function kosongkan() {
+            sedangKosongkan = true;
             input.value = '';
             hidden.value = '';
             hasil.hidden = true;
             if (tombolClear) tombolClear.hidden = true;
+            hidden.dispatchEvent(new Event('change', { bubbles: true }));
             if (autoSubmit) { wrap.closest('form')?.requestSubmit(); return; }
             input.focus();
         }
@@ -557,14 +562,39 @@ function initCariPilihan() {
             if (tombolClear) tombolClear.hidden = true;
 
             const q = input.value.trim().toLowerCase();
+            const qClean = q.replace(/\s+/g, '');
             const data = dataSekarang();
-            const cocok = q ? data.filter((s) => s.nama.toLowerCase().includes(q)) : data;
+            const cocok = q ? data.filter((s) => {
+                const nama = s.nama.toLowerCase();
+                return nama.includes(q) || (qClean.length > 0 && nama.replace(/\s+/g, '').includes(qClean));
+            }) : data;
             render(cocok);
             hasil.hidden = false;
         });
 
         input.addEventListener('focus', () => {
-            if (!hidden.value) { render(dataSekarang()); hasil.hidden = false; }
+            sedangKosongkan = false;
+            if (hidden.value) {
+                // Ada pilihan -- teks di input cuma "label tampilan", bukan teks
+                // yang mau diedit. Begitu diklik, langsung kosongkan + tampilkan
+                // semua opsi biar user bisa langsung ketik atau pilih ulang.
+                input.value = '';
+                if (tombolClear) tombolClear.hidden = true;
+            }
+            render(dataSekarang());
+            hasil.hidden = false;
+        });
+
+        input.addEventListener('blur', () => {
+            // Kalau unfocus tanpa memilih dan bukan dari tombol X,
+            // kembalikan teks ke label pilihan yang masih aktif.
+            setTimeout(() => {
+                if (!sedangKosongkan && hidden.value && !input.value) {
+                    const aktif = dataSekarang().find((x) => String(x.id) === String(hidden.value));
+                    if (aktif) { input.value = aktif.nama; if (tombolClear) tombolClear.hidden = false; }
+                }
+                sedangKosongkan = false;
+            }, 150);
         });
 
         daftar.addEventListener('click', (e) => {
@@ -592,28 +622,26 @@ function initCariCheckbox() {
         const input = wrap.querySelector('[data-cari-checkbox-input]');
         const rows = wrap.querySelectorAll('[data-cari-checkbox-row]');
         const kosong = wrap.querySelector('[data-cari-checkbox-kosong]');
+        const list = wrap.querySelector('[data-cari-checkbox-list]') || rows[0]?.parentElement;
         if (!input) return;
 
         input.addEventListener('input', () => {
             const q = input.value.trim().toLowerCase();
+            const qClean = q.replace(/\s+/g, '');
             let ada = false;
             rows.forEach((row) => {
-                const cocok = !q || row.dataset.nama.includes(q);
+                const nama = (row.dataset.nama || '').toLowerCase();
+                const cocok = !q || nama.includes(q) || (qClean.length > 0 && nama.replace(/\s+/g, '').includes(qClean));
                 row.hidden = !cocok;
                 if (cocok) ada = true;
             });
             if (kosong) kosong.hidden = ada;
+            if (list) list.scrollTop = 0;
         });
 
-        // Cegah submit kalau belum ada satupun yang dicentang -- server
-        // juga nolak (validasi min:1), tapi tanpa ini tombolnya kepencet +
-        // munculin dialog konfirmasi (data-confirm) buat "0 data" yang
-        // jelas nggak masuk akal (kejadian beneran, ketauan dari laporan
-        // bug). Listener dipasang di <form> (BUKAN document) supaya jalan
-        // SEBELUM klik-nya sempat sampai ke initConfirm() (yang dengerin di
-        // document, lebih jauh dari elemen yang diklik) -- stopPropagation
-        // di sini nahan event-nya nyampe ke situ sama sekali, jadi dialog
-        // konfirmasinya nggak sempat muncul kalau memang mau ditolak.
+        // Cegah submit kalau required tapi belum ada satupun yang dicentang.
+        if (!wrap.hasAttribute('data-required')) return;
+
         const form = wrap.closest('form');
         form?.addEventListener('click', (e) => {
             if (!e.target.closest('button[type="submit"], input[type="submit"]')) return;

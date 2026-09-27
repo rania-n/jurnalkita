@@ -20,7 +20,7 @@
 @endphp
 
 <x-layouts.admin title="Data Kelas" heading="Data Kelas">
-    <x-admin.page title="Data Kelas" subtitle="{{ $rows->count() }} kelas">
+    <x-admin.page title="Data Kelas" :subtitle="$rows->count() . ' kelas'">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-kelas" data-modal-title="Tambah Kelas">Tambah Kelas</x-ui.button>
         </x-slot:action>
@@ -53,6 +53,7 @@
                         name="kelas_ids"
                         :options="$kelasAktifList"
                         hint="Cari nama kelas, lalu centang satu atau beberapa kelas."
+                        required
                     />
                 </div>
                 <div class="flex flex-col justify-between gap-4">

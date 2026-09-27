@@ -16,6 +16,10 @@ class JadwalController extends Controller
 {
     public function save(Request $request): RedirectResponse
     {
+        if ($request->filled('ruang')) {
+            $request->merge(['ruang' => preg_replace('/^r\s*(\d+)$/i', 'R$1', trim($request->input('ruang')))]);
+        }
+
         $data = $request->validate([
             'id' => ['nullable', 'exists:jadwals,id'],
             'kelas_id' => ['required', 'exists:kelas,id'],
@@ -24,7 +28,7 @@ class JadwalController extends Controller
             'hari' => ['required', 'in:senin,selasa,rabu,kamis,jumat'],
             'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:15'],
             'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
-            'ruang' => ['nullable', 'string', 'max:50', Rule::in(config('akademik.ruangan'))],
+            'ruang' => ['required', 'string', 'max:50', Rule::in(config('akademik.ruangan'))],
         ]);
 
         // Guru yang sedang piket tidak mengajar (jadwal piket berbasis shift jam,

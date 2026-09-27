@@ -296,7 +296,7 @@ class DataAsliSeeder extends Seeder
                 'kelas_id' => $kelasId,
                 'mapel_id' => $mapelId,
                 'guru_id' => $guruId,
-                'ruang' => $j['ruang'],
+                'ruang' => ! empty($j['ruang']) ? preg_replace('/^r\s*(\d+)$/i', 'R$1', trim($j['ruang'])) : null,
                 'hari' => $j['hari'],
                 'jam_ke_mulai' => $j['jp_mulai'],
                 'jam_ke_selesai' => $j['jp_selesai'],

@@ -55,6 +55,10 @@ class KelasController extends Controller
         $baru = ! $kelas->exists;
 
         $tahunAktif = TahunAjaran::aktif();
+        if ($baru) {
+            $data['tahun_ajaran_id'] = $tahunAktif?->id;
+        }
+
         $kelasDalamTahunAktif = $baru || ($tahunAktif
             ? $kelas->tahun_ajaran_id === $tahunAktif->id
             : $kelas->tahun_ajaran_id === null);

@@ -10,11 +10,12 @@
      x-layouts.admin. Dulu di sini juga ada <h2> isinya sama, keliatan
      dobel nggak guna. Subtitle tetap ada -- itu info TAMBAHAN yang topbar
      nggak punya (mis. jumlah data). --}}
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-    <div class="flex flex-col gap-1">
+<div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+    <div class="flex flex-col items-start gap-1.5">
         @if ($back)
-            <a href="{{ $back }}" class="mb-1 inline-flex w-fit items-center gap-1 text-sm font-semibold text-muted hover:text-ink">
-                <x-icon name="arrow_back" :size="18" /> Kembali
+            <a href="{{ $back }}"
+               class="press inline-flex w-fit items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-semibold text-ink transition-colors hover:bg-[#cbd5e1]">
+                <x-icon name="arrow_back" :size="14" /> Kembali
             </a>
         @endif
         @if ($subtitle)

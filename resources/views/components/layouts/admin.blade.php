@@ -10,6 +10,15 @@
 
     $notifikasiTerbaru = $user?->notifications()->latest()->limit(8)->get() ?? collect();
     $jumlahBelumDibaca = $user?->unreadNotifications->count() ?? 0;
+
+    $hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    $bulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    $bulanPendek = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    $tanggalIndo = $hariIndo[now()->dayOfWeek].', '.now()->day.' '.$bulanIndo[now()->month].' '.now()->year;
+    $tanggalSingkat = $hariIndo[now()->dayOfWeek].', '.now()->day.' '.$bulanPendek[now()->month];
+    $jpAktif = \App\Support\Waktu::jpAktifSekarang();
+    $dalamJamSekolah = \App\Support\Waktu::dalamJamSekolah();
+    $statusWaktu = $jpAktif ? 'Sedang JP '.$jpAktif : ($dalamJamSekolah ? 'Waktu Istirahat' : 'Di luar jam pelajaran');
 @endphp
 
 <!DOCTYPE html>
@@ -87,37 +96,53 @@
 
     {{-- Konten --}}
     <div class="flex w-full flex-col lg:pl-60">
-        <header class="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-surface-alt bg-card/95 px-5 py-3 backdrop-blur sm:px-6 lg:px-10 2xl:px-16">
-            <div class="flex items-center gap-3">
-                <button type="button" class="lg:hidden" onclick="document.getElementById('admin-sidebar').classList.toggle('hidden')" aria-label="Menu">
-                    <x-icon name="menu" :size="24" class="text-ink" />
-                </button>
-                <h1 class="text-lg font-bold text-ink">{{ $heading ?? $title }}</h1>
-            </div>
-            <div class="flex items-center gap-2">
-                {{-- Format nama+role sama persis kayak shell non-admin (x-app-topbar) --
-                     dulu di sini nama disembunyikan di HP (hidden sm:block) & badge-nya
-                     hardcode "Admin", sekarang selalu kelihatan & pakai roleLabel(). --}}
-                <span class="flex flex-col items-end leading-tight">
-                    <span class="text-sm font-semibold text-ink">{{ $user?->name }}</span>
-                    <span class="text-[11px] font-bold text-muted">{{ $user?->roleLabel() }}</span>
-                </span>
+        <div class="sticky top-0 z-30">
+            <header class="flex items-center justify-between gap-3 border-b border-surface-alt bg-card/95 px-5 py-3 backdrop-blur sm:px-6 lg:px-10 2xl:px-16">
+                <div class="flex items-center gap-3">
+                    <button type="button" class="lg:hidden" onclick="document.getElementById('admin-sidebar').classList.toggle('hidden')" aria-label="Menu">
+                        <x-icon name="menu" :size="24" class="text-ink" />
+                    </button>
+                    <h1 class="text-lg font-bold text-ink">{{ $heading ?? $title }}</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    {{-- Format nama+role sama persis kayak shell non-admin (x-app-topbar) --}}
+                    <span class="flex flex-col items-end leading-tight">
+                        <span class="text-sm font-semibold text-ink">{{ $user?->name }}</span>
+                        <span class="text-[11px] font-bold text-muted">{{ $user?->roleLabel() }}</span>
+                    </span>
 
-                <button type="button" data-modal-open="modal-notifikasi" class="relative ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-muted transition-colors hover:text-navy" aria-label="Notifikasi">
-                    <x-icon name="notifications" :size="20" />
-                    @if ($jumlahBelumDibaca > 0)
-                        <span class="absolute right-1 top-1 flex h-2.5 w-2.5 rounded-full bg-alpha ring-2 ring-card"></span>
-                    @endif
-                </button>
+                    <button type="button" data-modal-open="modal-notifikasi" class="relative ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-muted transition-colors hover:text-navy" aria-label="Notifikasi">
+                        <x-icon name="notifications" :size="20" />
+                        @if ($jumlahBelumDibaca > 0)
+                            <span class="absolute right-1 top-1 flex h-2.5 w-2.5 rounded-full bg-alpha ring-2 ring-card"></span>
+                        @endif
+                    </button>
 
-                {{-- Logout juga di header (bukan cuma di sidebar) -- di HP sidebar
-                     ketutup hamburger, jadi keluar susah dicari kalau cuma di situ.
-                     Di desktop disembunyikan karena sidebar sudah ada tombol keluar. --}}
-                <span class="lg:hidden">
-                    <x-logout-button variant="icon" />
-                </span>
+                    <span class="lg:hidden">
+                        <x-logout-button variant="icon" />
+                    </span>
+                </div>
+            </header>
+
+            {{-- Status bar waktu konsisten seperti di shell non-admin (app-topbar) --}}
+            <div class="px-5 sm:px-6 lg:px-10 2xl:px-16">
+                <div class="-mt-px flex items-center justify-between gap-2 rounded-b-xl bg-navy px-3.5 py-2 text-card shadow-sm sm:rounded-b-2xl sm:px-5 sm:py-1.5">
+                    {{-- Kiri: Status Waktu --}}
+                    <p class="text-sm font-bold leading-tight text-card sm:text-base">
+                        {{ $statusWaktu }}
+                    </p>
+
+                    {{-- Kanan: tanggal + jam berjalan --}}
+                    <div class="flex shrink-0 items-center gap-1 text-[11px] text-card sm:text-xs">
+                        <x-icon name="schedule" :size="11" class="shrink-0 text-card/80" />
+                        <span class="hidden sm:inline">{{ $tanggalIndo }}</span>
+                        <span class="sm:hidden">{{ $tanggalSingkat }}</span>
+                        <span class="text-card/60">·</span>
+                        <span class="tabular-nums font-mono" data-jam-sekarang>{{ now()->format('H:i:s') }}</span>
+                    </div>
+                </div>
             </div>
-        </header>
+        </div>
 
         {{-- errorBag khusus (lihat catatan yang sama di app-topbar.blade.php) --
              biar modal ini nggak ikut kebuka pas form LAIN di halaman admin

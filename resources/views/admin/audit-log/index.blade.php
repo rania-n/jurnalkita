@@ -20,7 +20,7 @@
 @endphp
 
 <x-layouts.admin title="Audit Log" heading="Audit Log">
-    <x-admin.page title="Audit Log" subtitle="{{ $rows->total() }} entri" />
+    <x-admin.page title="Audit Log" :subtitle="$rows->total() . ' entri'" />
 
     <x-admin.filters :action="route('master.audit-log.index')">
         <x-admin.f-search placeholder="Aksi atau deskripsi..." />

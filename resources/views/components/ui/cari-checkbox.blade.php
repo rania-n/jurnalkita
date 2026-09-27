@@ -3,6 +3,7 @@
     'name',      // dipasang "[]" sendiri di tiap checkbox -- kirim tanpa "[]", mis. "mapel_tambahan"
     'options' => [],   // Collection/array of ['id' => ..., 'nama' => ...]
     'hint' => null,
+    'required' => false,
 ])
 
 @php
@@ -18,7 +19,7 @@
     yang mau dipilih beneran bisa lebih dari satu, bukan 1 nilai final kayak
     cari-pilihan.
 --}}
-<div {{ $attributes->except('id')->class('flex flex-col gap-1.5') }} data-cari-checkbox>
+<div {{ $attributes->except('id')->class('flex flex-col gap-1.5') }} data-cari-checkbox @if ($required) data-required @endif>
     @if ($label)
         <x-ui.label :for="$id">{{ $label }}</x-ui.label>
     @endif
@@ -35,7 +36,7 @@
         >
     </div>
 
-    <div class="max-h-48 overflow-y-auto rounded-xl border border-surface-alt bg-card p-1.5">
+    <div data-cari-checkbox-list class="max-h-48 overflow-y-auto rounded-xl border border-surface-alt bg-card p-1.5">
         @foreach ($daftar as $opt)
             <label data-cari-checkbox-row data-nama="{{ strtolower($opt['nama']) }}" class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-surface-alt">
                 <input type="checkbox" name="{{ $name }}[]" value="{{ $opt['id'] }}" class="h-4 w-4 shrink-0 rounded border-surface-alt text-navy focus:ring-navy">

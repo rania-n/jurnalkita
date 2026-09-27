@@ -31,7 +31,7 @@
 @endphp
 
 <x-layouts.admin title="Manajemen Akun" heading="Manajemen Akun">
-    <x-admin.page title="Manajemen Akun" subtitle="{{ $users->count() }} akun aktif/ditolak">
+    <x-admin.page title="Manajemen Akun" :subtitle="$users->count() . ' akun aktif/ditolak'">
         <x-slot:action>
             @if ($pendingCount > 0)
                 <x-ui.button :href="route('master.akun.persetujuan')" variant="secondary" icon="how_to_reg" class="w-full sm:w-auto">Persetujuan ({{ $pendingCount }})</x-ui.button>

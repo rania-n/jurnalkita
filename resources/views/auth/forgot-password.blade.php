@@ -1,6 +1,6 @@
 <x-layouts.guest title="Lupa Kata Sandi">
-    <a href="{{ route('login') }}" class="press mb-6 inline-flex items-center gap-1.5 rounded-lg bg-surface-alt py-2 pl-2 pr-3 text-sm font-semibold text-ink hover:bg-[#cbd5e1]">
-        <x-icon name="arrow_back" :size="18" />
+    <a href="{{ route('login') }}" class="press mb-6 inline-flex w-fit items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-semibold text-ink transition-colors hover:bg-[#cbd5e1]">
+        <x-icon name="arrow_back" :size="14" />
         <span>Kembali</span>
     </a>
 
