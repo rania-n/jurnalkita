@@ -120,16 +120,25 @@
             </form>
         </div>
 
-        <form method="GET" action="{{ route('dispensasi.index') }}" class="flex w-full gap-2">
+        <form method="GET" action="{{ route('dispensasi.index') }}" class="flex w-full items-end gap-2">
             <input type="hidden" name="tab" value="{{ $tab }}">
             @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
             @if(request('kelas_id')) <input type="hidden" name="kelas_id" value="{{ request('kelas_id') }}"> @endif
             <div class="flex-1">
-                <x-admin.f-date name="dari" label="Dari tanggal" onchange="this.form.submit()" />
+                <x-admin.f-date name="dari" label="Dari tanggal" data-pasangan="sampai" />
             </div>
             <div class="flex-1">
                 <x-admin.f-date name="sampai" label="Sampai tanggal" onchange="this.form.submit()" />
             </div>
+            @if (request('dari') || request('sampai'))
+                @php
+                    $sisaFilterTanggal = request()->except(['dari', 'sampai']);
+                @endphp
+                <a href="{{ url()->current() . ($sisaFilterTanggal ? '?' . http_build_query($sisaFilterTanggal) : '') }}"
+                   class="flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-surface-alt bg-card px-3 text-sm font-semibold text-muted hover:border-alpha hover:text-alpha">
+                    <x-icon name="close" :size="16" /> Reset
+                </a>
+            @endif
         </form>
     </div>
 

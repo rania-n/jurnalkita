@@ -62,11 +62,11 @@
     {{-- Rentang tanggal -- sama pola kayak Riwayat Jurnal (Dari/Sampai).
          Max hari ini di dua-duanya -- belum ada gunanya lihat piket buat
          tanggal yang belum kejalanin. --}}
-    <x-admin.filters :action="route('piket.monitor.index')" hideButtons="true">
+    <x-admin.filters :action="route('piket.monitor.index')" :ignore="['mode']">
         <input type="hidden" name="mode" value="{{ $mode }}">
         <input type="hidden" name="status" value="{{ $statusAktif }}">
         <div class="flex w-full gap-2">
-            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" max="{{ today()->toDateString() }}" data-pasangan="sampai" />
             <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
         </div>
     </x-admin.filters>

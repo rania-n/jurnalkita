@@ -21,9 +21,9 @@
          Cari nama: client-side langsung filter baris yang sudah dimuat (data
          di halaman ini nggak dipaginate, semua siswa yang cocok kelas/tanggal
          udah ada), jadi nggak perlu reload cuma buat cari nama. --}}
-    <x-admin.filters :action="route('rekap.siswa.index')" hideButtons="true">
+    <x-admin.filters :action="route('rekap.siswa.index')">
         <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua kelas" />
-        <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" onchange="this.form.submit()" />
+        <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" data-pasangan="sampai" />
         <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" onchange="this.form.submit()" />
     </x-admin.filters>
 

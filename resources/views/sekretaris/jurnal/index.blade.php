@@ -26,7 +26,7 @@
         <input type="hidden" name="status" value="{{ $status }}">
 
         <div class="flex w-full gap-2">
-            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" onchange="this.form.submit()" />
+            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" data-pasangan="sampai" />
             <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" onchange="this.form.submit()" />
         </div>
 
