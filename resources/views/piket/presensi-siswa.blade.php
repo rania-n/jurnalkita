@@ -69,28 +69,60 @@
         @if ($catatanPresensi->isEmpty())
             <x-ui.empty icon="event_busy" title="Belum ada presensi dari piket" />
         @else
+            <div class="mb-3">
+                <x-ui.search-bar id="cari-catatan-presensi" placeholder="Cari nama siswa atau kelas..." />
+            </div>
+
             <div class="flex flex-col gap-2">
                 @foreach ($catatanPresensi as $catatan)
-                    <x-ui.list-card
-                        :title="$catatan->siswa->nama"
-                        :meta="[$catatan->siswa->kelas->nama . ' · No. ' . ($catatan->siswa->no_absen ?? '—'), $catatan->catatan ?: 'Dicatat oleh ' . ($catatan->dicatatOleh?->name ?? 'piket')]"
-                    >
-                        <x-slot:badge>
-                            <x-ui.status-badge :status="$catatan->status" />
-                        </x-slot:badge>
-                        <x-slot:actions>
-                            <x-ui.action-button
-                                label="Ubah"
-                                icon="edit"
-                                :href="route('piket.presensi-siswa.index', ['tanggal' => $tanggal->toDateString(), 'kelas_id' => $catatan->siswa->kelas_id, 'siswa_id' => $catatan->siswa_id])"
-                            />
-                            @if ($catatan->surat_path)
-                                <x-ui.action-button label="Lihat Surat" icon="description" :href="Storage::url($catatan->surat_path)" target="_blank" />
-                            @endif
-                        </x-slot:actions>
-                    </x-ui.list-card>
+                    <div data-baris-catatan-presensi data-cari="{{ strtolower($catatan->siswa->nama.' '.$catatan->siswa->kelas->nama) }}">
+                        <x-ui.list-card
+                            :title="$catatan->siswa->nama"
+                            :meta="[$catatan->siswa->kelas->nama . ' · No. ' . ($catatan->siswa->no_absen ?? '—'), $catatan->catatan ?: 'Dicatat oleh ' . ($catatan->dicatatOleh?->name ?? 'piket')]"
+                        >
+                            <x-slot:badge>
+                                <x-ui.status-badge :status="$catatan->status" />
+                            </x-slot:badge>
+                            <x-slot:actions>
+                                <x-ui.action-button
+                                    label="Ubah"
+                                    icon="edit"
+                                    :href="route('piket.presensi-siswa.index', ['tanggal' => $tanggal->toDateString(), 'kelas_id' => $catatan->siswa->kelas_id, 'siswa_id' => $catatan->siswa_id])"
+                                />
+                                @if ($catatan->surat_path)
+                                    <x-ui.action-button label="Lihat Surat" icon="description" :href="Storage::url($catatan->surat_path)" target="_blank" />
+                                @endif
+                            </x-slot:actions>
+                        </x-ui.list-card>
+                    </div>
                 @endforeach
             </div>
+
+            <p id="catatan-presensi-kosong" hidden class="mt-2 rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
+                Tidak ada catatan yang cocok dengan pencarian.
+            </p>
+
+            @push('scripts')
+                <script>
+                    (function () {
+                        const cari = document.getElementById('cari-catatan-presensi');
+                        const rows = document.querySelectorAll('[data-baris-catatan-presensi]');
+                        const kosong = document.getElementById('catatan-presensi-kosong');
+                        if (!cari) return;
+
+                        cari.addEventListener('input', () => {
+                            const q = cari.value.trim().toLowerCase();
+                            let ada = false;
+                            rows.forEach((row) => {
+                                const cocok = !q || row.dataset.cari.includes(q);
+                                row.hidden = !cocok;
+                                if (cocok) ada = true;
+                            });
+                            if (kosong) kosong.hidden = ada;
+                        });
+                    })();
+                </script>
+            @endpush
         @endif
     </section>
 </x-layouts.app>
