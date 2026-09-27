@@ -3,6 +3,7 @@
         title="Isi Jurnal Pengganti"
         subtitle="Untuk guru yang memberi tugas via WA & tidak sempat mengisi sendiri"
         :back="route('sekretaris.jurnal.index')"
+        size="sm"
     />
 
     <x-alert type="info" class="mb-4">Hanya untuk guru yang <strong>Tidak Hadir</strong> dan tidak sempat mengisi sendiri. Tugas langsung tercatat disetujui.</x-alert>

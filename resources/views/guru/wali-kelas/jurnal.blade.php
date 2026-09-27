@@ -3,6 +3,7 @@
         title="Jurnal Kelas {{ $kelas->nama }}"
         subtitle="Lihat materi & presensi yang diisi guru -- Anda wali kelas ini"
         :back="$adaKelasLain ? route('guru.wali-kelas.index') : null"
+        size="sm"
     />
 
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">

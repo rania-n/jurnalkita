@@ -3,6 +3,7 @@
         title="Rekap Kehadiran Kelas"
         :subtitle="$kelas->nama . ' · ' . now()->translatedFormat('F Y') . ' · Anda wali kelas ini'"
         :back="$adaKelasLain ? route('guru.wali-kelas.index') : null"
+        size="sm"
     />
 
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl border border-surface-alt bg-card p-1">

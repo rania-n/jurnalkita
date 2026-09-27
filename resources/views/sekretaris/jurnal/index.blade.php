@@ -4,7 +4,7 @@
 @endphp
 
 <x-layouts.app title="Verifikasi Jurnal" width="wide">
-    <x-page-header title="Jurnal Kelas {{ $kelas->nama }}" subtitle="Periksa materi & presensi yang diisi guru">
+    <x-page-header title="Jurnal Kelas {{ $kelas->nama }}" subtitle="Periksa materi & presensi yang diisi guru" size="sm">
         <x-ui.button :href="route('sekretaris.jurnal.pengganti')" variant="secondary" icon="edit_note">Isi Jurnal Pengganti</x-ui.button>
     </x-page-header>
 
