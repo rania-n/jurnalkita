@@ -52,23 +52,17 @@
             </x-slot:action>
         </x-admin.page>
     @else
+        {{-- Ukuran tombol disamakan sama pola header lain di app (x-ui.button,
+             bukan lagi desain kecil kustom) -- Ekspor Ringkasan sebelumnya
+             kelihatan nyempil kecil sendiri dibanding tombol Ekspor di
+             halaman lain (Monitor Piket, Rekap Siswa). --}}
         <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran" always-row size="sm">
-        <div class="flex shrink-0 flex-col items-end gap-1.5">
-                @if ($bolehEkspor)
-                    <a href="{{ $urlEkspor }}"
-                       class="press inline-flex h-7 w-full shrink-0 items-center justify-center gap-2.5 rounded-md bg-surface-alt px-2.5 text-xs font-semibold text-ink hover:bg-[#cbd5e1]">
-                        <x-icon name="download" :size="13" class="shrink-0" />
-                        Ekspor Ringkasan
-                    </a>
-                @endif
-                @if ($bolehAjukan)
-                    <a href="{{ route('dispensasi.create') }}"
-                       class="press inline-flex h-7 w-full shrink-0 items-center justify-center gap-1 rounded-md bg-navy px-2.5 text-xs font-semibold text-card hover:bg-navy-hover">
-                        <x-icon name="add" :size="13" class="shrink-0" />
-                        Buat Dispen
-                    </a>
-                @endif
-            </div>
+            @if ($bolehEkspor)
+                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor Ringkasan</x-ui.button>
+            @endif
+            @if ($bolehAjukan)
+                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full sm:w-auto">Buat Dispen</x-ui.button>
+            @endif
         </x-page-header>
     @endif
 
