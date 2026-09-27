@@ -59,18 +59,32 @@ class WaliKelasController extends Controller
 
         $dari = $request->query('dari', today()->toDateString());
         $sampai = $request->query('sampai') ?: $dari;
+        $statusGuru = in_array($request->query('status_guru'), ['hadir', 'tidak_hadir'], true)
+            ? $request->query('status_guru') : '';
 
-        $jurnals = Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
-            ->with('jadwal.mapel', 'guru')
+        $baseQuery = fn () => Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
             ->whereDate('tanggal', '>=', $dari)
-            ->whereDate('tanggal', '<=', $sampai)
+            ->whereDate('tanggal', '<=', $sampai);
+
+        // Jumlah per tab (Semua/Hadir/Tidak Hadir) ikut rentang tanggal yang
+        // lagi aktif, TAPI TANPA filter status_guru -- biar tiap tab nunjukin
+        // angka aslinya, sama pola kayak $jumlahTab di Riwayat Jurnal guru.
+        $jumlahTab = [
+            'semua' => $baseQuery()->count(),
+            'hadir' => $baseQuery()->where('status_guru', 'hadir')->count(),
+            'tidak_hadir' => $baseQuery()->where('status_guru', 'tidak_hadir')->count(),
+        ];
+
+        $jurnals = $baseQuery()
+            ->with('jadwal.mapel', 'guru')
+            ->when($statusGuru, fn ($q) => $q->where('status_guru', $statusGuru))
             ->orderByRaw("CASE WHEN status_guru != 'tidak_hadir' AND status_verifikasi = 'pending' THEN 0 ELSE 1 END")
             ->latest('tanggal')->latest('id')
             ->paginate(15)->withQueryString();
 
         $adaKelasLain = auth()->user()->kelasWaliList()->count() > 1;
 
-        return view('guru.wali-kelas.jurnal', compact('kelas', 'jurnals', 'dari', 'sampai', 'adaKelasLain'));
+        return view('guru.wali-kelas.jurnal', compact('kelas', 'jurnals', 'dari', 'sampai', 'adaKelasLain', 'statusGuru', 'jumlahTab'));
     }
 
     public function jurnalFragment(Jurnal $jurnal): View

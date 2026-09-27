@@ -150,6 +150,27 @@ class JurnalController extends Controller
             ->latest('tanggal')->latest('id')
             ->paginate(15)->withQueryString();
 
+        // Jumlah per tab -- ikut filter tanggal/kelas/mapel yang lagi aktif
+        // (biar konsisten sama isi tabel), TAPI TANPA filter status (supaya
+        // tiap tab kelihatan jumlah aslinya, bukan kepotong status yang lagi
+        // dipilih). Base query dipanggil ULANG tiap tab (bukan clone), soalnya
+        // $guru->jurnals() balikin builder baru tiap dipanggil.
+        $baseHitung = fn () => $guru->jurnals()
+            ->when($dari, fn ($q) => $q->where('tanggal', '>=', $dari))
+            ->when($sampai, fn ($q) => $q->where('tanggal', '<=', $sampai))
+            ->when($request->filled('kelas_id'), fn ($q) => $q->whereHas('jadwal', fn ($q2) => $q2->where('kelas_id', $request->query('kelas_id'))))
+            ->when($request->filled('mapel_id'), fn ($q) => $q->whereHas('jadwal', fn ($q2) => $q2->where('mapel_id', $request->query('mapel_id'))));
+
+        $jumlahTab = [
+            'semua' => $baseHitung()->count(),
+            'tugas' => $baseHitung()->where('status_guru', 'tidak_hadir')->count(),
+            'pending' => $baseHitung()->inReviewQueue()->count(),
+            'terverifikasi' => $baseHitung()->where(fn ($q) => $q
+                ->where(fn ($q) => $q->where('status_verifikasi', 'terverifikasi')->whereNotNull('verifikator_id'))
+                ->orWhere('status_guru', 'tidak_hadir'))->count(),
+            'revisi' => $baseHitung()->where('status_verifikasi', 'revisi')->count(),
+        ];
+
         // Halaman detail jurnal (jurnal.show) udah dihapus -- semua "lihat
         // detail" sekarang lewat popup di halaman ini. Tempat lain yang dulu
         // redirect/link ke jurnal.show (habis submit, notifikasi revisi,
@@ -169,7 +190,7 @@ class JurnalController extends Controller
             $request->session()->keep(['errors', '_old_input']);
         }
 
-        return view('guru.jurnal.index', compact('jurnals', 'status', 'dari', 'sampai', 'kelasList', 'mapelList', 'lihatJurnal'));
+        return view('guru.jurnal.index', compact('jurnals', 'status', 'dari', 'sampai', 'kelasList', 'mapelList', 'lihatJurnal', 'jumlahTab'));
     }
 
     /** Endpoint ringan buat di-poll (initAutoRefresh()) -- lihat App\Support\Versi. */

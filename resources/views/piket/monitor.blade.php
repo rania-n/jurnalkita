@@ -20,45 +20,44 @@
             </x-slot:action>
         </x-admin.page>
     @else
-        <x-page-header title="Monitor Piket" :subtitle="$subtitle" always-row>
+        <x-page-header title="Monitor Piket" :subtitle="$subtitle" always-row size="sm">
             <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor Ringkasan</x-ui.button>
         </x-page-header>
     @endif
 
     <x-ui.auto-refresh :url="route('piket.monitor.versi', ['tanggal' => $tanggal->toDateString()])" />
 
-    {{-- Filter status -- paling atas, gaya tab disamakan dengan Riwayat Jurnal
-         (bg-navy pas aktif, bukan warna per-status kayak sebelumnya). Tetap
-         <button> (bukan <a>) -- ini filter CLIENT-SIDE, langsung nyaring baris
-         yang sudah dimuat tanpa reload halaman, beda dari tab Riwayat Jurnal
-         yang reload lewat query string. --}}
-    <div class="mb-2 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
-        <button type="button" data-status-filter=""
-            data-class-aktif="bg-navy text-card" data-class-nonaktif="text-muted-2 hover:text-ink"
-            class="status-filter-btn flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors bg-navy text-card" data-active="true">
-            Semua <span class="opacity-70">({{ $rekapTotal->sum() }})</span>
-        </button>
-        @foreach (['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir', 'belum_diisi' => 'Belum Diisi'] as $key => $label)
-            <button type="button" data-status-filter="{{ $key }}"
-                data-class-aktif="bg-navy text-card" data-class-nonaktif="text-muted-2 hover:text-ink"
-                class="status-filter-btn flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors text-muted-2 hover:text-ink">
-                {{ $label }} <span class="opacity-70">({{ $rekapTotal[$key] ?? 0 }})</span>
-            </button>
+    {{-- Filter status -- lewat query string (?status=...), sama pola kayak
+         tab Riwayat Jurnal -- biar TETAP di tab yang sama begitu tanggal/mode
+         diganti (reload halaman), bukan balik ke "Semua" terus. Jumlah
+         disembunyikan kalau 0 (nggak nambah info, cuma bikin rame). --}}
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+        @foreach (['' => 'Semua', 'hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir', 'belum_diisi' => 'Belum Diisi'] as $key => $label)
+            @php $jumlah = $key === '' ? $rekapTotal->sum() : ($rekapTotal[$key] ?? 0); @endphp
+            <a href="{{ route('piket.monitor.index', array_merge(request()->except('status', 'page'), $key === '' ? [] : ['status' => $key])) }}"
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusAktif === $key, 'text-muted-2 hover:text-ink' => $statusAktif !== $key])>
+                {{ $label }}
+                @if ($jumlah > 0)
+                    <span class="opacity-70">({{ $jumlah }})</span>
+                @endif
+            </a>
         @endforeach
     </div>
 
     {{-- Tanggal -- cuma 1 field (bukan rentang Dari/Sampai kayak Riwayat
          Jurnal), soalnya Monitor Piket memang laporan PER HARI, bukan
-         rentang tanggal. --}}
+         rentang tanggal. Max hari ini -- belum ada gunanya lihat piket
+         buat tanggal yang belum kejalanin. --}}
     <x-admin.filters :action="route('piket.monitor.index')" hideButtons="true">
         <input type="hidden" name="mode" value="{{ $mode }}">
-        <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" onchange="this.form.submit()" />
+        <input type="hidden" name="status" value="{{ $statusAktif }}">
+        <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
     </x-admin.filters>
 
     {{-- Bar pilih: kelompokkan per kelas atau per guru --}}
-    <div class="mb-2 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach (['kelas' => 'Per Kelas', 'guru' => 'Per Guru'] as $key => $label)
-            <a href="{{ route('piket.monitor.index', ['tanggal' => $tanggal->toDateString(), 'mode' => $key]) }}"
+            <a href="{{ route('piket.monitor.index', array_merge(request()->except('mode', 'page'), ['mode' => $key])) }}"
                @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap', 'bg-navy text-card' => $mode === $key, 'text-muted-2 hover:text-ink' => $mode !== $key])>
                 {{ $label }}
             </a>
@@ -176,11 +175,12 @@
     @push('scripts')
         <script>
             (function () {
+                // Filter status sekarang server-side (?status=..., lihat
+                // PiketController@index) -- JS di sini cuma ngurus pencarian
+                // teks di atas baris yang SUDAH difilter status dari server.
                 const cari = document.getElementById('cari-monitor');
-                const filterBtns = document.querySelectorAll('.status-filter-btn');
                 const grupCards = document.querySelectorAll('[data-grup-card]');
                 const kosong = document.getElementById('monitor-kosong');
-                let statusAktif = '';
 
                 function terapkan() {
                     const q = (cari?.value ?? '').trim().toLowerCase();
@@ -191,15 +191,11 @@
                         let tampilDiGrup = 0;
 
                         rows.forEach((row) => {
-                            const cocokQ = !q || row.dataset.cari.includes(q);
-                            const cocokStatus = !statusAktif || row.dataset.status === statusAktif;
-                            const tampil = cocokQ && cocokStatus;
+                            const tampil = !q || row.dataset.cari.includes(q);
                             row.hidden = !tampil;
                             if (tampil) tampilDiGrup++;
                         });
 
-                        const grupCocokNama = !q || card.dataset.cari.includes(q);
-                        const tampilkanGrup = tampilDiGrup > 0 || (grupCocokNama && !statusAktif && q === '');
                         card.hidden = tampilDiGrup === 0;
                         if (!card.hidden) adaGrupTampil = true;
                     });
@@ -208,18 +204,6 @@
                 }
 
                 cari?.addEventListener('input', terapkan);
-                filterBtns.forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        statusAktif = btn.dataset.statusFilter;
-                        filterBtns.forEach((b) => {
-                            const aktif = b === btn;
-                            b.dataset.active = aktif ? 'true' : 'false';
-                            b.classList.remove(...(aktif ? b.dataset.classNonaktif : b.dataset.classAktif).split(' '));
-                            b.classList.add(...(aktif ? b.dataset.classAktif : b.dataset.classNonaktif).split(' '));
-                        });
-                        terapkan();
-                    });
-                });
 
                 // Toggle Accordion untuk Tabel
                 const toggleBtns = document.querySelectorAll('.btn-toggle-tabel');

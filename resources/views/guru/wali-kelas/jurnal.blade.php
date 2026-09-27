@@ -16,9 +16,25 @@
         </a>
     </div>
 
+    {{-- Filter status kehadiran guru -- pola sama kayak tab Riwayat Jurnal
+         (server-side lewat query string, tetap di tab yang sama begitu
+         tanggal diganti), jumlah disembunyikan kalau 0. --}}
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+        @foreach (['' => 'Semua', 'hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'] as $key => $label)
+            <a href="{{ route('guru.wali-kelas.jurnal', array_merge(['kelas' => $kelas], request()->except('status_guru', 'page'), $key === '' ? [] : ['status_guru' => $key])) }}"
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusGuru === $key, 'text-muted-2 hover:text-ink' => $statusGuru !== $key])>
+                {{ $label }}
+                @if (($jumlahTab[$key === '' ? 'semua' : $key] ?? 0) > 0)
+                    <span class="opacity-70">({{ $jumlahTab[$key === '' ? 'semua' : $key] }})</span>
+                @endif
+            </a>
+        @endforeach
+    </div>
+
     <x-admin.filters :action="route('guru.wali-kelas.jurnal', $kelas)" hideButtons="true">
-        <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" onchange="this.form.submit()" />
-        <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" onchange="this.form.submit()" />
+        <input type="hidden" name="status_guru" value="{{ $statusGuru }}">
+        <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+        <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
     </x-admin.filters>
 
     <div class="mb-4 mt-4">

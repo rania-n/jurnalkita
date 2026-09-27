@@ -7,11 +7,14 @@
 
     <x-ui.auto-refresh :url="route('jurnal.versi')" />
 
-    <div class="mb-2 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
             <a href="{{ route('jurnal.index', array_merge(request()->except('status', 'page'), $key === 'semua' ? [] : ['status' => $key])) }}"
                @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $status === $key, 'text-muted-2 hover:text-ink' => $status !== $key])>
                 {{ $label }}
+                @if ($jumlahTab[$key] > 0)
+                    <span class="opacity-70">({{ $jumlahTab[$key] }})</span>
+                @endif
             </a>
         @endforeach
     </div>

@@ -124,8 +124,19 @@ class PiketController extends Controller
         $tanggal = $this->tanggal($request);
         $mode = $request->get('mode') === 'guru' ? 'guru' : 'kelas';
         $baris = $this->baris($tanggal);
+        // Dihitung dari SEMUA baris (sebelum filter status) -- biar jumlah di
+        // tiap pil tab tetap nunjukin angka aslinya, bukan kepotong status
+        // yang lagi aktif (sama kayak pola $jumlahTab di Riwayat Jurnal).
+        $rekapTotal = $baris->countBy('status');
 
-        $grup = $baris
+        // Status filter sekarang lewat query string (?status=...), BUKAN
+        // cuma JS di klien lagi -- biar nggak reset balik ke "Semua" tiap
+        // ganti tanggal (reload halaman). Lihat statusAktif di view.
+        $statusAktif = in_array($request->query('status'), ['hadir', 'tidak_hadir', 'belum_diisi'], true)
+            ? $request->query('status') : '';
+        $barisTampil = $statusAktif ? $baris->where('status', $statusAktif)->values() : $baris;
+
+        $grup = $barisTampil
             ->groupBy(fn ($b) => $mode === 'guru' ? $b['jadwal']->guru_id : $b['jadwal']->kelas_id)
             ->map(function (Collection $rows, $id) use ($mode) {
                 $contoh = $rows->first()['jadwal'];
@@ -144,7 +155,8 @@ class PiketController extends Controller
             'tanggal' => $tanggal,
             'mode' => $mode,
             'grup' => $grup,
-            'rekapTotal' => $baris->countBy('status'),
+            'rekapTotal' => $rekapTotal,
+            'statusAktif' => $statusAktif,
         ]);
     }
 
