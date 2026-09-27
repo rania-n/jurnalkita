@@ -35,7 +35,16 @@ class PasswordController extends Controller
      */
     public function sendResetLink(Request $request): RedirectResponse
     {
-        PasswordBroker::sendResetLink(['email' => $request->user()->email]);
+        // Layanan email pihak ketiga bisa gagal (kuota habis, domain belum
+        // diverifikasi, dll) -- tangkap di sini biar user cuma lihat pesan
+        // ramah, bukan halaman error mentah kayak yang sempat kejadian.
+        try {
+            PasswordBroker::sendResetLink(['email' => $request->user()->email]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'Gagal mengirim email reset sandi. Coba lagi nanti atau hubungi admin.');
+        }
 
         return back()->with('status', 'reset-link-sent');
     }

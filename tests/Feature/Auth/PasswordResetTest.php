@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -69,5 +70,33 @@ class PasswordResetTest extends TestCase
 
             return true;
         });
+    }
+
+    /**
+     * Regresi: layanan email pihak ketiga (SMTP/Resend/dst) yang gagal dulu
+     * bikin halaman crash total (error mentah, kejadian beneran di produksi).
+     * Sekarang harus ketangkep & tampil sebagai pesan ramah di form.
+     */
+    public function test_reset_password_link_gagal_kirim_tidak_crash(): void
+    {
+        Mail::shouldReceive('send')->andThrow(new \Exception('Layanan email lagi down'));
+
+        $user = User::factory()->create();
+
+        $response = $this->post('/forgot-password', ['email' => $user->email]);
+
+        $response->assertSessionHasErrors('email');
+    }
+
+    /** Sama kayak di atas, tapi jalur "Reset Kata Sandi" dari halaman Profil (bukan Lupa Sandi login). */
+    public function test_reset_link_dari_profil_gagal_kirim_tidak_crash(): void
+    {
+        Mail::shouldReceive('send')->andThrow(new \Exception('Layanan email lagi down'));
+
+        $user = User::factory()->role('guru')->create();
+
+        $response = $this->actingAs($user)->post('/password/reset-link');
+
+        $response->assertSessionHas('error');
     }
 }

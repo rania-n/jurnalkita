@@ -114,6 +114,12 @@
                     </x-alert>
                 @endif
 
+                @if (session('error'))
+                    <x-alert type="error" class="mb-3">
+                        {{ session('error') }}
+                    </x-alert>
+                @endif
+
                 <form id="form-password-update" method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-3">
                     @csrf
                     @method('PUT')
