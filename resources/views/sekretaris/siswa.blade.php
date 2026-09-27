@@ -4,8 +4,16 @@
     @if ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa di kelas ini" />
     @else
-        <x-ui.search-bar id="cari-siswa-kelas" placeholder="Cari nama siswa..." class="mb-3" />
-        <p class="-mt-2 mb-3 text-xs text-muted-2" id="jumlah-tampil-siswa-kelas">Menampilkan {{ $siswas->count() }} dari {{ $siswas->count() }} siswa</p>
+        {{-- class="mb-3" langsung di komponen ini kena merge ke <input>
+             DI DALAM search-bar (bukan wrapper-nya), bukan nambah jarak
+             ke elemen di bawahnya -- makanya dulu perlu ditambal pakai
+             -mt-2 di counter, dan malah bikin tinggi kotak carinya keganggu.
+             Jarak yang bener dikasih lewat div pembungkus, sama pola kayak
+             Monitor Piket/Verifikasi Jurnal. --}}
+        <div class="mb-2">
+            <x-ui.search-bar id="cari-siswa-kelas" placeholder="Cari nama siswa..." />
+        </div>
+        <p class="mb-3 text-xs text-muted-2" id="jumlah-tampil-siswa-kelas">Menampilkan {{ $siswas->count() }} dari {{ $siswas->count() }} siswa</p>
 
         <div class="hidden sm:block">
             <x-admin.table :head="['No. Absen', 'Nama', 'NIS', 'Jabatan', 'Kehadiran Hari Ini']">
@@ -40,7 +48,7 @@
                 <div data-siswa-kelas-row data-nama="{{ strtolower($s->nama) }}">
                     <x-ui.list-card :title="$s->nama" :meta="['No. ' . ($s->no_absen ?? '—') . ' · NIS ' . $s->nis]">
                         <x-slot:badge>
-                            <div class="flex flex-col items-end gap-1">
+                            <div class="flex flex-wrap items-center justify-end gap-1.5">
                                 @if ($statusHariIni)
                                     <x-ui.status-badge :status="$statusHariIni" />
                                 @else

@@ -9,10 +9,12 @@ use App\Models\Jadwal;
 use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Mapel;
+use App\Models\PengaturanJurnal;
 use App\Notifications\JurnalPerluRevisi;
 use App\Support\PresensiDefault;
 use App\Support\Versi;
 use App\Support\Waktu;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -153,40 +155,131 @@ class JurnalController extends Controller
             ->with('success', $pesanSukses);
     }
 
+    /**
+     * Sama persis aturannya kayak Guru\JurnalController::jadwalBolehDiisi() --
+     * mode 'disiplin' cuma boleh isi buat JP yang BENERAN lagi berlangsung
+     * sekarang, mode lain (atau tanggal bukan hari ini) selalu boleh.
+     */
+    private function jadwalBolehDiisi(Jadwal $jadwal, string $mode, Carbon $tanggal): bool
+    {
+        if ($mode !== 'disiplin' || ! $tanggal->isToday()) {
+            return true;
+        }
+
+        $jpAktif = Waktu::jpAktifSekarang();
+        if ($jpAktif !== null && $jadwal->jam_ke_mulai <= $jpAktif && $jadwal->jam_ke_selesai >= $jpAktif) {
+            return true;
+        }
+
+        return ! Waktu::dalamJamSekolah();
+    }
+
     /* ---------------------------------------- Jurnal pengganti (guru tidak sempat) */
-    public function createPengganti(): View
+    public function createPengganti(Request $request): View
     {
         $kelas = $this->kelas();
-        $hariIni = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][now()->dayOfWeek - 1] ?? null;
+        $mode = PengaturanJurnal::mode();
 
-        $jadwals = $kelas->jadwals()->with('mapel', 'guru')
-            ->when($hariIni, fn ($q) => $q->where('hari', $hariIni))
-            ->orderBy('jam_ke_mulai')->get();
+        // Sama pola kayak Guru\JurnalController::create() -- cuma mode
+        // 'bebas_selamanya' (& alias 'bebas_kemarin') yang boleh pilih
+        // tanggal custom, biar aturannya konsisten sama Isi Jurnal biasa.
+        $bisaPilihTanggal = in_array($mode, ['bebas_selamanya', 'bebas_kemarin'], true);
+        if ($bisaPilihTanggal && $request->filled('tanggal')) {
+            $tanggalAktif = Carbon::parse($request->input('tanggal'));
+            if ($tanggalAktif->isFuture()) {
+                $tanggalAktif = now();
+            }
+        } else {
+            $tanggalAktif = now();
+        }
+
+        $hariAktif = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggalAktif->dayOfWeek - 1] ?? null;
+
+        $jadwals = $hariAktif
+            ? $kelas->jadwals()->with('mapel', 'guru')->where('hari', $hariAktif)->orderBy('jam_ke_mulai')->get()
+            : collect();
+
+        // Jadwal yang di tanggal aktif itu udah ada jurnalnya nggak boleh
+        // dipilih lagi dari sini -- sama alasannya kayak Isi Jurnal biasa
+        // (Guru\JurnalController::create()).
+        $idJadwalSudahDiisi = Jurnal::whereIn('jadwal_id', $jadwals->pluck('id'))
+            ->whereDate('tanggal', $tanggalAktif->toDateString())
+            ->pluck('jadwal_id');
+        $jumlahSudahDiisi = $jadwals->whereIn('id', $idJadwalSudahDiisi)->count();
+        $jadwals = $jadwals->reject(fn ($j) => $idJadwalSudahDiisi->contains($j->id))->values();
+
+        // Mode 'disiplin' & tanggal hari ini -> kunci ke jadwal JP yang lagi
+        // aktif sekarang (kalau ada & pas cuma 1), sama kayak Isi Jurnal biasa
+        // -- pengganti pun cuma boleh diisi buat JP yang beneran berlangsung.
+        $modeDisiplinHariIni = $mode === 'disiplin' && $tanggalAktif->isToday();
+        $jpAktif = Waktu::jpAktifSekarang();
+        $jadwalJpIni = ($modeDisiplinHariIni && $jpAktif !== null)
+            ? $jadwals->filter(fn ($j) => $j->jam_ke_mulai <= $jpAktif && $j->jam_ke_selesai >= $jpAktif)
+            : collect();
+        $jadwalTerkunci = $modeDisiplinHariIni && $jadwalJpIni->count() === 1;
+
+        // Di luar JP manapun tapi masih dalam jam sekolah (istirahat/pergantian
+        // jam) -- sama kayak Isi Jurnal biasa, jangan kasih akses milih jadwal
+        // lain sembarangan biar nggak jadi celah isi jurnal jam yang nggak
+        // beneran berlangsung.
+        $jurnalDiblokirIstirahat = $modeDisiplinHariIni && Waktu::dalamJamSekolah() && $jadwalJpIni->count() !== 1;
+
+        if ($jurnalDiblokirIstirahat) {
+            $jadwals = collect();
+        } elseif ($jadwalTerkunci) {
+            $jadwals = $jadwalJpIni->values();
+        }
 
         // Pengurus kelas ADA di kelas itu, jadi dia yang paling tau siapa yang
-        // beneran hadir/nggak hari ini -- presensinya diisi bareng, bukan asal
-        // ditandai hadir semua. Default-nya ikut PresensiDefault (dispensasi
-        // hari ini / presensi dari jurnal lain kelas ini hari ini / "Hadir")
-        // -- sama aturannya kayak form Isi Jurnal punya Guru. Jam mulai/selesai
+        // beneran hadir/nggak di tanggal itu -- presensinya diisi bareng, bukan
+        // asal ditandai hadir semua. Default-nya ikut PresensiDefault (dispensasi
+        // / presensi dari jurnal lain kelas ini di tanggal itu / "Hadir") --
+        // sama aturannya kayak form Isi Jurnal punya Guru. Jam mulai/selesai
         // nggak dikasih di sini (belum tau jadwal mana yang bakal dipilih di
         // form ini -- presensinya di-render sebelum jadwalnya kepilih), jadi
         // dispensasi yang dicek sepanjang hari itu, bukan yang spesifik 1 JP.
         $siswas = $kelas->siswas()->orderBy('no_absen')->get();
-        $presensiAwal = PresensiDefault::untukKelas($siswas, $kelas->id, now()->toDateString());
+        $presensiAwal = PresensiDefault::untukKelas($siswas, $kelas->id, $tanggalAktif->toDateString());
 
-        // Peta jam_ke -> mulai/selesai buat hari ini -- dikirim ke JS biar bisa
+        // Peta jam_ke -> mulai/selesai buat HARI itu -- dikirim ke JS biar bisa
         // nampilin "Waktunya 07:00-08:30" yang otomatis update tiap jam ke-
         // dipilih/diubah manual (baik lewat jadwal maupun select JP langsung).
         $jamPelajaranHariIni = JamPelajaran::where('kategori', Waktu::kategori())
             ->get(['jam_ke', 'mulai', 'selesai'])
             ->mapWithKeys(fn ($jp) => [$jp->jam_ke => ['mulai' => $jp->mulai->format('H:i'), 'selesai' => $jp->selesai->format('H:i')]]);
 
-        return view('sekretaris.jurnal.pengganti', compact('kelas', 'jadwals', 'siswas', 'presensiAwal', 'jamPelajaranHariIni'));
+        return view('sekretaris.jurnal.pengganti', [
+            'kelas' => $kelas,
+            'jadwals' => $jadwals,
+            'siswas' => $siswas,
+            'presensiAwal' => $presensiAwal,
+            'jamPelajaranHariIni' => $jamPelajaranHariIni,
+            'modeJurnal' => $mode,
+            'bisaPilihTanggal' => $bisaPilihTanggal,
+            'tanggalAktif' => $tanggalAktif,
+            'jadwalTerkunci' => $jadwalTerkunci,
+            'jadwalTunggalTerkunci' => $jadwalTerkunci ? $jadwalJpIni->first() : null,
+            'jurnalDiblokirIstirahat' => $jurnalDiblokirIstirahat,
+            'jumlahSudahDiisi' => $jumlahSudahDiisi,
+        ]);
     }
 
     public function storePengganti(Request $request): RedirectResponse
     {
         $kelas = $this->kelas();
+        $mode = PengaturanJurnal::mode();
+
+        // Tanggal dihitung ULANG dari parameter yang sama (bukan trust nilai
+        // hidden input mentah-mentah) -- sama pola kayak
+        // Guru\JurnalController::tanggalUntukJadwal(), biar nggak bisa
+        // dipalsukan lewat request manual.
+        $bisaPilihTanggal = in_array($mode, ['bebas_selamanya', 'bebas_kemarin'], true);
+        $tanggalAktif = ($bisaPilihTanggal && $request->filled('tanggal'))
+            ? Carbon::parse($request->input('tanggal'))
+            : now();
+        if ($tanggalAktif->isFuture()) {
+            $tanggalAktif = now();
+        }
 
         $data = $request->validate([
             'jadwal_id' => ['required', 'exists:jadwals,id'],
@@ -207,6 +300,7 @@ class JurnalController extends Controller
 
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
         abort_unless($jadwal->kelas_id === $kelas->id, 403);
+        abort_unless($this->jadwalBolehDiisi($jadwal, $mode, $tanggalAktif), 403, 'Belum waktunya isi jurnal untuk jadwal ini -- tunggu jam pelajarannya berlangsung.');
 
         // Jam mulai SELALU ikut jadwal aslinya (bukan input form) -- sama kayak
         // aturan Guru\JurnalController::store(). jam_ke_selesai boleh lebih lama
@@ -217,22 +311,22 @@ class JurnalController extends Controller
         }
 
         $sudahAda = Jurnal::where('jadwal_id', $jadwal->id)
-            ->whereDate('tanggal', now()->toDateString())
+            ->whereDate('tanggal', $tanggalAktif->toDateString())
             ->first();
         if ($sudahAda) {
             return redirect()->route('sekretaris.jurnal.index', ['lihat' => $sudahAda->id])
-                ->with('info', 'Jurnal untuk jadwal ini hari ini sudah ada.');
+                ->with('info', 'Jurnal untuk jadwal ini di tanggal itu sudah ada.');
         }
 
         $presensiFallback = PresensiDefault::untukKelas(
-            $jadwal->kelas->siswas, $jadwal->kelas_id, now()->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
+            $jadwal->kelas->siswas, $jadwal->kelas_id, $tanggalAktif->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
         );
 
-        $jurnal = DB::transaction(function () use ($data, $jadwal, $presensiFallback) {
+        $jurnal = DB::transaction(function () use ($data, $jadwal, $presensiFallback, $tanggalAktif) {
             $jurnal = Jurnal::create([
                 ...collect($data)->except('presensi')->all(),
                 'guru_id' => $jadwal->guru_id,
-                'tanggal' => now()->toDateString(),
+                'tanggal' => $tanggalAktif->toDateString(),
                 'diisi_oleh_pengurus' => true,
                 'status_verifikasi' => 'terverifikasi',
                 'verifikator_id' => auth()->user()->siswa->id,

@@ -8,22 +8,89 @@
 
     <x-alert type="info" class="mb-4">Hanya untuk guru yang <strong>Tidak Hadir</strong> dan tidak sempat mengisi sendiri. Tugas langsung tercatat disetujui.</x-alert>
 
-    @if ($jadwals->isEmpty())
-        <x-ui.empty icon="event_busy" title="Tidak ada jadwal kelas ini hari ini" />
+    {{-- Tata letak & aturan tanggal/jadwal sengaja disamakan sama Isi Jurnal
+         biasa (Guru\JurnalController::create()) -- lihat catatan di
+         Sekretaris\JurnalController::createPengganti(). --}}
+    @if ($modeJurnal === 'bebas_selamanya')
+        <div class="mb-4 rounded-2xl border border-surface-alt bg-card p-3 sm:p-4 shadow-[var(--shadow-soft)]">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                        <x-icon name="history_edu" :size="20" />
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-ink">Bebas Isi Jurnal (Tanggal Custom)</h3>
+                        <p class="text-xs text-muted">Bisa mengisi jurnal pengganti dulu-dulu yang belum sempat dibuat. Pilih tanggal di sebelah kanan.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="pilih_tanggal_pengganti" class="text-xs font-semibold text-muted whitespace-nowrap">Tanggal:</label>
+                    <input
+                        type="date"
+                        id="pilih_tanggal_pengganti"
+                        value="{{ $tanggalAktif->toDateString() }}"
+                        max="{{ today()->toDateString() }}"
+                        class="rounded-xl border border-surface-alt bg-surface-alt/70 px-3 py-1.5 text-xs font-bold text-ink focus:border-navy focus:outline-none cursor-pointer"
+                    >
+                </div>
+            </div>
+        </div>
+    @elseif ($modeJurnal === 'bebas_kemarin')
+        <div class="mb-4 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">
+            <a href="{{ route('sekretaris.jurnal.pengganti') }}"
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold transition-colors', 'bg-navy text-card' => $tanggalAktif->isToday(), 'text-muted-2 hover:text-ink' => ! $tanggalAktif->isToday()])>
+                Hari Ini
+            </a>
+            <a href="{{ route('sekretaris.jurnal.pengganti', ['tanggal' => now()->subDay()->toDateString()]) }}"
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold transition-colors', 'bg-navy text-card' => ! $tanggalAktif->isToday(), 'text-muted-2 hover:text-ink' => $tanggalAktif->isToday()])>
+                Kemarin (Susulan)
+            </a>
+        </div>
+    @endif
+
+    @if ($jumlahSudahDiisi > 0)
+        <x-alert type="success" class="mb-4">
+            {{ $jumlahSudahDiisi }} jadwal pada {{ $tanggalAktif->isToday() ? 'hari ini' : $tanggalAktif->translatedFormat('d M Y') }} sudah ada jurnalnya — tidak muncul lagi di pilihan bawah.
+            <a href="{{ route('sekretaris.jurnal.index', ['dari' => $tanggalAktif->toDateString(), 'sampai' => $tanggalAktif->toDateString()]) }}" class="font-bold underline">Lihat di Riwayat</a>.
+        </x-alert>
+    @endif
+
+    @if ($jurnalDiblokirIstirahat)
+        <x-ui.empty
+            icon="hourglass_empty"
+            title="Belum waktunya isi jurnal"
+            desc="Sedang di luar jam pelajaran (istirahat/pergantian jam). Coba lagi begitu jam pelajaran berikutnya mulai."
+        />
+    @elseif ($jadwals->isEmpty())
+        <x-ui.empty
+            icon="event_busy"
+            :title="$jumlahSudahDiisi > 0 ? 'Semua jadwal sudah diisi' : 'Tidak ada jadwal kelas ini di tanggal itu'"
+            :desc="$jumlahSudahDiisi > 0 ? 'Mantap, kelar semua! Kalau ada yang perlu diubah, buka dari Riwayat.' : null"
+        />
     @else
         <form method="POST" action="{{ route('sekretaris.jurnal.pengganti.store') }}">
             @csrf
+            <input type="hidden" name="tanggal" value="{{ $tanggalAktif->toDateString() }}">
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-ui.select label="Mata Pelajaran (jadwal)" name="jadwal_id" id="jadwal_id" class="sm:col-span-2" required>
-                    <option value="" disabled selected hidden>Pilih jadwal</option>
-                    @foreach ($jadwals as $j)
-                        @php $jamOpsi = \App\Support\Waktu::rentangJam($j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
-                        <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected(old('jadwal_id') == $j->id)>
-                            {{ ucfirst($j->hari) }} · {{ $j->mapel->nama }} — {{ $j->guru->nama }} (JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " · {$jamOpsi}" : '' }})
-                        </option>
-                    @endforeach
-                </x-ui.select>
+                @if ($jadwalTerkunci)
+                    @php $jamOpsi = \App\Support\Waktu::rentangJam($jadwalTunggalTerkunci->jam_ke_mulai, $jadwalTunggalTerkunci->jam_ke_selesai); @endphp
+                    <x-ui.field-static label="Mata Pelajaran (jadwal)" icon="lock_clock" tone="muted" class="sm:col-span-2">
+                        {{ $jadwalTunggalTerkunci->mapel->nama }} — {{ $jadwalTunggalTerkunci->guru->nama }} (JP {{ $jadwalTunggalTerkunci->jam_ke_mulai }}–{{ $jadwalTunggalTerkunci->jam_ke_selesai }}{{ $jamOpsi ? " · {$jamOpsi}" : '' }})
+                    </x-ui.field-static>
+                    <input type="hidden" name="jadwal_id" id="jadwal_id" value="{{ $jadwalTunggalTerkunci->id }}" data-mulai="{{ $jadwalTunggalTerkunci->jam_ke_mulai }}" data-selesai="{{ $jadwalTunggalTerkunci->jam_ke_selesai }}">
+                    <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Otomatis ikut jam pelajaran yang lagi berlangsung sekarang.</p>
+                @else
+                    <x-ui.select label="Mata Pelajaran (jadwal)" name="jadwal_id" id="jadwal_id" class="sm:col-span-2" required>
+                        <option value="" disabled selected hidden>Pilih jadwal</option>
+                        @foreach ($jadwals as $j)
+                            @php $jamOpsi = \App\Support\Waktu::rentangJam($j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
+                            <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected(old('jadwal_id') == $j->id)>
+                                {{ ucfirst($j->hari) }} · {{ $j->mapel->nama }} — {{ $j->guru->nama }} (JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " · {$jamOpsi}" : '' }})
+                            </option>
+                        @endforeach
+                    </x-ui.select>
+                @endif
 
                 <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai" id="jam_ke_mulai">
                     @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_mulai') == $i)>Jam ke-{{ $i }}</option>@endfor
@@ -73,7 +140,10 @@
                     }
 
                     function sync() {
-                        const opt = jadwal.selectedOptions[0];
+                        // Jadwal terkunci (mode disiplin) render <input type=hidden>,
+                        // bukan <select> -- data-mulai/selesai-nya diambil langsung
+                        // dari elemen itu sendiri, bukan dari selectedOptions.
+                        const opt = jadwal.tagName === 'SELECT' ? jadwal.selectedOptions[0] : jadwal;
                         const mulai = opt?.dataset.mulai;
                         const selesai = opt?.dataset.selesai;
                         if (!mulai) return;
@@ -87,6 +157,16 @@
                     selectMulai.addEventListener('change', tampilkanWaktu);
                     selectSelesai.addEventListener('change', tampilkanWaktu);
                     sync();
+
+                    // Ganti tanggal (mode bebas_selamanya) -> muat ulang halaman
+                    // penuh, sama pola kayak Isi Jurnal biasa.
+                    const datePicker = document.getElementById('pilih_tanggal_pengganti');
+                    if (datePicker) {
+                        datePicker.addEventListener('change', () => {
+                            if (!datePicker.value) return;
+                            window.location.href = '{{ route('sekretaris.jurnal.pengganti') }}?tanggal=' + datePicker.value;
+                        });
+                    }
                 })();
             </script>
         @endpush

@@ -4,8 +4,8 @@
 @endphp
 
 <x-layouts.app title="Verifikasi Jurnal" width="wide">
-    <x-page-header title="Jurnal Kelas {{ $kelas->nama }}" subtitle="Periksa materi & presensi yang diisi guru" size="sm">
-        <x-ui.button :href="route('sekretaris.jurnal.pengganti')" variant="secondary" icon="edit_note">Isi Jurnal Pengganti</x-ui.button>
+    <x-page-header title="Jurnal Kelas {{ $kelas->nama }}" subtitle="Periksa materi & presensi yang diisi guru" always-row size="sm">
+        <x-ui.button :href="route('sekretaris.jurnal.pengganti')" variant="secondary" icon="edit_note" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Isi Jurnal Pengganti</x-ui.button>
     </x-page-header>
 
     <x-ui.auto-refresh :url="route('sekretaris.jurnal.versi')" />
@@ -19,9 +19,9 @@
         @endforeach
     </div>
 
-    {{-- Rentang tanggal & dropdown Mapel -- server-side (auto-submit), sama
-         pola kayak filter di Riwayat Jurnal Guru. Nggak ada filter Kelas di
-         sini karena pengurus kelas emang cuma pegang 1 kelas. --}}
+    {{-- Rentang tanggal -- server-side (auto-submit), sama pola kayak filter
+         di Riwayat Jurnal Guru. Nggak ada filter Kelas di sini karena
+         pengurus kelas emang cuma pegang 1 kelas. --}}
     <x-admin.filters :action="route('sekretaris.jurnal.index')" ignore="status">
         <input type="hidden" name="status" value="{{ $status }}">
 
@@ -29,14 +29,26 @@
             <x-admin.f-date name="dari" label="Dari tanggal" data-pasangan="sampai" />
             <x-admin.f-date name="sampai" label="Sampai tanggal" onchange="this.form.submit()" />
         </div>
-
-        <x-ui.cari-pilihan name="mapel_id" label="Mata Pelajaran" :options="$mapelList" all="Semua mapel" />
     </x-admin.filters>
 
-    {{-- Cari mapel/guru -- langsung filter baris yang sudah dimuat di
-         halaman ini (tanpa reload), sama pola kayak Riwayat Jurnal Guru. --}}
-    <div class="mb-4">
-        <x-ui.search-bar id="cari-verifikasi-jurnal" placeholder="Cari mata pelajaran atau guru..." />
+    {{-- Mata Pelajaran & Cari sejajar kanan-kiri (2 kotak, bukan numpuk 1-1)
+         -- Cari mapel/guru SENGAJA di luar <form> (client-side, langsung
+         filter baris yang sudah dimuat, sama pola kayak Riwayat Jurnal
+         Guru), jadi dipisah form sendiri (class="contents") biar tetap
+         sejajar tanpa ganggu filter Mata Pelajaran. --}}
+    <div class="mb-4 flex w-full gap-2">
+        <form method="GET" action="{{ route('sekretaris.jurnal.index') }}" class="contents">
+            <input type="hidden" name="status" value="{{ $status }}">
+            @if(request('dari')) <input type="hidden" name="dari" value="{{ request('dari') }}"> @endif
+            @if(request('sampai')) <input type="hidden" name="sampai" value="{{ request('sampai') }}"> @endif
+            <div class="flex-1">
+                <x-ui.cari-pilihan name="mapel_id" label="Mata Pelajaran" :options="$mapelList" all="Semua mapel" />
+            </div>
+        </form>
+        <div class="flex-1">
+            <span class="mb-1 block text-xs font-semibold text-muted-2">Cari Mapel/Guru</span>
+            <x-ui.search-bar id="cari-verifikasi-jurnal" placeholder="Cari mata pelajaran atau guru..." />
+        </div>
     </div>
 
     @if ($jurnals->isEmpty())

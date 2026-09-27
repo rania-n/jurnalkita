@@ -182,7 +182,7 @@ class KelasTest extends TestCase
             ->assertOk()->assertSee('Belum ada jadwal pelajaran')->assertDontSee('Matematika');
     }
 
-    public function test_rekap_menghitung_kehadiran_bulan_ini(): void
+    public function test_rekap_menghitung_seluruh_riwayat_tanpa_filter_tanggal(): void
     {
         $guru = Guru::create(['nama' => 'Bu Sarah']);
         $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
@@ -203,10 +203,41 @@ class KelasTest extends TestCase
         ]);
         Absensi::create(['jurnal_id' => $jurnalBulanLalu->id, 'siswa_id' => $ketua->id, 'status' => 'alpha']);
 
+        // Kosong (belum difilter) = tampilkan SELURUH riwayat -- konsisten
+        // sama Rekap Kehadiran Kelas milik Wali Kelas & Rekap Siswa Waka.
         $response = $this->actingAs($this->sekretaris)->get('/sekretaris/rekap');
 
         $response->assertOk()->assertSee('Ketua Kelas');
-        // 1 sakit bulan ini kehitung, alpha 2 bulan lalu TIDAK ikut kehitung.
+        $response->assertSee('text-sakit">1</span>', false);
+        $response->assertSee('text-alpha">1</span>', false);
+    }
+
+    public function test_rekap_bisa_difilter_rentang_tanggal(): void
+    {
+        $guru = Guru::create(['nama' => 'Bu Sarah']);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => now(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'x',
+        ]);
+        $ketua = Siswa::where('nama', 'Ketua Kelas')->firstOrFail();
+        Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $ketua->id, 'status' => 'sakit']);
+
+        $jurnalBulanLalu = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => now()->subMonthsNoOverflow(2),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'y',
+        ]);
+        Absensi::create(['jurnal_id' => $jurnalBulanLalu->id, 'siswa_id' => $ketua->id, 'status' => 'alpha']);
+
+        $response = $this->actingAs($this->sekretaris)
+            ->get('/sekretaris/rekap?dari='.now()->startOfMonth()->toDateString());
+
+        $response->assertOk()->assertSee('Ketua Kelas');
+        // Difilter dari awal bulan ini -- alpha 2 bulan lalu nggak ikut kehitung.
         $response->assertSee('text-sakit">1</span>', false);
         $response->assertSee('text-alpha">0</span>', false);
     }

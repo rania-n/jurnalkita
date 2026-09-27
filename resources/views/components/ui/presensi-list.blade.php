@@ -53,20 +53,31 @@
                         <span class="block truncate text-xs text-muted-2">{{ $a->catatan }}</span>
                     @endif
                     @if ($dispensasi)
-                        <span class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-2">
-                            <span>{{ $dispensasi->labelTanggal() }} · {{ $dispensasi->labelJam() }}</span>
-                            @if ($dispensasi->surat_path)
-                                @php
-                                    $buktiUrl = Storage::url($dispensasi->surat_path);
-                                    $buktiPdf = str_ends_with(strtolower($dispensasi->surat_path), '.pdf');
-                                @endphp
-                                <a href="{{ $buktiUrl }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-semibold text-navy hover:underline">
-                                    <x-icon :name="$buktiPdf ? 'picture_as_pdf' : 'image'" :size="13" /> Lihat bukti
-                                </a>
-                            @else
-                                <span>Tanpa bukti terlampir</span>
-                            @endif
+                        <span class="mt-0.5 block text-[11px] text-muted-2">
+                            {{ $dispensasi->labelTanggal() }} · {{ $dispensasi->labelJam() }}
+                            @unless ($dispensasi->surat_path) · Tanpa bukti terlampir @endunless
                         </span>
+                        @if ($dispensasi->surat_path)
+                            @php
+                                $buktiUrl = Storage::url($dispensasi->surat_path);
+                                $buktiPdf = str_ends_with(strtolower($dispensasi->surat_path), '.pdf');
+                            @endphp
+                            {{-- Buktinya langsung kelihatan di sini (bukan link
+                                 "Lihat bukti" yang perlu diklik dulu baru
+                                 kebuka tab baru) -- sama pola kayak Surat/Bukti
+                                 di popup Detail Dispensasi, diperkecil biar
+                                 muat di daftar. Tetap dibungkus tautan tab
+                                 baru buat perbesar. --}}
+                            <a href="{{ $buktiUrl }}" target="_blank" rel="noopener" class="mt-1 inline-block">
+                                @if ($buktiPdf)
+                                    <span class="inline-flex items-center gap-1 rounded-lg border border-surface-alt bg-surface-alt px-2 py-1 text-[11px] font-semibold text-navy">
+                                        <x-icon name="picture_as_pdf" :size="14" /> Buka bukti (PDF)
+                                    </span>
+                                @else
+                                    <img src="{{ $buktiUrl }}" alt="Bukti dispensasi {{ $a->siswa->nama }}" class="h-16 w-16 rounded-lg border border-surface-alt object-cover">
+                                @endif
+                            </a>
+                        @endif
                     @endif
                 </div>
                 <x-ui.status-badge :status="$a->status" />

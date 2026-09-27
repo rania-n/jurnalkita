@@ -4,12 +4,15 @@ namespace Tests\Feature\Sekretaris;
 
 use App\Models\Guru;
 use App\Models\Jadwal;
+use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\Mapel;
+use App\Models\PengaturanJurnal;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class VerifikasiJurnalTest extends TestCase
@@ -221,6 +224,96 @@ class VerifikasiJurnalTest extends TestCase
         // Pengurus kelas beneran bisa nandain siapa yang nggak hadir, bukan
         // ke-hardcode "hadir" semua.
         $this->assertSame('sakit', $jurnal->absensis()->where('siswa_id', $ketua->id)->value('status'));
+    }
+
+    /* ---------------------- Aturan mode isi jurnal buat Jurnal Pengganti (sama kayak Isi Jurnal Guru) --------------------- */
+
+    public function test_pengganti_mode_disiplin_diblokir_pas_istirahat(): void
+    {
+        // Istirahat -- di antara JP1 (selesai 09:00) & JP2 (mulai 09:40).
+        $this->travelTo(Carbon::parse('next monday 09:30:00'));
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '09:00']);
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '09:40', 'selesai' => '10:20']);
+
+        // Default (belum ada baris PengaturanJurnal sama sekali) -> 'disiplin'.
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti')
+            ->assertOk()->assertSee('Belum waktunya isi jurnal');
+
+        $ketua = Siswa::where('nis', '001')->firstOrFail();
+        $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'tugas_tambahan' => 'Kerjakan LKS', 'alasan' => 'Rapat dinas',
+            'presensi' => [$ketua->id => ['status' => 'hadir']],
+        ])->assertForbidden();
+    }
+
+    public function test_pengganti_mode_disiplin_terkunci_ke_jp_aktif(): void
+    {
+        // "next monday" DIPANGGIL SEKALI & disimpan -- manggil "next monday"
+        // lagi belakangan SETELAH waktunya dibekukan ke hari Senin bakal
+        // malah loncat ke Senin MINGGU DEPANNYA (perilaku relative date PHP),
+        // bukan hari yang sama.
+        $senin = Carbon::parse('next monday 08:00:00');
+        $this->travelTo($senin);
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '09:00']);
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 2, 'mulai' => '09:40', 'selesai' => '10:20']);
+
+        // Terkunci -- dropdown biasa nggak muncul, langsung ke jadwal yang lagi
+        // berlangsung (Matematika, JP1-2). Teks penanda field terkunci
+        // dipakai buat cek (bukan assertDontSee('Pilih jadwal') -- keterangan
+        // jam di bawahnya juga punya kalimat "Pilih jadwal dulu..." yang
+        // selalu tampil apa pun kondisinya).
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti')
+            ->assertOk()->assertSee('Matematika')
+            ->assertSee('Otomatis ikut jam pelajaran yang lagi berlangsung sekarang.');
+
+        $ketua = Siswa::where('nis', '001')->firstOrFail();
+        $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'tugas_tambahan' => 'Kerjakan LKS', 'alasan' => 'Rapat dinas',
+            'presensi' => [$ketua->id => ['status' => 'hadir']],
+        ])->assertRedirect();
+
+        $this->assertTrue(Jurnal::first()->tanggal->isSameDay($senin));
+    }
+
+    public function test_pengganti_mode_bebas_selamanya_bisa_pilih_tanggal_custom(): void
+    {
+        $this->travelTo(Carbon::parse('next tuesday 10:00:00'));
+        PengaturanJurnal::ambil()->update(['mode' => 'bebas_selamanya']);
+
+        // $this->jadwal hari-nya 'senin' -- tanggal custom 2 minggu lalu senin.
+        $tglCustom = Carbon::parse('2 weeks ago monday')->toDateString();
+
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti?tanggal='.$tglCustom)
+            ->assertOk()->assertSee('Bebas Isi Jurnal (Tanggal Custom)')->assertSee('Matematika');
+
+        $ketua = Siswa::where('nis', '001')->firstOrFail();
+        $this->actingAs($this->sekretaris)->post('/sekretaris/jurnal/pengganti', [
+            'jadwal_id' => $this->jadwal->id,
+            'tanggal' => $tglCustom,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'tugas_tambahan' => 'Kerjakan LKS', 'alasan' => 'Rapat dinas',
+            'presensi' => [$ketua->id => ['status' => 'hadir']],
+        ])->assertRedirect();
+
+        $jurnal = Jurnal::where('jadwal_id', $this->jadwal->id)->firstOrFail();
+        $this->assertSame($tglCustom, $jurnal->tanggal->toDateString());
+    }
+
+    public function test_pengganti_tidak_tampilkan_jadwal_yang_sudah_diisi(): void
+    {
+        $this->travelTo(Carbon::parse('next monday 12:00:00'));
+        PengaturanJurnal::ambil()->update(['mode' => 'bebas_hari_ini']);
+
+        $this->jurnalBaru();
+
+        $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti')
+            ->assertOk()
+            ->assertSee('Semua jadwal sudah diisi')
+            ->assertDontSee('Pilih jadwal');
     }
 
     /** Endpoint polling buat banner "ada data baru" (initAutoRefresh() di app.js) -- lihat App\Support\Versi. */

@@ -8,6 +8,7 @@ use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\PresensiPiket;
 use App\Support\HariSekolah;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -75,18 +76,26 @@ class KelasController extends Controller
     }
 
     /** Rekap kehadiran kelas bulan berjalan, per siswa. */
-    public function rekap(): View
+    public function rekap(Request $request): View
     {
         $kelas = $this->kelas();
+
+        // Kosong (belum difilter) = tampilkan SELURUH riwayat, bukan
+        // dibatasi bulan berjalan -- konsisten sama Rekap Kehadiran Kelas
+        // milik Wali Kelas & Rekap Kehadiran Siswa milik Waka.
+        $dari = $request->filled('dari') ? Carbon::parse($request->date('dari')) : null;
+        $sampai = $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : null;
 
         $siswas = $kelas->siswas()->orderBy('no_absen')->get();
 
         $rekap = Absensi::whereIn('siswa_id', $siswas->pluck('id'))
-            ->whereHas('jurnal', fn ($q) => $q->whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year))
+            ->whereHas('jurnal', fn ($q) => $q
+                ->when($dari, fn ($q2) => $q2->whereDate('tanggal', '>=', $dari))
+                ->when($sampai, fn ($q2) => $q2->whereDate('tanggal', '<=', $sampai)))
             ->get()
             ->groupBy('siswa_id')
             ->map(fn ($rows) => $rows->countBy('status'));
 
-        return view('sekretaris.rekap', compact('kelas', 'siswas', 'rekap'));
+        return view('sekretaris.rekap', compact('kelas', 'siswas', 'rekap', 'dari', 'sampai'));
     }
 }
