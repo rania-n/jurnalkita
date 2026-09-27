@@ -11,7 +11,7 @@
             </x-slot:action>
         </x-admin.page>
     @else
-        <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan">
+        <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan" size="sm">
             <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download">Ekspor PDF</x-ui.button>
         </x-page-header>
     @endif
