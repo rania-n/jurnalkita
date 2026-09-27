@@ -211,6 +211,36 @@ class JurnalTest extends TestCase
         Storage::disk('public')->assertExists($jurnal->foto_bukti);
     }
 
+    /**
+     * Regresi: guru buka Riwayat Jurnal yang lagi difilter ke tanggal lampau
+     * (mis. 20 September), ubah 1 jurnal, submit -- dulu kelempar balik ke
+     * filter DEFAULT (hari ini) karena redirect-nya nggak bawa query lama
+     * sama sekali. Sekarang harus tetap di filter yang sama.
+     */
+    public function test_ubah_jurnal_mempertahankan_filter_tanggal_riwayat_setelah_disimpan(): void
+    {
+        Storage::fake('public');
+
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $this->jadwal->id, 'guru_id' => $this->guru->id,
+            'tanggal' => '2026-09-20', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Materi lama', 'metode' => 'Ceramah',
+            'status_verifikasi' => 'pending',
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->from('/guru/jurnal?dari=2026-09-20&sampai=2026-09-20')
+            ->post("/guru/jurnal/{$jurnal->id}", [
+                'jam_ke_selesai' => 2, 'status_guru' => 'hadir',
+                'materi' => 'Materi direvisi', 'metode_pilihan' => 'ceramah',
+            ]);
+
+        $response->assertRedirect();
+        $lokasi = $response->headers->get('Location');
+        $this->assertStringContainsString('dari=2026-09-20', $lokasi);
+        $this->assertStringContainsString('sampai=2026-09-20', $lokasi);
+    }
+
     public function test_guru_lain_tidak_bisa_akses_jurnal_orang(): void
     {
         $jurnal = Jurnal::create([

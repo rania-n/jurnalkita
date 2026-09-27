@@ -46,6 +46,23 @@ class JurnalController extends Controller
         return auth()->user()->guru ?? abort(403, 'Akun tidak terhubung ke data guru.');
     }
 
+    /**
+     * Redirect ke Riwayat Jurnal SAMBIL mempertahankan filter yang lagi aktif
+     * (dari/sampai/status/kelas_id/mapel_id) -- diambil dari URL halaman
+     * sebelumnya (Referer). Tanpa ini, submit form (ubah/hapus/simpan massal)
+     * dari halaman yang lagi difilter (mis. tanggal 25) bikin balik lagi ke
+     * filter DEFAULT (hari ini) -- bug beneran, ketauan pas dites: guru buka
+     * tanggal lampau, ubah 1 jurnal, eh malah kelempar balik ke hari ini.
+     */
+    private function redirectRiwayat(array $params = []): RedirectResponse
+    {
+        $queryLama = [];
+        parse_str(parse_url(url()->previous(), PHP_URL_QUERY) ?? '', $queryLama);
+        unset($queryLama['lihat'], $queryLama['ubah'], $queryLama['page']);
+
+        return redirect()->route('jurnal.index', array_merge($queryLama, $params));
+    }
+
     private function milikSendiri(Jurnal $jurnal): void
     {
         abort_unless($jurnal->guru_id === $this->guru()->id, 403);
@@ -427,7 +444,7 @@ class JurnalController extends Controller
             ->whereDate('tanggal', $tanggal->toDateString())
             ->first();
         if ($sudahAda) {
-            return redirect()->route('jurnal.index', ['lihat' => $sudahAda->id])
+            return $this->redirectRiwayat(['lihat' => $sudahAda->id])
                 ->with('info', 'Jurnal untuk jadwal ini di tanggal itu sudah dibuat.');
         }
 
@@ -478,7 +495,7 @@ class JurnalController extends Controller
             ? 'Laporan ketidakhadiran tersimpan.'
             : 'Jurnal & presensi tersimpan.';
 
-        return redirect()->route('jurnal.index', ['lihat' => $jurnal->id])
+        return $this->redirectRiwayat(['lihat' => $jurnal->id])
             ->with('success', $pesanSukses);
     }
 
@@ -524,7 +541,7 @@ class JurnalController extends Controller
         $jadwals = $jadwals->reject(fn ($j) => $sudahAda->contains($j->id))->values();
 
         if ($jadwals->isEmpty()) {
-            return redirect()->route('jurnal.index')
+            return $this->redirectRiwayat()
                 ->with('info', 'Kelas yang dipilih sudah ada jurnalnya semua (mungkin baru saja diisi dari tab lain).');
         }
 
@@ -578,7 +595,7 @@ class JurnalController extends Controller
             AuditLog::catat('Tambah Jurnal (massal)', "Jurnal {$jurnal->jadwal->mapel->nama} — {$jurnal->jadwal->kelas->nama}", $jurnal);
         }
 
-        return redirect()->route('jurnal.index')
+        return $this->redirectRiwayat()
             ->with('success', $dibuat->count().' jurnal berhasil dibuat sekaligus.');
     }
 
@@ -683,7 +700,7 @@ class JurnalController extends Controller
                 ],
             ]);
         } catch (ValidationException $e) {
-            return redirect()->route('jurnal.index', ['lihat' => $jurnal->id, 'ubah' => 1])
+            return $this->redirectRiwayat(['lihat' => $jurnal->id, 'ubah' => 1])
                 ->withErrors($e->errors())->withInput();
         }
 
@@ -737,7 +754,7 @@ class JurnalController extends Controller
             $jurnal->jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal, hasilRevisi: true));
         }
 
-        return redirect()->route('jurnal.index', ['lihat' => $jurnal->id])->with('success', 'Jurnal & presensi diperbarui.');
+        return $this->redirectRiwayat(['lihat' => $jurnal->id])->with('success', 'Jurnal & presensi diperbarui.');
     }
 
     /**
@@ -765,7 +782,7 @@ class JurnalController extends Controller
 
         AuditLog::catat('Hapus Jurnal', "Hapus jurnal #{$jurnal->id} ({$label})", $jurnal);
 
-        return redirect()->route('jurnal.index')->with('success', 'Jurnal dihapus.');
+        return $this->redirectRiwayat()->with('success', 'Jurnal dihapus.');
     }
 
     /** Setelah guru merevisi, jurnal kembali antre untuk diperiksa pengurus kelas. */
