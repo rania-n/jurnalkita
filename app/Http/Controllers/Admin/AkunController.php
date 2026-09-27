@@ -11,7 +11,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -206,20 +205,5 @@ class AkunController extends Controller
         AuditLog::catat('Hapus Akun', "Hapus akun: {$email}", $user);
 
         return back()->with('success', "Akun {$nama} dihapus. Email {$email} bisa dipakai lagi.");
-    }
-
-    /** Kirim email tautan reset password ke user (admin tidak menyentuh password). */
-    public function sendResetLink(User $user): RedirectResponse
-    {
-        $status = Password::sendResetLink(['email' => $user->email]);
-
-        AuditLog::catat('Kirim Reset Password', "Kirim tautan reset sandi: {$user->email}", $user);
-
-        return back()->with(
-            $status === Password::RESET_LINK_SENT ? 'success' : 'error',
-            $status === Password::RESET_LINK_SENT
-                ? "Tautan reset sandi dikirim ke {$user->email}."
-                : 'Gagal mengirim tautan reset. Cek konfigurasi email.'
-        );
     }
 }

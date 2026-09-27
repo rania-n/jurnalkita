@@ -94,11 +94,6 @@
                                     class="flex h-8 items-center gap-1 rounded-lg bg-izin-soft px-2.5 text-xs font-bold text-izin hover:bg-[#bae6fd]">
                                     <x-icon name="edit" :size="14" /> Ubah
                                 </button>
-                                <form method="POST" action="{{ route('master.akun.reset', $u) }}" class="contents" data-confirm="Kirim email tautan reset sandi ke {{ $u->email }}?">@csrf
-                                    <button class="flex h-8 items-center gap-1 rounded-lg bg-surface-alt px-2.5 text-xs font-bold text-ink hover:bg-[#cbd5e1]">
-                                        <x-icon name="mail" :size="14" /> Kirim Reset
-                                    </button>
-                                </form>
                             @endif
 
                             {{-- Hapus akun: tidak untuk admin & tidak untuk diri sendiri --}}

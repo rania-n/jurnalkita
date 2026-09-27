@@ -101,7 +101,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/akun-ubah', [AkunController::class, 'update'])->name('master.akun.update');
         Route::post('/admin/akun/{user}/setujui', [AkunController::class, 'approve'])->name('master.akun.approve');
         Route::post('/admin/akun/{user}/tolak', [AkunController::class, 'reject'])->name('master.akun.reject');
-        Route::post('/admin/akun/{user}/kirim-reset', [AkunController::class, 'sendResetLink'])->name('master.akun.reset');
         Route::delete('/admin/akun/{user}', [AkunController::class, 'destroy'])->name('master.akun.destroy');
 
         /* Tulis master data (tambah/ubah = save, hapus = destroy) */

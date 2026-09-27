@@ -6,9 +6,7 @@ use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class AkunTest extends TestCase
@@ -218,16 +216,6 @@ class AkunTest extends TestCase
 
         $this->actingAs($admin)->post("/admin/akun/{$p2->id}/tolak")->assertRedirect();
         $this->assertSame('rejected', $p2->fresh()->status);
-    }
-
-    public function test_kirim_reset_mengirim_email(): void
-    {
-        Notification::fake();
-        $guru = User::factory()->role('guru')->create();
-
-        $this->actingAs($this->admin())->post("/admin/akun/{$guru->id}/kirim-reset")->assertRedirect();
-
-        Notification::assertSentTo($guru, ResetPassword::class);
     }
 
     public function test_email_duplikat_ditolak(): void
