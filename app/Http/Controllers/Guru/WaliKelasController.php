@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Jurnal;
 use App\Models\Kelas;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -34,17 +35,24 @@ class WaliKelasController extends Controller
     {
         abort_unless($kelas->wali_id === auth()->user()->guru?->id, 403, 'Anda bukan wali kelas ini.');
 
+        // request() dipakai (bukan Request $request di-inject) soalnya method
+        // ini juga dipanggil LANGSUNG dari index() -- kalau di-type-hint,
+        // panggilan manual $this->rekap($kelas) di atas nggak dapat instance
+        // Request-nya.
+        $dari = request()->filled('dari') ? Carbon::parse(request()->date('dari')) : now()->startOfMonth();
+        $sampai = request()->filled('sampai') ? Carbon::parse(request()->date('sampai')) : now();
+
         $siswas = $kelas->siswas()->orderBy('no_absen')->get();
 
         $rekap = Absensi::whereIn('siswa_id', $siswas->pluck('id'))
-            ->whereHas('jurnal', fn ($q) => $q->whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year))
+            ->whereHas('jurnal', fn ($q) => $q->whereDate('tanggal', '>=', $dari)->whereDate('tanggal', '<=', $sampai))
             ->get()
             ->groupBy('siswa_id')
             ->map(fn ($rows) => $rows->countBy('status'));
 
         $adaKelasLain = auth()->user()->kelasWaliList()->count() > 1;
 
-        return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'adaKelasLain'));
+        return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'adaKelasLain', 'dari', 'sampai'));
     }
 
     /**
