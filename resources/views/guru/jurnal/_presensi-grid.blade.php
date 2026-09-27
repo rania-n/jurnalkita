@@ -47,8 +47,12 @@
 
     {{-- Kotak sendiri -- siswanya di-scroll/dicari di dalam sini, bukan numpuk
          jadi satu halaman panjang. Lebih pendek di HP (layarnya udah sempit,
-         separuh layar kerasa kebesaran), agak lega lagi di layar lebih lebar. --}}
-    <div class="mt-2 max-h-[38vh] overflow-y-auto rounded-2xl border border-surface-alt bg-surface-alt/40 p-3 sm:max-h-[50vh]">
+         separuh layar kerasa kebesaran), agak lega lagi di layar lebih lebar.
+         style="transform" -- paksa browser kasih compositing layer sendiri
+         ke kotak scroll ini, jaga-jaga glitch render "kosong pas discroll"
+         yang kadang kejadian di kotak overflow-y-auto berlatar transparan
+         (bg-surface-alt/40) pas isinya panjang. --}}
+    <div class="mt-2 max-h-[38vh] overflow-y-auto rounded-2xl border border-surface-alt bg-surface-alt/40 p-3 sm:max-h-[50vh]" style="transform: translateZ(0);">
         {{-- "grid-fill-last" (CSS murni) SENGAJA nggak dipakai di sini --
              utility itu ngecek :last-child:nth-child(odd) DI DOM, nggak sadar
              ada kartu yang `hidden` (sebagian besar kartu emang disembunyiin

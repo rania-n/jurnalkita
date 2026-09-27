@@ -42,7 +42,7 @@
         </label>
     </div>
 
-    <div class="mt-2 max-h-[38vh] overflow-y-auto rounded-2xl border border-surface-alt bg-surface-alt/40 p-3 sm:max-h-[50vh]">
+    <div class="mt-2 max-h-[38vh] overflow-y-auto rounded-2xl border border-surface-alt bg-surface-alt/40 p-3 sm:max-h-[50vh]" style="transform: translateZ(0);">
         {{-- Sama alasannya kayak versi Guru -- "grid-fill-last" CSS nggak
              sadar kartu yang `hidden` lewat JS, jadi stretch-nya diakalin
              manual lewat JS (lihat refresh() di bawah). --}}
