@@ -1,5 +1,5 @@
 <x-layouts.app title="Rekap Kehadiran Kelas" width="wide">
-    <x-page-header title="Rekap Kehadiran" :subtitle="$kelas->nama . ' · ' . now()->translatedFormat('F Y')" />
+    <x-page-header title="Rekap Kehadiran" :subtitle="$kelas->nama . ' · ' . now()->translatedFormat('F Y')" size="sm" />
 
     @if ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa di kelas ini" />

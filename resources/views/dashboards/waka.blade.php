@@ -33,7 +33,7 @@
 @endphp
 
 <x-layouts.app title="Beranda Waka" width="wide">
-    <x-page-header title="Beranda Waka Kesiswaan" subtitle="Persetujuan dispensasi tahap 2" />
+    <x-page-header title="Beranda Waka Kesiswaan" subtitle="Persetujuan dispensasi tahap 2" size="sm" />
 
 
     @if ($adaJadwalWaka)

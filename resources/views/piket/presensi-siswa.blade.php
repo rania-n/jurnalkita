@@ -2,6 +2,7 @@
     <x-page-header
         title="Presensi Siswa"
         subtitle="Catat siswa sakit atau izin dari surat yang diterima piket. Status ini disamakan ke semua jurnal kelas pada tanggal tersebut."
+        size="sm"
     />
 
     <form method="GET" action="{{ route('piket.presensi-siswa.index') }}" class="mb-4 grid grid-cols-1 gap-3 rounded-2xl border border-surface-alt bg-card p-4 sm:grid-cols-2">

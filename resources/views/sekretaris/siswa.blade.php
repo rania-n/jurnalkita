@@ -1,5 +1,5 @@
 <x-layouts.app title="Daftar Siswa Sekelas" width="wide">
-    <x-page-header title="Daftar Siswa" :subtitle="$kelas->nama . ' · kehadiran hari ini'" />
+    <x-page-header title="Daftar Siswa" :subtitle="$kelas->nama . ' · kehadiran hari ini'" size="sm" />
 
     @if ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa di kelas ini" />
