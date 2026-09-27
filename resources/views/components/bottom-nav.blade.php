@@ -54,12 +54,10 @@
                 <a
                     href="{{ $itemFab['url'] }}"
                     data-nav-fab
-                    class="press absolute right-1 top-0 flex -translate-y-3.5 flex-col items-center gap-1"
+                    class="press absolute right-1 top-0 flex h-20 w-20 -translate-y-8 flex-col items-center justify-center gap-0.5 rounded-full bg-navy text-card shadow-lg shadow-navy/30 ring-4 ring-surface"
                 >
-                    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-navy text-card shadow-lg shadow-navy/30 ring-4 ring-surface">
-                        <x-icon :name="$itemFab['icon']" :size="22" fill />
-                    </span>
-                    <span class="text-[10px] font-bold leading-none text-ink whitespace-nowrap">{{ $itemFab['label'] }}</span>
+                    <x-icon :name="$itemFab['icon']" :size="22" fill />
+                    <span class="text-[10px] font-bold leading-none whitespace-nowrap">{{ $itemFab['label'] }}</span>
                 </a>
             @endif
         </div>
