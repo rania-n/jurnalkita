@@ -15,9 +15,23 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
+use Illuminate\View\View;
 
 class AkunController extends Controller
 {
+    public function show(User $user): View
+    {
+        $user->load('guru', 'siswa.kelas');
+
+        $riwayat = AuditLog::where('subject_type', $user->getMorphClass())
+            ->where('subject_id', $user->id)
+            ->with('user')
+            ->latest('created_at')
+            ->get();
+
+        return view('admin.akun.show', compact('user', 'riwayat'));
+    }
+
     /**
      * Buat akun login.
      * - "sumber" = "guru:5" / "siswa:12" -> hubungkan ke record yang sudah ada.

@@ -121,6 +121,24 @@ class AkunTest extends TestCase
         $response->assertOk()->assertSee('Ditolak Test')->assertDontSee('Pending Test');
     }
 
+    public function test_halaman_detail_akun_menampilkan_data_dan_riwayat(): void
+    {
+        $admin = $this->admin();
+        $guru = Guru::create(['nama' => 'Bu Sarah']);
+
+        $this->actingAs($admin)->post('/admin/akun', $this->akunPayload([
+            'sumber' => "guru:{$guru->id}", 'nama' => 'Bu Sarah', 'email' => 'sarah@sekolah.test',
+        ]));
+        $user = User::where('email', 'sarah@sekolah.test')->firstOrFail();
+
+        $response = $this->actingAs($admin)->get("/admin/akun/{$user->id}");
+
+        $response->assertOk()
+            ->assertSee('Bu Sarah')
+            ->assertSee('sarah@sekolah.test')
+            ->assertSee('Buat Akun'); // tercatat di riwayat aktivitas
+    }
+
     public function test_halaman_persetujuan_akun_terpisah_cuma_isi_pending(): void
     {
         $ditolak = User::factory()->role('guru')->create(['name' => 'Ditolak Test', 'status' => 'rejected']);

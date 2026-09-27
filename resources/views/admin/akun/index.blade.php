@@ -80,6 +80,10 @@
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex justify-end gap-1">
+                            <a href="{{ route('master.akun.show', $u) }}" class="flex h-8 items-center gap-1 rounded-lg bg-surface-alt px-2.5 text-xs font-bold text-ink hover:bg-[#cbd5e1]">
+                                <x-icon name="visibility" :size="14" /> Detail
+                            </a>
+
                             @if ($u->role !== 'admin')
                                 <button type="button"
                                     data-modal-open="modal-akun-ubah"
