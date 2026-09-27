@@ -32,7 +32,7 @@
          diganti (reload halaman), bukan balik ke "Semua" terus. Jumlah
          disembunyikan kalau 0 (nggak nambah info, cuma bikin rame). --}}
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
-        @foreach (['' => 'Semua', 'hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir', 'belum_diisi' => 'Belum Diisi'] as $key => $label)
+        @foreach (['' => 'Semua', 'hadir' => 'Sudah Diisi', 'tidak_hadir' => 'Tidak Hadir', 'belum_diisi' => 'Belum Diisi'] as $key => $label)
             @php $jumlah = $key === '' ? $rekapTotal->sum() : ($rekapTotal[$key] ?? 0); @endphp
             <a href="{{ route('piket.monitor.index', array_merge(request()->except('status', 'page'), $key === '' ? [] : ['status' => $key])) }}"
                @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusAktif === $key, 'text-muted-2 hover:text-ink' => $statusAktif !== $key])>
