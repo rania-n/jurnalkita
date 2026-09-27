@@ -7,6 +7,14 @@
     // Halaman ini dipakai SEMUA peran -- admin pakai shell admin biar konsisten
     // sama sidebar & topbar-nya (lihat catatan yang sama di dispensasi/index dkk).
     $admin = $user->role === 'admin';
+
+    // Sama kayak "Hubungi Admin" di topbar (components/app-topbar.blade.php) --
+    // dulu di sini cuma disebut lewat KALIMAT ("Hubungi Admin kalau ada yang
+    // perlu diperbaiki") tanpa tautan beneran, padahal maksudnya ngajak
+    // pengguna buat action. Null kalau nggak ada akun admin dengan No. WA
+    // terdaftar -- kalimatnya tetap muncul, cuma tanpa tautan WA.
+    $adminTujuan = ! $admin ? \App\Models\User::where('role', 'admin')->whereNotNull('no_hp')->first() : null;
+    $waLinkAdmin = $adminTujuan ? \App\Support\WaLink::url($adminTujuan->no_hp, "Halo Admin jurnalkita, saya {$nama} ({$user->roleLabel()}), ada data akun yang perlu diperbaiki.") : null;
 @endphp
 
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Profil" heading="Profil">
@@ -94,8 +102,13 @@
                 </div>
 
                 <x-alert type="info" class="mt-6">
-                    Perubahan data akun (nama, email, dll) dilakukan oleh Admin. Hubungi Admin
-                    kalau ada yang perlu diperbaiki.
+                    Perubahan data akun (nama, email, dll.) dilakukan oleh Admin.
+                    @if ($waLinkAdmin)
+                        <a href="{{ $waLinkAdmin }}" target="_blank" rel="noopener" class="font-bold underline">Hubungi Admin melalui WhatsApp</a>
+                        jika ada yang perlu diperbaiki.
+                    @else
+                        Hubungi Admin jika ada yang perlu diperbaiki.
+                    @endif
                 </x-alert>
             @endif
         </div>

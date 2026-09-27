@@ -55,6 +55,15 @@ class Waktu
      */
     public static function jpAktifSekarang(): ?int
     {
+        // Sabtu/Minggu bukan hari sekolah sama sekali (lihat HariSekolah) --
+        // tanpa pengecekan ini, kategori() jatuh ke fallback 'senin_kamis'
+        // (dibuat buat kasus lain: hari sekolah yang belum diberi kategori
+        // eksplisit), jadi jam pelajaran Senin-Kamis ketebak "aktif" tiap
+        // akhir pekan cuma karena jamnya kebetulan sama.
+        if (! HariSekolah::hariIni()) {
+            return null;
+        }
+
         return JamPelajaran::where('kategori', self::kategori())
             ->where('mulai', '<=', now()->format('H:i:s'))
             ->where('selesai', '>=', now()->format('H:i:s'))
@@ -72,6 +81,12 @@ class Waktu
      */
     public static function dalamJamSekolah(): bool
     {
+        // Sama alasannya kayak di jpAktifSekarang() -- Sabtu/Minggu memang
+        // nggak pernah dianggap jam sekolah, terlepas dari jam berapa pun.
+        if (! HariSekolah::hariIni()) {
+            return false;
+        }
+
         $kategori = self::kategori();
         $mulaiPertama = JamPelajaran::where('kategori', $kategori)->min('mulai');
         $selesaiTerakhir = JamPelajaran::where('kategori', $kategori)->max('selesai');

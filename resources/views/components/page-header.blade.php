@@ -23,15 +23,17 @@
         {{-- Panah kembali nempel SEJAJAR sama judul (bukan baris sendiri di
              atasnya kayak dulu) TAPI tetap keliatan jelas sebagai TOMBOL --
              background abu-abu selalu ada (bukan cuma pas hover), biar nggak
-             kayak ikon nyasar doang nempel di judul. --}}
+             kayak ikon nyasar doang nempel di judul. Teks "Kembali" ikut
+             ditulis (bukan cuma ikon + aria-label) biar jelas ini tombol
+             kembali, bukan ikon nyasar tanpa keterangan. --}}
         <div class="flex flex-1 min-w-0 items-start gap-3">
             @if ($back)
                 <a
                     href="{{ $back }}"
-                    class="press mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-alt text-ink transition-colors hover:bg-[#cbd5e1]"
-                    aria-label="Kembali"
+                    class="press mt-0.5 flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-surface-alt px-3 text-sm font-semibold text-ink transition-colors hover:bg-[#cbd5e1]"
                 >
                     <x-icon name="arrow_back" :size="20" />
+                    <span>Kembali</span>
                 </a>
             @endif
             <div class="flex flex-1 flex-col gap-0.5 min-w-0">

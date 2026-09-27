@@ -52,6 +52,24 @@ class JurnalTest extends TestCase
         $this->actingAs($this->user)->get('/guru/jurnal/tambah')->assertOk()->assertsee('Form Jurnal');
     }
 
+    public function test_fab_isi_jurnal_di_bottom_nav_disembunyikan_saat_di_halamannya_sendiri(): void
+    {
+        // Di halaman lain, FAB "Isi Jurnal" tetap muncul di bottom-nav.
+        $this->assertStringContainsString(
+            'data-nav-fab',
+            $this->actingAs($this->user)->get('/guru')->assertOk()->getContent()
+        );
+
+        // Tapi begitu sudah di halaman Isi Jurnal itu sendiri, FAB-nya
+        // disembunyikan -- percuma shortcut ke halaman yang lagi dibuka, dan
+        // posisinya bisa numpuk sama sticky-bar "Simpan Jurnal" di halaman
+        // ini (lihat components/bottom-nav.blade.php).
+        $this->assertStringNotContainsString(
+            'data-nav-fab',
+            $this->actingAs($this->user)->get('/guru/jurnal/tambah')->assertOk()->getContent()
+        );
+    }
+
     public function test_simpan_jurnal_membuat_absensi_default_hadir(): void
     {
         Storage::fake('public');
