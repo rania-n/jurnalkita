@@ -475,4 +475,58 @@ class DispensasiTest extends TestCase
         $versiBaru = $this->get('/dispensasi/versi')->assertOk()->json('versi');
         $this->assertNotSame($versiAwal, $versiBaru);
     }
+
+    public function test_guru_piket_bisa_isi_no_hp_belakangan_kalau_kosong_pas_ngajuin(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'alasan' => 'Lomba', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+        $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
+
+        // Kosong -> form isi No. HP yang muncul, bukan link WA.
+        $this->actingAs($this->piket)->get("/dispensasi/{$d->id}/fragment")
+            ->assertOk()->assertSee('No. HP')->assertDontSee('Kirim Surat ke Siswa (WA)');
+
+        $this->actingAs($this->piket)->post("/dispensasi/{$d->id}/no-hp", ['no_hp' => '081234567890'])
+            ->assertRedirect();
+
+        $this->assertSame('081234567890', $d->fresh()->no_hp);
+
+        // Terisi -> link WA-nya sekarang muncul.
+        $this->actingAs($this->piket)->get("/dispensasi/{$d->id}/fragment")
+            ->assertOk()->assertSee('Kirim Surat ke Siswa (WA)');
+    }
+
+    public function test_waka_juga_bisa_isi_no_hp_belakangan(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'alasan' => 'Lomba', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/no-hp", ['no_hp' => '089876543210'])
+            ->assertRedirect();
+
+        $this->assertSame('089876543210', $d->fresh()->no_hp);
+    }
+
+    public function test_guru_biasa_bukan_piket_tidak_bisa_isi_no_hp(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(), 'alasan' => 'Lomba', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        $guruBiasa = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $guruBiasa->id, 'nama' => 'Guru Biasa']);
+
+        $this->actingAs($guruBiasa)->post("/dispensasi/{$d->id}/no-hp", ['no_hp' => '081111111111'])
+            ->assertForbidden();
+
+        $this->assertNull($d->fresh()->no_hp);
+    }
 }

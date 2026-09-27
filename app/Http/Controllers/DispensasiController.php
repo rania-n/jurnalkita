@@ -286,9 +286,33 @@ class DispensasiController extends Controller
             'bisaWaka' => $user->role === 'waka' && $dispensasi->status_waka === 'pending',
             'bisaBatal' => $dispensasi->diajukan_oleh_id === $user->id
                 && $dispensasi->status_waka === 'pending',
+            // Piket kadang lupa isi No. HP pas ngajuin (field-nya opsional) --
+            // boleh diisi belakangan kapan saja (nggak cuma sekali di form
+            // awal), oleh piket ATAU Waka, bukan cuma pengaju aslinya.
+            'bisaUbahNoHp' => $user->role === 'waka' || $user->isPiket(),
             'waLinkWaka' => $waLinkWaka,
             'waLinkSiswa' => $waLinkSiswa,
         ]);
+    }
+
+    /**
+     * Isi/ubah No. HP belakangan -- kalau kosong pas ngajuin (field-nya
+     * opsional), satu-satunya cara "kirim bukti via WA" jadi kepakai adalah
+     * ngisi ini SEKARANG, nggak peduli status persetujuan lagi apa.
+     */
+    public function updateNoHp(Dispensasi $dispensasi, Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        abort_unless($user->role === 'waka' || $user->isPiket(), 403, 'Hanya guru piket dan Waka Kesiswaan yang bisa mengisi ini.');
+
+        $data = $request->validate([
+            'no_hp' => ['required', 'string', 'max:20'],
+        ]);
+
+        $dispensasi->update($data);
+
+        return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])
+            ->with('success', 'No. HP disimpan. Sekarang bukti dispensasi sudah bisa dikirim lewat WA.');
     }
 
     /**

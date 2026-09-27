@@ -9,7 +9,7 @@
     DispensasiController::index()), bukan pas buka detail.
 
     Variabel yang wajib ada di scope pemanggil:
-      $dispensasi, $bisaWaka, $bisaBatal, $waLinkWaka, $waLinkSiswa
+      $dispensasi, $bisaWaka, $bisaBatal, $bisaUbahNoHp, $waLinkWaka, $waLinkSiswa
 --}}
 @php
     [$waIcon, $waColor, $waText] = match ($dispensasi->status_waka) {
@@ -30,6 +30,22 @@
              gap kosong di sebelahnya kalau nggak di-stretch. --}}
         @if ($dispensasi->no_hp)
             <x-ui.field-static label="No. HP" icon="call" class="sm:col-span-2">{{ $dispensasi->no_hp }}</x-ui.field-static>
+        @elseif ($bisaUbahNoHp)
+            {{-- Piket lupa isi pas ngajuin (field-nya opsional) -- boleh
+                 ditambahkan belakangan di sini, oleh piket atau Waka, biar
+                 tombol "Kirim Surat ke Siswa (WA)" di bawah bisa kepakai. --}}
+            <form method="POST" action="{{ route('dispensasi.no-hp.update', $dispensasi) }}" class="flex items-end gap-2 sm:col-span-2">
+                @csrf
+                <x-ui.input
+                    label="No. HP (siswa/wali, atau satpam gerbang)"
+                    name="no_hp"
+                    :value="old('no_hp')"
+                    placeholder="08xxxxxxxxxx"
+                    class="flex-1"
+                    required
+                />
+                <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
+            </form>
         @endif
         @if ($dispensasi->surat_path)
             @php $suratUrl = Storage::url($dispensasi->surat_path); $isPdf = str_ends_with(strtolower($dispensasi->surat_path), '.pdf'); @endphp

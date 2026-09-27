@@ -206,6 +206,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:waka')->group(function () {
         Route::post('/dispensasi/{dispensasi}/waka', [DispensasiController::class, 'approveWaka'])->name('dispensasi.waka');
     });
+    Route::middleware('role:guru,waka')->group(function () {
+        Route::post('/dispensasi/{dispensasi}/no-hp', [DispensasiController::class, 'updateNoHp'])->name('dispensasi.no-hp.update');
+    });
 
     /* ===== MONITOR PIKET (pantauan kehadiran guru — piket, waka, admin oversight) ===== */
     Route::middleware('role:guru,waka,admin')->prefix('piket/monitor')->name('piket.monitor.')->group(function () {
