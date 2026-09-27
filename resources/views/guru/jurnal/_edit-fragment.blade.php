@@ -107,7 +107,6 @@
             :value="$alasanTerpilih"
             required
         />
-        <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" required>{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
 
         {{-- id BEDA dari yang di blok-hadir (name-nya sama "foto_bukti") --
              lihat catatan lebih detail di guru/jurnal/create.blade.php. --}}
@@ -119,9 +118,13 @@
             hint="JPG, PNG, atau PDF"
             accept="image/*,application/pdf"
         />
+
+        <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" required>{{ old('tugas_tambahan', $jurnal->tugas_tambahan) }}</x-ui.textarea>
     </div>
 
-    @include('guru.jurnal._presensi-grid')
+    <div id="blok-presensi" @if(old('status_guru', $jurnal->status_guru) === 'tidak_hadir') hidden @endif>
+        @include('guru.jurnal._presensi-grid')
+    </div>
 
     <div class="mt-6 flex justify-end">
         <x-ui.button type="submit" icon="save">Simpan Perubahan</x-ui.button>
@@ -132,11 +135,16 @@
     (function () {
         const blokHadir = document.getElementById('blok-hadir');
         const blokTidakHadir = document.getElementById('blok-tidak-hadir');
+        const blokPresensi = document.getElementById('blok-presensi');
         function syncStatusGuru() {
             const val = document.querySelector('input[name="status_guru"]:checked')?.value;
             const hadir = val === 'hadir';
             blokHadir.hidden = !hadir;
             blokTidakHadir.hidden = hadir;
+            if (blokPresensi) {
+                blokPresensi.hidden = !hadir;
+                blokPresensi.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
+            }
 
             // Disable SEMUA field (bukan cuma yang "required") di blok yang
             // disembunyiin -- selain biar validitas native nggak kesandung,

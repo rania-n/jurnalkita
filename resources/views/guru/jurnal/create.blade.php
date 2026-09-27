@@ -79,144 +79,47 @@
         <form id="form-jurnal" method="POST" action="{{ route('jurnal.store') }}" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="tanggal" value="{{ $tanggalAktif->toDateString() }}">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             {{-- Info pengajar & tanggal (otomatis) --}}
-            <div class="flex items-center gap-2 rounded-xl bg-surface-alt px-3.5 py-3">
-                <x-icon name="person" :size="18" class="text-navy" />
-                <span class="text-sm font-semibold text-ink">{{ auth()->user()->name }}</span>
-            </div>
-            <div class="flex items-center gap-2 rounded-xl bg-surface-alt px-3.5 py-3">
-                <x-icon name="calendar_month" :size="18" class="text-navy" />
-                <span class="text-sm font-semibold text-ink">
-                    {{ $tanggalAktif->translatedFormat('d M Y') }}
-                    @if ($tanggalAktif->isToday())
-                        <span class="text-xs font-normal text-muted-2">(Hari Ini)</span>
-                    @elseif ($tanggalAktif->isYesterday())
-                        <span class="text-xs font-normal text-muted-2">(Kemarin)</span>
-                    @else
-                        <span class="text-xs font-normal text-muted-2">(Susulan {{ ucfirst($hariAktif ?? '') }})</span>
-                    @endif
-                </span>
-            </div>
-
-            @php
-                $mulaiAwal = $jadwalTerpilih->jam_ke_mulai ?? $jpSekarang;
-                $selesaiAwal = old('jam_ke_selesai', $jadwalTerpilih->jam_ke_selesai ?? $jpSekarang);
-                $hariJadwalTerpilih = $jadwalTerpilih->hari ?? \App\Support\HariSekolah::hariIni();
-                $jamAwal = $hariJadwalTerpilih ? \App\Support\Waktu::rentangJamUntukHari($hariJadwalTerpilih, $mulaiAwal, $selesaiAwal) : null;
-            @endphp
-
-            @if ($jadwalTerkunci)
-                <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" tone="muted" class="sm:col-span-2">
-                    <span data-jadwal-terkunci-teks>
-                        {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
-                    </span>
-                    @if ($jamAwal)
-                        <span class="text-muted-2">({{ $jamAwal }})</span>
-                    @endif
-                </x-ui.field-static>
-                <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
-                <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Otomatis ikut jadwal Anda sekarang. Salah jadwal? Hubungi Admin.</p>
-            @else
-                {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
-                     yang tepat ikut kerender dari server. Materi/dll yang sudah
-                     diketik sebelum ganti jadwal memang akan hilang -- wajar karena
-                     pindah kelas = konteks jurnalnya beda total. --}}
-                <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2" required>
-                    <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
-                    @foreach ($jadwals as $j)
-                        @php $jamOpsi = \App\Support\Waktu::rentangJamUntukHari($j->hari, $j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
-                        <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected($jadwalTerpilih?->id === $j->id)>
-                            {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " ({$jamOpsi})" : '' }}
-                        </option>
-                    @endforeach
-                </x-ui.select>
-            @endif
-
-            {{-- Jam mulai & selesai SELALU ngikut jadwal (statis, nggak bisa diedit
-                 manual) -- guru nggak perlu (dan nggak boleh) ngarang jam sendiri,
-                 itu udah ditentuin jadwalnya. Pas jadwal diganti lewat dropdown di
-                 atas, dua-duanya ikut kesinkron otomatis (lihat sync() di bawah). --}}
-            <div>
-                <x-ui.field-static label="Jam ke- (mulai)" icon="schedule" tone="muted">
-                    <span id="tampilan-jam-mulai">Jam ke-{{ $mulaiAwal }}</span>
-                </x-ui.field-static>
-                <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
-            </div>
-            <div>
-                <x-ui.field-static label="Jam ke- (selesai)" icon="schedule" tone="muted">
-                    <span id="tampilan-jam-selesai">Jam ke-{{ $selesaiAwal }}</span>
-                </x-ui.field-static>
-                <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">
-            </div>
-            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">
-                Jam mengajar otomatis mengikuti jadwal yang dipilih.
-                @if ($jamAwal) <span id="keterangan-jam-aktual">Waktunya {{ $jamAwal }}.</span> @endif
-            </p>
-
-            {{-- Acuan dari jurnal TERAKHIR di jadwal yang sama (bisa minggu lalu,
-                 bisa lebih lama kalau libur) -- biar guru/pengurus kelas yang isi
-                 nggak lupa nyambungin dari mana terakhir kali, tanpa harus buka
-                 Riwayat Jurnal dulu di tab lain. --}}
-            @if ($jurnalSebelumnya)
-                <div class="sm:col-span-2 rounded-xl bg-surface-alt/60 px-3.5 py-2.5 text-xs text-muted">
-                    <span class="font-semibold text-ink">
-                        Terakhir diisi ({{ $jurnalSebelumnya->tanggal->translatedFormat('d M Y') }}{{ $jurnalSebelumnya->status_guru === 'tidak_hadir' ? ', gurunya tidak hadir' : '' }}):
-                    </span>
-                    {{ ($jurnalSebelumnya->status_guru === 'hadir' ? $jurnalSebelumnya->materi : $jurnalSebelumnya->tugas_tambahan) ?: '—' }}
+            <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="flex items-center gap-2 rounded-xl bg-surface-alt px-3.5 py-3">
+                    <x-icon name="person" :size="18" class="text-navy" />
+                    <span class="text-sm font-semibold text-ink">{{ auth()->user()->name }}</span>
                 </div>
-            @endif
+                <div class="flex items-center gap-2 rounded-xl bg-surface-alt px-3.5 py-3">
+                    <x-icon name="calendar_month" :size="18" class="text-navy" />
+                    <span class="text-sm font-semibold text-ink">
+                        {{ $tanggalAktif->translatedFormat('d M Y') }}
+                        @if ($tanggalAktif->isToday())
+                            <span class="text-xs font-normal text-muted-2">(Hari Ini)</span>
+                        @elseif ($tanggalAktif->isYesterday())
+                            <span class="text-xs font-normal text-muted-2">(Kemarin)</span>
+                        @else
+                            <span class="text-xs font-normal text-muted-2">(Susulan {{ ucfirst($hariAktif ?? '') }})</span>
+                        @endif
+                    </span>
+                </div>
+            </div>
 
-            {{-- Ganti jadwal (dropdown di atas) muat ulang HALAMAN PENUH --
+            {{-- Ganti jadwal (dropdown di bawah) muat ulang HALAMAN PENUH --
                  kalau guru udah sempat pilih "Tidak Hadir" duluan sebelum
                  ganti jadwal, itu bakal ke-reset balik ke "Hadir" tanpa
                  kesadaran (bug yang sempat dilaporkan). request()->query
                  jadi jaring kedua setelah old() -- JS di bawah nyisipin
                  status_guru yang lagi kepilih ke URL pas jadwal diganti,
                  biar ikut kebawa lagi pas halaman render ulang. --}}
+            @php
+                $statusGuruAwal = old('status_guru', request()->query('status_guru', 'hadir'));
+            @endphp
             <x-ui.choice
                 label="Status Kehadiran Anda"
                 name="status_guru"
-                class="sm:col-span-2"
                 :options="['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir']"
                 :tones="['hadir' => 'hadir', 'tidak_hadir' => 'alpha']"
-                :value="old('status_guru', request()->query('status_guru', 'hadir'))"
+                :value="$statusGuruAwal"
             />
-            </div>
 
-            {{-- Semua field di sini full-width (sm:col-span-2), jadi nggak perlu ikut
-                 grid 2-kolom di atas -- aman langsung disembunyikan/ditampilkan. --}}
-            <div id="blok-hadir" class="mt-4 flex flex-col gap-4">
-                <x-ui.textarea label="Materi" name="materi" :rows="3" placeholder="Materi yang diajarkan..." required>{{ old('materi') }}</x-ui.textarea>
-
-                <div class="flex flex-col gap-1.5">
-                    <x-ui.choice
-                        label="Metode Pembelajaran"
-                        name="metode_pilihan"
-                        :options="$metodeLabel"
-                        :value="$metodeTerpilih"
-                        required
-                    />
-                    <div id="metode_custom_wrap" hidden>
-                        <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" required />
-                    </div>
-                </div>
-
-                @if ($jadwalTerpilih)
-                    {{-- Wajib jepret langsung dari kamera (nggak boleh unggah dari
-                         galeri) -- biar beneran bukti sedang di kelas, bukan foto
-                         lama. Jalan di HP maupun PC/laptop (lihat komponennya). --}}
-                    <x-ui.upload-kamera
-                        label="Foto Suasana Kelas"
-                        name="foto_bukti"
-                        hint="Wajib diisi — bukti pembelajaran sedang berlangsung"
-                        required
-                    />
-                @endif
-            </div>
-
-            <div id="blok-tidak-hadir" class="mt-4 flex flex-col gap-4" hidden>
+            <div id="blok-tidak-hadir" class="mt-2 flex flex-col gap-4" @if($statusGuruAwal === 'hadir') hidden @endif>
                 {{-- Alasan duluan (langsung di bawah Status Kehadiran) --
                      itu pertanyaan paling dasar begitu "Tidak Hadir" dipilih,
                      baru abis itu urusan cakupannya (1 kelas ini/semua kelas)
@@ -227,6 +130,24 @@
                     :options="$alasanLabel"
                     :value="old('alasan')"
                     required
+                />
+
+                {{-- Opsional (BEDA dari foto suasana kelas di atas) -- guru
+                     nggak di sekolah, jadi nggak wajib jepret kamera, cukup
+                     lampirin foto/scan surat izin dari galeri kalau ada.
+                     Dipakai juga buat mode "Ya, Semua Kelas" -- 1 lampiran
+                     yang sama berlaku ke semua kelas yang ditandai. --}}
+                {{-- id BEDA dari yang di blok-hadir (walau name-nya sama
+                     persis "foto_bukti") -- dua elemen id kembar bikin
+                     getElementById/dst nebak-nebak (sama kasusnya kayak
+                     cari-pilihan, lihat catatan di komponen itu). --}}
+                <x-ui.upload
+                    id="foto_bukti_tidak_hadir"
+                    label="Surat Izin/Sakit (opsional)"
+                    name="foto_bukti"
+                    title="Lampirkan Surat / Foto Bukti"
+                    hint="JPG, PNG, atau PDF"
+                    accept="image/*,application/pdf"
                 />
 
                 @if ($jadwals->count() > 1)
@@ -285,42 +206,130 @@
                 @endif
 
                 <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+            @php
+                $mulaiAwal = $jadwalTerpilih->jam_ke_mulai ?? $jpSekarang;
+                $selesaiAwal = old('jam_ke_selesai', $jadwalTerpilih->jam_ke_selesai ?? $jpSekarang);
+                $hariJadwalTerpilih = $jadwalTerpilih->hari ?? \App\Support\HariSekolah::hariIni();
+                $jamAwal = $hariJadwalTerpilih ? \App\Support\Waktu::rentangJamUntukHari($hariJadwalTerpilih, $mulaiAwal, $selesaiAwal) : null;
+            @endphp
+
+            @if ($jadwalTerkunci)
+                <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" tone="muted" class="sm:col-span-2">
+                    <span data-jadwal-terkunci-teks>
+                        {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
+                    </span>
+                    @if ($jamAwal)
+                        <span class="text-muted-2">({{ $jamAwal }})</span>
+                    @endif
+                </x-ui.field-static>
+                <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
+                <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Otomatis ikut jadwal Anda sekarang. Salah jadwal? Hubungi Admin.</p>
+            @else
+                {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
+                     yang tepat ikut kerender dari server. Materi/dll yang sudah
+                     diketik sebelum ganti jadwal memang akan hilang -- wajar karena
+                     pindah kelas = konteks jurnalnya beda total. --}}
+                <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2" required>
+                    <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
+                    @foreach ($jadwals as $j)
+                        @php $jamOpsi = \App\Support\Waktu::rentangJamUntukHari($j->hari, $j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
+                        <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected($jadwalTerpilih?->id === $j->id)>
+                            {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " ({$jamOpsi})" : '' }}
+                        </option>
+                    @endforeach
+                </x-ui.select>
+            @endif
+
+            {{-- Jam mulai & selesai SELALU ngikut jadwal (statis, nggak bisa diedit
+                 manual) -- guru nggak perlu (dan nggak boleh) ngarang jam sendiri,
+                 itu udah ditentuin jadwalnya. Pas jadwal diganti lewat dropdown di
+                 atas, dua-duanya ikut kesinkron otomatis (lihat sync() di bawah).
+                 Hanya ditampilkan saat status "Hadir" -- di saat tidak hadir,
+                 info jam pelajaran tidak relevan untuk ditampilkan. --}}
+            <div id="tampilan-jam-mulai-wrap">
+                <x-ui.field-static label="Jam ke- (mulai)" icon="schedule" tone="muted">
+                    <span id="tampilan-jam-mulai">Jam ke-{{ $mulaiAwal }}</span>
+                </x-ui.field-static>
+                <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
+            </div>
+            <div id="tampilan-jam-selesai-wrap">
+                <x-ui.field-static label="Jam ke- (selesai)" icon="schedule" tone="muted">
+                    <span id="tampilan-jam-selesai">Jam ke-{{ $selesaiAwal }}</span>
+                </x-ui.field-static>
+                <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">
+            </div>
+            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">
+                Jam mengajar otomatis mengikuti jadwal yang dipilih.
+                @if ($jamAwal) <span id="keterangan-jam-aktual">Waktunya {{ $jamAwal }}.</span> @endif
+            </p>
+
+            {{-- Acuan dari jurnal TERAKHIR di jadwal yang sama (bisa minggu lalu,
+                 bisa lebih lama kalau libur) -- biar guru/pengurus kelas yang isi
+                 nggak lupa nyambungin dari mana terakhir kali, tanpa harus buka
+                 Riwayat Jurnal dulu di tab lain. --}}
+            @if ($jurnalSebelumnya)
+                <div class="sm:col-span-2 rounded-xl bg-surface-alt/60 px-3.5 py-2.5 text-xs text-muted">
+                    <span class="font-semibold text-ink">
+                        Terakhir diisi ({{ $jurnalSebelumnya->tanggal->translatedFormat('d M Y') }}{{ $jurnalSebelumnya->status_guru === 'tidak_hadir' ? ', gurunya tidak hadir' : '' }}):
+                    </span>
+                    {{ ($jurnalSebelumnya->status_guru === 'hadir' ? $jurnalSebelumnya->materi : $jurnalSebelumnya->tugas_tambahan) ?: '—' }}
+                </div>
+            @endif
+
+            </div>
+
+            {{-- Semua field di sini full-width (sm:col-span-2), jadi nggak perlu ikut
+                 grid 2-kolom di atas -- aman langsung disembunyikan/ditampilkan. --}}
+            <div id="blok-hadir" class="mt-4 flex flex-col gap-4" @if($statusGuruAwal !== 'hadir') hidden @endif>
+                <x-ui.textarea label="Materi" name="materi" :rows="3" placeholder="Materi yang diajarkan..." required>{{ old('materi') }}</x-ui.textarea>
+
+                <div class="flex flex-col gap-1.5">
+                    <x-ui.choice
+                        label="Metode Pembelajaran"
+                        name="metode_pilihan"
+                        :options="$metodeLabel"
+                        :value="$metodeTerpilih"
+                        required
+                    />
+                    <div id="metode_custom_wrap" hidden>
+                        <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" required />
+                    </div>
+                </div>
 
                 @if ($jadwalTerpilih)
-                    {{-- Opsional (BEDA dari foto suasana kelas di atas) -- guru
-                         nggak di sekolah, jadi nggak wajib jepret kamera, cukup
-                         lampirin foto/scan surat izin dari galeri kalau ada.
-                         Dipakai juga buat mode "Ya, Semua Kelas" -- 1 lampiran
-                         yang sama berlaku ke semua kelas yang ditandai. --}}
-                    {{-- id BEDA dari yang di blok-hadir (walau name-nya sama
-                         persis "foto_bukti") -- dua elemen id kembar bikin
-                         getElementById/dst nebak-nebak (sama kasusnya kayak
-                         cari-pilihan, lihat catatan di komponen itu). --}}
-                    <x-ui.upload
-                        id="foto_bukti_tidak_hadir"
-                        label="Surat Izin/Sakit (opsional)"
+                    {{-- Wajib jepret langsung dari kamera (nggak boleh unggah dari
+                         galeri) -- biar beneran bukti sedang di kelas, bukan foto
+                         lama. Jalan di HP maupun PC/laptop (lihat komponennya). --}}
+                    <x-ui.upload-kamera
+                        label="Foto Suasana Kelas"
                         name="foto_bukti"
-                        title="Lampirkan Surat / Foto Bukti"
-                        hint="JPG, PNG, atau PDF"
-                        accept="image/*,application/pdf"
+                        hint="Wajib diisi — bukti pembelajaran sedang berlangsung"
+                        required
                     />
                 @endif
             </div>
 
             @if ($jadwalTerpilih)
-                {{-- Disembunyikan pas mode massal aktif -- presensi 1 kelas ini
-                     nggak relevan lagi kalau guru nyatain absen dari SEMUA
-                     kelas (server juga nggak makai kiriman presensi buat
-                     storeMassal(), lihat sync() di script bawah). --}}
-                <div id="blok-presensi">
+                {{-- Disembunyikan pas mode massal aktif ATAU status guru tidak hadir -- presensi
+                     nggak relevan kalau guru tidak hadir di kelas (presensi siswa otomatis
+                     mengikuti default/verifikasi pengurus). --}}
+                <div id="blok-presensi" @if($statusGuruAwal !== 'hadir') hidden @endif>
                     @include('guru.jurnal._presensi-grid')
                 </div>
             @else
-                <x-alert type="info" class="mt-6">Pilih kelas & mata pelajaran dulu di atas untuk mengisi presensi siswa.</x-alert>
+                <div id="blok-alert-pilih-jadwal" @if($statusGuruAwal !== 'hadir') hidden @endif>
+                    <x-alert type="info" class="mt-6">Pilih kelas & mata pelajaran dulu di atas untuk mengisi presensi siswa.</x-alert>
+                </div>
             @endif
 
             <x-ui.sticky-bar>
-                <x-ui.button type="submit" block icon="save">Simpan Jurnal &amp; Presensi</x-ui.button>
+                <x-ui.button type="submit" block icon="save">
+                    <span id="teks-tombol-submit">{{ $statusGuruAwal === 'tidak_hadir' ? 'Simpan Jurnal' : 'Simpan Jurnal & Presensi' }}</span>
+                </x-ui.button>
             </x-ui.sticky-bar>
         </form>
 
@@ -546,55 +555,66 @@
                     }
 
                     // Status Kehadiran -> Hadir nampilin Materi+Metode, selain itu
-                    // nampilin Tugas Tambahan+Alasan.
+                    // nampilin Tugas Tambahan+Alasan. Field Jam ke- juga hanya
+                    // relevan ditampilkan saat status Hadir.
                     const blokHadir = document.getElementById('blok-hadir');
                     const blokTidakHadir = document.getElementById('blok-tidak-hadir');
-                    function syncStatusGuru() {
-                        const val = document.querySelector('input[name="status_guru"]:checked')?.value;
-                        const hadir = val === 'hadir';
-                        blokHadir.hidden = !hadir;
-                        blokTidakHadir.hidden = hadir;
-
-                        // Disable SEMUA field (bukan cuma yang "required") di blok
-                        // yang lagi disembunyiin -- dua alasan: (1) atribut
-                        // "required" bawaan HTML tetap ngecek elemen yang
-                        // disembunyiin lewat ancestor "hidden", nggak otomatis
-                        // dikecualiin; (2) dua-duanya sama-sama punya field
-                        // name="foto_bukti" (beda id, kamera vs upload biasa) --
-                        // kalau yang disembunyiin nggak di-disable, dua-duanya
-                        // ikut kesubmit bareng & yang kepakai jadi nggak pasti.
-                        blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
-                        blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
-                    }
-                    document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncStatusGuru));
-                    syncStatusGuru();
-
-                    // "Tidak Hadir 1 Hari Penuh?" -> pilih "Ya" munculin checklist
-                    // kelas LANGSUNG di bawahnya (nggak pindah halaman), sekalian
-                    // ganti tujuan form ke endpoint massal.
+                    const jamMulaiWrap = document.getElementById('tampilan-jam-mulai-wrap');
+                    const jamSelesaiWrap = document.getElementById('tampilan-jam-selesai-wrap');
+                    const keteranganJam = document.getElementById('keterangan-jam');
                     const blokMassal = document.getElementById('blok-massal-kelas');
                     const blokPresensi = document.getElementById('blok-presensi');
-                    if (blokMassal) {
-                        function syncMassal() {
-                            const massal = document.querySelector('input[name="tidak_hadir_sehari_penuh"]:checked')?.value === 'ya';
+                    const blokAlertPilihJadwal = document.getElementById('blok-alert-pilih-jadwal');
+                    const teksTombolSubmit = document.getElementById('teks-tombol-submit');
+
+                    function syncFormState() {
+                        const statusGuru = document.querySelector('input[name="status_guru"]:checked')?.value || 'hadir';
+                        const hadir = statusGuru === 'hadir';
+                        const massal = !hadir && (document.querySelector('input[name="tidak_hadir_sehari_penuh"]:checked')?.value === 'ya');
+
+                        blokHadir.hidden = !hadir;
+                        blokTidakHadir.hidden = hadir;
+                        if (jamMulaiWrap) { jamMulaiWrap.hidden = !hadir; }
+                        if (jamSelesaiWrap) { jamSelesaiWrap.hidden = !hadir; }
+                        if (keteranganJam) { keteranganJam.hidden = !hadir; }
+
+                        // Disable SEMUA field di blok yang lagi disembunyikan
+                        blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
+                        blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
+
+                        // Presensi siswa: hanya relevan jika guru hadir di kelas.
+                        // Saat guru tidak hadir, presensi disembunyikan & dinonaktifkan (otomatis ikut default).
+                        if (blokPresensi) {
+                            blokPresensi.hidden = !hadir;
+                            blokPresensi.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
+                        }
+                        if (blokAlertPilihJadwal) {
+                            blokAlertPilihJadwal.hidden = !hadir;
+                        }
+
+                        if (teksTombolSubmit) {
+                            teksTombolSubmit.textContent = hadir ? 'Simpan Jurnal & Presensi' : 'Simpan Jurnal';
+                        }
+
+                        if (blokMassal) {
                             blokMassal.hidden = !massal;
                             blokMassal.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !massal; });
-                            form.action = massal
-                                ? '{{ route('jurnal.massal.store') }}'
-                                : '{{ route('jurnal.store') }}';
-
-                            // Dua hal ini nggak dipakai sama sekali sama
-                            // storeMassal() -- jadwal_id (1 kelas doang) nggak
-                            // relevan lagi (ditandai LEBIH dari 1 kelas lewat
-                            // checklist di atas), dan presensi cuma bisa diisi
-                            // manual kalau guru beneran ada di kelasnya.
-                            // "required"-nya jadwal_id ikut nggak ngeblok
-                            // submit begitu di-disable.
-                            if (jadwal) jadwal.disabled = massal;
-                            if (blokPresensi) blokPresensi.hidden = massal;
                         }
-                        document.querySelectorAll('input[name="tidak_hadir_sehari_penuh"]').forEach((el) => el.addEventListener('change', syncMassal));
-                        syncMassal();
+
+                        form.action = massal
+                            ? '{{ route('jurnal.massal.store') }}'
+                            : '{{ route('jurnal.store') }}';
+
+                        if (jadwal) {
+                            jadwal.disabled = massal;
+                        }
+                    }
+
+                    document.querySelectorAll('input[name="status_guru"]').forEach((el) => el.addEventListener('change', syncFormState));
+                    document.querySelectorAll('input[name="tidak_hadir_sehari_penuh"]').forEach((el) => el.addEventListener('change', syncFormState));
+                    syncFormState();
+
+                    if (blokMassal) {
 
                         // Kartu kelas yang nggak dicentang -> field "tugas khusus"-nya
                         // ikut di-disable, biar nggak ketinggalan kesubmit walau
