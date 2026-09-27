@@ -11,24 +11,51 @@
             </x-slot:action>
         </x-admin.page>
     @else
-        <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan" size="sm">
-            <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download">Ekspor PDF</x-ui.button>
+        <x-page-header title="Rekap Kehadiran Siswa" subtitle="Lintas kelas, buat evaluasi kedisiplinan" always-row size="sm">
+            <x-ui.button :href="route('rekap.siswa.ekspor', request()->query())" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor PDF</x-ui.button>
         </x-page-header>
     @endif
 
-    {{-- Kelas & tanggal: server-side, langsung submit begitu diubah (otomatis,
-         nggak perlu tombol Cari lagi) -- sama kayak pola Monitor Piket.
-         Cari nama: client-side langsung filter baris yang sudah dimuat (data
-         di halaman ini nggak dipaginate, semua siswa yang cocok kelas/tanggal
-         udah ada), jadi nggak perlu reload cuma buat cari nama. --}}
-    <x-admin.filters :action="route('rekap.siswa.index')">
-        <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua kelas" />
-        <x-admin.f-date name="dari" label="Dari tanggal" data-pasangan="sampai" />
-        <x-admin.f-date name="sampai" label="Sampai tanggal" onchange="this.form.submit()" />
-    </x-admin.filters>
+    {{-- Tanggal di baris atas (2 kotak), Kelas & Cari nama sejajar di baris
+         bawahnya (2 kotak juga) -- pola yang sama dipakai di seluruh app
+         (rentang tanggal duluan, baru filter lain berpasangan 2-2).
+         Kelas & tanggal: server-side, langsung submit begitu diubah. Cari
+         nama: client-side langsung filter baris yang sudah dimuat (data di
+         halaman ini nggak dipaginate), jadi nggak perlu reload cuma buat
+         cari nama -- makanya SENGAJA di luar <form> (class="contents" di
+         form Kelas bikin child-nya ikut jadi flex item wadah luar, tanpa
+         form-nya sendiri ganggu layout), sama pola kayak Dispensasi Siswa. --}}
+    <div class="mb-4 flex flex-col gap-2">
+        <form method="GET" action="{{ route('rekap.siswa.index') }}" class="flex w-full items-end gap-2">
+            @if(request('kelas_id')) <input type="hidden" name="kelas_id" value="{{ request('kelas_id') }}"> @endif
+            <div class="flex-1">
+                <x-admin.f-date name="dari" label="Dari tanggal" data-pasangan="sampai" />
+            </div>
+            <div class="flex-1">
+                <x-admin.f-date name="sampai" label="Sampai tanggal" onchange="this.form.submit()" />
+            </div>
+            @if (request('dari') || request('sampai'))
+                @php $sisaFilterTanggal = request()->except(['dari', 'sampai']); @endphp
+                <a href="{{ url()->current() . ($sisaFilterTanggal ? '?' . http_build_query($sisaFilterTanggal) : '') }}"
+                   class="flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-surface-alt bg-card px-3 text-sm font-semibold text-muted hover:border-alpha hover:text-alpha">
+                    <x-icon name="close" :size="16" /> Reset
+                </a>
+            @endif
+        </form>
 
-    <div class="mb-4">
-        <x-ui.search-bar id="cari-rekap" placeholder="Cari nama atau NIS siswa..." />
+        <div class="flex w-full gap-2">
+            <form method="GET" action="{{ route('rekap.siswa.index') }}" class="contents">
+                @if(request('dari')) <input type="hidden" name="dari" value="{{ request('dari') }}"> @endif
+                @if(request('sampai')) <input type="hidden" name="sampai" value="{{ request('sampai') }}"> @endif
+                <div class="flex-1">
+                    <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua kelas" />
+                </div>
+            </form>
+            <div class="flex-1">
+                <span class="mb-1 block text-xs font-semibold text-muted-2">Cari Siswa</span>
+                <x-ui.search-bar id="cari-rekap" placeholder="Cari nama atau NIS siswa..." />
+            </div>
+        </div>
     </div>
 
     @if ($totalAlphaTinggi > 0)

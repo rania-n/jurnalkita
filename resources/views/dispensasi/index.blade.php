@@ -90,36 +90,17 @@
         @endforeach
     </div>
 
-    {{-- Kelas & Cari sejajar kanan-kiri, lalu Dari/Sampai tanggal sejajar
-         kanan-kiri di baris bawahnya. Search bar SENGAJA di luar <form>
-         (class="contents" di form bikin child-nya ikut jadi flex item wadah
-         luar, tanpa form-nya sendiri ganggu layout) -- soalnya x-ui.search-bar
+    {{-- Tanggal di baris atas (2 kotak), Kelas & Cari sejajar di baris
+         bawahnya (2 kotak juga) -- rentang tanggal duluan, baru filter lain
+         berpasangan 2-2. Search bar SENGAJA di luar <form> (class="contents"
+         di form bikin child-nya ikut jadi flex item wadah luar, tanpa
+         form-nya sendiri ganggu layout) -- soalnya x-ui.search-bar
          defaultnya punya atribut name="q" yang nggak dipakai controller ini
          (filternya client-side, lihat script bawah); kalau dia di DALAM form,
          "q" bakal ikut kekirim & numpuk jadi query string nggak berguna
          tiap Kelas/Tanggal diganti. Teks cari tetap dibawa lewat hidden
          input "cari" yang sudah ada. --}}
     <div class="mb-4 flex flex-col gap-2">
-        <div class="flex w-full gap-2">
-            <div class="flex-1">
-                {{-- Label ditambah manual (x-ui.search-bar nggak punya prop
-                     label) -- gaya disamain persis kayak label "Kelas"/"Dari
-                     tanggal" di sebelahnya (x-admin.f-date), biar nggak
-                     keliatan beda sendiri kosong tanpa keterangan. --}}
-                <span class="mb-1 block text-xs font-semibold text-muted-2">Cari Siswa</span>
-                <x-ui.search-bar id="input-cari-dispen" value="{{ request('cari') }}" placeholder="Nama atau NIS siswa..." autocomplete="off" />
-            </div>
-            <form method="GET" action="{{ route('dispensasi.index') }}" class="contents">
-                <input type="hidden" name="tab" value="{{ $tab }}">
-                @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
-                @if(request('dari')) <input type="hidden" name="dari" value="{{ request('dari') }}"> @endif
-                @if(request('sampai')) <input type="hidden" name="sampai" value="{{ request('sampai') }}"> @endif
-                <div class="flex-1">
-                    <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua Kelas" />
-                </div>
-            </form>
-        </div>
-
         <form method="GET" action="{{ route('dispensasi.index') }}" class="flex w-full items-end gap-2">
             <input type="hidden" name="tab" value="{{ $tab }}">
             @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
@@ -140,6 +121,26 @@
                 </a>
             @endif
         </form>
+
+        <div class="flex w-full gap-2">
+            <div class="flex-1">
+                {{-- Label ditambah manual (x-ui.search-bar nggak punya prop
+                     label) -- gaya disamain persis kayak label "Kelas"/"Dari
+                     tanggal" di sebelahnya (x-admin.f-date), biar nggak
+                     keliatan beda sendiri kosong tanpa keterangan. --}}
+                <span class="mb-1 block text-xs font-semibold text-muted-2">Cari Siswa</span>
+                <x-ui.search-bar id="input-cari-dispen" value="{{ request('cari') }}" placeholder="Nama atau NIS siswa..." autocomplete="off" />
+            </div>
+            <form method="GET" action="{{ route('dispensasi.index') }}" class="contents">
+                <input type="hidden" name="tab" value="{{ $tab }}">
+                @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
+                @if(request('dari')) <input type="hidden" name="dari" value="{{ request('dari') }}"> @endif
+                @if(request('sampai')) <input type="hidden" name="sampai" value="{{ request('sampai') }}"> @endif
+                <div class="flex-1">
+                    <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua Kelas" />
+                </div>
+            </form>
+        </div>
     </div>
 
     @if ($items->isEmpty())
