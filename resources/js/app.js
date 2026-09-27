@@ -528,7 +528,10 @@ function initCariPilihan() {
                 return;
             }
             daftar.innerHTML = list.slice(0, 30).map((s) => `
-                <button type="button" data-id="${s.id}" class="flex w-full px-3.5 py-2.5 text-left text-sm font-semibold text-ink hover:bg-surface-alt">${s.nama}</button>
+                <button type="button" data-id="${s.id}" class="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm font-semibold text-ink hover:bg-surface-alt">
+                    <span>${s.nama}</span>
+                    ${s.keterangan ? `<span class="ml-2 shrink-0 rounded bg-surface-alt px-1.5 py-0.5 text-xs font-normal text-muted-2">${s.keterangan}</span>` : ''}
+                </button>
             `).join('');
         }
 

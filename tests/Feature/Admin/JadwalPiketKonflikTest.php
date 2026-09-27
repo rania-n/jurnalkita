@@ -48,6 +48,7 @@ class JadwalPiketKonflikTest extends TestCase
             'hari' => 'senin',
             'jam_ke_mulai' => 1,
             'jam_ke_selesai' => 2,
+            'ruang' => 'R1',
         ], $override);
     }
 

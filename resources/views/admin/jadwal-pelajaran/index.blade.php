@@ -29,15 +29,28 @@
     $hariTabs = ['semua' => 'Semua'] + $hariLabel;
     $kelasList = \App\Models\Kelas::orderedByHierarchy()->get(['id', 'nama']);
     $mapelList = \App\Models\Mapel::orderBy('nama')->get(['id', 'nama']);
-    $guruList = \App\Models\Guru::with('mapels:id')->orderBy('nama')->get(['id', 'nama', 'mapel_utama_id']);
-    $guruMapelMap = $guruList->map(fn ($g) => [
-        'id' => $g->id,
-        'nama' => $g->nama,
-        'mapel_ids' => array_values(array_filter(array_unique(array_merge(
+    $guruList = \App\Models\Guru::with('mapels:id,nama', 'mapelUtama:id,nama')->orderBy('nama')->get(['id', 'nama', 'mapel_utama_id']);
+    $guruMapelMap = $guruList->map(function ($g) {
+        $mapelIds = array_values(array_filter(array_unique(array_merge(
             $g->mapel_utama_id ? [(int) $g->mapel_utama_id] : [],
             $g->mapels->pluck('id')->map(fn ($id) => (int) $id)->all()
-        )))),
-    ])->values()->all();
+        ))));
+        $mapelNamas = array_values(array_filter(array_unique(array_merge(
+            $g->mapelUtama ? [$g->mapelUtama->nama] : [],
+            $g->mapels->pluck('nama')->all()
+        ))));
+        return [
+            'id' => $g->id,
+            'nama' => $g->nama,
+            'mapel_ids' => $mapelIds,
+            'keterangan' => implode(', ', $mapelNamas),
+        ];
+    })->values()->all();
+
+    $guruListFilter = $mapelId
+        ? $guruList->filter(fn ($g) => $g->mapel_utama_id == $mapelId || $g->mapels->contains('id', (int) $mapelId))->values()
+        : $guruList;
+
     $ruangList = collect(config('akademik.ruangan'))->map(fn ($r) => ['id' => $r, 'nama' => $r]);
     $jpList = collect(range(1, 13))->mapWithKeys(fn ($i) => [$i => "Jam ke-{$i}"]);
     $queryTanpaHari = request()->except('page', 'hari');
@@ -91,7 +104,7 @@
             <input type="hidden" name="hari" value="{{ $hari }}">
         @endif
         <x-ui.cari-pilihan name="kelas" label="Kelas" :options="$kelasList" all="Semua Kelas" />
-        <x-ui.cari-pilihan name="guru" label="Guru" :options="$guruList" all="Semua Guru" />
+        <x-ui.cari-pilihan name="guru" label="Guru" :options="$guruListFilter" all="Semua Guru" />
         <x-ui.cari-pilihan name="mapel" label="Mapel" :options="$mapelList" all="Semua Mapel" />
         <x-ui.cari-pilihan name="ruang" label="Ruang" :options="$ruangList" all="Semua Ruang" />
         <x-admin.f-select name="jp" label="JP" :options="$jpList" all="Semua JP" />
@@ -210,9 +223,13 @@
                 const hariPenuhMap = @json($hariPenuhSemuaKelas);
                 const hariNamaMap = @json($hariLabel);
                 const semuaGuru = @json($guruMapelMap);
+                const semuaMapel = @json($mapelList);
                 const modal = document.getElementById('modal-jadwal');
                 const kelasInput = modal?.querySelector('[data-cari-pilihan-value][name="kelas_id"]');
-                const mapelInput = modal?.querySelector('[data-cari-pilihan-value][name="mapel_id"]');
+                const wrapMapel = modal?.querySelector('[data-cari-pilihan-mapel]');
+                const mapelInput = wrapMapel?.querySelector('[data-cari-pilihan-value]');
+                const inputMapel = wrapMapel?.querySelector('[data-cari-pilihan-input]');
+                const clearBtnMapel = wrapMapel?.querySelector('[data-cari-pilihan-clear]');
                 const wrapGuru = modal?.querySelector('[data-cari-pilihan-guru]');
                 const inputGuru = wrapGuru?.querySelector('[data-cari-pilihan-input]');
                 const hiddenGuru = wrapGuru?.querySelector('[data-cari-pilihan-value]');
@@ -223,13 +240,14 @@
                     const mId = parseInt(mapelId, 10);
                     let guruTersedia = semuaGuru;
                     if (mId) {
-                        const guruCocok = semuaGuru.filter((g) => g.mapel_ids && g.mapel_ids.includes(mId));
-                        if (guruCocok.length > 0) {
-                            guruTersedia = guruCocok;
-                        }
+                        guruTersedia = semuaGuru.filter((g) => g.mapel_ids && g.mapel_ids.includes(mId));
                     }
 
-                    wrapGuru.dataset.list = JSON.stringify(guruTersedia.map((g) => ({ id: g.id, nama: g.nama })));
+                    wrapGuru.dataset.list = JSON.stringify(guruTersedia.map((g) => ({
+                        id: g.id,
+                        nama: g.nama,
+                        keterangan: g.keterangan || '',
+                    })));
 
                     if (!keepSelection && hiddenGuru && hiddenGuru.value) {
                         const masihAda = guruTersedia.some((g) => String(g.id) === String(hiddenGuru.value));
@@ -237,6 +255,29 @@
                             hiddenGuru.value = '';
                             if (inputGuru) inputGuru.value = '';
                             if (clearBtnGuru) clearBtnGuru.hidden = true;
+                        }
+                    }
+                }
+
+                function filterMapelByGuru(guruId, keepSelection = false) {
+                    if (!wrapMapel) return;
+                    const gId = parseInt(guruId, 10);
+                    let mapelTersedia = semuaMapel;
+                    if (gId) {
+                        const targetGuru = semuaGuru.find((g) => String(g.id) === String(gId));
+                        if (targetGuru && targetGuru.mapel_ids && targetGuru.mapel_ids.length > 0) {
+                            mapelTersedia = semuaMapel.filter((m) => targetGuru.mapel_ids.includes(m.id));
+                        }
+                    }
+
+                    wrapMapel.dataset.list = JSON.stringify(mapelTersedia);
+
+                    if (!keepSelection && mapelInput && mapelInput.value) {
+                        const masihAda = mapelTersedia.some((m) => String(m.id) === String(mapelInput.value));
+                        if (!masihAda) {
+                            mapelInput.value = '';
+                            if (inputMapel) inputMapel.value = '';
+                            if (clearBtnMapel) clearBtnMapel.hidden = true;
                         }
                     }
                 }
@@ -282,10 +323,22 @@
 
                 mapelInput?.addEventListener('change', function () {
                     filterGuruByMapel(this.value, false);
+                    if (!this.value && hiddenGuru?.value) {
+                        filterMapelByGuru(hiddenGuru.value, true);
+                    }
+                });
+
+                hiddenGuru?.addEventListener('change', function () {
+                    if (!mapelInput?.value) {
+                        filterMapelByGuru(this.value, false);
+                    }
                 });
 
                 modal?.addEventListener('modal:open', function () {
                     filterGuruByMapel(mapelInput?.value || '', true);
+                    if (hiddenGuru?.value && !mapelInput?.value) {
+                        filterMapelByGuru(hiddenGuru.value, true);
+                    }
                     updateHariPenuh(kelasInput?.value || '');
                 });
             })();

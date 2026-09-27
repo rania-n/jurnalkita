@@ -73,22 +73,25 @@ class SiswaController extends Controller
             // no_hp SENGAJA tidak ada di sini -- diisi sekali lewat Manajemen Akun
             // ("Buat Akun"/"Ubah Akun"), biar nggak ada 2 tempat isi nomor yang beda.
             'jenis_kelamin' => ['required', 'in:L,P'],
-            // Cuma 1 pengurus kelas per kelas (akunnya boleh dipakai di banyak HP
-            // sekaligus, itu bukan masalah -- yang dibatasi jumlah ORANGnya).
-            'jabatan' => ['required', 'in:anggota,pengurus', function ($attribute, $value, $fail) use ($request) {
-                if ($value !== 'pengurus') {
-                    return;
-                }
-                $sudahAdaPengurus = Siswa::where('kelas_id', $request->input('kelas_id'))
-                    ->where('jabatan', 'pengurus')
-                    ->when($request->filled('id'), fn ($q) => $q->where('id', '!=', $request->integer('id')))
-                    ->exists();
-                if ($sudahAdaPengurus) {
-                    $fail('Kelas ini sudah memiliki pengurus kelas. Ubah pengurus lama menjadi "Anggota" terlebih dahulu apabila ingin menggantinya.');
-                }
-            }],
+            'jabatan' => ['required', 'in:anggota,pengurus'],
             'status' => ['nullable', 'in:aktif,lulus,pindah'],
         ]);
+
+        // Cuma 1 pengurus kelas per kelas. Dicek di luar validate() supaya
+        // error dikembalikan sebagai flash (back()->with('error')) -- bukan
+        // ValidationException yang otomatis membuka modal kembali, sehingga
+        // pesan bisa terbaca langsung di halaman tanpa modal menghalangi.
+        if ($data['jabatan'] === 'pengurus') {
+            $sudahAdaPengurus = Siswa::where('kelas_id', $data['kelas_id'])
+                ->where('jabatan', 'pengurus')
+                ->when($request->filled('id'), fn ($q) => $q->where('id', '!=', $request->integer('id')))
+                ->exists();
+
+            if ($sudahAdaPengurus) {
+                return back()->with('error', 'Kelas ini sudah memiliki pengurus kelas. Ubah pengurus lama menjadi "Anggota" terlebih dahulu apabila ingin menggantinya.');
+            }
+        }
+
         // Checkbox HTML nggak ngirim apa-apa pas nggak dicentang, jadi nggak
         // bisa divalidasi lewat $request->validate() biasa -- dibaca manual.
         $data['pkl'] = $request->boolean('pkl');
