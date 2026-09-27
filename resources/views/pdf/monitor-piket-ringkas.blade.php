@@ -101,7 +101,7 @@
     <div class="meta">
         <table>
             <tr>
-                <td style="width: 50%;"><strong>Hari / Tanggal:</strong> {{ $tanggal->translatedFormat('l, d F Y') }}</td>
+                <td style="width: 50%;"><strong>Tanggal:</strong> {{ $dari->isSameDay($sampai) ? $dari->translatedFormat('l, d F Y') : $dari->translatedFormat('d F Y').' s/d '.$sampai->translatedFormat('d F Y') }}</td>
                 <td style="width: 50%; text-align: right;"><strong>Total Jadwal:</strong> {{ count($rekap['baris']) }} JP</td>
             </tr>
             <tr>
@@ -119,6 +119,9 @@
         <thead>
             <tr>
                 <th style="width: 25px;" class="text-center">No</th>
+                @if (! $dari->isSameDay($sampai))
+                    <th style="width: 60px;">Tanggal</th>
+                @endif
                 <th style="width: 45px;" class="text-center">Jam</th>
                 <th style="width: 70px;">Kelas</th>
                 <th style="width: 130px;">Mata Pelajaran</th>
@@ -138,6 +141,9 @@
                 @endphp
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
+                    @if (! $dari->isSameDay($sampai))
+                        <td>{{ \Illuminate\Support\Carbon::parse($b['tanggal'])->translatedFormat('d M Y') }}</td>
+                    @endif
                     <td class="text-center font-bold">JP {{ $b['jamKe'] }}</td>
                     <td><strong>{{ $b['kelas'] }}</strong></td>
                     <td>{{ $b['mapel'] }}</td>
@@ -149,7 +155,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center" style="padding: 15px; color: #94a3b8;">Tidak ada data jadwal pelajaran untuk tanggal ini.</td>
+                    <td colspan="{{ $dari->isSameDay($sampai) ? 7 : 8 }}" class="text-center" style="padding: 15px; color: #94a3b8;">Tidak ada data jadwal pelajaran untuk rentang tanggal ini.</td>
                 </tr>
             @endforelse
         </tbody>

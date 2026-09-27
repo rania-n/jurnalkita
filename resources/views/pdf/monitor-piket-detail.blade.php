@@ -103,7 +103,7 @@
     <div class="meta">
         <table>
             <tr>
-                <td style="width: 50%;"><strong>Hari / Tanggal:</strong> {{ $tanggal->translatedFormat('l, d F Y') }}</td>
+                <td style="width: 50%;"><strong>Tanggal:</strong> {{ $dari->isSameDay($sampai) ? $dari->translatedFormat('l, d F Y') : $dari->translatedFormat('d F Y').' s/d '.$sampai->translatedFormat('d F Y') }}</td>
                 <td style="width: 50%; text-align: right;"><strong>Total Baris:</strong> {{ count($baris) }} baris</td>
             </tr>
             <tr>

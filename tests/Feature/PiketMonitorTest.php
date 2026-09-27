@@ -98,9 +98,38 @@ class PiketMonitorTest extends TestCase
             ->assertOk()->assertSee('Bu Sarah')->assertSee('Pak Herman');
     }
 
+    /** Rentang Dari/Sampai lebih dari 1 hari -- data tiap hari digabung, kolom Tanggal ikut muncul. */
+    public function test_rentang_tanggal_menggabungkan_beberapa_hari_sekaligus(): void
+    {
+        $dari = now()->subDay()->toDateString(); // Minggu -- kemarin dari Senin yang di-pin setUp()
+        $sampai = now()->toDateString(); // Senin -- ada jadwal & jurnalnya (lihat setUp())
+
+        $response = $this->actingAs($this->waka)->get("/piket/monitor?dari={$dari}&sampai={$sampai}");
+
+        $response->assertOk()
+            ->assertSee('X RPL 1')->assertSee('Aljabar dasar')
+            ->assertSee('X TKJ 1')->assertSee('Belum Diisi')
+            ->assertSee(now()->translatedFormat('d M Y')); // kolom Tanggal per-baris cuma muncul kalau rentangnya >1 hari
+    }
+
+    /** Sampai tanggal nggak boleh melewati hari ini -- diklem balik, bukan error. */
+    public function test_rentang_tanggal_tidak_bisa_melewati_hari_ini(): void
+    {
+        $besok = now()->addDay()->toDateString();
+
+        $response = $this->actingAs($this->waka)->get("/piket/monitor?dari={$besok}&sampai={$besok}");
+
+        $response->assertOk()->assertSee(now()->translatedFormat('d M Y'));
+    }
+
     public function test_akhir_pekan_tidak_ada_jadwal_tanpa_error(): void
     {
-        $minggu = now()->next(Carbon::SUNDAY)->toDateString();
+        // "Kemarin" (bukan ->next(SUNDAY)) -- setUp() udah travelTo() ke
+        // Senin, jadi "besok Minggu" akan keanggap tanggal MASA DEPAN dan
+        // ke-klem balik ke hari ini (lihat rentangTanggal(), Monitor Piket
+        // nggak boleh pilih tanggal yang belum kejalanin). "Kemarin" dari
+        // Senin yang di-pin selalu Minggu juga, tapi di masa lalu.
+        $minggu = now()->subDay()->toDateString();
 
         $this->actingAs($this->waka)->get("/piket/monitor?tanggal={$minggu}")
             ->assertOk()->assertSee('Tidak ada jadwal pelajaran');

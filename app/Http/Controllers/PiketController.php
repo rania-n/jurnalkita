@@ -121,9 +121,9 @@ class PiketController extends Controller
     {
         $this->pastikanBolehLihat();
 
-        $tanggal = $this->tanggal($request);
+        [$dari, $sampai] = $this->rentangTanggal($request);
         $mode = $request->get('mode') === 'guru' ? 'guru' : 'kelas';
-        $baris = $this->baris($tanggal);
+        $baris = $this->barisRange($dari, $sampai);
         // Dihitung dari SEMUA baris (sebelum filter status) -- biar jumlah di
         // tiap pil tab tetap nunjukin angka aslinya, bukan kepotong status
         // yang lagi aktif (sama kayak pola $jumlahTab di Riwayat Jurnal).
@@ -144,7 +144,10 @@ class PiketController extends Controller
                 return [
                     'id' => $id,
                     'label' => $mode === 'guru' ? $contoh->guru->nama : $contoh->kelas->nama,
-                    'rows' => $rows->sortBy(fn ($b) => $b['jadwal']->jam_ke_mulai)->values(),
+                    // Diurutkan tanggal dulu baru jam -- rentang lebih dari 1
+                    // hari bisa punya jadwal yang SAMA (JP-nya) di tanggal
+                    // beda-beda, jangan sampai keurut cuma dari jam-nya doang.
+                    'rows' => $rows->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))->values(),
                     'rekap' => $rows->countBy('status'),
                 ];
             })
@@ -152,7 +155,8 @@ class PiketController extends Controller
             ->values();
 
         return view('piket.monitor', [
-            'tanggal' => $tanggal,
+            'dari' => $dari,
+            'sampai' => $sampai,
             'mode' => $mode,
             'grup' => $grup,
             'rekapTotal' => $rekapTotal,
@@ -165,44 +169,50 @@ class PiketController extends Controller
     {
         $this->pastikanBolehLihat();
 
-        $tanggal = $this->tanggal($request);
-        $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? null;
-        $jadwalIds = $hari ? Jadwal::where('hari', $hari)->pluck('id') : collect();
+        [$dari, $sampai] = $this->rentangTanggal($request);
+        $haris = collect(\Carbon\CarbonPeriod::create($dari, $sampai))
+            ->map(fn ($d) => ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$d->dayOfWeek - 1] ?? null)
+            ->filter()->unique();
+        $jadwalIds = Jadwal::whereIn('hari', $haris)->pluck('id');
 
         return response()->json([
-            'versi' => Versi::dari(Jurnal::whereIn('jadwal_id', $jadwalIds)->whereDate('tanggal', $tanggal)),
+            'versi' => Versi::dari(Jurnal::whereIn('jadwal_id', $jadwalIds)
+                ->whereDate('tanggal', '>=', $dari)->whereDate('tanggal', '<=', $sampai)),
         ]);
     }
 
-    /** Ekspor ringkas satu hari penuh, semua kelompok — cuma baris jam/status, tanpa presensi. */
+    /** Ekspor ringkas rentang tanggal terpilih, semua kelompok — cuma baris jam/status, tanpa presensi. */
     public function ekspor(Request $request)
     {
         $this->pastikanBolehLihat();
 
-        $tanggal = $this->tanggal($request);
-        $baris = $this->baris($tanggal);
+        [$dari, $sampai] = $this->rentangTanggal($request);
+        $baris = $this->barisRange($dari, $sampai);
 
-        AuditLog::catat('Ekspor Ringkasan Piket', "Ekspor ringkas monitor piket {$tanggal->toDateString()} ({$baris->count()} baris)");
+        AuditLog::catat('Ekspor Ringkasan Piket', "Ekspor ringkas monitor piket {$dari->toDateString()} s/d {$sampai->toDateString()} ({$baris->count()} baris)");
 
         $totalHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'hadir') && ! str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
         $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
         $totalBelumDiisi = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'belum'))->count();
 
-        $rows = $baris->map(function ($b) {
-            return [
-                'tanggal' => $b['tanggal'],
-                'jamKe' => "{$b['jadwal']->jam_ke_mulai}-{$b['jadwal']->jam_ke_selesai}",
-                'kelas' => $b['jadwal']->kelas->nama,
-                'mapel' => $b['jadwal']->mapel->nama,
-                'guru' => $b['jadwal']->guru->nama,
-                'statusLabel' => $b['statusLabel'],
-                'materi' => $b['jurnal']->materi ?? '-',
-            ];
-        })->values()->all();
+        $rows = $baris
+            ->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))
+            ->map(function ($b) {
+                return [
+                    'tanggal' => $b['tanggal'],
+                    'jamKe' => "{$b['jadwal']->jam_ke_mulai}-{$b['jadwal']->jam_ke_selesai}",
+                    'kelas' => $b['jadwal']->kelas->nama,
+                    'mapel' => $b['jadwal']->mapel->nama,
+                    'guru' => $b['jadwal']->guru->nama,
+                    'statusLabel' => $b['statusLabel'],
+                    'materi' => $b['jurnal']->materi ?? '-',
+                ];
+            })->values()->all();
 
         $pdf = Pdf::loadView('pdf.monitor-piket-ringkas', [
             'judul' => 'Laporan Ringkasan Monitor Piket',
-            'tanggal' => $tanggal,
+            'dari' => $dari,
+            'sampai' => $sampai,
             'rekap' => [
                 'baris' => $rows,
                 'totalHadir' => $totalHadir,
@@ -211,7 +221,11 @@ class PiketController extends Controller
             ],
         ])->setPaper('a4', 'portrait');
 
-        return $pdf->download('monitor-piket-ringkas-'.$tanggal->toDateString().'.pdf');
+        $namaFile = $dari->isSameDay($sampai)
+            ? 'monitor-piket-ringkas-'.$dari->toDateString().'.pdf'
+            : 'monitor-piket-ringkas-'.$dari->toDateString().'-sd-'.$sampai->toDateString().'.pdf';
+
+        return $pdf->download($namaFile);
     }
 
     /**
@@ -223,21 +237,27 @@ class PiketController extends Controller
         $this->pastikanBolehLihat();
         abort_unless(in_array($tipe, ['kelas', 'guru'], true), 404);
 
-        $tanggal = $this->tanggal($request);
-        $baris = $this->baris($tanggal, denganPresensi: true)
+        [$dari, $sampai] = $this->rentangTanggal($request);
+        $rentangBeda = ! $dari->isSameDay($sampai);
+        $baris = $this->barisRange($dari, $sampai, denganPresensi: true)
             ->filter(fn ($b) => ($tipe === 'guru' ? $b['jadwal']->guru_id : $b['jadwal']->kelas_id) === $id)
-            ->sortBy(fn ($b) => $b['jadwal']->jam_ke_mulai);
+            ->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai));
 
         abort_if($baris->isEmpty(), 404);
 
         $label = $tipe === 'guru' ? $baris->first()['jadwal']->guru->nama : $baris->first()['jadwal']->kelas->nama;
 
-        AuditLog::catat('Ekspor Detail Piket', "Ekspor detail monitor piket — {$tipe} {$label}, {$tanggal->toDateString()}");
+        AuditLog::catat('Ekspor Detail Piket', "Ekspor detail monitor piket — {$tipe} {$label}, {$dari->toDateString()} s/d {$sampai->toDateString()}");
 
         $barisData = [];
         foreach ($baris as $b) {
             $jadwal = $b['jadwal'];
             $jam = "JP {$jadwal->jam_ke_mulai}-{$jadwal->jam_ke_selesai}";
+            // Tanggal ikut ditempel ke depan kalau rentangnya lebih dari 1
+            // hari -- biar tetap bisa dibedain baris ini punya hari yang mana.
+            if ($rentangBeda) {
+                $jam = \Illuminate\Support\Carbon::parse($b['tanggal'])->translatedFormat('d M').' · '.$jam;
+            }
             $lawan = $tipe === 'guru' ? $jadwal->kelas->nama : $jadwal->guru->nama;
 
             if (! $b['jurnal']) {
@@ -295,13 +315,18 @@ class PiketController extends Controller
 
         $pdf = Pdf::loadView('pdf.monitor-piket-detail', [
             'judul' => "Laporan Detail Monitor Piket - {$label}",
-            'tanggal' => $tanggal,
+            'dari' => $dari,
+            'sampai' => $sampai,
             'tipe' => $tipe,
             'targetNama' => $label,
             'baris' => $barisData,
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download("monitor-piket-{$tipe}-".Str::slug($label).'-'.$tanggal->toDateString().'.pdf');
+        $namaFile = $rentangBeda
+            ? "monitor-piket-{$tipe}-".Str::slug($label).'-'.$dari->toDateString().'-sd-'.$sampai->toDateString().'.pdf'
+            : "monitor-piket-{$tipe}-".Str::slug($label).'-'.$dari->toDateString().'.pdf';
+
+        return $pdf->download($namaFile);
     }
 
     /**
@@ -317,11 +342,42 @@ class PiketController extends Controller
         return view('piket._jurnal-detail-fragment', compact('jurnal'));
     }
 
-    private function tanggal(Request $request): Carbon
+    /**
+     * Rentang tanggal (Dari/Sampai) -- default HARI INI doang (dari=sampai)
+     * kalau nggak ada parameter. Nggak boleh ada yang tanggal masa depan
+     * (lihat max= di view) -- diklem ke hari ini kalau kelolosan.
+     *
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    private function rentangTanggal(Request $request): array
     {
-        return $request->filled('tanggal')
-            ? Carbon::parse($request->date('tanggal'))
-            : today();
+        $dari = $request->filled('dari')
+            ? Carbon::parse($request->date('dari'))
+            : ($request->filled('tanggal') ? Carbon::parse($request->date('tanggal')) : today());
+        $sampai = $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : $dari->copy();
+
+        if ($dari->isFuture()) {
+            $dari = today();
+        }
+        if ($sampai->isFuture()) {
+            $sampai = today();
+        }
+        if ($sampai->lt($dari)) {
+            $sampai = $dari->copy();
+        }
+
+        return [$dari, $sampai];
+    }
+
+    /** Gabungan baris() buat tiap tanggal dalam rentang $dari..$sampai (inklusif). */
+    private function barisRange(Carbon $dari, Carbon $sampai, bool $denganPresensi = false): Collection
+    {
+        $hasil = collect();
+        for ($d = $dari->copy(); $d->lte($sampai); $d->addDay()) {
+            $hasil = $hasil->merge($this->baris($d->copy(), $denganPresensi));
+        }
+
+        return $hasil->values();
     }
 
     /**

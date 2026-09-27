@@ -4,14 +4,19 @@
         'tidak_hadir' => 'bg-alpha-soft text-alpha',
         'belum_diisi' => 'bg-sakit-soft text-sakit',
     ];
-    $hariLabel = config('akademik.hari')[['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? ''] ?? null;
+    $rentangBeda = ! $dari->isSameDay($sampai);
+    $hariLabel = config('akademik.hari')[['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$dari->dayOfWeek - 1] ?? ''] ?? null;
     $admin = auth()->user()->role === 'admin';
 @endphp
 
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Monitor Piket" heading="Monitor Piket" width="wide">
-    @php $subtitle = $hariLabel ? $hariLabel . ', ' . $tanggal->translatedFormat('d M Y') : $tanggal->translatedFormat('d M Y') . ' — akhir pekan, tidak ada jadwal pelajaran'; @endphp
+    @php
+        $subtitle = $rentangBeda
+            ? $dari->translatedFormat('d M Y') . ' s/d ' . $sampai->translatedFormat('d M Y')
+            : ($hariLabel ? $hariLabel . ', ' . $dari->translatedFormat('d M Y') : $dari->translatedFormat('d M Y') . ' — akhir pekan, tidak ada jadwal pelajaran');
+    @endphp
 
-    @php $urlEkspor = route('piket.monitor.ekspor', ['tanggal' => $tanggal->toDateString()]); @endphp
+    @php $urlEkspor = route('piket.monitor.ekspor', ['dari' => $dari->toDateString(), 'sampai' => $sampai->toDateString()]); @endphp
 
     @if ($admin)
         <x-admin.page title="Monitor Piket" :subtitle="$subtitle">
@@ -25,7 +30,7 @@
         </x-page-header>
     @endif
 
-    <x-ui.auto-refresh :url="route('piket.monitor.versi', ['tanggal' => $tanggal->toDateString()])" />
+    <x-ui.auto-refresh :url="route('piket.monitor.versi', ['dari' => $dari->toDateString(), 'sampai' => $sampai->toDateString()])" />
 
     {{-- Filter status -- lewat query string (?status=...), sama pola kayak
          tab Riwayat Jurnal -- biar TETAP di tab yang sama begitu tanggal/mode
@@ -54,14 +59,16 @@
         @endforeach
     </div>
 
-    {{-- Tanggal -- cuma 1 field (bukan rentang Dari/Sampai kayak Riwayat
-         Jurnal), soalnya Monitor Piket memang laporan PER HARI, bukan
-         rentang tanggal. Max hari ini -- belum ada gunanya lihat piket
-         buat tanggal yang belum kejalanin. --}}
+    {{-- Rentang tanggal -- sama pola kayak Riwayat Jurnal (Dari/Sampai).
+         Max hari ini di dua-duanya -- belum ada gunanya lihat piket buat
+         tanggal yang belum kejalanin. --}}
     <x-admin.filters :action="route('piket.monitor.index')" hideButtons="true">
         <input type="hidden" name="mode" value="{{ $mode }}">
         <input type="hidden" name="status" value="{{ $statusAktif }}">
-        <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+        <div class="flex w-full gap-2">
+            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+            <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+        </div>
     </x-admin.filters>
 
     <div class="mb-4">
@@ -69,7 +76,7 @@
     </div>
 
     @if ($grup->isEmpty())
-        <x-ui.empty icon="event_busy" title="Tidak ada jadwal pelajaran" desc="Tanggal ini akhir pekan, atau belum ada jadwal sama sekali." />
+        <x-ui.empty icon="event_busy" title="Tidak ada jadwal pelajaran" desc="Rentang tanggal ini akhir pekan semua, atau belum ada jadwal sama sekali." />
     @else
         <div class="flex flex-col gap-4" id="grup-monitor">
             @foreach ($grup as $g)
@@ -96,7 +103,7 @@
                             label="Ekspor Lengkap"
                             icon="download"
                             class="!px-2 !py-1 !text-[10px] shrink-0 mt-0.5"
-                            :href="route('piket.monitor.ekspor.detail', ['tipe' => $mode, 'id' => $g['id'], 'tanggal' => $tanggal->toDateString()])"
+                            :href="route('piket.monitor.ekspor.detail', ['tipe' => $mode, 'id' => $g['id'], 'dari' => $dari->toDateString(), 'sampai' => $sampai->toDateString()])"
                         />
                     </div>
 
@@ -104,6 +111,9 @@
                         <table class="responsive-table responsive-table--inline w-full text-left text-sm">
                             <thead>
                                 <tr class="border-b border-surface-alt">
+                                    @if ($rentangBeda)
+                                        <th class="px-3 py-2 text-xs font-bold uppercase tracking-wide text-muted-2">Tanggal</th>
+                                    @endif
                                     <th class="px-3 py-2 text-xs font-bold uppercase tracking-wide text-muted-2">Jam</th>
                                     <th class="px-3 py-2 text-xs font-bold uppercase tracking-wide text-muted-2">Mapel</th>
                                     <th class="px-3 py-2 text-xs font-bold uppercase tracking-wide text-muted-2">{{ $mode === 'kelas' ? 'Guru' : 'Kelas' }}</th>
@@ -117,7 +127,8 @@
                                         $lawan = $mode === 'kelas' ? $b['jadwal']->guru->nama : $b['jadwal']->kelas->nama;
                                         $cariBaris = str($g['label'].' '.$lawan.' '.$b['jadwal']->mapel->nama)->lower();
                                         $bisaDiklik = $b['jurnal'] !== null;
-                                        $jamBaris = \App\Support\Waktu::rentangJam($b['jadwal']->jam_ke_mulai, $b['jadwal']->jam_ke_selesai, $tanggal);
+                                        $tanggalBaris = \Illuminate\Support\Carbon::parse($b['tanggal']);
+                                        $jamBaris = \App\Support\Waktu::rentangJam($b['jadwal']->jam_ke_mulai, $b['jadwal']->jam_ke_selesai, $tanggalBaris);
                                     @endphp
                                     <tr
                                         data-baris-monitor
@@ -134,6 +145,9 @@
                                             tabindex="0"
                                         @endif
                                     >
+                                        @if ($rentangBeda)
+                                            <td class="px-3 py-2 text-muted whitespace-nowrap">{{ $tanggalBaris->translatedFormat('d M Y') }}</td>
+                                        @endif
                                         <td class="px-3 py-2 text-muted">
                                             JP {{ $b['jadwal']->jam_ke_mulai }}–{{ $b['jadwal']->jam_ke_selesai }}
                                             @if ($jamBaris)
