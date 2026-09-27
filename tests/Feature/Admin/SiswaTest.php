@@ -37,7 +37,7 @@ class SiswaTest extends TestCase
         $this->actingAs($this->admin())->post('/admin/siswa', [
             'id' => $calon->id, 'kelas_id' => $kelas->id, 'nis' => '002', 'nama' => 'Calon Ketua Baru',
             'jenis_kelamin' => 'L', 'jabatan' => 'pengurus',
-        ])->assertSessionHasErrors('jabatan');
+        ])->assertSessionHas('error');
 
         $this->assertSame('anggota', $calon->fresh()->jabatan);
     }

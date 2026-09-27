@@ -60,8 +60,8 @@
         </x-slot:action>
     </x-admin.page>
 
-    <x-admin.filters :action="route('master.siswa.index')">
-        <x-admin.f-search placeholder="Nama, NIS, atau kelas..." />
+    <x-admin.filters :action="route('master.siswa.index')" :hide-buttons="true">
+        <x-admin.f-search placeholder="Nama, NIS, atau kelas..." :server="true" />
         <x-ui.cari-pilihan name="kelas" label="Kelas" :options="$kelasList" all="Semua Kelas" />
         <x-admin.f-select name="jabatan" label="Jabatan" :options="['anggota' => 'Anggota', 'pengurus' => 'Pengurus Kelas']" all="Semua Jabatan" />
         <x-admin.f-select name="jk" label="Jenis Kelamin" :options="['L' => 'Laki-laki', 'P' => 'Perempuan']" all="Semua" />
@@ -108,6 +108,7 @@
         @endif
     </section>
 
+    <div data-server-search-target>
     @if ($rows->isEmpty())
         <x-ui.empty title="Tidak ada siswa yang cocok" />
     @else
@@ -154,6 +155,7 @@
 
         <div class="mt-4">{{ $rows->links() }}</div>
     @endif
+    </div>
 
     <x-admin.modal id="modal-siswa" title="Tambah Siswa">
         <form method="POST" action="{{ route('master.siswa.save') }}" class="flex flex-col gap-4">

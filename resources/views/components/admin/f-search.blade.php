@@ -1,4 +1,4 @@
-@props(['name' => 'cari', 'placeholder' => 'Cari...'])
+@props(['name' => 'cari', 'placeholder' => 'Cari...', 'server' => false])
 
 <div class="flex h-10 min-w-[14rem] flex-1 items-center gap-2 rounded-lg border border-surface-alt bg-card px-3">
     <x-icon name="search" :size="16" class="shrink-0 text-muted" />
@@ -8,6 +8,7 @@
         value="{{ request()->query($name) }}"
         placeholder="{{ $placeholder }}"
         data-admin-search
+        @if ($server) data-server-search @endif
         autocomplete="off"
         class="w-full border-none bg-transparent text-sm text-ink outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:hidden"
     >
@@ -84,37 +85,122 @@
             }
         }
 
+        // --- Server-side search: AJAX fetch dengan debounce ---
+        // Dipakai di halaman yang datanya dipaginasi (siswa, audit-log, dll.)
+        // supaya pencarian menjangkau SEMUA data, bukan cuma halaman aktif.
+        // Pakai fetch() + debounce 300ms supaya terasa instan tanpa full page
+        // reload -- hanya bagian [data-server-search-target] yang diganti di DOM.
+        // Kalau target tidak ditemukan, fallback ke form submit biasa.
+        const serverSearchTimers = new WeakMap();
+
+        async function fetchServerSearch(input) {
+            const form = input.closest('form');
+            if (!form) {
+                return;
+            }
+
+            const target = document.querySelector('[data-server-search-target]');
+            if (!target) {
+                // Fallback: form submit penuh
+                const pageInput = form.querySelector('input[name="page"]');
+                if (pageInput) {
+                    pageInput.remove();
+                }
+                form.submit();
+                return;
+            }
+
+            // Bangun URL dari isi form, tanpa parameter page
+            const params = new URLSearchParams();
+            for (const [key, val] of new FormData(form).entries()) {
+                if (key !== 'page' && val !== '') {
+                    params.set(key, val);
+                }
+            }
+            const url = new URL(form.action);
+            url.search = params.toString();
+
+            target.style.opacity = '0.5';
+            target.style.pointerEvents = 'none';
+
+            try {
+                const res = await fetch(url.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const fresh = doc.querySelector('[data-server-search-target]');
+                if (fresh) {
+                    target.innerHTML = fresh.innerHTML;
+                    history.replaceState({}, '', url.pathname + (url.search || ''));
+                }
+            } catch (_) {
+                // Jaringan error -- fallback ke form submit
+                form.submit();
+            } finally {
+                target.style.opacity = '';
+                target.style.pointerEvents = '';
+            }
+        }
+
         document.addEventListener('input', function (e) {
             const input = e.target.closest('[data-admin-search]');
-            if (input) filterAdminRows(input);
+            if (!input) {
+                return;
+            }
+
+            if (input.dataset.serverSearch !== undefined) {
+                const wrapper = input.closest('div');
+                const clearBtn = wrapper ? wrapper.querySelector('[data-admin-search-clear]') : null;
+                if (clearBtn) {
+                    clearBtn.classList.toggle('hidden', !input.value);
+                }
+
+                if (serverSearchTimers.has(input)) {
+                    clearTimeout(serverSearchTimers.get(input));
+                }
+                serverSearchTimers.set(input, setTimeout(() => fetchServerSearch(input), 300));
+            } else {
+                filterAdminRows(input);
+            }
         });
 
         document.addEventListener('click', function (e) {
             const clearBtn = e.target.closest('[data-admin-search-clear]');
-            if (!clearBtn) return;
+            if (!clearBtn) {
+                return;
+            }
 
             const wrapper = clearBtn.closest('div');
             const input = wrapper ? wrapper.querySelector('[data-admin-search]') : null;
-            if (!input) return;
+            if (!input) {
+                return;
+            }
 
             input.value = '';
-            filterAdminRows(input);
-            input.focus();
 
-            try {
-                const url = new URL(window.location.href);
-                const name = input.name || 'cari';
-                if (url.searchParams.has(name)) {
-                    url.searchParams.delete(name);
-                    window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
-                }
-            } catch (_) {}
+            if (input.dataset.serverSearch !== undefined) {
+                fetchServerSearch(input);
+                input.focus();
+            } else {
+                filterAdminRows(input);
+                input.focus();
+
+                try {
+                    const url = new URL(window.location.href);
+                    const name = input.name || 'cari';
+                    if (url.searchParams.has(name)) {
+                        url.searchParams.delete(name);
+                        window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+                    }
+                } catch (_) {}
+            }
         });
 
         function init() {
             const inputs = document.querySelectorAll('[data-admin-search]');
             inputs.forEach((input) => {
-                if (input.value) {
+                if (input.value && input.dataset.serverSearch === undefined) {
                     filterAdminRows(input);
                 }
             });

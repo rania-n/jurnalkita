@@ -33,53 +33,84 @@
     </x-admin.filters>
 
     @if ($kelasAktifList->isNotEmpty())
-        <section class="mb-5 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
-            <h2 class="text-base font-bold text-ink">Ubah Status PKL Beberapa Kelas</h2>
-            <p class="mt-1 text-sm text-muted">Pilih beberapa kelas aktif sekaligus. Kelas arsip tidak ikut diubah.</p>
-
-            {{-- data-confirm SENGAJA dipasang di TOMBOLnya, bukan di <form> --
-                 dulu nempel di <form>, akibatnya konfirmasi muncul di SETIAP
-                 klik di dalam form ini (klik kotak cari, checkbox, radio pun
-                 kena), bukan cuma pas klik submit. initConfirm() di app.js
-                 nyari ancestor terdekat yang punya [data-confirm] dari
-                 elemen manapun yang diklik -- kalau itu <form>, semua
-                 turunannya ikut kena. --}}
-            <form method="POST" action="{{ route('master.kelas.status-massal') }}" class="mt-4 grid gap-4 lg:grid-cols-2">
-                @csrf
-                @method('PATCH')
-                <div>
-                    <x-ui.cari-checkbox
-                        label="Kelas yang diubah"
-                        name="kelas_ids"
-                        :options="$kelasAktifList"
-                        hint="Cari nama kelas, lalu centang satu atau beberapa kelas."
-                        required
-                    />
+        <section class="mb-5 rounded-2xl bg-card shadow-[var(--shadow-soft)]">
+            {{-- Header section --}}
+            <div class="border-b border-surface-alt px-5 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy/10">
+                        <x-icon name="school" :size="18" class="text-navy" />
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-ink">Ubah Status PKL Kelas</h2>
+                        <p class="text-sm text-muted">Pilih satu atau beberapa kelas aktif lalu terapkan status PKL.</p>
+                    </div>
                 </div>
-                <div class="flex flex-col justify-between gap-4">
-                    <x-ui.choice
-                        label="Status baru"
-                        name="status"
-                        :options="['pkl' => 'PKL', 'aktif' => 'Bukan PKL']"
-                        value="pkl"
-                        required
-                    />
-                    <x-ui.button type="submit" icon="save" class="w-full sm:w-auto" data-confirm="Ubah status kelas yang dipilih?">Terapkan ke Kelas Terpilih</x-ui.button>
-                </div>
-            </form>
+            </div>
 
-            <div class="mt-4 flex flex-col gap-3 border-t border-surface-alt pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <p class="text-sm text-muted">Jadikan semua kelas XII pada tahun ajaran aktif berstatus PKL.</p>
-                <form method="POST" action="{{ route('master.kelas.status-massal') }}">
+            <div class="p-5">
+                {{-- Form: pilih kelas + status --}}
+                {{-- data-confirm SENGAJA dipasang di TOMBOLnya, bukan di <form> --
+                     dulu nempel di <form>, akibatnya konfirmasi muncul di SETIAP
+                     klik di dalam form ini (klik kotak cari, checkbox, radio pun
+                     kena), bukan cuma pas klik submit. --}}
+                <form method="POST" action="{{ route('master.kelas.status-massal') }}" class="flex flex-col gap-5">
                     @csrf
                     @method('PATCH')
-                    <input type="hidden" name="tingkat" value="XII">
-                    <input type="hidden" name="status" value="pkl">
-                    <x-ui.button type="submit" variant="secondary" icon="school" class="w-full sm:w-auto" data-confirm="Jadikan semua kelas XII tahun ajaran aktif sebagai PKL?">Semua Kelas XII → PKL</x-ui.button>
+
+                    {{-- Langkah 1: pilih kelas --}}
+                    <div>
+                        <p class="mb-2 text-sm font-semibold text-ink">1. Pilih kelas yang ingin diubah</p>
+                        <x-ui.cari-checkbox
+                            name="kelas_ids"
+                            :options="$kelasAktifList"
+                            required
+                        />
+                    </div>
+
+                    {{-- Langkah 2: pilih status + tombol --}}
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                        <div class="flex-1">
+                            <p class="mb-2 text-sm font-semibold text-ink">2. Status baru</p>
+                            <x-ui.choice
+                                name="status"
+                                :options="['pkl' => 'PKL', 'aktif' => 'Bukan PKL']"
+                                value="pkl"
+                                required
+                            />
+                        </div>
+                        <x-ui.button
+                            type="submit"
+                            icon="save"
+                            class="w-full sm:w-auto"
+                            data-confirm="Ubah status kelas yang dipilih?"
+                        >Terapkan ke Kelas Terpilih</x-ui.button>
+                    </div>
                 </form>
+
+                {{-- Shortcut: semua kelas XII → PKL --}}
+                <div class="mt-5 flex flex-col gap-3 rounded-xl border border-surface-alt bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-ink">Jadikan semua kelas XII menjadi PKL</p>
+                        <p class="mt-0.5 text-xs text-muted">Berlaku untuk semua kelas XII pada tahun ajaran aktif.</p>
+                    </div>
+                    <form method="POST" action="{{ route('master.kelas.status-massal') }}" class="shrink-0">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="tingkat" value="XII">
+                        <input type="hidden" name="status" value="pkl">
+                        <x-ui.button
+                            type="submit"
+                            variant="secondary"
+                            icon="school"
+                            class="w-full sm:w-auto"
+                            data-confirm="Jadikan semua kelas XII tahun ajaran aktif sebagai PKL?"
+                        >Semua Kelas XII → PKL</x-ui.button>
+                    </form>
+                </div>
             </div>
         </section>
     @endif
+
 
     @if ($rows->isEmpty())
         <x-ui.empty title="Tidak ada kelas yang cocok" />
