@@ -102,6 +102,11 @@
     <div class="mb-4 flex flex-col gap-2">
         <div class="flex w-full gap-2">
             <div class="flex-1">
+                {{-- Label ditambah manual (x-ui.search-bar nggak punya prop
+                     label) -- gaya disamain persis kayak label "Kelas"/"Dari
+                     tanggal" di sebelahnya (x-admin.f-date), biar nggak
+                     keliatan beda sendiri kosong tanpa keterangan. --}}
+                <span class="mb-1 block text-xs font-semibold text-muted-2">Cari Siswa</span>
                 <x-ui.search-bar id="input-cari-dispen" value="{{ request('cari') }}" placeholder="Nama atau NIS siswa..." autocomplete="off" />
             </div>
             <form method="GET" action="{{ route('dispensasi.index') }}" class="contents">

@@ -34,9 +34,11 @@
 
     <div class="mt-2 flex items-center justify-between gap-2">
         <p class="text-xs text-muted-2" id="jumlah-tampil-pengganti"></p>
+        {{-- Default nampilin SEMUA kartu -- checkbox ini kebalikannya, sama
+             pola kayak guru/jurnal/_presensi-grid.blade.php. --}}
         <label class="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-semibold text-navy">
-            <input type="checkbox" id="tampilkan-semua-siswa-pengganti" class="h-3.5 w-3.5 rounded border-surface-alt text-navy focus:ring-navy">
-            Tampilkan semua siswa
+            <input type="checkbox" id="tampilkan-tidak-hadir-saja-pengganti" class="h-3.5 w-3.5 rounded border-surface-alt text-navy focus:ring-navy">
+            Tampilkan yang tidak hadir saja
         </label>
     </div>
 
@@ -124,7 +126,7 @@
             const hasil = document.getElementById('hasil-cari-siswa-pengganti');
             const rows = Array.from(document.querySelectorAll('[data-siswa-row-pengganti]'));
             const counter = document.getElementById('jumlah-tampil-pengganti');
-            const tampilkanSemua = document.getElementById('tampilkan-semua-siswa-pengganti');
+            const tampilkanTidakHadirSaja = document.getElementById('tampilkan-tidak-hadir-saja-pengganti');
             const dipilihManual = new Set();
 
             cari?.closest('form')?.addEventListener('keydown', (e) => {
@@ -173,13 +175,13 @@
             }
 
             function refresh() {
-                const semua = tampilkanSemua?.checked;
+                const hanyaTidakHadir = tampilkanTidakHadirSaja?.checked;
                 let tidakHadir = 0;
 
                 rows.forEach((row) => {
                     const statusNyaTidakHadir = statusRow(row) !== 'hadir';
                     if (statusNyaTidakHadir) tidakHadir++;
-                    row.hidden = !(semua || statusNyaTidakHadir || dipilihManual.has(row));
+                    row.hidden = hanyaTidakHadir && !(statusNyaTidakHadir || dipilihManual.has(row));
                     row.classList.remove('lg:col-span-2');
                 });
 
@@ -188,13 +190,9 @@
                     tampil[tampil.length - 1].classList.add('lg:col-span-2');
                 }
 
-                if (semua) {
-                    counter.textContent = `Menampilkan semua ${rows.length} siswa`;
-                } else {
-                    counter.textContent = tidakHadir > 0
-                        ? `${tidakHadir} siswa ditandai tidak hadir (dari ${rows.length} siswa)`
-                        : `Semua ${rows.length} siswa Hadir`;
-                }
+                counter.textContent = tidakHadir > 0
+                    ? `${tidakHadir} siswa ditandai tidak hadir (dari ${rows.length} siswa)`
+                    : `Semua ${rows.length} siswa Hadir`;
             }
 
             cari?.addEventListener('input', () => renderHasilCari(cari.value.trim().toLowerCase()));
@@ -204,7 +202,7 @@
                     hasil.hidden = true;
                 }
             });
-            tampilkanSemua?.addEventListener('change', refresh);
+            tampilkanTidakHadirSaja?.addEventListener('change', refresh);
             rows.forEach((row) => {
                 row.querySelectorAll('input[type="radio"]').forEach((r) => r.addEventListener('change', refresh));
             });

@@ -33,12 +33,15 @@
 
     <div class="mt-2 flex items-center justify-between gap-2">
         <p class="text-xs text-muted-2" id="jumlah-tampil"></p>
-        {{-- Default cuma nampilin yang DITANDAI tidak hadir (biar nggak usah
-             geser 36 kartu buat nyari 2-3 siswa yang nggak masuk) -- checkbox
-             ini buka semua kartu lagi buat yang mau ngecek ulang satu-satu. --}}
+        {{-- Default nampilin SEMUA kartu -- checkbox ini kebalikannya: kalau
+             dicentang, baru disaring jadi yang DITANDAI tidak hadir doang
+             (buat guru yang cuma mau ngecek cepat siapa aja yang nggak
+             masuk, tanpa geser puluhan kartu Hadir). Rekap teksnya tetap
+             soal jumlah tidak hadir, apa pun mode tampilannya (lihat
+             refresh() di bawah). --}}
         <label class="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-semibold text-navy">
-            <input type="checkbox" id="tampilkan-semua-siswa" class="h-3.5 w-3.5 rounded border-surface-alt text-navy focus:ring-navy">
-            Tampilkan semua siswa
+            <input type="checkbox" id="tampilkan-tidak-hadir-saja" class="h-3.5 w-3.5 rounded border-surface-alt text-navy focus:ring-navy">
+            Tampilkan yang tidak hadir saja
         </label>
     </div>
 
@@ -137,7 +140,7 @@
             const hasil = document.getElementById('hasil-cari-siswa');
             const rows = Array.from(document.querySelectorAll('[data-siswa-row]'));
             const counter = document.getElementById('jumlah-tampil');
-            const tampilkanSemua = document.getElementById('tampilkan-semua-siswa');
+            const tampilkanTidakHadirSaja = document.getElementById('tampilkan-tidak-hadir-saja');
 
             // Kartu yang barusan "dibuka" lewat dropdown cari -- tetap kelihatan
             // SEMENTARA biar guru sempat ubah statusnya, TAPI begitu statusnya
@@ -195,13 +198,13 @@
             }
 
             function refresh() {
-                const semua = tampilkanSemua?.checked;
+                const hanyaTidakHadir = tampilkanTidakHadirSaja?.checked;
                 let tidakHadir = 0;
 
                 rows.forEach((row) => {
                     const statusNyaTidakHadir = statusRow(row) !== 'hadir';
                     if (statusNyaTidakHadir) tidakHadir++;
-                    row.hidden = !(semua || statusNyaTidakHadir || dipilihManual.has(row));
+                    row.hidden = hanyaTidakHadir && !(statusNyaTidakHadir || dipilihManual.has(row));
                     row.classList.remove('lg:col-span-2');
                 });
 
@@ -213,13 +216,11 @@
                     tampil[tampil.length - 1].classList.add('lg:col-span-2');
                 }
 
-                if (semua) {
-                    counter.textContent = `Menampilkan semua ${rows.length} siswa`;
-                } else {
-                    counter.textContent = tidakHadir > 0
-                        ? `${tidakHadir} siswa ditandai tidak hadir (dari ${rows.length} siswa)`
-                        : `Semua ${rows.length} siswa Hadir`;
-                }
+                // Rekap TETAP soal jumlah tidak hadir, apa pun mode tampilannya
+                // (semua kartu ATAU disaring tidak hadir doang).
+                counter.textContent = tidakHadir > 0
+                    ? `${tidakHadir} siswa ditandai tidak hadir (dari ${rows.length} siswa)`
+                    : `Semua ${rows.length} siswa Hadir`;
             }
 
             cari?.addEventListener('input', () => renderHasilCari(cari.value.trim().toLowerCase()));
@@ -229,7 +230,7 @@
                     hasil.hidden = true;
                 }
             });
-            tampilkanSemua?.addEventListener('change', refresh);
+            tampilkanTidakHadirSaja?.addEventListener('change', refresh);
             rows.forEach((row) => {
                 row.querySelectorAll('input[type="radio"]').forEach((r) => r.addEventListener('change', () => {
                     // Statusnya balik/tetap Hadir -> lepas dari daftar "kartu
