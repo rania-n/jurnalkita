@@ -16,25 +16,40 @@
     @if ($admin)
         <x-admin.page title="Monitor Piket" :subtitle="$subtitle">
             <x-slot:action>
-                <a href="{{ $urlEkspor }}" title="Ekspor Ringkasan"
-                   class="press group inline-flex h-10 w-10 hover:w-auto shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-surface-alt text-ink hover:bg-[#cbd5e1] transition-all duration-200 hover:px-4 whitespace-nowrap">
-                    <x-icon name="download" :size="20" class="shrink-0" />
-                    <span class="hidden group-hover:inline text-sm font-semibold">Ekspor Ringkasan</span>
-                </a>
+                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor Ringkasan</x-ui.button>
             </x-slot:action>
         </x-admin.page>
     @else
         <x-page-header title="Monitor Piket" :subtitle="$subtitle" always-row>
-            <a href="{{ $urlEkspor }}" title="Ekspor Ringkasan"
-               class="press group inline-flex h-10 w-10 hover:w-auto shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-surface-alt text-ink hover:bg-[#cbd5e1] transition-all duration-200 hover:px-4 whitespace-nowrap">
-                <x-icon name="download" :size="20" class="shrink-0" />
-                <span class="hidden group-hover:inline text-sm font-semibold">Ekspor Ringkasan</span>
-            </a>
+            <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full sm:w-auto">Ekspor Ringkasan</x-ui.button>
         </x-page-header>
     @endif
 
     <x-ui.auto-refresh :url="route('piket.monitor.versi', ['tanggal' => $tanggal->toDateString()])" />
 
+    {{-- Filter status -- paling atas, gaya tab disamakan dengan Riwayat Jurnal
+         (bg-navy pas aktif, bukan warna per-status kayak sebelumnya). Tetap
+         <button> (bukan <a>) -- ini filter CLIENT-SIDE, langsung nyaring baris
+         yang sudah dimuat tanpa reload halaman, beda dari tab Riwayat Jurnal
+         yang reload lewat query string. --}}
+    <div class="mb-2 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+        <button type="button" data-status-filter=""
+            data-class-aktif="bg-navy text-card" data-class-nonaktif="text-muted-2 hover:text-ink"
+            class="status-filter-btn flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors bg-navy text-card" data-active="true">
+            Semua <span class="opacity-70">({{ $rekapTotal->sum() }})</span>
+        </button>
+        @foreach (['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir', 'belum_diisi' => 'Belum Diisi'] as $key => $label)
+            <button type="button" data-status-filter="{{ $key }}"
+                data-class-aktif="bg-navy text-card" data-class-nonaktif="text-muted-2 hover:text-ink"
+                class="status-filter-btn flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors text-muted-2 hover:text-ink">
+                {{ $label }} <span class="opacity-70">({{ $rekapTotal[$key] ?? 0 }})</span>
+            </button>
+        @endforeach
+    </div>
+
+    {{-- Tanggal -- cuma 1 field (bukan rentang Dari/Sampai kayak Riwayat
+         Jurnal), soalnya Monitor Piket memang laporan PER HARI, bukan
+         rentang tanggal. --}}
     <x-admin.filters :action="route('piket.monitor.index')" hideButtons="true">
         <input type="hidden" name="mode" value="{{ $mode }}">
         <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" onchange="this.form.submit()" />
@@ -50,31 +65,8 @@
         @endforeach
     </div>
 
-    {{-- Cari + filter status -- langsung filter baris yang sudah dimuat (tanpa
-         reload). Pil status sekaligus nunjukin jumlahnya -- dulu ini kotak
-         warna-warni terpisah di atas (isinya sama, cuma nggak bisa diklik),
-         sekarang digabung jadi satu biar nggak dobel & bar-nya stretch penuh
-         ngikutin lebar (bukan cuma numpuk di kiri kayak sebelumnya). --}}
-    <div class="mb-4 flex flex-col gap-2">
+    <div class="mb-4">
         <x-ui.search-bar id="cari-monitor" placeholder="Cari nama guru, kelas, atau mata pelajaran..." />
-        <div class="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-1.5">
-            <button type="button" data-status-filter=""
-                data-class-aktif="bg-navy text-card" data-class-nonaktif="bg-surface-alt text-muted-2"
-                class="status-filter-btn flex-auto sm:flex-1 rounded-md sm:rounded-lg px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-center text-[10.5px] sm:text-xs font-bold whitespace-nowrap bg-navy text-card" data-active="true">
-                Semua <span class="opacity-70">({{ $rekapTotal->sum() }})</span>
-            </button>
-            @foreach ([
-                'hadir' => ['Hadir', 'bg-hadir text-card', 'bg-hadir-soft text-hadir'],
-                'tidak_hadir' => ['Tidak Hadir', 'bg-alpha text-card', 'bg-alpha-soft text-alpha'],
-                'belum_diisi' => ['Belum Diisi', 'bg-sakit text-card', 'bg-sakit-soft text-sakit'],
-            ] as $key => [$label, $classAktif, $classNonaktif])
-                <button type="button" data-status-filter="{{ $key }}"
-                    data-class-aktif="{{ $classAktif }}" data-class-nonaktif="{{ $classNonaktif }}"
-                    class="status-filter-btn flex-auto sm:flex-1 rounded-md sm:rounded-lg px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-center text-[10.5px] sm:text-xs font-bold whitespace-nowrap {{ $classNonaktif }}">
-                    {{ $label }} <span class="opacity-70">({{ $rekapTotal[$key] ?? 0 }})</span>
-                </button>
-            @endforeach
-        </div>
     </div>
 
     @if ($grup->isEmpty())

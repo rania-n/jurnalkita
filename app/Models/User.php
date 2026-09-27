@@ -69,7 +69,22 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function piketHariIni(): bool
     {
-        if (! HariSekolah::hariIni() || ! $this->isPiket()) {
+        if (! $this->isPiket()) {
+            return false;
+        }
+
+        // gurus.piket_selalu_aktif -- KHUSUS akun testing, biar bisa dicek
+        // "Piket Hari Ini" kapan saja termasuk Sabtu/Minggu, TANPA mengubah
+        // HariSekolah::hariIni() (itu tetap Senin-Jumat, itu benar buat
+        // sekolah sungguhan -- ubah itu butuh migrasi enum 'hari' di 3 tabel
+        // sekaligus & berdampak ke banyak fitur lain). Default false buat
+        // semua guru asli, jadi baris di bawah ini nggak ngaruh sama sekali
+        // kecuali sengaja diaktifkan lewat tinker.
+        if ($this->guru->piket_selalu_aktif) {
+            return true;
+        }
+
+        if (! HariSekolah::hariIni()) {
             return false;
         }
 
