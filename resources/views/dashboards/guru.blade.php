@@ -107,6 +107,14 @@
             : collect();
     }
 
+    // Kartu sorotan (pelajaran BERIKUTNYA hari ini) + ringkasan jumlah --
+    // yang lagi berlangsung sekarang sengaja nggak disorot di sini, itu
+    // sudah cukup kelihatan & bisa diisi dari daftar jadwal biasa di bawah.
+    $jadwalSorotan = \App\Support\Waktu::jadwalSorotan($jadwalHariIni);
+    $jumlahJadwalHariIni = $jadwalHariIni->count();
+    $jumlahSudahDiisiHariIniRingkasan = $jadwalHariIni->filter(fn ($j) => $jurnalGuruHariIni->has($j->id))->count();
+    $jumlahBelumDiisiHariIniRingkasan = $jumlahJadwalHariIni - $jumlahSudahDiisiHariIniRingkasan;
+
     // Pilihan awal cuma ditampilkan SEKALI per login (bukan tiap kali buka
     // dasbor) -- ditandai session (bukan localStorage) biar konsisten walau
     // guru buka dari perangkat/browser berbeda tiap login.
@@ -528,6 +536,26 @@
          hari ini, isi jurnal buat jadwal lain") nggak relevan buat fokus
          piket hari itu. --}}
     @if (! $piketHariIni || $jadwalHariIni->isNotEmpty())
+        @if ($jadwalSorotan)
+            <x-ui.jadwal-sorotan :jadwal="$jadwalSorotan['jadwal']">
+                <x-slot:actions>
+                    @if ($jurnalGuruHariIni->has($jadwalSorotan['jadwal']->id))
+                        <x-ui.button :href="route('jurnal.index')" variant="secondary" icon="check_circle">Sudah Diisi</x-ui.button>
+                    @else
+                        <x-ui.button :href="route('jurnal.create', ['jadwal' => $jadwalSorotan['jadwal']->id])" variant="secondary" icon="edit_note">Isi Jurnal</x-ui.button>
+                    @endif
+                </x-slot:actions>
+            </x-ui.jadwal-sorotan>
+        @endif
+
+        @if ($jumlahJadwalHariIni > 0)
+            <div class="mb-4 flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
+                <x-ui.stat label="Jadwal" tone="izin" :value="$jumlahJadwalHariIni" />
+                <x-ui.stat label="Selesai" tone="hadir" :value="$jumlahSudahDiisiHariIniRingkasan" />
+                <x-ui.stat label="Belum" tone="sakit" :value="$jumlahBelumDiisiHariIniRingkasan" />
+            </div>
+        @endif
+
         <div class="mb-3 flex items-center justify-between">
             <h2 class="text-sm font-bold text-ink">Jadwal Mengajar Hari Ini</h2>
             <a href="{{ route('jurnal.index') }}" class="text-sm font-semibold text-navy">Riwayat Jurnal →</a>

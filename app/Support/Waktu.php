@@ -143,6 +143,30 @@ class Waktu
         return ($jpAktif !== null && $jamKeMulai <= $jpAktif && $jamKeSelesai >= $jpAktif) ? 'berlangsung' : 'istirahat';
     }
 
+    /**
+     * Cari jadwal BERIKUTNYA (yang belum dimulai) dari daftar jadwal hari ini,
+     * buat disorot di dashboard. Jadwal yang lagi BENERAN berlangsung detik ini
+     * sengaja TIDAK dipilih di sini -- itu sudah cukup terlihat & bisa diisi
+     * langsung dari daftar jadwal biasa di bawah kartu sorotan, jadi kartu ini
+     * dikhususkan buat "kasih tahu apa selanjutnya", bukan mengulang yang
+     * sudah kelihatan. Null kalau $jadwals kosong atau semua jadwalnya sudah
+     * berlangsung/lewat hari ini (dashboard cukup nggak nampilkan kartu
+     * sorotan sama sekali).
+     *
+     * $jadwals harus sudah diurutkan ASCENDING berdasarkan jam_ke_mulai (semua
+     * pemanggil sudah begitu -- query jadwal hari ini selalu orderBy jam_ke_mulai).
+     */
+    public static function jadwalSorotan(\Illuminate\Support\Collection $jadwals): ?array
+    {
+        foreach ($jadwals as $jadwal) {
+            if (self::statusJpHariIni($jadwal->jam_ke_mulai, $jadwal->jam_ke_selesai) === 'belum') {
+                return ['jadwal' => $jadwal, 'status' => 'berikutnya'];
+            }
+        }
+
+        return null;
+    }
+
     /** Jam mulai (hari ini, sebagai Carbon lengkap) buat JP tertentu. Null kalau JP-nya tidak ada. */
     public static function mulaiJpHariIni(int $jamKe): ?Carbon
     {
