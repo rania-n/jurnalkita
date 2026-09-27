@@ -90,12 +90,19 @@
             </div>
         </div>
 
+        @php
+            // Sama kayak $isHariIni di JurnalController@create -- foto kamera
+            // cuma boleh WAJIB kalau tanggal jurnalnya hari ini. Jurnal Hadir
+            // tanpa foto buat tanggal lampau (dibuat lewat mode bebas) nggak
+            // boleh dipaksa jepret kamera "sedang berlangsung" pas diedit.
+            $fotoWajib = ! $jurnal->foto_bukti && $jurnal->tanggal->isToday();
+        @endphp
         <x-ui.upload-kamera
             :label="$jurnal->foto_bukti ? 'Ganti Foto Suasana Kelas (opsional)' : 'Foto Suasana Kelas'"
             name="foto_bukti"
             :placeholder="$jurnal->foto_bukti ? 'Buka kamera buat ganti foto' : 'Wajib buka kamera'"
-            :hint="$jurnal->foto_bukti ? 'Opsional — biarin kosong kalau foto lama masih dipakai' : 'Wajib diisi — bukti pembelajaran sedang berlangsung'"
-            :required="! $jurnal->foto_bukti"
+            :hint="$jurnal->foto_bukti ? 'Opsional — biarin kosong kalau foto lama masih dipakai' : ($fotoWajib ? 'Wajib diisi — bukti pembelajaran sedang berlangsung' : 'Opsional untuk jurnal susulan (tanggal lampau)')"
+            :required="$fotoWajib"
         />
     </div>
 

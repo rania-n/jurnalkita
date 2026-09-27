@@ -188,6 +188,13 @@
                                         <span class="min-w-0 flex-1">
                                             <span class="block truncate text-sm font-semibold text-ink">{{ $j->kelas->nama }} · {{ $j->mapel->nama }}</span>
                                             <span class="block text-xs text-muted-2">{{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}</span>
+                                            {{-- Acuan materi terakhir KHUSUS kelas ini -- beda dari
+                                                 $jurnalSebelumnya (cuma buat 1 jadwal yang lagi
+                                                 terpilih), soalnya di sini bisa lebih dari 1 kelas
+                                                 ditandai sekaligus, tiap kelas butuh acuannya sendiri. --}}
+                                            @if ($riwayatPerJadwal[$j->id] ?? null)
+                                                <span class="block truncate text-[11px] text-muted-2 mt-0.5">Terakhir: {{ \Illuminate\Support\Str::limit($riwayatPerJadwal[$j->id]->materi, 40) }}</span>
+                                            @endif
                                         </span>
                                     </label>
 
@@ -318,12 +325,16 @@
                 @if ($jadwalTerpilih)
                     {{-- Wajib jepret langsung dari kamera (nggak boleh unggah dari
                          galeri) -- biar beneran bukti sedang di kelas, bukan foto
-                         lama. Jalan di HP maupun PC/laptop (lihat komponennya). --}}
+                         lama. Jalan di HP maupun PC/laptop (lihat komponennya).
+                         Cuma WAJIB kalau tanggalnya hari ini -- jurnal susulan
+                         (tanggal lampau lewat mode bebas) nggak mungkin jepret
+                         foto "sedang berlangsung" buat kejadian yang udah lewat,
+                         jadi opsional (lihat $isHariIni di JurnalController). --}}
                     <x-ui.upload-kamera
                         label="Foto Suasana Kelas"
                         name="foto_bukti"
-                        hint="Wajib diisi — bukti pembelajaran sedang berlangsung"
-                        required
+                        :hint="$isHariIni ? 'Wajib diisi — bukti pembelajaran sedang berlangsung' : 'Opsional untuk jurnal susulan (tanggal lampau)'"
+                        :required="$isHariIni"
                     />
                 @endif
             </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AuditLog;
+use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
 use App\Models\Kelas;
@@ -285,19 +286,16 @@ class JurnalController extends Controller
                 $siswas, $jadwalTerpilih->kelas_id, $tanggalAktif->toDateString(), $jadwalTerpilih->jam_ke_mulai, $jadwalTerpilih->jam_ke_selesai
             );
 
-            // Materi terakhir dari guru ini untuk kelas + mapel yang sama,
-            // meski baris jadwal/slot hariannya berbeda. Hanya jurnal Hadir
-            // yang punya materi yang bisa jadi referensi.
-            $jurnalSebelumnya = Jurnal::where('guru_id', $guru->id)
-                ->where('tanggal', '<', $tanggalAktif->toDateString())
-                ->where('status_guru', 'hadir')
-                ->whereNotNull('materi')
-                ->whereHas('jadwal', fn ($query) => $query
-                    ->where('kelas_id', $jadwalTerpilih->kelas_id)
-                    ->where('mapel_id', $jadwalTerpilih->mapel_id))
-                ->latest('tanggal')->latest('id')
-                ->first();
+            $jurnalSebelumnya = $this->jurnalSebelumnyaUntuk($guru, $jadwalTerpilih, $tanggalAktif);
         }
+
+        // Sama kayak $jurnalSebelumnya di atas, tapi buat SEMUA jadwal yang
+        // muncul di checklist "Tidak Hadir -- Semua Kelas" (blok-massal-kelas)
+        // -- guru butuh acuan materi terakhir TIAP kelas yang ditandai, bukan
+        // cuma 1 jadwal yang kebetulan lagi terpilih.
+        $riwayatPerJadwal = $daftarJadwal->mapWithKeys(
+            fn ($j) => [$j->id => $this->jurnalSebelumnyaUntuk($guru, $j, $tanggalAktif)]
+        );
 
         return view('guru.jurnal.create', [
             'jadwals' => $daftarJadwal,
@@ -306,6 +304,7 @@ class JurnalController extends Controller
             'jurnalDiblokirIstirahat' => $jurnalDiblokirIstirahat,
             'jumlahSudahDiisiHariIni' => $jumlahSudahDiisiHariIni,
             'jurnalSebelumnya' => $jurnalSebelumnya,
+            'riwayatPerJadwal' => $riwayatPerJadwal,
             'jpSekarang' => $jpSekarang,
             'jpMaks' => 13,
             'siswas' => $siswas,
@@ -317,12 +316,48 @@ class JurnalController extends Controller
             'modeJurnal' => $mode,
             'pakaiKemarin' => $pakaiKemarin,
             'tanggalAktif' => $tanggalAktif,
+            // Foto kamera "Hadir" cuma wajib buat tanggal HARI INI -- guru
+            // isi jurnal susulan (tanggal lampau lewat mode bebas) nggak
+            // mungkin jepret foto "sedang berlangsung" buat kejadian yang
+            // udah lewat. Dipakai bareng validasi foto_bukti di store().
+            'isHariIni' => $tanggalAktif->isToday(),
         ]);
+    }
+
+    /** Materi terakhir guru ini di kelas+mapel yang sama (hari beda pun tetap dicari). */
+    private function jurnalSebelumnyaUntuk(Guru $guru, Jadwal $jadwal, Carbon $tanggalAktif): ?Jurnal
+    {
+        return Jurnal::where('guru_id', $guru->id)
+            ->where('tanggal', '<', $tanggalAktif->toDateString())
+            ->where('status_guru', 'hadir')
+            ->whereNotNull('materi')
+            ->whereHas('jadwal', fn ($query) => $query
+                ->where('kelas_id', $jadwal->kelas_id)
+                ->where('mapel_id', $jadwal->mapel_id))
+            ->latest('tanggal')->latest('id')
+            ->first();
     }
 
     public function store(Request $request): RedirectResponse
     {
         $guru = $this->guru();
+        $mode = PengaturanJurnal::mode();
+
+        // Sama seperti $isHariIni di create() -- foto kamera "Hadir" cuma
+        // wajib buat tanggal HARI INI. Dihitung ringan di sini (belum butuh
+        // $jadwal, itu baru ketemu sesudah validasi) dari parameter yang
+        // sama dipakai tanggalUntukJadwal() di bawah -- kasus implisit
+        // "otomatis kemarin" (jadwal.hari cocok hari kemarin TANPA parameter
+        // eksplisit) sengaja tetap dianggap hari ini di sini (foto tetap
+        // wajib) karena $jadwal-nya belum ketemu buat dicek.
+        $hariIni = true;
+        if (in_array($mode, ['bebas_selamanya', 'bebas_kemarin'], true)) {
+            if ($request->filled('tanggal')) {
+                $hariIni = Carbon::parse($request->input('tanggal'))->isToday();
+            } elseif ($request->query('hari') === 'kemarin') {
+                $hariIni = false;
+            }
+        }
 
         $data = $request->validate([
             'jadwal_id' => ['required', 'exists:jadwals,id'],
@@ -336,12 +371,15 @@ class JurnalController extends Controller
             'presensi' => ['nullable', 'array'],
             'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
-            // Wajib cuma kalau Hadir (bukti "beneran di kelas", lewat kamera
-            // langsung). Kalau Tidak Hadir, opsional -- boleh lampirin foto
+            // Wajib cuma kalau Hadir DAN tanggalnya hari ini (bukti "beneran
+            // di kelas", lewat kamera langsung) -- jurnal susulan (tanggal
+            // lampau lewat mode bebas) nggak mungkin jepret foto "sedang
+            // berlangsung" buat kejadian yang udah lewat, jadi opsional.
+            // Kalau Tidak Hadir, selalu opsional -- boleh lampirin foto
             // surat izin/sakit dari galeri (bukan wajib jepret kamera), lihat
             // x-ui.upload di view. mimes (bukan "image") biar PDF juga lolos.
             'foto_bukti' => [
-                $request->input('status_guru') === 'hadir' ? 'required' : 'nullable',
+                $request->input('status_guru') === 'hadir' && $hariIni ? 'required' : 'nullable',
                 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096',
             ],
         ]);
@@ -351,7 +389,6 @@ class JurnalController extends Controller
             $data['alasan'] = self::ALASAN_LABEL[$data['alasan']] ?? $data['alasan'];
         }
 
-        $mode = PengaturanJurnal::mode();
         $jadwal = Jadwal::findOrFail($data['jadwal_id']);
         abort_unless($jadwal->guru_id === $guru->id, 403);
 
@@ -611,12 +648,16 @@ class JurnalController extends Controller
                 'presensi' => ['nullable', 'array'],
                 'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
                 'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
-                // Foto wajib cuma kalau status_guru Hadir DAN belum ada foto dari
-                // sebelumnya (guru cuma ubah data lain nggak wajib upload ulang).
-                // Tidak Hadir -> selalu opsional (surat izin/sakit, bukan wajib
-                // jepret kamera) -- sama alasannya kayak store().
+                // Foto wajib cuma kalau status_guru Hadir, belum ada foto dari
+                // sebelumnya (guru cuma ubah data lain nggak wajib upload ulang),
+                // DAN tanggal jurnalnya hari ini -- jurnal Hadir tanpa foto buat
+                // tanggal lampau (dibuat lewat mode bebas, lihat store()) nggak
+                // boleh keblokir wajib jepret kamera "sedang berlangsung" pas
+                // diedit, kejadiannya kan udah lewat. Tidak Hadir -> selalu
+                // opsional (surat izin/sakit, bukan wajib jepret kamera) -- sama
+                // alasannya kayak store().
                 'foto_bukti' => [
-                    ($jurnal->foto_bukti || $request->input('status_guru') !== 'hadir') ? 'nullable' : 'required',
+                    ($jurnal->foto_bukti || $request->input('status_guru') !== 'hadir' || ! $jurnal->tanggal->isToday()) ? 'nullable' : 'required',
                     'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096',
                 ],
             ]);

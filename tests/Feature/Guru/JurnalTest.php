@@ -424,6 +424,81 @@ class JurnalTest extends TestCase
             ->assertOk();
     }
 
+    public function test_foto_bukti_wajib_untuk_hadir_hari_ini(): void
+    {
+        $response = $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Bab 1', 'metode_pilihan' => 'ceramah',
+        ]);
+
+        $response->assertSessionHasErrors('foto_bukti');
+        $this->assertDatabaseCount('jurnals', 0);
+    }
+
+    /** Jurnal susulan (tanggal lampau lewat mode bebas) nggak mungkin jepret foto "sedang berlangsung". */
+    public function test_foto_bukti_opsional_untuk_jurnal_susulan_tanggal_lampau(): void
+    {
+        $this->travelTo(Carbon::parse('next monday 10:00:00'));
+        PengaturanJurnal::ambil()->update(['mode' => 'bebas_selamanya']);
+
+        $tglCustom = Carbon::parse('2 weeks ago monday')->toDateString();
+
+        $this->actingAs($this->user)->post('/guru/jurnal', [
+            'jadwal_id' => $this->jadwal->id,
+            'tanggal' => $tglCustom,
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Susulan tanpa foto', 'metode_pilihan' => 'ceramah',
+        ])->assertRedirect();
+
+        $jurnal = Jurnal::where('jadwal_id', $this->jadwal->id)->whereDate('tanggal', $tglCustom)->firstOrFail();
+        $this->assertNull($jurnal->foto_bukti);
+    }
+
+    /** Jurnal Hadir tanpa foto (dibuat lewat kasus di atas) nggak boleh keblokir wajib foto lagi pas diedit. */
+    public function test_ubah_jurnal_hadir_tanpa_foto_tanggal_lampau_tidak_wajib_upload_ulang(): void
+    {
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $this->jadwal->id, 'guru_id' => $this->guru->id,
+            'tanggal' => today()->subWeek()->toDateString(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Materi lama', 'metode' => 'Ceramah',
+            'status_verifikasi' => 'pending',
+        ]);
+
+        $this->actingAs($this->user)->post("/guru/jurnal/{$jurnal->id}", [
+            'jam_ke_selesai' => 2,
+            'status_guru' => 'hadir', 'materi' => 'Materi direvisi', 'metode_pilihan' => 'ceramah',
+        ])->assertRedirect();
+
+        $this->assertSame('Materi direvisi', $jurnal->fresh()->materi);
+    }
+
+    /** Checklist "Tidak Hadir -- Semua Kelas" kasih acuan materi terakhir TIAP kelas, bukan cuma 1. */
+    public function test_checklist_massal_tampilkan_materi_terakhir_per_kelas(): void
+    {
+        $kelasLain = Kelas::create(['nama' => 'X RPL 2', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+        $mapel = Mapel::first();
+        $jadwalLain = Jadwal::create([
+            'kelas_id' => $kelasLain->id, 'mapel_id' => $mapel->id, 'guru_id' => $this->guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 3, 'jam_ke_selesai' => 4,
+        ]);
+
+        Jurnal::create([
+            'jadwal_id' => $jadwalLain->id, 'guru_id' => $this->guru->id,
+            'tanggal' => today()->subWeek()->toDateString(),
+            'jam_ke_mulai' => 3, 'jam_ke_selesai' => 4,
+            'status_guru' => 'hadir', 'materi' => 'Materi khusus kelas lain', 'metode' => 'Ceramah',
+            'status_verifikasi' => 'terverifikasi',
+        ]);
+
+        $this->travelTo(Carbon::parse('next monday 10:00:00'));
+
+        $this->actingAs($this->user)->get('/guru/jurnal/tambah')
+            ->assertOk()
+            ->assertSee('Terakhir: Materi khusus kelas lain');
+    }
+
     /** Endpoint polling buat banner "ada data baru" (initAutoRefresh() di app.js) -- lihat App\Support\Versi. */
     public function test_endpoint_versi_berubah_setelah_ada_jurnal_baru(): void
     {
