@@ -123,7 +123,7 @@
                 {{-- Alasan duluan (langsung di bawah Status Kehadiran) --
                      itu pertanyaan paling dasar begitu "Tidak Hadir" dipilih,
                      baru abis itu urusan cakupannya (1 kelas ini/semua kelas)
-                     & tugas buat siswa. --}}
+                     & pilih kelasnya (di bawah blok ini, lihat blok-pilih-jadwal). --}}
                 <x-ui.choice
                     label="Alasan"
                     name="alasan"
@@ -154,9 +154,10 @@
                     {{-- Izin/sakit biasanya bukan cuma 1 jam pelajaran -- kalau guru
                          megang lebih dari 1 jadwal hari ini, tawarin tandain
                          sekaligus. Pilih "Ya" -> checklist kelas muncul LANGSUNG
-                         di bawah (nggak pindah halaman lagi), sama pola kayak
-                         milih Kelas di form ini -- baru abis dipilih, bagian
-                         yang relevan (presensi/checklist) muncul. --}}
+                         di bawah (nggak pindah halaman lagi), sekaligus nyembunyiin
+                         dropdown "Kelas & Mata Pelajaran" di bawah (lihat
+                         blok-pilih-jadwal) -- kelasnya udah dipilih lewat
+                         checklist ini, dropdown itu jadi nggak relevan lagi. --}}
                     <x-ui.choice
                         label="Tidak Hadir 1 Hari Penuh?"
                         name="tidak_hadir_sehari_penuh"
@@ -204,11 +205,7 @@
                         </div>
                     </div>
                 @endif
-
-                <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
             </div>
-
-            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             @php
                 $mulaiAwal = $jadwalTerpilih->jam_ke_mulai ?? $jpSekarang;
@@ -217,32 +214,42 @@
                 $jamAwal = $hariJadwalTerpilih ? \App\Support\Waktu::rentangJamUntukHari($hariJadwalTerpilih, $mulaiAwal, $selesaiAwal) : null;
             @endphp
 
-            @if ($jadwalTerkunci)
-                <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" tone="muted" class="sm:col-span-2">
-                    <span data-jadwal-terkunci-teks>
-                        {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
-                    </span>
-                    @if ($jamAwal)
-                        <span class="text-muted-2">({{ $jamAwal }})</span>
-                    @endif
-                </x-ui.field-static>
-                <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
-                <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Otomatis ikut jadwal Anda sekarang. Salah jadwal? Hubungi Admin.</p>
-            @else
-                {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
-                     yang tepat ikut kerender dari server. Materi/dll yang sudah
-                     diketik sebelum ganti jadwal memang akan hilang -- wajar karena
-                     pindah kelas = konteks jurnalnya beda total. --}}
-                <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" class="sm:col-span-2" required>
-                    <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
-                    @foreach ($jadwals as $j)
-                        @php $jamOpsi = \App\Support\Waktu::rentangJamUntukHari($j->hari, $j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
-                        <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected($jadwalTerpilih?->id === $j->id)>
-                            {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " ({$jamOpsi})" : '' }}
-                        </option>
-                    @endforeach
-                </x-ui.select>
-            @endif
+            {{-- Kelas & Mata Pelajaran -- diletakkan SETELAH blok Tidak Hadir
+                 (bukan sebelum Tugas untuk Siswa lagi) supaya guru pilih
+                 kelasnya dulu baru nulis tugasnya. Disembunyikan total pas
+                 mode "Ya, Semua Kelas" (lihat syncMassal() di script bawah)
+                 karena kelasnya udah dipilih lewat checklist blok-massal-kelas
+                 di atas, dropdown ini jadi nggak relevan lagi. --}}
+            <div id="blok-pilih-jadwal" class="mt-4 flex flex-col gap-2">
+                @if ($jadwalTerkunci)
+                    <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" tone="muted">
+                        <span data-jadwal-terkunci-teks>
+                            {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
+                        </span>
+                        @if ($jamAwal)
+                            <span class="text-muted-2">({{ $jamAwal }})</span>
+                        @endif
+                    </x-ui.field-static>
+                    <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
+                    <p class="-mt-1 text-xs text-muted-2">Otomatis ikut jadwal Anda sekarang. Salah jadwal? Hubungi Admin.</p>
+                @else
+                    {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
+                         yang tepat ikut kerender dari server. Materi/dll yang sudah
+                         diketik sebelum ganti jadwal memang akan hilang -- wajar karena
+                         pindah kelas = konteks jurnalnya beda total. --}}
+                    <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" required>
+                        <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
+                        @foreach ($jadwals as $j)
+                            @php $jamOpsi = \App\Support\Waktu::rentangJamUntukHari($j->hari, $j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
+                            <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected($jadwalTerpilih?->id === $j->id)>
+                                {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " ({$jamOpsi})" : '' }}
+                            </option>
+                        @endforeach
+                    </x-ui.select>
+                @endif
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             {{-- Jam mulai & selesai SELALU ngikut jadwal (statis, nggak bisa diedit
                  manual) -- guru nggak perlu (dan nggak boleh) ngarang jam sendiri,
@@ -280,6 +287,14 @@
                 </div>
             @endif
 
+            </div>
+
+            {{-- Tugas untuk Siswa -- dipisah dari blok-tidak-hadir di atas
+                 (biar Kelas & Mata Pelajaran bisa nyempil di antara keduanya),
+                 tapi tetap ikut disembunyikan/dinonaktifkan bareng lewat
+                 syncStatusGuru() di script bawah. --}}
+            <div id="blok-tugas-tidak-hadir" class="mt-4" @if($statusGuruAwal === 'hadir') hidden @endif>
+                <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
             </div>
 
             {{-- Semua field di sini full-width (sm:col-span-2), jadi nggak perlu ikut
@@ -559,6 +574,8 @@
                     // relevan ditampilkan saat status Hadir.
                     const blokHadir = document.getElementById('blok-hadir');
                     const blokTidakHadir = document.getElementById('blok-tidak-hadir');
+                    const blokTugasTidakHadir = document.getElementById('blok-tugas-tidak-hadir');
+                    const blokPilihJadwal = document.getElementById('blok-pilih-jadwal');
                     const jamMulaiWrap = document.getElementById('tampilan-jam-mulai-wrap');
                     const jamSelesaiWrap = document.getElementById('tampilan-jam-selesai-wrap');
                     const keteranganJam = document.getElementById('keterangan-jam');
@@ -582,6 +599,10 @@
                         // ikut kesubmit bareng & yang kepakai jadi nggak pasti.
                         blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
                         blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
+                        if (blokTugasTidakHadir) {
+                            blokTugasTidakHadir.hidden = hadir;
+                            blokTugasTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
+                        }
 
                         // Info jam pelajaran, kotak presensi, & alert "pilih jadwal
                         // dulu" cuma relevan kalau guru beneran hadir di kelas --
@@ -616,20 +637,30 @@
                     // ganti tujuan form ke endpoint massal.
                     if (blokMassal) {
                         function syncMassal() {
-                            const massal = document.querySelector('input[name="tidak_hadir_sehari_penuh"]:checked')?.value === 'ya';
+                            // "massal" HARUS ikut ngecek status Hadir/Tidak Hadir juga --
+                            // radio "tidak_hadir_sehari_penuh" nggak ke-reset otomatis pas
+                            // pindah balik ke "Hadir", jadi tanpa cek ini blok-pilih-jadwal
+                            // bisa nyangkut tersembunyi (bug beneran, ketauan pas dites:
+                            // pilih Tidak Hadir -> Ya Semua Kelas -> balik ke Hadir ->
+                            // dropdown Kelas & Mata Pelajaran ikutan hilang padahal harusnya
+                            // selalu tampil pas Hadir).
+                            const hadir = document.querySelector('input[name="status_guru"]:checked')?.value === 'hadir';
+                            const massal = !hadir && document.querySelector('input[name="tidak_hadir_sehari_penuh"]:checked')?.value === 'ya';
                             blokMassal.hidden = !massal;
                             blokMassal.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !massal; });
                             form.action = massal
                                 ? '{{ route('jurnal.massal.store') }}'
                                 : '{{ route('jurnal.store') }}';
 
-                            // jadwal_id (1 kelas doang) nggak relevan lagi (ditandai
-                            // LEBIH dari 1 kelas lewat checklist di atas) --
-                            // "required"-nya ikut nggak ngeblok submit begitu
-                            // di-disable. Presensi (blok-presensi) udah diurus
-                            // syncStatusGuru() di atas (disembunyikan+dinonaktifkan
-                            // begitu status Tidak Hadir dipilih, terlepas massal
-                            // atau nggak).
+                            // Dropdown "Kelas & Mata Pelajaran" (blok-pilih-jadwal)
+                            // disembunyikan total begitu massal aktif -- kelasnya
+                            // udah ditandai lewat checklist di atas, jadi dropdown
+                            // 1-kelas ini nggak relevan lagi. jadwal_id ikut
+                            // di-disable biar "required"-nya nggak ngeblok submit.
+                            // Presensi (blok-presensi) udah diurus syncStatusGuru()
+                            // di atas (disembunyikan+dinonaktifkan begitu status
+                            // Tidak Hadir dipilih, terlepas massal atau nggak).
+                            if (blokPilihJadwal) blokPilihJadwal.hidden = massal;
                             if (jadwal) jadwal.disabled = massal;
                         }
                         document.querySelectorAll('input[name="tidak_hadir_sehari_penuh"]').forEach((el) => el.addEventListener('change', syncMassal));
