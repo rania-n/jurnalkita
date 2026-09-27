@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Administrator', 'email' => 'admin@jurnalkita.test',
             'email_verified_at' => now(), 'password' => Hash::make('password'),
-            'role' => 'admin', 'status' => 'approved',
+            'role' => 'admin', 'status' => 'approved', 'no_hp' => '08970022883',
         ]);
 
         $waka = User::create([

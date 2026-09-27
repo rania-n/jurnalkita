@@ -65,10 +65,18 @@
                 @endif
 
                 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <x-ui.field-static label="Email" icon="mail" class="sm:col-span-2">{{ $user->email }}</x-ui.field-static>
+                    <form method="POST" action="{{ route('profil.email') }}" class="flex items-end gap-2 sm:col-span-2">
+                        @csrf
+                        <x-ui.input label="Email" icon="mail" type="email" name="email" value="{{ old('email', $user->email) }}" required errorBag="ubahEmail" class="flex-1" />
+                        <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
+                    </form>
 
                     @if ($guru)
-                        <x-ui.field-static label="NIP" icon="badge">{{ $guru->nip ?: '—' }}</x-ui.field-static>
+                        <form method="POST" action="{{ route('profil.nip') }}" class="flex items-end gap-2">
+                            @csrf
+                            <x-ui.input label="NIP" icon="badge" name="nip" value="{{ old('nip', $guru->nip) }}" errorBag="ubahNip" class="flex-1" />
+                            <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
+                        </form>
                         <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
                         @if ($guru->mapels->isNotEmpty())
                             <x-ui.field-static label="Mapel Tambahan" icon="library_books" class="sm:col-span-2">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
@@ -84,16 +92,16 @@
                         <x-ui.field-static label="Jabatan" icon="workspace_premium">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
                     @endif
 
-                    {{-- No. WhatsApp ditaruh paling bawah (bukan di atas dekat Email) --
-                         field lain di sini murni informasi, ini satu-satunya yang
-                         punya FORM+tombol Simpan sendiri, jadi dipisah ke akhir biar
-                         nggak keselip di tengah daftar field yang cuma buat dibaca.
-                         SATU sumber buat semua peran: users.no_hp -- beda dari field
-                         lain (nama/email/dll, cuma Admin yang boleh ubah), No. WA ini
-                         boleh diubah sendiri sama pemilik akunnya -- guru sering butuh
-                         update sendiri (ganti nomor) tanpa nunggu Admin. SELALU
-                         sm:col-span-2 -- form+tombol, kalau cuma setengah kolom kotak
-                         inputnya keburu sempit disenggol tombol Simpan. --}}
+                    {{-- No. WhatsApp ditaruh paling bawah -- field lain di sini murni
+                         informasi (Mapel Utama/Tambahan/Wali Kelas untuk guru, Kelas/
+                         NIS/dll untuk siswa, tetap diubah lewat Admin), jadi form ini
+                         dipisah ke akhir biar nggak keselip di tengah daftar field yang
+                         cuma buat dibaca. SATU sumber buat semua peran: users.no_hp --
+                         boleh diubah sendiri sama pemilik akunnya (sama seperti Email di
+                         atas & NIP untuk guru), guru sering butuh update sendiri (ganti
+                         nomor) tanpa nunggu Admin. SELALU sm:col-span-2 -- form+tombol,
+                         kalau cuma setengah kolom kotak inputnya keburu sempit
+                         disenggol tombol Simpan. --}}
                     <form method="POST" action="{{ route('profil.no-hp') }}" class="flex items-end gap-2 sm:col-span-2">
                         @csrf
                         <x-ui.input label="No. WhatsApp" icon="call" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" errorBag="ubahNoHp" class="flex-1" />
@@ -102,7 +110,7 @@
                 </div>
 
                 <x-alert type="info" class="mt-6">
-                    Perubahan data akun (nama, email, dll.) dilakukan oleh Admin.
+                    Perubahan nama, kelas, atau mata pelajaran dilakukan oleh Admin.
                     @if ($waLinkAdmin)
                         <a href="{{ $waLinkAdmin }}" target="_blank" rel="noopener" class="font-bold underline">Hubungi Admin melalui WhatsApp</a>
                         jika ada yang perlu diperbaiki.
