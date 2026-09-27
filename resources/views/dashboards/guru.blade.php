@@ -537,15 +537,7 @@
          piket hari itu. --}}
     @if (! $piketHariIni || $jadwalHariIni->isNotEmpty())
         @if ($jadwalSorotan)
-            <x-ui.jadwal-sorotan :jadwal="$jadwalSorotan['jadwal']">
-                <x-slot:actions>
-                    @if ($jurnalGuruHariIni->has($jadwalSorotan['jadwal']->id))
-                        <x-ui.button :href="route('jurnal.index')" variant="secondary" icon="check_circle">Sudah Diisi</x-ui.button>
-                    @else
-                        <x-ui.button :href="route('jurnal.create', ['jadwal' => $jadwalSorotan['jadwal']->id])" variant="secondary" icon="edit_note">Isi Jurnal</x-ui.button>
-                    @endif
-                </x-slot:actions>
-            </x-ui.jadwal-sorotan>
+            <x-ui.jadwal-sorotan :jadwal="$jadwalSorotan['jadwal']" />
         @endif
 
         @if ($jumlahJadwalHariIni > 0)
