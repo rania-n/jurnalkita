@@ -57,7 +57,12 @@ return [
     'sekretaris' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'sekretaris.dashboard'],
         ['label' => 'Jurnal', 'icon' => 'menu_book', 'route' => 'sekretaris.jurnal.index', 'match' => 'sekretaris.jurnal.*'],
-        ['label' => 'Kelas', 'icon' => 'school', 'route' => 'sekretaris.kelas.siswa'],
+        // Dulu "Kelas" -> Daftar Siswa (kehadiran hari ini doang). Diganti ke
+        // Rekap Kehadiran (rentang tanggal, bisa lihat seluruh riwayat) --
+        // lebih sering dipakai, sama pola kayak menu "Rekap" milik Waka.
+        // Daftar Siswa tetap ada, dipindah jadi kartu menu di Beranda
+        // (lihat dashboards/sekretaris.blade.php) biar tetap kejangkau.
+        ['label' => 'Rekap', 'icon' => 'bar_chart', 'route' => 'sekretaris.kelas.rekap'],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'sekretaris.kelas.jadwal'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],

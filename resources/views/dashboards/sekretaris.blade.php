@@ -60,7 +60,21 @@
                 </span>
                 <div class="flex-1">
                     <p class="text-sm font-bold text-ink">Rekap Kehadiran</p>
-                    <p class="text-xs text-muted">Kehadiran siswa sekelas bulan ini</p>
+                    <p class="text-xs text-muted">Kehadiran siswa sekelas, bisa difilter tanggal</p>
+                </div>
+                <x-icon name="chevron_right" :size="20" class="text-muted" />
+            </a>
+
+            {{-- Daftar Siswa dulu di menu bawah "Kelas" -- diganti Rekap
+                 Kehadiran (lihat config/navigation.php), jadi dipindah ke
+                 sini biar tetap kejangkau. --}}
+            <a href="{{ route('sekretaris.kelas.siswa') }}" class="press flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-alt text-navy">
+                    <x-icon name="school" :size="24" />
+                </span>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-ink">Daftar Siswa</p>
+                    <p class="text-xs text-muted">Kehadiran hari ini per siswa</p>
                 </div>
                 <x-icon name="chevron_right" :size="20" class="text-muted" />
             </a>
