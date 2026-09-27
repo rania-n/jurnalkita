@@ -66,8 +66,13 @@
         <input type="hidden" name="mode" value="{{ $mode }}">
         <input type="hidden" name="status" value="{{ $statusAktif }}">
         <div class="flex w-full gap-2">
-            <x-admin.f-date name="dari" label="Dari tanggal" max="{{ today()->toDateString() }}" data-pasangan="sampai" />
-            <x-admin.f-date name="sampai" label="Sampai tanggal" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+            {{-- BEDA dari pola Riwayat Jurnal -- di sini kosong BUKAN berarti
+                 "semua riwayat" (Monitor Piket per-hari, nggak ada versi
+                 "semua tanggal sekaligus"), jadi kotaknya SENGAJA tetap
+                 kelihatan keisi tanggal yang lagi aktif (default hari ini),
+                 nggak dikosongin kayak f-date lain. --}}
+            <x-admin.f-date name="dari" label="Dari tanggal" :value="$dari->toDateString()" max="{{ today()->toDateString() }}" data-pasangan="sampai" />
+            <x-admin.f-date name="sampai" label="Sampai tanggal" :value="$sampai->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
         </div>
     </x-admin.filters>
 

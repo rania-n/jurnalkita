@@ -90,7 +90,7 @@
         <p id="rekap-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
             Tidak ada siswa yang cocok dengan pencarian.
         </p>
-        <p class="mt-3 text-xs text-muted-2">Merah muda = alpha {{ $ambangAlpha }}x atau lebih pada rentang tanggal ini.</p>
+        <p class="mt-3 text-xs text-muted-2">Merah muda = alpha {{ $ambangAlpha }}x atau lebih {{ ($dari || $sampai) ? 'pada rentang tanggal ini' : 'sepanjang riwayat' }}.</p>
     @endif
 
     @push('scripts')

@@ -123,12 +123,11 @@ class JurnalController extends Controller
     public function index(Request $request): View
     {
         $status = $request->query('status', 'semua');
-        // Default-nya HARI INI (bukan seluruh riwayat tanpa batas) -- guru
-        // paling sering buka Riwayat buat ngecek jurnal yang BARUSAN diisi
-        // hari itu. Filter jelas kok kelihatan keisi tanggal hari ini di
-        // kotaknya (bukan kosong tersembunyi), tetap bisa diganti manual
-        // kalau mau lihat tanggal lain.
-        $dari = $request->filled('dari') ? $request->query('dari') : today()->toDateString();
+        // Kosong (belum difilter) = tampilkan SEMUA riwayat, bukan
+        // otomatis dibatasi hari ini -- kotak Dari/Sampai juga kosong
+        // (bukan diam-diam keisi hari ini), jadi tampilannya konsisten
+        // sama yang kelihatan di form.
+        $dari = $request->query('dari');
         $sampai = $request->query('sampai');
 
         // "Dari" diisi tapi "Sampai" kosong -> anggap nyari HARI ITU doang

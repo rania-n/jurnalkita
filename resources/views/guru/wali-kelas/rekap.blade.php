@@ -71,7 +71,9 @@
         <p id="rekap-wali-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
             Tidak ada siswa yang cocok dengan pencarian.
         </p>
-        <p class="mt-3 text-xs text-muted-2">Dihitung dari jurnal yang sudah diisi pada rentang tanggal ini. Belum termasuk jam pelajaran yang jurnalnya belum diisi guru.</p>
+        <p class="mt-3 text-xs text-muted-2">
+            Dihitung dari jurnal yang sudah diisi {{ ($dari || $sampai) ? 'pada rentang tanggal ini' : 'sepanjang riwayat' }}. Belum termasuk jam pelajaran yang jurnalnya belum diisi guru.
+        </p>
     @endif
 
     @push('scripts')

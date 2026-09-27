@@ -39,13 +39,17 @@ class WaliKelasController extends Controller
         // ini juga dipanggil LANGSUNG dari index() -- kalau di-type-hint,
         // panggilan manual $this->rekap($kelas) di atas nggak dapat instance
         // Request-nya.
-        $dari = request()->filled('dari') ? Carbon::parse(request()->date('dari')) : now()->startOfMonth();
-        $sampai = request()->filled('sampai') ? Carbon::parse(request()->date('sampai')) : now();
+        // Kosong (belum difilter) = tampilkan SELURUH riwayat, bukan
+        // dibatasi bulan berjalan -- konsisten sama Rekap Kehadiran Siswa (Waka).
+        $dari = request()->filled('dari') ? Carbon::parse(request()->date('dari')) : null;
+        $sampai = request()->filled('sampai') ? Carbon::parse(request()->date('sampai')) : null;
 
         $siswas = $kelas->siswas()->orderBy('no_absen')->get();
 
         $rekap = Absensi::whereIn('siswa_id', $siswas->pluck('id'))
-            ->whereHas('jurnal', fn ($q) => $q->whereDate('tanggal', '>=', $dari)->whereDate('tanggal', '<=', $sampai))
+            ->whereHas('jurnal', fn ($q) => $q
+                ->when($dari, fn ($q2) => $q2->whereDate('tanggal', '>=', $dari))
+                ->when($sampai, fn ($q2) => $q2->whereDate('tanggal', '<=', $sampai)))
             ->get()
             ->groupBy('siswa_id')
             ->map(fn ($rows) => $rows->countBy('status'));
@@ -57,22 +61,22 @@ class WaliKelasController extends Controller
 
     /**
      * Jurnal harian kelas -- wali kelas cuma LIHAT (bukan pengurus kelas,
-     * nggak berwenang memeriksa/verifikasi). Default hari ini, karena yang
-     * paling relevan buat wali kelas adalah "apa yang terjadi di kelasnya
-     * hari ini", bukan riwayat panjang seperti punya pengurus kelas.
+     * nggak berwenang memeriksa/verifikasi). Kosong (belum difilter) =
+     * tampilkan SEMUA riwayat, kotak Dari/Sampai juga kosong -- konsisten
+     * sama pola Riwayat Jurnal guru.
      */
     public function jurnal(Kelas $kelas, Request $request): View
     {
         abort_unless($kelas->wali_id === auth()->user()->guru?->id, 403, 'Anda bukan wali kelas ini.');
 
-        $dari = $request->query('dari', today()->toDateString());
-        $sampai = $request->query('sampai') ?: $dari;
+        $dari = $request->query('dari');
+        $sampai = $request->query('sampai');
         $statusGuru = in_array($request->query('status_guru'), ['hadir', 'tidak_hadir'], true)
             ? $request->query('status_guru') : '';
 
         $baseQuery = fn () => Jurnal::whereHas('jadwal', fn ($q) => $q->where('kelas_id', $kelas->id))
-            ->whereDate('tanggal', '>=', $dari)
-            ->whereDate('tanggal', '<=', $sampai);
+            ->when($dari, fn ($q) => $q->whereDate('tanggal', '>=', $dari))
+            ->when($sampai, fn ($q) => $q->whereDate('tanggal', '<=', $sampai));
 
         // Jumlah per tab (Semua/Hadir/Tidak Hadir) ikut rentang tanggal yang
         // lagi aktif, TAPI TANPA filter status_guru -- biar tiap tab nunjukin

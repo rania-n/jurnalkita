@@ -35,8 +35,8 @@ class RekapController extends Controller
             if ($jumlahSiswa > self::BATAS_EKSPOR_SISWA) {
                 return view('rekap.siswa', [
                     'siswas' => collect(), 'rekap' => collect(),
-                    'dari' => $request->filled('dari') ? Carbon::parse($request->date('dari')) : now()->startOfMonth(),
-                    'sampai' => $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : now(),
+                    'dari' => $request->filled('dari') ? Carbon::parse($request->date('dari')) : null,
+                    'sampai' => $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : null,
                     'kelasList' => Kelas::orderedByHierarchy()->get(),
                     'ambangAlpha' => self::AMBANG_ALPHA,
                     'terlaluBanyakTanpaFilter' => $jumlahSiswa,
@@ -77,7 +77,8 @@ class RekapController extends Controller
         // batas bawaan (128M) sempit banget buat dompdf, biar nggak mepet.
         ini_set('memory_limit', '256M');
 
-        AuditLog::catat('Ekspor Rekap Siswa', "Ekspor rekap kehadiran siswa {$dari->toDateString()} s/d {$sampai->toDateString()}");
+        $labelPeriode = ($dari && $sampai) ? "{$dari->toDateString()} s/d {$sampai->toDateString()}" : 'seluruh riwayat';
+        AuditLog::catat('Ekspor Rekap Siswa', "Ekspor rekap kehadiran siswa {$labelPeriode}");
 
         $daftar = [];
         foreach ($siswas as $s) {
@@ -111,14 +112,20 @@ class RekapController extends Controller
             'daftar' => $daftar,
         ])->setPaper('a4', 'portrait');
 
-        return $pdf->download('rekap-kehadiran-siswa-'.$dari->toDateString().'-sd-'.$sampai->toDateString().'.pdf');
+        $namaFile = ($dari && $sampai)
+            ? 'rekap-kehadiran-siswa-'.$dari->toDateString().'-sd-'.$sampai->toDateString().'.pdf'
+            : 'rekap-kehadiran-siswa-seluruh-riwayat.pdf';
+
+        return $pdf->download($namaFile);
     }
 
-    /** @return array{0: Carbon, 1: Carbon, 2: Collection, 3: Collection} */
+    /** @return array{0: ?Carbon, 1: ?Carbon, 2: Collection, 3: Collection} */
     private function data(Request $request): array
     {
-        $dari = $request->filled('dari') ? Carbon::parse($request->date('dari')) : now()->startOfMonth();
-        $sampai = $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : now();
+        // Kosong (belum difilter) = tampilkan SELURUH riwayat, bukan
+        // dibatasi bulan berjalan -- konsisten sama pola Riwayat Jurnal.
+        $dari = $request->filled('dari') ? Carbon::parse($request->date('dari')) : null;
+        $sampai = $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : null;
 
         $siswas = Siswa::with('kelas')
             ->when($request->filled('kelas_id'), fn ($q) => $q->where('kelas_id', $request->integer('kelas_id')))
@@ -131,8 +138,8 @@ class RekapController extends Controller
 
         $rekap = Absensi::whereIn('siswa_id', $siswas->pluck('id'))
             ->whereHas('jurnal', fn ($q) => $q
-                ->whereDate('tanggal', '>=', $dari->toDateString())
-                ->whereDate('tanggal', '<=', $sampai->toDateString()))
+                ->when($dari, fn ($q2) => $q2->whereDate('tanggal', '>=', $dari->toDateString()))
+                ->when($sampai, fn ($q2) => $q2->whereDate('tanggal', '<=', $sampai->toDateString())))
             ->get()
             ->groupBy('siswa_id')
             ->map(fn ($rows) => $rows->countBy('status'));

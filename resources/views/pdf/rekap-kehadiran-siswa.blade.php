@@ -92,7 +92,7 @@
     <div class="meta">
         <table>
             <tr>
-                <td style="width: 50%;"><strong>Periode:</strong> {{ $dari->translatedFormat('d M Y') }} s/d {{ $sampai->translatedFormat('d M Y') }}</td>
+                <td style="width: 50%;"><strong>Periode:</strong> {{ ($dari && $sampai) ? $dari->translatedFormat('d M Y').' s/d '.$sampai->translatedFormat('d M Y') : 'Seluruh riwayat' }}</td>
                 <td style="width: 50%; text-align: right;"><strong>Kelas:</strong> {{ $kelasNama }}</td>
             </tr>
             <tr>
