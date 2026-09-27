@@ -48,9 +48,14 @@
      panjang, tombolnya jangan sampai ketimbun di bawah, harus tetap
      kepegang tanpa scroll ke dasar dulu. Link "Lihat semua notifikasi"
      dihapus -- popup ini sendiri sudah isinya semua notifikasi, jadi
-     nggak perlu halaman riwayat terpisah lagi. --}}
+     nggak perlu halaman riwayat terpisah lagi.
+
+     z-10 + posisi relatif WAJIB ada -- tanpa itu baris notifikasi (link)
+     yang lagi di-scroll lewat bisa "nembus" ke atas bar sticky ini (keliatan
+     tumpang tindih & link-nya yang kepencet, bukan tombolnya) karena
+     dua-duanya nggak eksplisit punya urutan tumpukan (stacking order). --}}
 @if ($jumlahBelumDibaca > 0)
-    <div class="sticky bottom-0 -mx-5 -mb-5 border-t border-surface-alt bg-card px-5 py-3">
+    <div class="sticky bottom-0 z-10 -mx-5 -mb-5 border-t border-surface-alt bg-card px-5 py-3">
         <form method="POST" action="{{ route('notifikasi.tandai-semua-dibaca') }}">
             @csrf
             <x-ui.button type="submit" variant="secondary" icon="done_all" class="w-full !h-10 !text-sm">Tandai Semua Dibaca</x-ui.button>
