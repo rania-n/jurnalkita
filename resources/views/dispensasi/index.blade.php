@@ -52,7 +52,7 @@
             </x-slot:action>
         </x-admin.page>
     @else
-        <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran" always-row>
+        <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran" always-row size="sm">
         <div class="flex shrink-0 flex-col items-end gap-1.5">
                 @if ($bolehEkspor)
                     <a href="{{ $urlEkspor }}"
