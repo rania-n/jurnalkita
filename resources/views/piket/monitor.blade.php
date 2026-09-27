@@ -44,16 +44,6 @@
         @endforeach
     </div>
 
-    {{-- Tanggal -- cuma 1 field (bukan rentang Dari/Sampai kayak Riwayat
-         Jurnal), soalnya Monitor Piket memang laporan PER HARI, bukan
-         rentang tanggal. Max hari ini -- belum ada gunanya lihat piket
-         buat tanggal yang belum kejalanin. --}}
-    <x-admin.filters :action="route('piket.monitor.index')" hideButtons="true">
-        <input type="hidden" name="mode" value="{{ $mode }}">
-        <input type="hidden" name="status" value="{{ $statusAktif }}">
-        <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
-    </x-admin.filters>
-
     {{-- Bar pilih: kelompokkan per kelas atau per guru --}}
     <div class="mb-4 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach (['kelas' => 'Per Kelas', 'guru' => 'Per Guru'] as $key => $label)
@@ -63,6 +53,16 @@
             </a>
         @endforeach
     </div>
+
+    {{-- Tanggal -- cuma 1 field (bukan rentang Dari/Sampai kayak Riwayat
+         Jurnal), soalnya Monitor Piket memang laporan PER HARI, bukan
+         rentang tanggal. Max hari ini -- belum ada gunanya lihat piket
+         buat tanggal yang belum kejalanin. --}}
+    <x-admin.filters :action="route('piket.monitor.index')" hideButtons="true">
+        <input type="hidden" name="mode" value="{{ $mode }}">
+        <input type="hidden" name="status" value="{{ $statusAktif }}">
+        <x-admin.f-date name="tanggal" label="Tanggal" :value="$tanggal->toDateString()" max="{{ today()->toDateString() }}" onchange="this.form.submit()" />
+    </x-admin.filters>
 
     <div class="mb-4">
         <x-ui.search-bar id="cari-monitor" placeholder="Cari nama guru, kelas, atau mata pelajaran..." />
