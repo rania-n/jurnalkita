@@ -18,11 +18,7 @@
 
         <x-ui.input label="Kata Sandi" name="password" type="password" id="password" placeholder="Masukkan kata sandi" required />
 
-        <div class="flex items-center justify-between">
-            <label class="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" name="remember" class="h-4 w-4 rounded accent-navy">
-                <span class="text-[13px] text-muted-2">Tetap masuk</span>
-            </label>
+        <div class="flex items-center justify-end">
             <a href="{{ route('password.request') }}" class="text-[13px] font-bold text-navy">Lupa Sandi?</a>
         </div>
 
