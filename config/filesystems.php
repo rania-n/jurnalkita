@@ -41,7 +41,12 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // 'url' sengaja TIDAK diisi pakai APP_URL -- kalau diisi, semua link file
+            // (foto jurnal, surat dispensasi, dll) selalu nunjuk ke APP_URL walau
+            // halamannya lagi dibuka lewat alamat lain (mis. tunnel ngrok/Cloudflare
+            // buat testing di HP), jadinya link file itu nggak bisa diakses dari HP.
+            // Tanpa 'url', Storage::url() otomatis ikut alamat yang lagi dipakai buka
+            // halaman saat itu (lewat asset()), jadi selalu benar di alamat manapun.
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
