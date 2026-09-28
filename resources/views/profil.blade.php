@@ -34,11 +34,6 @@
     @if ($admin)
         <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-2 lg:gap-6">
             <div class="flex flex-col rounded-2xl border border-surface-alt bg-card p-5 sm:p-6">
-                @if (session('success'))
-                    <x-alert type="success" class="mt-4">
-                        {{ session('success') }}
-                    </x-alert>
-                @endif
                 <form action="{{ route('master.akun.update') }}" method="POST" class="mt-4 flex flex-col gap-3">
                     @csrf
                     <input type="hidden" name="id" value="{{ $user->id }}">
@@ -75,12 +70,6 @@
                     </x-alert>
                 @endif
 
-                @if (session('error'))
-                    <x-alert type="error" class="mb-3">
-                        {{ session('error') }}
-                    </x-alert>
-                @endif
-
                 <form id="form-password-update" method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-3">
                     @csrf
                     @method('PUT')
@@ -107,21 +96,9 @@
              dulu 2 kartu terpisah kesan-kesannya kayak 2 hal yang beda, padahal
              sekarang sama-sama disimpan lewat 1 form + 1 tombol Simpan yang sama. --}}
         <div class="rounded-2xl border border-surface-alt bg-card p-5 sm:p-6">
-            @if (session('success'))
-                <x-alert type="success" class="mb-4">
-                    {{ session('success') }}
-                </x-alert>
-            @endif
-
             @if (session('status') === 'reset-link-sent')
                 <x-alert type="success" class="mb-4">
                     Tautan reset kata sandi sudah dikirim ke email Anda. Buka email lalu ikuti tautannya.
-                </x-alert>
-            @endif
-
-            @if (session('error'))
-                <x-alert type="error" class="mb-4">
-                    {{ session('error') }}
                 </x-alert>
             @endif
 
@@ -133,32 +110,26 @@
             <form id="form-profil" method="POST" action="{{ route('profil.update') }}" class="flex flex-col gap-5">
                 @csrf
 
-                <div class="flex items-center justify-between gap-2">
-                    <p class="text-sm font-bold text-ink">Data Akun</p>
-                    <div class="flex gap-2">
-                        <x-ui.button type="button" id="tombol-edit-profil" variant="secondary" icon="edit" :hidden="$editMode">Edit</x-ui.button>
-                        <x-ui.button type="submit" id="tombol-simpan-profil" variant="primary" icon="save" :hidden="! $editMode">Simpan</x-ui.button>
-                    </div>
-                </div>
+                <p class="text-sm font-bold text-ink">Data Akun</p>
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <x-ui.input label="Email" icon="mail" type="email" name="email" value="{{ old('email', $user->email) }}" required class="sm:col-span-2" data-field-profil :disabled="! $editMode" />
 
                     @if ($guru)
                         <x-ui.input label="NIP" icon="badge" name="nip" value="{{ old('nip', $guru->nip) }}" data-field-profil :disabled="! $editMode" />
-                        <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
+                        <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book" tone="muted">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
                         @if ($guru->mapels->isNotEmpty())
-                            <x-ui.field-static label="Mapel Tambahan" icon="library_books" class="sm:col-span-2">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
+                            <x-ui.field-static label="Mapel Tambahan" icon="library_books" tone="muted" class="sm:col-span-2">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
                         @endif
                         @if ($guru->kelasWali->isNotEmpty())
-                            <x-ui.field-static label="Wali Kelas" icon="groups" class="sm:col-span-2">{{ $guru->kelasWali->pluck('nama')->join(', ') }}</x-ui.field-static>
+                            <x-ui.field-static label="Wali Kelas" icon="groups" tone="muted" class="sm:col-span-2">{{ $guru->kelasWali->pluck('nama')->join(', ') }}</x-ui.field-static>
                         @endif
                     @elseif ($siswa)
                         {{-- Kelas+NIS = 2 field 1-kolom, pas genap, dipasangin bareng. --}}
-                        <x-ui.field-static label="Kelas" icon="school">{{ $siswa->kelas->nama ?? '—' }}</x-ui.field-static>
-                        <x-ui.field-static label="NIS" icon="badge">{{ $siswa->nis }}</x-ui.field-static>
-                        <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
-                        <x-ui.field-static label="Jabatan" icon="workspace_premium">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
+                        <x-ui.field-static label="Kelas" icon="school" tone="muted">{{ $siswa->kelas->nama ?? '—' }}</x-ui.field-static>
+                        <x-ui.field-static label="NIS" icon="badge" tone="muted">{{ $siswa->nis }}</x-ui.field-static>
+                        <x-ui.field-static label="No. Absen" icon="tag" tone="muted">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
+                        <x-ui.field-static label="Jabatan" icon="workspace_premium" tone="muted">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
                     @endif
 
                     {{-- SATU sumber buat semua peran: users.no_hp -- boleh diubah
@@ -172,11 +143,23 @@
                     <p class="text-sm font-bold text-ink">Ganti Kata Sandi</p>
                     <p class="mt-0.5 text-xs text-muted-2">Kosongkan bagian ini kalau tidak ingin mengganti kata sandi.</p>
 
-                    <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <x-ui.input type="password" icon="lock" name="current_password" form="form-profil" placeholder="Kata sandi saat ini" autocomplete="current-password" class="sm:col-span-2" data-field-profil :disabled="! $editMode" />
+                    {{-- Semua full-width, satu kolom -- sengaja TIDAK dipasangin
+                         2-kolom kayak NIP/Mapel di atas, biar urutan atas-bawah
+                         (sandi lama -> sandi baru -> ulangi) kebaca jelas sebagai
+                         satu alur, bukan kelompok field yang harus "dicocokkan". --}}
+                    <div class="mt-3 flex flex-col gap-3">
+                        <x-ui.input type="password" icon="lock" name="current_password" form="form-profil" placeholder="Kata sandi saat ini" autocomplete="current-password" data-field-profil :disabled="! $editMode" />
                         <x-ui.input type="password" icon="lock" name="password" form="form-profil" placeholder="Kata sandi baru" autocomplete="new-password" hint="Minimal 8 karakter." data-field-profil :disabled="! $editMode" />
                         <x-ui.input type="password" icon="lock" name="password_confirmation" form="form-profil" placeholder="Tulis ulang kata sandi baru" autocomplete="new-password" data-field-profil :disabled="! $editMode" />
                     </div>
+                </div>
+
+                {{-- Tombol di BAWAH form -- ikut pola tombol Simpan di form-form
+                     lain di app ini (mis. admin/form-card.blade.php, form Simpan
+                     Profil Admin di atas), bukan nempel di header sebelah judul. --}}
+                <div class="flex gap-2">
+                    <x-ui.button type="button" id="tombol-edit-profil" variant="secondary" icon="edit" :hidden="$editMode">Edit</x-ui.button>
+                    <x-ui.button type="submit" id="tombol-simpan-profil" icon="save" :hidden="! $editMode">Simpan</x-ui.button>
                 </div>
             </form>
 
