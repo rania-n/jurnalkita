@@ -97,7 +97,7 @@ class SuratDispensasiController extends Controller
         abort_unless($request->hasValidSignature(), 403, 'Tautan tidak valid atau sudah kedaluwarsa.');
 
         $otomatisKadaluarsa = $dispensasi->batalkanKalauKadaluarsa();
-        $dispensasi->load('siswa.kelas', 'pengaju');
+        $dispensasi->load('siswa.kelas', 'pengaju', 'waka');
 
         return view('dispensasi.persetujuan-wa', [
             'dispensasi' => $dispensasi,

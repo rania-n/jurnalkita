@@ -35,7 +35,10 @@
     @elseif ($sudahDiputuskan)
         <x-alert type="info" class="mt-5">
             Pengajuan ini sudah diputuskan sebelumnya:
-            <strong>{{ $dispensasi->status_waka === 'approved' ? 'Disetujui' : 'Ditolak' }}</strong>.
+            <strong>{{ $dispensasi->status_waka === 'approved' ? 'Disetujui' : 'Ditolak' }}</strong>
+            @if ($dispensasi->waka)
+                oleh <strong>{{ $dispensasi->waka->name }}</strong>
+            @endif.
         </x-alert>
     @else
         <form method="POST" action="{{ url()->full() }}" class="mt-5 flex flex-col gap-3">
