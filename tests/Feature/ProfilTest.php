@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Guru;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ProfilTest extends TestCase
@@ -92,6 +93,60 @@ class ProfilTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertNull($guru->fresh()->nip);
+    }
+
+    public function test_kata_sandi_ikut_bisa_diganti_lewat_form_profil_gabungan(): void
+    {
+        $user = User::factory()->role('guru')->create(['email' => 'guru@jurnalkita.test']);
+
+        $this->actingAs($user)->post('/profil', [
+            'email' => 'guru@jurnalkita.test',
+            'current_password' => 'password',
+            'password' => 'sandi-baru-123',
+            'password_confirmation' => 'sandi-baru-123',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertTrue(Hash::check('sandi-baru-123', $user->fresh()->password));
+    }
+
+    public function test_kata_sandi_boleh_dikosongkan_kalau_cuma_mau_ubah_email(): void
+    {
+        $user = User::factory()->role('guru')->create(['email' => 'lama@jurnalkita.test']);
+        $passwordSemula = $user->password;
+
+        $this->actingAs($user)->post('/profil', ['email' => 'baru@jurnalkita.test'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('baru@jurnalkita.test', $user->fresh()->email);
+        $this->assertSame($passwordSemula, $user->fresh()->password);
+    }
+
+    public function test_kata_sandi_lama_yang_salah_ditolak(): void
+    {
+        $user = User::factory()->role('guru')->create(['email' => 'guru@jurnalkita.test']);
+
+        $this->actingAs($user)->post('/profil', [
+            'email' => 'guru@jurnalkita.test',
+            'current_password' => 'salah',
+            'password' => 'sandi-baru-123',
+            'password_confirmation' => 'sandi-baru-123',
+        ])->assertSessionHasErrors(['current_password']);
+
+        $this->assertTrue(Hash::check('password', $user->fresh()->password));
+    }
+
+    public function test_konfirmasi_kata_sandi_baru_harus_cocok(): void
+    {
+        $user = User::factory()->role('guru')->create(['email' => 'guru@jurnalkita.test']);
+
+        $this->actingAs($user)->post('/profil', [
+            'email' => 'guru@jurnalkita.test',
+            'current_password' => 'password',
+            'password' => 'sandi-baru-123',
+            'password_confirmation' => 'tidak-cocok',
+        ])->assertSessionHasErrors(['password']);
+
+        $this->assertTrue(Hash::check('password', $user->fresh()->password));
     }
 
     public function test_siswa_tidak_punya_data_guru_bisa_ubah_profil_tanpa_nip(): void

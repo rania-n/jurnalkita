@@ -72,7 +72,7 @@
                      supaya pesan errornya tetap bisa dibaca & diperbaiki, bukan malah
                      ketutup field yang disabled lagi. --}}
                 @php $editMode = $errors->any(); @endphp
-                <form method="POST" action="{{ route('profil.update') }}" class="mt-4 flex flex-col gap-3">
+                <form id="form-profil" method="POST" action="{{ route('profil.update') }}" class="mt-4 flex flex-col gap-3">
                     @csrf
 
                     <div class="flex items-center justify-end gap-2">
@@ -132,6 +132,10 @@
 
         <div @class(['flex flex-col gap-4', 'rounded-2xl border border-surface-alt bg-card p-5 sm:p-6' => $admin])>
             <div @class(['rounded-2xl border border-surface-alt bg-card p-5' => ! $admin])>
+                {{-- 'password-updated' cuma dipicu jalur Admin (form terpisah di
+                     bawah, lewat route('password.update')) -- non-admin sekarang
+                     ganti sandinya lewat form-profil gabungan & pakai flash
+                     'success' biasa (lihat bagian atas halaman ini). --}}
                 @if (session('status') === 'password-updated')
                     <x-alert type="success" class="mb-3">
                         Kata sandi berhasil diperbarui.
@@ -150,25 +154,52 @@
                     </x-alert>
                 @endif
 
-                <form id="form-password-update" method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-3">
-                    @csrf
-                    @method('PUT')
-
-                    <x-ui.input type="password" name="current_password" id="current_password" placeholder="Kata sandi saat ini" required autocomplete="current-password" errorBag="updatePassword" />
-                    
-                    <x-ui.input type="password" name="password" id="password" placeholder="Kata sandi baru" required autocomplete="new-password" errorBag="updatePassword" hint="Minimal 8 karakter." />
-                    
-                    <x-ui.input type="password" name="password_confirmation" id="password_confirmation" placeholder="Tulis ulang kata sandi baru" required autocomplete="new-password" errorBag="updatePassword" />
-                </form>
-
-                <div class="mt-5 flex items-center justify-between">
-                    <form method="POST" action="{{ route('password.reset-link') }}">
+                @if ($admin)
+                    {{-- Khusus Admin: TETAP form terpisah (bukan digabung ke form-profil
+                         non-admin) -- route master.akun.update di atas dipakai Admin
+                         juga buat ubah akun ORANG LAIN, jadi nggak relevan digabung
+                         sama urusan ganti-sandi-sendiri di sini. --}}
+                    <form id="form-password-update" method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-3">
                         @csrf
-                        <x-ui.button type="submit" variant="secondary" icon="lock_reset">Reset Kata Sandi</x-ui.button>
+                        @method('PUT')
+
+                        <x-ui.input type="password" name="current_password" id="current_password" placeholder="Kata sandi saat ini" required autocomplete="current-password" errorBag="updatePassword" />
+
+                        <x-ui.input type="password" name="password" id="password" placeholder="Kata sandi baru" required autocomplete="new-password" errorBag="updatePassword" hint="Minimal 8 karakter." />
+
+                        <x-ui.input type="password" name="password_confirmation" id="password_confirmation" placeholder="Tulis ulang kata sandi baru" required autocomplete="new-password" errorBag="updatePassword" />
                     </form>
-                    
-                    <x-ui.button type="submit" form="form-password-update" variant="primary">Simpan</x-ui.button>
-                </div>
+
+                    <div class="mt-5 flex items-center justify-between">
+                        <form method="POST" action="{{ route('password.reset-link') }}">
+                            @csrf
+                            <x-ui.button type="submit" variant="secondary" icon="lock_reset">Reset Kata Sandi</x-ui.button>
+                        </form>
+
+                        <x-ui.button type="submit" form="form-password-update" variant="primary">Simpan</x-ui.button>
+                    </div>
+                @else
+                    {{-- Non-admin: field-nya TIDAK dibungkus <form> sendiri -- lewat
+                         atribut form="form-profil", nyambung ke form Email/NIP/No.
+                         WhatsApp di kolom kiri, jadi satu kesatuan: satu tombol Edit,
+                         satu tombol Simpan buat semuanya (bukan dibedain per bagian
+                         kayak dulu). Kosongkan aja kalau nggak mau ganti kata sandi --
+                         lihat ProfilController::update(), ganti sandi bersifat opsional. --}}
+                    <div class="flex flex-col gap-3">
+                        <x-ui.input type="password" name="current_password" form="form-profil" placeholder="Kata sandi saat ini" autocomplete="current-password" data-field-profil :disabled="! $editMode" />
+
+                        <x-ui.input type="password" name="password" form="form-profil" placeholder="Kata sandi baru" autocomplete="new-password" hint="Kosongkan kalau tidak ingin ganti kata sandi. Minimal 8 karakter." data-field-profil :disabled="! $editMode" />
+
+                        <x-ui.input type="password" name="password_confirmation" form="form-profil" placeholder="Tulis ulang kata sandi baru" autocomplete="new-password" data-field-profil :disabled="! $editMode" />
+                    </div>
+
+                    <div class="mt-5">
+                        <form method="POST" action="{{ route('password.reset-link') }}">
+                            @csrf
+                            <x-ui.button type="submit" variant="secondary" icon="lock_reset">Reset Kata Sandi</x-ui.button>
+                        </form>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

@@ -4,18 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class ProfilController extends Controller
 {
     /**
-     * Email, NIP, dan No. WhatsApp -- field akun yang boleh diubah mandiri
-     * oleh guru/siswa/waka tanpa lewat Admin (nama, kelas, mapel, dll tetap
-     * harus lewat Manajemen Akun, lihat alert di profil.blade.php). Admin
-     * sendiri sudah punya jalur ubah profil sendiri lewat master.akun.update
-     * (form terpisah di halaman ini, khusus admin). Digabung jadi SATU form/
-     * SATU tombol Simpan (dulu 3 form+tombol terpisah per field) -- lebih
-     * enak dipakai, dan validasinya tetap per-field lewat @error di blade.
+     * Email, NIP, No. WhatsApp, DAN ganti kata sandi -- semua field akun yang
+     * boleh diubah mandiri oleh guru/siswa/waka tanpa lewat Admin (nama,
+     * kelas, mapel, dll tetap harus lewat Manajemen Akun, lihat alert di
+     * profil.blade.php). Admin sendiri sudah punya jalur ubah profil sendiri
+     * lewat master.akun.update (form terpisah di halaman ini, khusus admin --
+     * TIDAK ikut digabung ke sini karena endpoint itu dipakai juga buat Admin
+     * mengubah akun ORANG LAIN, jadi nggak relevan buat urusan ganti-sandi-
+     * sendiri). Semua digabung jadi SATU form/SATU tombol Simpan (dulu 3 form
+     * profil + 1 form kata sandi terpisah, masing-masing tombolnya sendiri)
+     * biar nggak keliatan berantakan & nggak membingungkan mana yang harus
+     * diklik buat nyimpen apa.
      */
     public function update(Request $request): RedirectResponse
     {
@@ -35,6 +41,16 @@ class ProfilController extends Controller
                 'nullable', 'string', 'max:30',
                 Rule::unique('gurus', 'nip')->ignore($guru->id),
             ];
+        }
+
+        // Ganti kata sandi bersifat OPSIONAL di form gabungan ini -- cuma
+        // divalidasi (termasuk cek kata sandi lama) kalau field 'password'
+        // beneran diisi, biar bisa nyimpen Email/NIP/No. WhatsApp tanpa
+        // dipaksa ganti kata sandi tiap kali submit.
+        $gantiSandi = $request->filled('password');
+        if ($gantiSandi) {
+            $rules['current_password'] = ['required', 'current_password'];
+            $rules['password'] = ['required', Password::defaults(), 'confirmed'];
         }
 
         $data = $request->validate($rules);
@@ -58,6 +74,10 @@ class ProfilController extends Controller
 
         if ($guru) {
             $guru->update(['nip' => $data['nip'] ?? null]);
+        }
+
+        if ($gantiSandi) {
+            $user->update(['password' => Hash::make($data['password'])]);
         }
 
         return back()->with('success', 'Profil berhasil diperbarui.');
