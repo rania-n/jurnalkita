@@ -62,10 +62,15 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Guru piket yang KEBAGIAN JADWAL HARI INI (bukan cuma "pernah dapat piket") —
-     * dipakai buat nav, biar menu Piket/Dispensasi cuma nongol di hari dia
-     * beneran bertugas. Beda dari isPiket() yang tetap dipakai buat akses fitur
-     * (boleh ajukan/lihat dispensasi kapan saja, bukan cuma pas hari piketnya).
+     * Guru piket yang SEDANG BERTUGAS SEKARANG (bukan cuma "kebagian hari ini",
+     * dan bukan cuma "pernah dapat piket") -- dipakai buat nav & dasbor, biar
+     * tampilan Piket cuma nongol SELAMA jam shift-nya beneran berlangsung.
+     * Begitu shift-nya lewat (mis. piket pagi 07.00-11.00, sekarang udah jam
+     * 11.20), guru itu balik ditampilkan sebagai guru biasa lagi di hari yang
+     * sama -- bukan "piket sepanjang hari" cuma karena kebetulan kebagian
+     * jadwal piket hari itu. Beda dari isPiket() yang tetap dipakai buat akses
+     * fitur (boleh ajukan/lihat dispensasi kapan saja, bukan cuma pas jam
+     * shift piketnya).
      */
     public function piketHariIni(): bool
     {
@@ -91,7 +96,21 @@ class User extends Authenticatable implements MustVerifyEmail
         // berlakuPada() -- piket sekarang per TANGGAL SPESIFIK (ulang tiap 2
         // minggu, bukan tiap minggu di hari yang sama); baris lama (tanggal
         // kosong) tetap dianggap berulang tiap minggu (lihat JadwalPiket).
-        return $this->guru->jadwalPikets()->berlakuPada(today())->exists();
+        // Ambil baris yang berlaku HARI ini dulu (query di DB), baru cek jam
+        // shift-nya satu-satu di PHP (mulai/selesai cuma nyimpen JAM, jadi
+        // dibandingkan sebagai string H:i:s, sama pola kayak Waktu::jpAktifSekarang()).
+        $sekarang = now()->format('H:i:s');
+
+        return $this->guru->jadwalPikets()->berlakuPada(today())->get()
+            ->contains(function (JadwalPiket $p) use ($sekarang) {
+                // mulai/selesai kosong = piket SEHARI PENUH tanpa jam spesifik --
+                // tetap dianggap bertugas kapan pun sepanjang hari itu.
+                if (! $p->mulai || ! $p->selesai) {
+                    return true;
+                }
+
+                return $sekarang >= $p->mulai->format('H:i:s') && $sekarang <= $p->selesai->format('H:i:s');
+            });
     }
 
     /** Waka yang PUNYA jadwal shift sama sekali -- kalau kosong berarti belum diatur (semua Waka dianggap standby). */
