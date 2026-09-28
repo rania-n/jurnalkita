@@ -142,12 +142,15 @@ class PiketMonitorTest extends TestCase
         $this->actingAs($admin)->get('/piket/monitor')->assertOk()->assertSee('X RPL 1');
     }
 
-    public function test_guru_biasa_bukan_piket_tidak_bisa_akses(): void
+    public function test_guru_biasa_bukan_piket_tetap_bisa_lihat_monitor(): void
     {
+        // Monitor Piket cuma buat LIHAT -- terbuka buat semua guru, bukan cuma
+        // yang piket hari ini (beda sama mencatat presensi siswa, yang tetap
+        // dikunci guru piket beneran, lihat PresensiSiswaTest/PiketController).
         $guruBiasa = User::factory()->role('guru')->create();
         Guru::create(['user_id' => $guruBiasa->id, 'nama' => 'Guru Biasa']);
 
-        $this->actingAs($guruBiasa)->get('/piket/monitor')->assertForbidden();
+        $this->actingAs($guruBiasa)->get('/piket/monitor')->assertOk();
     }
 
     public function test_ekspor_ringkasan_berisi_baris_sesuai_status(): void

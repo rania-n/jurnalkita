@@ -25,20 +25,16 @@ use Illuminate\View\View;
  * tapi pantauan guru piket: hari ini, tiap jam pelajaran di tiap kelas,
  * gurunya masuk/tidak hadir, atau jurnalnya belum diisi sama sekali.
  * Dikelompokkan per kelas ATAU per guru (bar pilih, bukan filter dropdown).
+ *
+ * Melihat (index/versi/ekspor/jurnalDetail) TERBUKA buat semua guru, bukan
+ * cuma yang piket hari ini -- cukup dijaga middleware route ('guru,waka,
+ * admin'), tanpa gate tambahan di sini. Cuma MENCATAT presensi siswa (lihat
+ * pastikanBolehInputPresensi()) yang tetap dikunci guru piket beneran, sama
+ * kayak Shopee: lihat produk bebas, checkout baru butuh login.
  */
 class PiketController extends Controller
 {
     private const LABEL_STATUS = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
-
-    private function pastikanBolehLihat(): void
-    {
-        $user = auth()->user();
-        abort_unless(
-            in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
-            403,
-            'Hanya guru piket yang dapat mengakses ini.'
-        );
-    }
 
     private function pastikanBolehInputPresensi(): void
     {
@@ -119,8 +115,6 @@ class PiketController extends Controller
 
     public function index(Request $request): View
     {
-        $this->pastikanBolehLihat();
-
         [$dari, $sampai] = $this->rentangTanggal($request);
         $mode = $request->get('mode') === 'guru' ? 'guru' : 'kelas';
         $baris = $this->barisRange($dari, $sampai);
@@ -167,8 +161,6 @@ class PiketController extends Controller
     /** Endpoint ringan buat di-poll (initAutoRefresh()) -- lihat App\Support\Versi. */
     public function versi(Request $request): JsonResponse
     {
-        $this->pastikanBolehLihat();
-
         [$dari, $sampai] = $this->rentangTanggal($request);
         $haris = collect(\Carbon\CarbonPeriod::create($dari, $sampai))
             ->map(fn ($d) => ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$d->dayOfWeek - 1] ?? null)
@@ -184,8 +176,6 @@ class PiketController extends Controller
     /** Ekspor ringkas rentang tanggal terpilih, semua kelompok — cuma baris jam/status, tanpa presensi. */
     public function ekspor(Request $request)
     {
-        $this->pastikanBolehLihat();
-
         [$dari, $sampai] = $this->rentangTanggal($request);
         $baris = $this->barisRange($dari, $sampai);
 
@@ -234,7 +224,6 @@ class PiketController extends Controller
      */
     public function eksporDetail(Request $request, string $tipe, int $id)
     {
-        $this->pastikanBolehLihat();
         abort_unless(in_array($tipe, ['kelas', 'guru'], true), 404);
 
         [$dari, $sampai] = $this->rentangTanggal($request);
@@ -336,7 +325,6 @@ class PiketController extends Controller
      */
     public function jurnalDetail(Jurnal $jurnal): View
     {
-        $this->pastikanBolehLihat();
         $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'guru', 'absensis.siswa');
 
         return view('piket._jurnal-detail-fragment', compact('jurnal'));

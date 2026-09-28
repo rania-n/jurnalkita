@@ -24,6 +24,10 @@ return [
         // guru-piket (hari piket, guru nggak dijadwalkan mengajar).
         ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
+        // Monitor Piket kini terbuka buat SEMUA guru (bukan cuma yang piket hari
+        // ini) -- lihat PiketController, cuma lihat, sama kayak menu 'waka' di
+        // bawah yang juga selalu punya akses walau bukan piket.
+        ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
@@ -34,6 +38,7 @@ return [
         ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => ['jurnal.index', 'jurnal.show']],
         ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
+        ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
         ['label' => 'Wali Kelas', 'icon' => 'groups', 'route' => 'guru.wali-kelas.index', 'match' => 'guru.wali-kelas.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
