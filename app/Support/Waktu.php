@@ -197,6 +197,22 @@ class Waktu
         return self::rentangJamDenganKategori(self::kategoriUntukHari($hari), $jamKeMulai, $jamKeSelesai);
     }
 
+    /** Jam mulai (format "H:i") satu JP tertentu pada hari tertentu. */
+    public static function jamMulaiUntukHari(string $hari, int $jamKe): ?string
+    {
+        $mulai = JamPelajaran::where('kategori', self::kategoriUntukHari($hari))->where('jam_ke', $jamKe)->value('mulai');
+
+        return $mulai?->format('H:i');
+    }
+
+    /** Jam selesai (format "H:i") satu JP tertentu pada hari tertentu. */
+    public static function jamSelesaiUntukHari(string $hari, int $jamKe): ?string
+    {
+        $selesai = JamPelajaran::where('kategori', self::kategoriUntukHari($hari))->where('jam_ke', $jamKe)->value('selesai');
+
+        return $selesai?->format('H:i');
+    }
+
     private static function rentangJamDenganKategori(string $kategori, int $jamKeMulai, ?int $jamKeSelesai = null): ?string
     {
         $awal = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jamKeMulai)->first();

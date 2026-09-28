@@ -219,6 +219,8 @@
                 $selesaiAwal = old('jam_ke_selesai', $jadwalTerpilih->jam_ke_selesai ?? $jpSekarang);
                 $hariJadwalTerpilih = $jadwalTerpilih->hari ?? \App\Support\HariSekolah::hariIni();
                 $jamAwal = $hariJadwalTerpilih ? \App\Support\Waktu::rentangJamUntukHari($hariJadwalTerpilih, $mulaiAwal, $selesaiAwal) : null;
+                $jamMulaiAwal = $hariJadwalTerpilih ? \App\Support\Waktu::jamMulaiUntukHari($hariJadwalTerpilih, $mulaiAwal) : null;
+                $jamSelesaiAwal = $hariJadwalTerpilih ? \App\Support\Waktu::jamSelesaiUntukHari($hariJadwalTerpilih, $selesaiAwal) : null;
             @endphp
 
             {{-- Kelas & Mata Pelajaran -- diletakkan SETELAH blok Tidak Hadir
@@ -231,11 +233,8 @@
                 @if ($jadwalTerkunci)
                     <x-ui.field-static label="Kelas & Mata Pelajaran" icon="lock_clock" tone="muted">
                         <span data-jadwal-terkunci-teks>
-                            {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — JP {{ $jadwalTerpilih->jam_ke_mulai }}–{{ $jadwalTerpilih->jam_ke_selesai }}
+                            {{ $jadwalTerpilih->kelas->nama }} · {{ $jadwalTerpilih->mapel->nama }} — {{ ucfirst($jadwalTerpilih->hari) }}
                         </span>
-                        @if ($jamAwal)
-                            <span class="text-muted-2">({{ $jamAwal }})</span>
-                        @endif
                     </x-ui.field-static>
                     <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
                     <p class="-mt-1 text-xs text-muted-2">Otomatis mengikuti jadwal Anda saat ini. Jika jadwal ini salah, hubungi Admin.</p>
@@ -247,9 +246,12 @@
                     <x-ui.select label="Kelas & Mata Pelajaran" name="jadwal_id" id="jadwal_id" required>
                         <option value="" disabled @selected(! $jadwalTerpilih) hidden>Pilih jadwal</option>
                         @foreach ($jadwals as $j)
-                            @php $jamOpsi = \App\Support\Waktu::rentangJamUntukHari($j->hari, $j->jam_ke_mulai, $j->jam_ke_selesai); @endphp
-                            <option value="{{ $j->id }}" data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}" @selected($jadwalTerpilih?->id === $j->id)>
-                                {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }} JP {{ $j->jam_ke_mulai }}–{{ $j->jam_ke_selesai }}{{ $jamOpsi ? " ({$jamOpsi})" : '' }}
+                            <option value="{{ $j->id }}"
+                                data-mulai="{{ $j->jam_ke_mulai }}" data-selesai="{{ $j->jam_ke_selesai }}"
+                                data-mulai-jam="{{ \App\Support\Waktu::jamMulaiUntukHari($j->hari, $j->jam_ke_mulai) }}"
+                                data-selesai-jam="{{ \App\Support\Waktu::jamSelesaiUntukHari($j->hari, $j->jam_ke_selesai) }}"
+                                @selected($jadwalTerpilih?->id === $j->id)>
+                                {{ $j->kelas->nama }} · {{ $j->mapel->nama }} — {{ ucfirst($j->hari) }}
                             </option>
                         @endforeach
                     </x-ui.select>
@@ -266,13 +268,13 @@
                  info jam pelajaran tidak relevan untuk ditampilkan. --}}
             <div id="tampilan-jam-mulai-wrap">
                 <x-ui.field-static label="Jam ke- (mulai)" icon="schedule" tone="muted">
-                    <span id="tampilan-jam-mulai">Jam ke-{{ $mulaiAwal }}</span>
+                    <span id="tampilan-jam-mulai">Jam ke-{{ $mulaiAwal }}{{ $jamMulaiAwal ? " ({$jamMulaiAwal})" : '' }}</span>
                 </x-ui.field-static>
                 <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
             </div>
             <div id="tampilan-jam-selesai-wrap">
                 <x-ui.field-static label="Jam ke- (selesai)" icon="schedule" tone="muted">
-                    <span id="tampilan-jam-selesai">Jam ke-{{ $selesaiAwal }}</span>
+                    <span id="tampilan-jam-selesai">Jam ke-{{ $selesaiAwal }}{{ $jamSelesaiAwal ? " ({$jamSelesaiAwal})" : '' }}</span>
                 </x-ui.field-static>
                 <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">
             </div>
@@ -539,9 +541,9 @@
                             const selesai = opt?.dataset.selesai;
                             if (!mulai) return;
 
-                            tampilanMulai.textContent = 'Jam ke-' + mulai;
+                            tampilanMulai.textContent = 'Jam ke-' + mulai + (opt.dataset.mulaiJam ? ' (' + opt.dataset.mulaiJam + ')' : '');
                             inputMulai.value = mulai;
-                            tampilanSelesai.textContent = 'Jam ke-' + selesai;
+                            tampilanSelesai.textContent = 'Jam ke-' + selesai + (opt.dataset.selesaiJam ? ' (' + opt.dataset.selesaiJam + ')' : '');
                             inputSelesai.value = selesai;
                         }
 
