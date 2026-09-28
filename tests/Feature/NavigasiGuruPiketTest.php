@@ -103,6 +103,53 @@ class NavigasiGuruPiketTest extends TestCase
         $this->actingAs($guru)->get('/dispensasi')->assertOk();
     }
 
+    /**
+     * Piket yang punya JAM SHIFT spesifik (bukan "sehari penuh" tanpa jam)
+     * balik ditampilkan sebagai guru biasa begitu shift-nya lewat, di HARI
+     * yang sama -- bukan piket sepanjang hari cuma karena kebetulan kebagian
+     * jadwal piket hari itu. Dasbor Piket & dasbor Guru Biasa juga sengaja
+     * TIDAK digabung ditampilkan bareng lagi (lihat guru.blade.php).
+     */
+    public function test_dasbor_balik_jadi_guru_biasa_begitu_shift_piket_lewat(): void
+    {
+        $guru = User::factory()->role('guru')->create();
+        $g = Guru::create(['user_id' => $guru->id, 'nama' => 'Guru Shift Piket']);
+        JadwalPiket::create(['guru_id' => $g->id, 'hari' => 'senin', 'mulai' => '07:00', 'selesai' => '11:00']);
+
+        $this->travelTo(Carbon::parse('next monday 08:00'));
+        $this->assertTrue($guru->piketHariIni());
+        $this->actingAs($guru)->get('/guru')->assertOk()
+            ->assertSee('Ajukan Dispensasi')
+            ->assertDontSee('Jadwal Mengajar Hari Ini');
+
+        $this->travelTo(Carbon::parse('next monday 12:00')); // shift 07.00-11.00 sudah lewat
+        $this->assertFalse($guru->piketHariIni());
+        $this->actingAs($guru)->get('/guru')->assertOk()
+            ->assertDontSee('Sedang Berlangsung')
+            ->assertSee('Jadwal Mengajar Hari Ini');
+    }
+
+    /**
+     * Ringkasan "Pantauan Jurnal Hari Ini" (progress bar) & tombol "Buat
+     * Pengajuan Dispensasi" di dalam kartu Dispensasi SENGAJA dihapus dari
+     * Beranda -- yang pertama sudah ada di halaman Monitor Piket, yang kedua
+     * dobel sama kartu "Ajukan Dispensasi" di menu aksi cepat. Lihat juga
+     * komentar di guru.blade.php.
+     */
+    public function test_beranda_piket_tidak_mengulang_info_yang_sudah_ada_di_menu_lain(): void
+    {
+        $this->travelTo(Carbon::parse('next monday 08:00'));
+
+        $guru = User::factory()->role('guru')->create();
+        $g = Guru::create(['user_id' => $guru->id, 'nama' => 'Guru Piket']);
+        JadwalPiket::create(['guru_id' => $g->id, 'hari' => 'senin']);
+
+        $this->actingAs($guru)->get('/guru')->assertOk()
+            ->assertDontSee('Pantauan Jurnal Hari Ini')
+            ->assertDontSee('Buat Pengajuan Dispensasi')
+            ->assertSee('Ajukan Dispensasi'); // kartu menu aksi cepat tetap ada
+    }
+
     public function test_sticky_bar_waktu_muncul_di_semua_halaman_guru_piket(): void
     {
         $this->travelTo(Carbon::parse('next monday 08:00'));

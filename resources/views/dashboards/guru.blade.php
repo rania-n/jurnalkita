@@ -5,22 +5,6 @@
     $isWali = auth()->user()->isWali();
 
     if ($piketHariIni) {
-        $jpAktif = \App\Support\Waktu::jpAktifSekarang();
-        $dalamJamSekolah = \App\Support\Waktu::dalamJamSekolah();
-
-        // Piket BUKAN berarti otomatis nggak ada jadwal ngajar hari itu --
-        // dua-duanya bisa nempel di hari yang sama. Dihitung juga di sini
-        // (bukan cuma di cabang "else" di bawah) biar "Jadwal Mengajar Hari
-        // Ini" tetap kelihatan kalau ternyata guru ini piket SEKALIGUS ngajar
-        // -- jangan disembunyiin cuma gara-gara lagi piket (lihat pemakaian
-        // di bawah, dekat "Jadwal Mengajar Hari Ini").
-        $jadwalHariIni = $hari && $guru
-            ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hari)->orderBy('jam_ke_mulai')->get()
-            : collect();
-        $jurnalGuruHariIni = $guru
-            ? $guru->jurnals()->whereDate('tanggal', today())->get()->keyBy('jadwal_id')
-            : collect();
-
         // Jam berakhir JP TERAKHIR hari ini -- dipakai buat kasih tau "piket
         // sampai jam berapa" di badge atas (piket nggak punya jam sendiri di
         // data, jadi dipakein jam pulang sekolah beneran).
@@ -30,7 +14,10 @@
         // Jadwal + jurnal SATU HARI SEKOLAH (bukan cuma jadwal guru ini sendiri
         // -- piket ngawasin SEMUA kelas), dipetakan ke status per baris. Cuma
         // 'hadir'/'tidak_hadir' yang valid sekarang (status "Tugas Luar" udah
-        // dihapus dari aplikasi, lihat migration remove_tugas_status).
+        // dihapus dari aplikasi, lihat migration remove_tugas_status). Cuma
+        // dipakai buat "Catatan Guru Tidak Hadir" di bawah -- ringkasan
+        // "Pantauan Jurnal" & "Sedang Berlangsung" udah dipindah sepenuhnya
+        // ke halaman Monitor Piket (menu navbar), nggak diulang di sini lagi.
         $jadwalsHariIni = $hari
             ? \App\Models\Jadwal::where('hari', $hari)->with('kelas', 'mapel', 'guru')->get()
             : collect();
@@ -54,27 +41,17 @@
             ];
         });
 
-        $totalJp = $piketRows->count();
-        $totalHadir = $piketRows->where('status', 'hadir')->count();
-        $totalTidakHadir = $piketRows->where('status', 'tidak_hadir')->count();
-        $totalBelumDiisi = $piketRows->where('status', 'belum_diisi')->count();
-        $totalTerisi = $totalHadir + $totalTidakHadir;
-        $persenTerisi = $totalJp > 0 ? round(($totalTerisi / $totalJp) * 100) : 0;
-
-        // JP yang beneran lagi jalan detik ini -- yang paling mendesak buat
-        // dipantau (kelas yang belum diisi jurnalnya PADAHAL jamnya lagi
-        // berlangsung sekarang, bukan cuma "hari ini" secara umum).
-        $jpAktifRows = $jpAktif
-            ? $piketRows->filter(fn ($r) => $r['jadwal']->jam_ke_mulai <= $jpAktif && $r['jadwal']->jam_ke_selesai >= $jpAktif)
-            : collect();
-        $jpAktifBelumDiisi = $jpAktifRows->where('status', 'belum_diisi');
-        $jpAktifSudahDiisi = $jpAktifRows->where('status', '!=', 'belum_diisi');
-
         $guruTidakHadirHariIni = $piketRows->where('status', 'tidak_hadir');
 
+        // Persis "HARI INI" beneran (tanggal = hari ini), bukan dispensasi
+        // multi-hari yang KEBETULAN masih aktif tapi diajukan di hari lain --
+        // biar judul "Dispensasi Siswa Hari Ini" nggak menyesatkan. Yang
+        // ditolak juga nggak ikut ditampilkan -- itu udah beres/nggak perlu
+        // ditindaklanjuti lagi, cuma bikin daftar lebih ramai tanpa nambah
+        // info yang perlu diperhatikan piket.
         $dispensasiHariIni = \App\Models\Dispensasi::with('siswa.kelas')
-            ->where(fn ($q) => $q->whereDate('tanggal', '<=', today())
-                ->where(fn ($w) => $w->whereNull('tanggal_selesai')->orWhereDate('tanggal_selesai', '>=', today())))
+            ->whereDate('tanggal', today())
+            ->where('status_akhir', '!=', 'rejected')
             ->latest()
             ->get();
 
@@ -97,6 +74,13 @@
             ? \App\Support\WaLink::url($wakaBertugas->no_hp, "Halo Bapak/Ibu {$wakaBertugas->name} (Waka Kesiswaan), saya ".auth()->user()->name.' (Guru Piket hari ini), ingin koordinasi terkait dispensasi siswa.')
             : null;
     } else {
+        // Dasbor Guru Piket dan dasbor Guru Biasa SENGAJA dipisah total --
+        // begitu lagi bertugas piket, halaman ini cuma nampilin sisi piketnya
+        // (lihat cabang atas), sisi "guru biasa" (jadwal mengajar sendiri)
+        // baru muncul kalau BENERAN lagi nggak piket. Guru yang piket sekalipun
+        // kebetulan juga punya jadwal ngajar hari itu akan tetap lihat jadwal
+        // itu di sini begitu jam piketnya lewat (piketHariIni() ikut jam
+        // shift, lihat User::piketHariIni()), bukan digabung tampil bareng.
         $jadwalHariIni = $hari && $guru
             ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hari)->orderBy('jam_ke_mulai')->get()
             : collect();
@@ -105,15 +89,15 @@
         $jurnalGuruHariIni = $guru
             ? $guru->jurnals()->whereDate('tanggal', today())->get()->keyBy('jadwal_id')
             : collect();
-    }
 
-    // Kartu sorotan (pelajaran BERIKUTNYA hari ini) + ringkasan jumlah --
-    // yang lagi berlangsung sekarang sengaja nggak disorot di sini, itu
-    // sudah cukup kelihatan & bisa diisi dari daftar jadwal biasa di bawah.
-    $jadwalSorotan = \App\Support\Waktu::jadwalSorotan($jadwalHariIni);
-    $jumlahJadwalHariIni = $jadwalHariIni->count();
-    $jumlahSudahDiisiHariIniRingkasan = $jadwalHariIni->filter(fn ($j) => $jurnalGuruHariIni->has($j->id))->count();
-    $jumlahBelumDiisiHariIniRingkasan = $jumlahJadwalHariIni - $jumlahSudahDiisiHariIniRingkasan;
+        // Kartu sorotan (pelajaran BERIKUTNYA hari ini) + ringkasan jumlah --
+        // yang lagi berlangsung sekarang sengaja nggak disorot di sini, itu
+        // sudah cukup kelihatan & bisa diisi dari daftar jadwal biasa di bawah.
+        $jadwalSorotan = \App\Support\Waktu::jadwalSorotan($jadwalHariIni);
+        $jumlahJadwalHariIni = $jadwalHariIni->count();
+        $jumlahSudahDiisiHariIniRingkasan = $jadwalHariIni->filter(fn ($j) => $jurnalGuruHariIni->has($j->id))->count();
+        $jumlahBelumDiisiHariIniRingkasan = $jumlahJadwalHariIni - $jumlahSudahDiisiHariIniRingkasan;
+    }
 
     // Pilihan awal cuma ditampilkan SEKALI per login (bukan tiap kali buka
     // dasbor) -- ditandai session (bukan localStorage) biar konsisten walau
@@ -161,48 +145,11 @@
 
     @if ($piketHariIni)
         {{-- ==================== DASBOR GURU PIKET ==================== --}}
-
-        {{-- Progress bar + ringkasan cepat --}}
-        <div class="mb-4 rounded-2xl border border-surface-alt bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 class="text-base font-bold text-ink">Pantauan Jurnal Hari Ini</h2>
-                    <p class="mt-0.5 text-xs text-muted">
-                        <strong class="text-ink">{{ $totalTerisi }}</strong> dari {{ $totalJp }} jam pelajaran sudah dilaporkan guru
-                    </p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-extrabold text-navy">{{ $persenTerisi }}%</span>
-                    <span class="text-xs text-muted">terisi</span>
-                </div>
-            </div>
-
-            <div class="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-surface-alt">
-                <div class="h-full rounded-full bg-gradient-to-r from-navy to-hadir transition-all duration-500" style="width: {{ $persenTerisi }}%"></div>
-            </div>
-
-            <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
-                <div class="flex flex-col rounded-xl bg-surface-alt/70 p-3">
-                    <span class="text-[11px] font-semibold text-muted">Total Terjadwal</span>
-                    <span class="mt-0.5 text-lg font-bold text-ink">{{ $totalJp }} <span class="text-xs font-normal text-muted">JP</span></span>
-                </div>
-                <div class="flex flex-col rounded-xl bg-hadir-soft/60 p-3">
-                    <span class="text-[11px] font-semibold text-hadir">Guru Hadir</span>
-                    <span class="mt-0.5 text-lg font-bold text-hadir">{{ $totalHadir }} <span class="text-xs font-normal opacity-80">JP</span></span>
-                </div>
-                {{-- max-sm:col-span-2 -- 3 kartu di grid 2 kolom (HP) selalu
-                     nyisain yang terakhir ini sendirian di barisnya (2+1),
-                     di-stretch penuh KHUSUS di bawah breakpoint sm -- begitu
-                     naik ke sm:grid-cols-3, 3 kartunya udah pas 1 baris,
-                     nggak butuh di-stretch lagi (makanya bukan grid-fill-last
-                     generik, itu bakal maksa dia turun baris sendiri di
-                     breakpoint 3 kolom). --}}
-                <div class="flex flex-col rounded-xl bg-sakit-soft/60 p-3 max-sm:col-span-2">
-                    <span class="text-[11px] font-semibold text-sakit">Belum Diisi</span>
-                    <span class="mt-0.5 text-lg font-bold text-sakit">{{ $totalBelumDiisi }} <span class="text-xs font-normal opacity-80">JP</span></span>
-                </div>
-            </div>
-        </div>
+        {{-- Ringkasan "Pantauan Jurnal Hari Ini" (progress bar) & "Sedang
+             Berlangsung: JP ..." SENGAJA tidak diulang di sini lagi -- itu
+             persis konten halaman Monitor Piket (sudah ada tombolnya di
+             bawah & di menu navbar bawah), jadi cuma dobel informasi kalau
+             ditampilkan juga di Beranda. --}}
 
         {{-- Menu aksi cepat --}}
         <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -240,154 +187,65 @@
             </a>
         </div>
 
-        {{-- Live monitor JP yang lagi jalan sekarang -- ini yang paling
-             mendesak, jadi selalu kebuka full kalau ada yang belum diisi
-             (bukan disembunyiin di balik <details>). Daftar detailnya sendiri
-             baru dibungkus <details> pas jumlahnya lumayan banyak. --}}
-        <div class="mb-6 overflow-hidden rounded-2xl border border-surface-alt bg-card shadow-[var(--shadow-soft)]">
-            @if (! $jpAktif)
-                <div class="p-4 sm:p-5">
-                    <div class="flex items-center gap-2 border-b border-surface-alt pb-3">
-                        <span class="flex h-3 w-3 rounded-full bg-muted"></span>
-                        <h3 class="text-sm font-bold text-ink">Pantauan Sesi Sekarang</h3>
-                    </div>
-                    <div class="py-6 text-center text-muted">
-                        <x-icon name="snooze" :size="32" class="mx-auto mb-1 text-muted-2" />
-                        <p class="text-sm font-semibold text-ink">
-                            {{ $dalamJamSekolah ? 'Saat ini waktu istirahat / jeda pelajaran' : 'Di luar jam pelajaran aktif sekolah' }}
-                        </p>
-                        <p class="mt-0.5 text-xs text-muted">Monitoring per-JP otomatis aktif saat jam pelajaran dimulai.</p>
-                    </div>
-                </div>
-            @elseif ($jpAktifBelumDiisi->isEmpty())
-                <div class="p-4 sm:p-5">
-                    <div class="flex items-center justify-between border-b border-surface-alt pb-3">
-                        <div class="flex items-center gap-2">
-                            <span class="flex h-3 w-3 rounded-full bg-hadir"></span>
-                            <h3 class="text-sm font-bold text-ink">Sedang Berlangsung: JP {{ $jpAktif }}</h3>
-                        </div>
-                        <span class="text-xs font-semibold text-hadir">{{ $jpAktifSudahDiisi->count() }}/{{ $jpAktifRows->count() }} Kelas Terisi (100%)</span>
-                    </div>
-                    <div class="py-5 text-center text-hadir">
-                        <x-icon name="task_alt" :size="32" class="mx-auto mb-1 text-hadir" />
-                        <p class="text-sm font-bold text-ink">Semua Kelas di JP {{ $jpAktif }} Sudah Terisi!</p>
-                        <p class="mt-0.5 text-xs text-muted">Seluruh guru yang terjadwal di jam ini sudah melaporkan kehadiran dan materi.</p>
-                    </div>
-                </div>
-            @else
-                <details class="group" open>
-                    <summary class="flex cursor-pointer list-none items-center justify-between p-4 transition-colors select-none hover:bg-surface/50 sm:p-5 [&::-webkit-details-marker]:hidden">
-                        <div class="flex min-w-0 items-center gap-3">
-                            <span class="relative flex h-3 w-3 shrink-0">
-                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sakit opacity-75"></span>
-                                <span class="relative inline-flex h-3 w-3 rounded-full bg-sakit"></span>
-                            </span>
-                            <div class="min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <h3 class="text-sm font-bold text-ink">Sedang Berlangsung: JP {{ $jpAktif }}</h3>
-                                    <span class="rounded-full bg-sakit-soft px-2 py-0.5 text-[10px] font-bold text-sakit">{{ $jpAktifBelumDiisi->count() }} Belum Diisi</span>
-                                </div>
-                                <p class="mt-0.5 text-xs text-muted">{{ $jpAktifSudahDiisi->count() }}/{{ $jpAktifRows->count() }} Kelas Terisi</p>
-                            </div>
-                        </div>
-                        <span class="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-alt text-muted transition-colors group-hover:text-ink">
-                            <x-icon name="expand_more" :size="20" class="transition-transform duration-200 group-open:rotate-180" />
-                        </span>
-                    </summary>
-
-                    <div class="border-t border-surface-alt bg-surface/30 p-4 sm:p-5">
-                        <div class="mb-3 flex items-center justify-between">
-                            <p class="flex items-center gap-1 text-xs font-bold text-sakit">
-                                <x-icon name="warning" :size="15" />
-                                {{ $jpAktifBelumDiisi->count() }} kelas belum diisi jurnal di JP {{ $jpAktif }}
-                            </p>
-                            <a href="{{ route('piket.monitor.index') }}" class="text-xs font-semibold text-navy hover:underline">Monitor Piket Lengkap →</a>
-                        </div>
-
-                        <div class="max-h-80 overflow-y-auto pr-1">
-                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                                @foreach ($jpAktifBelumDiisi as $item)
-                                    <div class="flex items-start justify-between gap-2 rounded-xl border border-sakit/20 bg-card p-3">
-                                        <div class="min-w-0">
-                                            <p class="truncate text-xs font-bold text-ink">{{ $item['jadwal']->kelas->nama }}</p>
-                                            <p class="mt-0.5 truncate text-[11px] text-muted">{{ $item['jadwal']->mapel->nama }}</p>
-                                            <p class="mt-0.5 truncate text-[11px] font-medium text-ink">{{ $item['jadwal']->guru->nama }}</p>
-                                        </div>
-                                        <span class="shrink-0 rounded-md bg-sakit-soft px-1.5 py-0.5 text-[10px] font-bold text-sakit">Belum Diisi</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                </details>
-            @endif
-        </div>
-
         {{-- Dispensasi hari ini & tim koordinasi piket --}}
         <div class="mb-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+            {{-- Nggak dibungkus <details> lagi (beda dari "Tim Piket &
+                 Koordinasi" di sebelahnya) -- ini yang paling sering perlu
+                 langsung kelihatan piket tanpa satu tap tambahan buat buka.
+                 Tombol "Buat Pengajuan" di bawah SENGAJA dihapus -- sudah ada
+                 kartu "Ajukan Dispensasi" di menu aksi cepat atas, dobel
+                 kalau diulang lagi di sini. --}}
             <div class="overflow-hidden rounded-2xl border border-surface-alt bg-card shadow-[var(--shadow-soft)]">
-                <details class="group">
-                    <summary class="flex cursor-pointer list-none items-center justify-between p-4 transition-colors select-none hover:bg-surface/50 sm:p-5 [&::-webkit-details-marker]:hidden">
-                        <div class="flex min-w-0 items-center gap-3">
-                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-alt text-navy">
-                                <x-icon name="fact_check" :size="18" />
-                            </span>
-                            <div class="min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <h3 class="text-sm font-bold text-ink">Dispensasi Siswa Hari Ini</h3>
-                                    @if ($dispensasiPendingCount > 0)
-                                        <span class="rounded-full bg-sakit-soft px-2 py-0.5 text-[10px] font-bold text-sakit">{{ $dispensasiPendingCount }} Menunggu</span>
-                                    @endif
-                                </div>
-                                <p class="mt-0.5 truncate text-[11px] text-muted">{{ $dispensasiHariIni->count() }} siswa izin ({{ $dispensasiPendingCount }} menunggu, {{ $dispensasiApprovedCount }} disetujui)</p>
-                            </div>
+                <div class="flex items-center gap-3 p-4 sm:p-5">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-alt text-navy">
+                        <x-icon name="fact_check" :size="18" />
+                    </span>
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h3 class="text-sm font-bold text-ink">Dispensasi Siswa Hari Ini</h3>
+                            @if ($dispensasiPendingCount > 0)
+                                <span class="rounded-full bg-sakit-soft px-2 py-0.5 text-[10px] font-bold text-sakit">{{ $dispensasiPendingCount }} Menunggu</span>
+                            @endif
                         </div>
-                        <span class="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-alt text-muted transition-colors group-hover:text-ink">
-                            <x-icon name="expand_more" :size="20" class="transition-transform duration-200 group-open:rotate-180" />
-                        </span>
-                    </summary>
-
-                    <div class="border-t border-surface-alt p-4 pt-3 sm:p-5">
-                        <div class="mb-3 flex items-center justify-between">
-                            <span class="text-xs font-medium text-muted">Daftar Pengajuan Hari Ini</span>
-                            <a href="{{ route('dispensasi.index') }}" class="text-xs font-semibold text-navy hover:underline">Lihat Semua →</a>
-                        </div>
-
-                        @if ($dispensasiHariIni->isEmpty())
-                            <div class="py-6 text-center text-muted">
-                                <x-icon name="verified" :size="28" class="mx-auto mb-1 text-muted-2" />
-                                <p class="text-xs font-semibold text-ink">Tidak ada siswa dispensasi hari ini</p>
-                                <p class="mt-0.5 text-[11px] text-muted">Belum ada pengajuan izin keluar atau kegiatan lomba.</p>
-                            </div>
-                        @else
-                            <div class="flex max-h-64 flex-col gap-2 overflow-y-auto pr-1">
-                                @foreach ($dispensasiHariIni->take(6) as $disp)
-                                    <a href="{{ route('dispensasi.surat', $disp) }}" class="flex items-center justify-between gap-2 rounded-xl border border-surface-alt/60 p-2.5 transition-colors hover:bg-surface-alt/60">
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-center gap-1.5">
-                                                <p class="truncate text-xs font-bold text-ink">{{ $disp->siswa->nama }}</p>
-                                                <span class="text-[10px] text-muted">· {{ $disp->siswa->kelas?->nama }}</span>
-                                            </div>
-                                            <p class="mt-0.5 truncate text-[11px] text-muted">{{ $disp->labelJam() }} · {{ $disp->alasan }}</p>
-                                        </div>
-                                        <span @class([
-                                            'shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold',
-                                            'bg-sakit-soft text-sakit' => $disp->status_akhir === 'pending',
-                                            'bg-hadir-soft text-hadir' => $disp->status_akhir === 'approved',
-                                            'bg-alpha-soft text-alpha' => $disp->status_akhir === 'rejected',
-                                        ])>
-                                            {{ ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$disp->status_akhir] ?? $disp->status_akhir }}
-                                        </span>
-                                    </a>
-                                @endforeach
-                            </div>
-                        @endif
-
-                        <div class="mt-3 border-t border-surface-alt pt-3">
-                            <x-ui.button :href="route('dispensasi.create')" icon="add" class="!h-9 w-full !text-xs">Buat Pengajuan Dispensasi</x-ui.button>
-                        </div>
+                        <p class="mt-0.5 truncate text-[11px] text-muted">{{ $dispensasiHariIni->count() }} siswa izin ({{ $dispensasiPendingCount }} menunggu, {{ $dispensasiApprovedCount }} disetujui)</p>
                     </div>
-                </details>
+                </div>
+
+                <div class="border-t border-surface-alt p-4 pt-3 sm:p-5">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="text-xs font-medium text-muted">Daftar Pengajuan Hari Ini</span>
+                        <a href="{{ route('dispensasi.index') }}" class="text-xs font-semibold text-navy hover:underline">Lihat Semua →</a>
+                    </div>
+
+                    @if ($dispensasiHariIni->isEmpty())
+                        <div class="py-6 text-center text-muted">
+                            <x-icon name="verified" :size="28" class="mx-auto mb-1 text-muted-2" />
+                            <p class="text-xs font-semibold text-ink">Tidak ada siswa dispensasi hari ini</p>
+                            <p class="mt-0.5 text-[11px] text-muted">Belum ada pengajuan izin keluar atau kegiatan lomba.</p>
+                        </div>
+                    @else
+                        <div class="flex max-h-64 flex-col gap-2 overflow-y-auto pr-1">
+                            @foreach ($dispensasiHariIni->take(6) as $disp)
+                                <a href="{{ route('dispensasi.surat', $disp) }}" class="flex items-center justify-between gap-2 rounded-xl border border-surface-alt/60 p-2.5 transition-colors hover:bg-surface-alt/60">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <p class="truncate text-xs font-bold text-ink">{{ $disp->siswa->nama }}</p>
+                                            <span class="text-[10px] text-muted">· {{ $disp->siswa->kelas?->nama }}</span>
+                                        </div>
+                                        <p class="mt-0.5 truncate text-[11px] text-muted">{{ $disp->labelJam() }} · {{ $disp->alasan }}</p>
+                                    </div>
+                                    <span @class([
+                                        'shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold',
+                                        'bg-sakit-soft text-sakit' => $disp->status_akhir === 'pending',
+                                        'bg-hadir-soft text-hadir' => $disp->status_akhir === 'approved',
+                                    ])>
+                                        {{ ['pending' => 'Menunggu', 'approved' => 'Disetujui'][$disp->status_akhir] ?? $disp->status_akhir }}
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <div class="overflow-hidden rounded-2xl border border-surface-alt bg-card shadow-[var(--shadow-soft)]">
@@ -529,13 +387,12 @@
         </a>
     @endif
 
-    {{-- Piket TETAP bisa nempel jadwal ngajar di hari yang sama -- kalau
-         ternyata ada, tetap ditampilkan (jangan disembunyiin cuma gara-gara
-         lagi piket). Kalau piket TANPA jadwal ngajar (kasus paling umum),
-         bagian ini disembunyikan total -- state kosongnya ("Tidak ada jadwal
-         hari ini, isi jurnal buat jadwal lain") nggak relevan buat fokus
-         piket hari itu. --}}
-    @if (! $piketHariIni || $jadwalHariIni->isNotEmpty())
+    {{-- Sisi "guru biasa" (jadwal mengajar sendiri) SENGAJA cuma tampil kalau
+         BENERAN nggak lagi piket -- dasbor Piket & dasbor Guru Biasa nggak
+         digabung ditampilkan bareng lagi (lihat User::piketHariIni(), sudah
+         ikut jam shift). Begitu shift piketnya lewat, bagian ini otomatis
+         muncul sendiri di reload/kunjungan berikutnya hari yang sama. --}}
+    @if (! $piketHariIni)
         @if ($jadwalSorotan)
             <x-ui.jadwal-sorotan :jadwal="$jadwalSorotan['jadwal']" />
         @endif
