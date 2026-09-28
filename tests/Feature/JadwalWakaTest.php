@@ -98,6 +98,63 @@ class JadwalWakaTest extends TestCase
         $this->assertDatabaseHas('jadwal_wakas', ['user_id' => $waka->id, 'hari' => 'senin']);
     }
 
+    public function test_admin_bisa_tambah_lebih_dari_satu_waka_di_hari_yang_sama(): void
+    {
+        $admin = User::factory()->role('admin')->create();
+        $waka1 = User::factory()->role('waka')->create();
+        $waka2 = User::factory()->role('waka')->create();
+
+        $this->actingAs($admin)->post('/admin/jadwal-waka', [
+            'user_id' => $waka1->id, 'hari' => 'senin',
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($admin)->post('/admin/jadwal-waka', [
+            'user_id' => $waka2->id, 'hari' => 'senin',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame(2, JadwalWaka::where('hari', 'senin')->count());
+    }
+
+    public function test_admin_bisa_ubah_jadwal_waka_yang_ada(): void
+    {
+        $admin = User::factory()->role('admin')->create();
+        $waka1 = User::factory()->role('waka')->create();
+        $waka2 = User::factory()->role('waka')->create();
+
+        $j1 = JadwalWaka::create(['user_id' => $waka1->id, 'hari' => 'senin']);
+        $j2 = JadwalWaka::create(['user_id' => $waka2->id, 'hari' => 'senin']);
+
+        // Ubah hari j1 menjadi selasa
+        $this->actingAs($admin)->post('/admin/jadwal-waka', [
+            'id' => $j1->id,
+            'user_id' => $waka1->id,
+            'hari' => 'selasa',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('selasa', $j1->fresh()->hari);
+
+        // Simpan j2 tanpa ubah apa pun (tetap senin) harusnya tidak bentrok dengan dirinya sendiri
+        $this->actingAs($admin)->post('/admin/jadwal-waka', [
+            'id' => $j2->id,
+            'user_id' => $waka2->id,
+            'hari' => 'senin',
+        ])->assertSessionHasNoErrors();
+    }
+
+    public function test_waka_sama_tidak_boleh_dijadwalkan_dua_kali_di_hari_yang_sama(): void
+    {
+        $admin = User::factory()->role('admin')->create();
+        $waka = User::factory()->role('waka')->create(['name' => 'Pak Waka']);
+
+        JadwalWaka::create(['user_id' => $waka->id, 'hari' => 'senin']);
+
+        $this->actingAs($admin)->post('/admin/jadwal-waka', [
+            'user_id' => $waka->id, 'hari' => 'senin',
+        ])->assertSessionHas('error');
+
+        $this->assertSame(1, JadwalWaka::where('user_id', $waka->id)->where('hari', 'senin')->count());
+    }
+
     public function test_bukan_admin_tidak_bisa_atur_jadwal_waka(): void
     {
         $guru = User::factory()->role('guru')->create();

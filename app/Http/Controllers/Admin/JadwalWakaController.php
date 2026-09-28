@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\JadwalWaka;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -16,16 +17,21 @@ class JadwalWakaController extends Controller
         $data = $request->validate([
             'id' => ['nullable', 'exists:jadwal_wakas,id'],
             'user_id' => ['required', 'exists:users,id', Rule::exists('users', 'id')->where('role', 'waka')],
-            'hari' => [
-                'required', 'in:senin,selasa,rabu,kamis,jumat',
-                // Satu hari cuma boleh 1 waka bertugas -- User::wakaUntukHariIni() cuma
-                // ambil yang pertama cocok kalau lebih dari satu, jadi dobel jadwal
-                // bikin salah satu waka diam-diam nggak pernah kepilih.
-                Rule::unique('jadwal_wakas', 'hari')->ignore($request->input('id')),
-            ],
-        ], [
-            'hari.unique' => 'Hari ini sudah ada waka yang bertugas. Ubah jadwal yang sudah ada, bukan tambah baru.',
+            'hari' => ['required', 'in:senin,selasa,rabu,kamis,jumat'],
         ]);
+
+        // Cek apakah waka yang sama sudah ditugaskan pada hari yang sama
+        $sudahAda = JadwalWaka::where('hari', $data['hari'])
+            ->where('user_id', $data['user_id'])
+            ->when($data['id'] ?? null, fn ($q, $id) => $q->whereKeyNot($id))
+            ->exists();
+
+        if ($sudahAda) {
+            $waka = User::find($data['user_id']);
+            $hariNama = config("akademik.hari.{$data['hari']}", ucfirst($data['hari']));
+
+            return back()->with('error', "{$waka?->name} sudah memiliki jadwal bertugas pada hari {$hariNama}.")->withInput();
+        }
 
         $jadwal = $request->filled('id') ? JadwalWaka::findOrFail($data['id']) : new JadwalWaka;
         $baru = ! $jadwal->exists;
