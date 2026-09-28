@@ -140,7 +140,7 @@
                 @if ($piketHariIni)
                     <p class="text-sm text-muted">Anda bertugas piket hari ini. Ingin langsung memantau piket, atau melihat ringkasan beranda terlebih dahulu?</p>
                 @else
-                    <p class="text-sm text-muted">Ingin langsung mengisi jurnal, atau melihat-lihat beranda terlebih dahulu?</p>
+                    <p class="text-sm text-muted">Ingin langsung mengisi jurnal, atau melihat beranda terlebih dahulu?</p>
                 @endif
             </div>
 
