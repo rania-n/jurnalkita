@@ -62,9 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', fn () => redirect()->route(auth()->user()->homeRoute()))->name('dashboard');
     Route::view('/profil', 'profil')->name('profil');
-    Route::post('/profil/no-hp', [ProfilController::class, 'updateNoHp'])->name('profil.no-hp');
-    Route::post('/profil/email', [ProfilController::class, 'updateEmail'])->name('profil.email');
-    Route::post('/profil/nip', [ProfilController::class, 'updateNip'])->name('profil.nip');
+    Route::post('/profil', [ProfilController::class, 'update'])->name('profil.update');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::get('/notifikasi/jumlah', [NotifikasiController::class, 'jumlah'])->name('notifikasi.jumlah');

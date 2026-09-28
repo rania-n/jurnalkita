@@ -16,7 +16,7 @@ class ProfilTest extends TestCase
         $user = User::factory()->role('guru')->create(['email' => 'lama@jurnalkita.test']);
         Guru::create(['user_id' => $user->id, 'nama' => 'Pak Guru']);
 
-        $this->actingAs($user)->post('/profil/email', ['email' => 'baru@jurnalkita.test'])
+        $this->actingAs($user)->post('/profil', ['email' => 'baru@jurnalkita.test'])
             ->assertSessionHasNoErrors()
             ->assertRedirect();
 
@@ -28,8 +28,8 @@ class ProfilTest extends TestCase
         User::factory()->role('guru')->create(['email' => 'dipakai@jurnalkita.test']);
         $user = User::factory()->role('guru')->create(['email' => 'punyaku@jurnalkita.test']);
 
-        $this->actingAs($user)->post('/profil/email', ['email' => 'dipakai@jurnalkita.test'])
-            ->assertSessionHasErrorsIn('ubahEmail', ['email']);
+        $this->actingAs($user)->post('/profil', ['email' => 'dipakai@jurnalkita.test'])
+            ->assertSessionHasErrors(['email']);
 
         $this->assertSame('punyaku@jurnalkita.test', $user->fresh()->email);
     }
@@ -38,7 +38,7 @@ class ProfilTest extends TestCase
     {
         $user = User::factory()->role('guru')->create(['email' => 'tetap@jurnalkita.test']);
 
-        $this->actingAs($user)->post('/profil/email', ['email' => 'tetap@jurnalkita.test'])
+        $this->actingAs($user)->post('/profil', ['email' => 'tetap@jurnalkita.test'])
             ->assertSessionHasNoErrors();
 
         $this->assertSame('tetap@jurnalkita.test', $user->fresh()->email);
@@ -48,16 +48,26 @@ class ProfilTest extends TestCase
     {
         $user = User::factory()->role('guru')->create();
 
-        $this->actingAs($user)->post('/profil/email', ['email' => 'bukan-email'])
-            ->assertSessionHasErrorsIn('ubahEmail', ['email']);
+        $this->actingAs($user)->post('/profil', ['email' => 'bukan-email'])
+            ->assertSessionHasErrors(['email']);
+    }
+
+    public function test_no_hp_ikut_tersimpan_bareng_email(): void
+    {
+        $user = User::factory()->role('guru')->create(['email' => 'guru@jurnalkita.test', 'no_hp' => null]);
+
+        $this->actingAs($user)->post('/profil', ['email' => 'guru@jurnalkita.test', 'no_hp' => '081234567890'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('081234567890', $user->fresh()->no_hp);
     }
 
     public function test_guru_bisa_ubah_nip_sendiri(): void
     {
-        $user = User::factory()->role('guru')->create();
+        $user = User::factory()->role('guru')->create(['email' => 'guru@jurnalkita.test']);
         $guru = Guru::create(['user_id' => $user->id, 'nama' => 'Pak Guru', 'nip' => '111']);
 
-        $this->actingAs($user)->post('/profil/nip', ['nip' => '222333444'])
+        $this->actingAs($user)->post('/profil', ['email' => 'guru@jurnalkita.test', 'nip' => '222333444'])
             ->assertSessionHasNoErrors();
 
         $this->assertSame('222333444', $guru->fresh()->nip);
@@ -66,29 +76,31 @@ class ProfilTest extends TestCase
     public function test_nip_ditolak_kalau_sudah_dipakai_guru_lain(): void
     {
         Guru::create(['nama' => 'Guru Lain', 'nip' => '999888777']);
-        $user = User::factory()->role('guru')->create();
+        $user = User::factory()->role('guru')->create(['email' => 'guru@jurnalkita.test']);
         Guru::create(['user_id' => $user->id, 'nama' => 'Pak Guru', 'nip' => '111']);
 
-        $this->actingAs($user)->post('/profil/nip', ['nip' => '999888777'])
-            ->assertSessionHasErrorsIn('ubahNip', ['nip']);
+        $this->actingAs($user)->post('/profil', ['email' => 'guru@jurnalkita.test', 'nip' => '999888777'])
+            ->assertSessionHasErrors(['nip']);
     }
 
     public function test_nip_boleh_dikosongkan(): void
     {
-        $user = User::factory()->role('guru')->create();
+        $user = User::factory()->role('guru')->create(['email' => 'guru@jurnalkita.test']);
         $guru = Guru::create(['user_id' => $user->id, 'nama' => 'Pak Guru', 'nip' => '111']);
 
-        $this->actingAs($user)->post('/profil/nip', ['nip' => ''])
+        $this->actingAs($user)->post('/profil', ['email' => 'guru@jurnalkita.test', 'nip' => ''])
             ->assertSessionHasNoErrors();
 
         $this->assertNull($guru->fresh()->nip);
     }
 
-    public function test_siswa_tidak_bisa_akses_ubah_nip_karena_tidak_punya_data_guru(): void
+    public function test_siswa_tidak_punya_data_guru_bisa_ubah_profil_tanpa_nip(): void
     {
-        $user = User::factory()->role('siswa')->create();
+        $user = User::factory()->role('siswa')->create(['email' => 'siswa@jurnalkita.test']);
 
-        $this->actingAs($user)->post('/profil/nip', ['nip' => '123'])
-            ->assertNotFound();
+        $this->actingAs($user)->post('/profil', ['email' => 'siswa@jurnalkita.test', 'no_hp' => '081200000000'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('081200000000', $user->fresh()->no_hp);
     }
 }

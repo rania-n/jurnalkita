@@ -33,7 +33,7 @@
             type="{{ $type }}"
             @if ($name) name="{{ $name }}" @endif
             id="{{ $id }}"
-            {{ $input->class('w-full border-none bg-transparent text-[15px] text-ink outline-none placeholder:text-placeholder') }}
+            {{ $input->class('w-full border-none bg-transparent text-[15px] text-ink outline-none placeholder:text-placeholder disabled:cursor-not-allowed disabled:text-muted-2') }}
         >
 
         @if($type === 'password')

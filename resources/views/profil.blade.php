@@ -64,50 +64,49 @@
                     </x-alert>
                 @endif
 
-                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <form method="POST" action="{{ route('profil.email') }}" class="flex items-end gap-2 sm:col-span-2">
-                        @csrf
-                        <x-ui.input label="Email" icon="mail" type="email" name="email" value="{{ old('email', $user->email) }}" required errorBag="ubahEmail" class="flex-1" />
-                        <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
-                    </form>
+                {{-- Dulu Email/NIP/No. WhatsApp 3 form+tombol Simpan terpisah (submit
+                     sendiri-sendiri per field) -- diringkas jadi SATU form dengan SATU
+                     tombol Simpan, biar nggak keliatan berantakan. Field-nya disabled
+                     sampai tombol Edit ditekan (lihat script di bawah); begitu ada
+                     error validasi, langsung dibuka dalam mode edit (lihat $editMode)
+                     supaya pesan errornya tetap bisa dibaca & diperbaiki, bukan malah
+                     ketutup field yang disabled lagi. --}}
+                @php $editMode = $errors->any(); @endphp
+                <form method="POST" action="{{ route('profil.update') }}" class="mt-4 flex flex-col gap-3">
+                    @csrf
 
-                    @if ($guru)
-                        <form method="POST" action="{{ route('profil.nip') }}" class="flex items-end gap-2">
-                            @csrf
-                            <x-ui.input label="NIP" icon="badge" name="nip" value="{{ old('nip', $guru->nip) }}" errorBag="ubahNip" class="flex-1" />
-                            <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
-                        </form>
-                        <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
-                        @if ($guru->mapels->isNotEmpty())
-                            <x-ui.field-static label="Mapel Tambahan" icon="library_books" class="sm:col-span-2">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
-                        @endif
-                        @if ($guru->kelasWali->isNotEmpty())
-                            <x-ui.field-static label="Wali Kelas" icon="groups" class="sm:col-span-2">{{ $guru->kelasWali->pluck('nama')->join(', ') }}</x-ui.field-static>
-                        @endif
-                    @elseif ($siswa)
-                        {{-- Kelas+NIS = 2 field 1-kolom, pas genap, dipasangin bareng. --}}
-                        <x-ui.field-static label="Kelas" icon="school">{{ $siswa->kelas->nama ?? '—' }}</x-ui.field-static>
-                        <x-ui.field-static label="NIS" icon="badge">{{ $siswa->nis }}</x-ui.field-static>
-                        <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
-                        <x-ui.field-static label="Jabatan" icon="workspace_premium">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
-                    @endif
+                    <div class="flex items-center justify-end gap-2">
+                        <x-ui.button type="button" id="tombol-edit-profil" variant="secondary" icon="edit" :hidden="$editMode">Edit</x-ui.button>
+                        <x-ui.button type="submit" id="tombol-simpan-profil" variant="primary" icon="save" :hidden="! $editMode">Simpan</x-ui.button>
+                    </div>
 
-                    {{-- No. WhatsApp ditaruh paling bawah -- field lain di sini murni
-                         informasi (Mapel Utama/Tambahan/Wali Kelas untuk guru, Kelas/
-                         NIS/dll untuk siswa, tetap diubah lewat Admin), jadi form ini
-                         dipisah ke akhir biar nggak keselip di tengah daftar field yang
-                         cuma buat dibaca. SATU sumber buat semua peran: users.no_hp --
-                         boleh diubah sendiri sama pemilik akunnya (sama seperti Email di
-                         atas & NIP untuk guru), guru sering butuh update sendiri (ganti
-                         nomor) tanpa nunggu Admin. SELALU sm:col-span-2 -- form+tombol,
-                         kalau cuma setengah kolom kotak inputnya keburu sempit
-                         disenggol tombol Simpan. --}}
-                    <form method="POST" action="{{ route('profil.no-hp') }}" class="flex items-end gap-2 sm:col-span-2">
-                        @csrf
-                        <x-ui.input label="No. WhatsApp" icon="call" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" errorBag="ubahNoHp" class="flex-1" />
-                        <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
-                    </form>
-                </div>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <x-ui.input label="Email" icon="mail" type="email" name="email" value="{{ old('email', $user->email) }}" required class="sm:col-span-2" data-field-profil :disabled="! $editMode" />
+
+                        @if ($guru)
+                            <x-ui.input label="NIP" icon="badge" name="nip" value="{{ old('nip', $guru->nip) }}" data-field-profil :disabled="! $editMode" />
+                            <x-ui.field-static label="Mata Pelajaran Utama" icon="menu_book">{{ $guru->mapelUtama->nama ?? '—' }}</x-ui.field-static>
+                            @if ($guru->mapels->isNotEmpty())
+                                <x-ui.field-static label="Mapel Tambahan" icon="library_books" class="sm:col-span-2">{{ $guru->mapels->pluck('nama')->join(', ') }}</x-ui.field-static>
+                            @endif
+                            @if ($guru->kelasWali->isNotEmpty())
+                                <x-ui.field-static label="Wali Kelas" icon="groups" class="sm:col-span-2">{{ $guru->kelasWali->pluck('nama')->join(', ') }}</x-ui.field-static>
+                            @endif
+                        @elseif ($siswa)
+                            {{-- Kelas+NIS = 2 field 1-kolom, pas genap, dipasangin bareng. --}}
+                            <x-ui.field-static label="Kelas" icon="school">{{ $siswa->kelas->nama ?? '—' }}</x-ui.field-static>
+                            <x-ui.field-static label="NIS" icon="badge">{{ $siswa->nis }}</x-ui.field-static>
+                            <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
+                            <x-ui.field-static label="Jabatan" icon="workspace_premium">{{ ucfirst($siswa->jabatan) }}</x-ui.field-static>
+                        @endif
+
+                        {{-- SATU sumber buat semua peran: users.no_hp -- boleh diubah
+                             sendiri sama pemilik akunnya (sama kayak Email & NIP di
+                             atas), guru sering butuh update sendiri (ganti nomor)
+                             tanpa nunggu Admin. --}}
+                        <x-ui.input label="No. WhatsApp" icon="call" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" class="sm:col-span-2" data-field-profil :disabled="! $editMode" />
+                    </div>
+                </form>
 
                 <x-alert type="info" class="mt-6">
                     Perubahan nama, kelas, atau mata pelajaran dilakukan oleh Admin.
@@ -118,6 +117,16 @@
                         Hubungi Admin jika ada yang perlu diperbaiki.
                     @endif
                 </x-alert>
+
+                @push('scripts')
+                    <script>
+                        document.getElementById('tombol-edit-profil')?.addEventListener('click', function () {
+                            document.querySelectorAll('[data-field-profil]').forEach((el) => el.disabled = false);
+                            this.hidden = true;
+                            document.getElementById('tombol-simpan-profil').hidden = false;
+                        });
+                    </script>
+                @endpush
             @endif
         </div>
 
