@@ -7,6 +7,11 @@
     $rentangBeda = ! $dari->isSameDay($sampai);
     $hariLabel = config('akademik.hari')[['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$dari->dayOfWeek - 1] ?? ''] ?? null;
     $admin = auth()->user()->role === 'admin';
+    // Ekspor (PDF) beda dari sekadar lihat -- tetap dikunci guru piket/waka/
+    // admin (lihat PiketController::pastikanBolehEkspor()). Tombolnya
+    // disembunyikan di sini biar nggak nampilin tombol yang bakal 403 kalau
+    // diklik guru biasa yang bukan piket.
+    $bolehEkspor = $admin || auth()->user()->role === 'waka' || auth()->user()->isPiket();
 @endphp
 
 <x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Monitor Piket" heading="Monitor Piket" width="wide">
@@ -20,13 +25,17 @@
 
     @if ($admin)
         <x-admin.page title="Monitor Piket" :subtitle="$subtitle">
-            <x-slot:action>
-                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
-            </x-slot:action>
+            @if ($bolehEkspor)
+                <x-slot:action>
+                    <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
+                </x-slot:action>
+            @endif
         </x-admin.page>
     @else
         <x-page-header title="Monitor Piket" :subtitle="$subtitle" always-row size="sm">
-            <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
+            @if ($bolehEkspor)
+                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
+            @endif
         </x-page-header>
     @endif
 
@@ -104,12 +113,14 @@
                                 </p>
                             </div>
                         </div>
-                        <x-ui.action-button
-                            label="Ekspor Lengkap"
-                            icon="download"
-                            class="!px-2 !py-1 !text-[10px] shrink-0 mt-0.5"
-                            :href="route('piket.monitor.ekspor.detail', ['tipe' => $mode, 'id' => $g['id'], 'dari' => $dari->toDateString(), 'sampai' => $sampai->toDateString()])"
-                        />
+                        @if ($bolehEkspor)
+                            <x-ui.action-button
+                                label="Ekspor Lengkap"
+                                icon="download"
+                                class="!px-2 !py-1 !text-[10px] shrink-0 mt-0.5"
+                                :href="route('piket.monitor.ekspor.detail', ['tipe' => $mode, 'id' => $g['id'], 'dari' => $dari->toDateString(), 'sampai' => $sampai->toDateString()])"
+                            />
+                        @endif
                     </div>
 
                     <div class="overflow-x-auto tabel-container border-t border-surface-alt" hidden>

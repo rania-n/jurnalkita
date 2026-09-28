@@ -153,6 +153,25 @@ class PiketMonitorTest extends TestCase
         $this->actingAs($guruBiasa)->get('/piket/monitor')->assertOk();
     }
 
+    public function test_guru_biasa_bukan_piket_tidak_bisa_ekspor(): void
+    {
+        // Beda dari sekadar lihat -- ekspor tetap dikunci guru piket/waka/admin.
+        $guruBiasa = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $guruBiasa->id, 'nama' => 'Guru Biasa']);
+
+        $this->actingAs($guruBiasa)->get('/piket/monitor/ekspor')->assertForbidden();
+    }
+
+    public function test_tombol_ekspor_disembunyikan_dari_guru_biasa_bukan_piket(): void
+    {
+        $guruBiasa = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $guruBiasa->id, 'nama' => 'Guru Biasa']);
+
+        $this->actingAs($guruBiasa)->get('/piket/monitor')
+            ->assertOk()
+            ->assertDontSee('Ekspor Ringkasan');
+    }
+
     public function test_ekspor_ringkasan_berisi_baris_sesuai_status(): void
     {
         $res = $this->unduh('/piket/monitor/ekspor');

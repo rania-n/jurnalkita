@@ -29,4 +29,21 @@
         Belum punya akun?
         <a href="{{ route('pilih_peran') }}" class="font-bold text-navy">Daftar Akun Baru</a>
     </p>
+
+    {{-- Referensi ringkas buat siapa saja sebelum masuk -- lihat PiketController::
+         popupHariIni() soal batasannya (hari ini, sudah diisi, tanpa data siswa). --}}
+    <button type="button" data-modal-open="modal-jurnal-hari-ini" data-ajax-url="{{ route('piket.popup-hari-ini') }}"
+        class="mt-4 flex w-full items-center justify-center gap-1.5 text-[13px] font-bold text-navy">
+        <x-icon name="visibility" :size="16" />
+        Lihat Jurnal Hari Ini
+    </button>
+
+    {{-- errorBag unik ("tidak-dipakai", sama pola kayak modal-notifikasi di
+         app-topbar.blade.php) -- modal ini nggak punya form sendiri, jadi
+         kalau bag-nya dibiarkan default, error login (email/password salah)
+         bisa ke-anggap "punya modal ini" & bikin dia auto-kebuka nggak
+         nyambung pas login gagal. --}}
+    <x-ui.modal id="modal-jurnal-hari-ini" title="Jurnal Hari Ini" errorBag="tidak-dipakai">
+        <div data-modal-ajax-target></div>
+    </x-ui.modal>
 </x-layouts.guest>

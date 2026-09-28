@@ -58,6 +58,12 @@ Route::post('/dispensasi/{dispensasi}/persetujuan', [SuratDispensasiController::
    (satpam.hasil-scan) udah dari awal pakai layout guest (tanpa sidebar). */
 Route::get('/satpam/scan', [SatpamController::class, 'scan'])->name('satpam.scan');
 
+/* Popup "referensi" di halaman login -- TANPA login juga. SENGAJA dibatasi
+   ketat (lihat PiketController::popupHariIni()): cuma hari ini, cuma yang
+   sudah diisi, dan CUMA level guru/kelas/mapel -- tidak ada data siswa sama
+   sekali, jadi aman dibuka tanpa login. */
+Route::get('/jurnal-hari-ini', [PiketController::class, 'popupHariIni'])->name('piket.popup-hari-ini');
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', fn () => redirect()->route(auth()->user()->homeRoute()))->name('dashboard');

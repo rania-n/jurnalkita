@@ -26,11 +26,12 @@ use Illuminate\View\View;
  * gurunya masuk/tidak hadir, atau jurnalnya belum diisi sama sekali.
  * Dikelompokkan per kelas ATAU per guru (bar pilih, bukan filter dropdown).
  *
- * Melihat (index/versi/ekspor/jurnalDetail) TERBUKA buat semua guru, bukan
- * cuma yang piket hari ini -- cukup dijaga middleware route ('guru,waka,
- * admin'), tanpa gate tambahan di sini. Cuma MENCATAT presensi siswa (lihat
- * pastikanBolehInputPresensi()) yang tetap dikunci guru piket beneran, sama
- * kayak Shopee: lihat produk bebas, checkout baru butuh login.
+ * Melihat (index/versi/jurnalDetail) TERBUKA buat semua guru, bukan cuma
+ * yang piket hari ini -- cukup dijaga middleware route ('guru,waka,admin'),
+ * tanpa gate tambahan di sini. MENCATAT presensi siswa (lihat
+ * pastikanBolehInputPresensi()) dan MENGEKSPOR (lihat pastikanBolehEkspor())
+ * tetap dikunci guru piket/waka/admin -- sama kayak Shopee: lihat produk
+ * bebas, checkout (aksi/unduh) baru butuh login/wewenang lebih.
  */
 class PiketController extends Controller
 {
@@ -39,6 +40,17 @@ class PiketController extends Controller
     private function pastikanBolehInputPresensi(): void
     {
         abort_unless(auth()->user()?->isPiket(), 403, 'Hanya guru piket yang dapat mencatat surat izin siswa.');
+    }
+
+    /** Ekspor (PDF ringkas/detail) beda dari sekadar lihat -- tetap dikunci guru piket/waka/admin. */
+    private function pastikanBolehEkspor(): void
+    {
+        $user = auth()->user();
+        abort_unless(
+            in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
+            403,
+            'Hanya guru piket, Waka, atau Admin yang dapat mengekspor.'
+        );
     }
 
     public function presensiSiswa(Request $request): View
@@ -113,6 +125,30 @@ class PiketController extends Controller
         ])->with('success', "Presensi {$siswa->nama} tersimpan dan disamakan ke jurnal kelas pada tanggal tersebut.");
     }
 
+    /**
+     * Popup "referensi" di halaman login -- TANPA login sama sekali, jadi
+     * SENGAJA dibatasi ketat & beda dari index() di atas:
+     * - Cuma HARI INI, cuma yang SUDAH diisi (jurnal cuma ada kalau sudah
+     *   diisi -- makanya query-nya nggak perlu nge-cross-reference ke Jadwal
+     *   buat nyari yang "belum diisi" kayak index()/barisRange()).
+     * - CUMA level guru/kelas/mapel/materi/status kehadiran GURU. TIDAK
+     *   menyertakan data siswa (nama, kehadiran per-siswa/absensi) sama
+     *   sekali -- itu tetap wajib login, biar data pribadi siswa (termasuk
+     *   yang masih di bawah umur) nggak kebuka ke siapa pun yang cuma
+     *   mampir ke halaman login.
+     * - TIDAK bisa diekspor/diunduh dari sini.
+     */
+    public function popupHariIni(): View
+    {
+        $jurnals = Jurnal::whereDate('tanggal', today())
+            ->with('jadwal.kelas', 'jadwal.mapel', 'guru')
+            ->get()
+            ->sortBy(fn (Jurnal $j) => $j->jam_ke_mulai)
+            ->values();
+
+        return view('piket._popup-jurnal-hari-ini', compact('jurnals'));
+    }
+
     public function index(Request $request): View
     {
         [$dari, $sampai] = $this->rentangTanggal($request);
@@ -176,6 +212,8 @@ class PiketController extends Controller
     /** Ekspor ringkas rentang tanggal terpilih, semua kelompok — cuma baris jam/status, tanpa presensi. */
     public function ekspor(Request $request)
     {
+        $this->pastikanBolehEkspor();
+
         [$dari, $sampai] = $this->rentangTanggal($request);
         $baris = $this->barisRange($dari, $sampai);
 
@@ -224,6 +262,7 @@ class PiketController extends Controller
      */
     public function eksporDetail(Request $request, string $tipe, int $id)
     {
+        $this->pastikanBolehEkspor();
         abort_unless(in_array($tipe, ['kelas', 'guru'], true), 404);
 
         [$dari, $sampai] = $this->rentangTanggal($request);
