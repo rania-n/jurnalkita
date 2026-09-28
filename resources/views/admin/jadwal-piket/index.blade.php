@@ -103,16 +103,16 @@
             />
             <x-ui.input label="Tanggal Mulai" name="tanggal" type="date" :value="old('tanggal', today()->isWeekend() ? today()->nextWeekday()->toDateString() : today()->toDateString())" required />
             <p class="-mt-2 text-xs text-muted-2">Hari piket ditentukan otomatis dari tanggal. Jadwal berulang mengikuti interval yang dipilih.</p>
-            {{-- Sesi -- shortcut isi Jam Mulai/Selesai otomatis (2 sesi yang
-                 beneran dipakai sekolah), tapi field jamnya sendiri tetap
-                 bisa diubah manual sesudahnya kalau memang beda. --}}
+            {{-- Sesi -- shortcut isi Jam Mulai/Selesai otomatis. Jam mulai & selesai
+                 disembunyikan untuk sesi pagi/siang dan hanya muncul jika memilih Custom. --}}
             <x-ui.choice
                 label="Sesi"
                 name="sesi_piket"
                 data-sesi-piket
+                value="pagi"
                 :options="['pagi' => 'Pagi (07:00–11:00)', 'siang' => 'Siang (11:00–15:00)', 'custom' => 'Custom']"
             />
-            <div class="flex gap-3">
+            <div class="flex gap-3" data-wrap-jam-piket hidden>
                 <x-ui.input label="Jam Mulai" name="mulai" type="time" value="07:00" class="flex-1" required />
                 <x-ui.input label="Jam Selesai" name="selesai" type="time" value="11:00" class="flex-1" required />
             </div>
@@ -145,7 +145,14 @@
                 required
             />
             <x-ui.input label="Tanggal" name="tanggal" type="date" required />
-            <div class="flex gap-3">
+            <x-ui.choice
+                label="Sesi"
+                name="sesi_piket"
+                data-sesi-piket
+                value="pagi"
+                :options="['pagi' => 'Pagi (07:00–11:00)', 'siang' => 'Siang (11:00–15:00)', 'custom' => 'Custom']"
+            />
+            <div class="flex gap-3" data-wrap-jam-piket hidden>
                 <x-ui.input label="Jam Mulai" name="mulai" type="time" class="flex-1" required />
                 <x-ui.input label="Jam Selesai" name="selesai" type="time" class="flex-1" required />
             </div>
@@ -159,16 +166,64 @@
 
     @push('scripts')
         <script>
-            // Sesi -- shortcut isi Jam Mulai/Selesai otomatis, jam-nya sendiri
-            // tetap bisa diubah manual sesudahnya kalau memang beda.
-            document.querySelectorAll('[data-sesi-piket] input[name="sesi_piket"]').forEach((r) => {
-                r.addEventListener('change', function () {
-                    const form = this.closest('form');
-                    const m = form.querySelector('[name=mulai]'), s = form.querySelector('[name=selesai]');
-                    if (this.value === 'pagi') { m.value = '07:00'; s.value = '11:00'; }
-                    else if (this.value === 'siang') { m.value = '11:00'; s.value = '15:00'; }
+            (function () {
+                function updateSesiPiket(form) {
+                    if (!form) return;
+                    const sesiInput = form.querySelector('[data-sesi-piket] input[name="sesi_piket"]:checked');
+                    const wrapJam = form.querySelector('[data-wrap-jam-piket]');
+                    const m = form.querySelector('[name=mulai]');
+                    const s = form.querySelector('[name=selesai]');
+                    if (!wrapJam || !m || !s) return;
+
+                    const sesi = sesiInput ? sesiInput.value : 'pagi';
+                    if (sesi === 'pagi') {
+                        m.value = '07:00';
+                        s.value = '11:00';
+                        wrapJam.hidden = true;
+                    } else if (sesi === 'siang') {
+                        m.value = '11:00';
+                        s.value = '15:00';
+                        wrapJam.hidden = true;
+                    } else if (sesi === 'custom') {
+                        wrapJam.hidden = false;
+                    }
+                }
+
+                document.querySelectorAll('[data-sesi-piket] input[name="sesi_piket"]').forEach((r) => {
+                    r.addEventListener('change', function () {
+                        updateSesiPiket(this.closest('form'));
+                    });
                 });
-            });
+
+                const modalTambah = document.getElementById('modal-piket-tambah');
+                modalTambah?.addEventListener('modal:open', function () {
+                    const radioPagi = this.querySelector('input[name="sesi_piket"][value="pagi"]');
+                    if (radioPagi) {
+                        radioPagi.checked = true;
+                    }
+                    updateSesiPiket(this.querySelector('form'));
+                });
+
+                const modalUbah = document.getElementById('modal-piket-ubah');
+                modalUbah?.addEventListener('modal:open', function () {
+                    const form = this.querySelector('form');
+                    const m = form?.querySelector('[name=mulai]')?.value;
+                    const s = form?.querySelector('[name=selesai]')?.value;
+
+                    let targetSesi = 'custom';
+                    if (m === '07:00' && s === '11:00') {
+                        targetSesi = 'pagi';
+                    } else if (m === '11:00' && s === '15:00') {
+                        targetSesi = 'siang';
+                    }
+
+                    const targetRadio = form?.querySelector(`input[name="sesi_piket"][value="${targetSesi}"]`);
+                    if (targetRadio) {
+                        targetRadio.checked = true;
+                    }
+                    updateSesiPiket(form);
+                });
+            })();
         </script>
     @endpush
 </x-layouts.admin>
