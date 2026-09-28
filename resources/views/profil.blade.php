@@ -153,21 +153,22 @@
                         <x-ui.input type="password" icon="lock" name="password_confirmation" form="form-profil" placeholder="Tulis ulang kata sandi baru" autocomplete="new-password" data-field-profil :disabled="! $editMode" />
                     </div>
                 </div>
-
-                {{-- Tombol di BAWAH form -- ikut pola tombol Simpan di form-form
-                     lain di app ini (mis. admin/form-card.blade.php, form Simpan
-                     Profil Admin di atas), bukan nempel di header sebelah judul. --}}
-                <div class="flex gap-2">
-                    <x-ui.button type="button" id="tombol-edit-profil" variant="secondary" icon="edit" :hidden="$editMode">Edit</x-ui.button>
-                    <x-ui.button type="submit" id="tombol-simpan-profil" icon="save" :hidden="! $editMode">Simpan</x-ui.button>
-                </div>
             </form>
 
-            <div class="mt-5 border-t border-surface-alt pt-5">
+            {{-- Reset Kata Sandi (kiri) & Edit/Simpan (kanan) satu baris --
+                 tombol Edit/Simpan pakai atribut form="form-profil" biar tetap
+                 nyambung ke form di atas walau taruhnya di luar tag <form>
+                 (nggak boleh ada <form> di dalam <form> lain di HTML). --}}
+            <div class="mt-5 flex items-center justify-between border-t border-surface-alt pt-5">
                 <form method="POST" action="{{ route('password.reset-link') }}">
                     @csrf
                     <x-ui.button type="submit" variant="secondary" icon="lock_reset">Reset Kata Sandi</x-ui.button>
                 </form>
+
+                <div class="flex gap-2">
+                    <x-ui.button type="button" id="tombol-edit-profil" variant="secondary" icon="edit" form="form-profil" :hidden="$editMode">Edit</x-ui.button>
+                    <x-ui.button type="submit" id="tombol-simpan-profil" icon="save" form="form-profil" :hidden="! $editMode">Simpan</x-ui.button>
+                </div>
             </div>
 
             <x-alert type="info" class="mt-5">
