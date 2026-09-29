@@ -217,6 +217,31 @@ class NotifikasiTest extends TestCase
             ->assertRedirect('/guru/jurnal/99?status=pending');
     }
 
+    public function test_guru_biasa_tidak_diarahkan_ke_halaman_dispensasi_dari_notifikasi_lama(): void
+    {
+        $guruUser = User::factory()->role('guru')->create();
+        Guru::create(['user_id' => $guruUser->id, 'nama' => 'Guru Mapel']);
+
+        $guruUser->notify(new class extends \Illuminate\Notifications\Notification
+        {
+            public function via($notifiable): array
+            {
+                return ['database'];
+            }
+
+            public function toArray($notifiable): array
+            {
+                return ['title' => 'Dispensasi disetujui', 'url' => '/dispensasi?lihat=10'];
+            }
+        });
+
+        $id = $guruUser->notifications()->first()->id;
+
+        $this->actingAs($guruUser)->get("/notifikasi/{$id}/buka")
+            ->assertRedirect(route('guru.dashboard'))
+            ->assertSessionHas('info', 'Informasi dispensasi sudah tercatat untuk pelajaran Anda.');
+    }
+
     public function test_halaman_notifikasi_tampil_dan_bisa_ditandai_dibaca(): void
     {
         $guruUser = User::factory()->role('guru')->create();

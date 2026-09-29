@@ -30,7 +30,9 @@ class SiswaDispensasiDiKelasAnda extends Notification
             'title' => 'Siswa dispensasi di jam Anda mengajar',
             'body' => $this->dispensasi->siswa->nama.' ('.($this->dispensasi->siswa->kelas?->nama ?? '—').') dispensasi '
                 .$this->dispensasi->labelTanggal().' · '.$this->dispensasi->labelJam(),
-            'url' => route('dispensasi.index', ['lihat' => $this->dispensasi->id]),
+            // Guru mapel menerima pemberitahuan agar tahu status siswanya,
+            // tetapi halaman dispensasi hanya dapat dibuka guru piket.
+            'url' => route('guru.dashboard'),
         ];
     }
 }

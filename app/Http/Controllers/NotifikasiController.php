@@ -57,6 +57,13 @@ class NotifikasiController extends Controller
         $path = parse_url($url, PHP_URL_PATH) ?? '/';
         $query = parse_url($url, PHP_URL_QUERY);
 
+        // Notifikasi lama untuk guru mapel pernah menyimpan tautan detail
+        // dispensasi. Guru biasa tidak memiliki akses ke halaman tersebut.
+        if (str_starts_with($path, '/dispensasi') && auth()->user()->role === 'guru' && ! auth()->user()->isPiket()) {
+            return redirect()->route(auth()->user()->homeRoute())
+                ->with('info', 'Informasi dispensasi sudah tercatat untuk pelajaran Anda.');
+        }
+
         return redirect($path.($query ? "?{$query}" : ''));
     }
 
