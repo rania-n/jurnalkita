@@ -46,7 +46,10 @@ class DispensasiTest extends TestCase
 
     public function test_hanya_guru_piket_bisa_buka_form_ajukan(): void
     {
-        $this->actingAs($this->piket)->get('/dispensasi-ajukan/baru')->assertOk();
+        $this->actingAs($this->piket)->get('/dispensasi-ajukan/baru')
+            ->assertOk()
+            ->assertDontSee('Nomor WhatsApp penerima')
+            ->assertDontSee('No. HP');
 
         $guruBiasa = User::factory()->role('guru')->create();
         $this->actingAs($guruBiasa)->get('/dispensasi-ajukan/baru')->assertForbidden();
@@ -112,7 +115,7 @@ class DispensasiTest extends TestCase
             ->assertOk()
             ->assertSee('Budi')
             ->assertSee('Siti')
-            ->assertSee('Setujui 2 Siswa');
+            ->assertSee('Setujui');
 
         $this->actingAs($this->waka)->post("/dispensasi/{$dispensasi->id}/waka", [
             'keputusan' => 'approved',
@@ -533,9 +536,9 @@ class DispensasiTest extends TestCase
         $d->segarkanStatusAkhir();
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
 
-        // Kosong -> form isi No. HP yang muncul, bukan link WA.
+        // Kosong -> form nomor WhatsApp muncul setelah dispensasi disetujui.
         $this->actingAs($this->piket)->get("/dispensasi/{$d->id}/fragment")
-            ->assertOk()->assertSee('No. HP')->assertDontSee('Kirim Surat ke Siswa (WA)');
+            ->assertOk()->assertSee('Nomor WhatsApp penerima')->assertDontSee('Kirim Bukti melalui WhatsApp');
 
         $this->actingAs($this->piket)->post("/dispensasi/{$d->id}/no-hp", ['no_hp' => '081234567890'])
             ->assertRedirect();
@@ -544,7 +547,7 @@ class DispensasiTest extends TestCase
 
         // Terisi -> link WA-nya sekarang muncul.
         $this->actingAs($this->piket)->get("/dispensasi/{$d->id}/fragment")
-            ->assertOk()->assertSee('Kirim Surat ke Siswa (WA)');
+            ->assertOk()->assertSee('Kirim Bukti melalui WhatsApp');
     }
 
     public function test_waka_juga_bisa_isi_no_hp_belakangan(): void
@@ -554,11 +557,33 @@ class DispensasiTest extends TestCase
             'tanggal' => today(), 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
+        $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
 
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/no-hp", ['no_hp' => '089876543210'])
             ->assertRedirect();
 
         $this->assertSame('089876543210', $d->fresh()->no_hp);
+    }
+
+    public function test_nomor_whatsapp_belum_bisa_diisi_sebelum_dispensasi_disetujui(): void
+    {
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id,
+            'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => today(),
+            'alasan' => 'Lomba',
+            'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        $this->actingAs($this->piket)->get("/dispensasi/{$d->id}/fragment")
+            ->assertOk()
+            ->assertDontSee('Nomor WhatsApp penerima');
+
+        $this->actingAs($this->piket)->post("/dispensasi/{$d->id}/no-hp", ['no_hp' => '081234567890'])
+            ->assertForbidden();
+
+        $this->assertNull($d->fresh()->no_hp);
     }
 
     public function test_guru_biasa_bukan_piket_tidak_bisa_isi_no_hp(): void

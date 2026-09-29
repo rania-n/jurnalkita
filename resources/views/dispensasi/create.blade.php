@@ -20,7 +20,7 @@
 
             <x-ui.input label="Tanggal" name="tanggal" type="date" :value="old('tanggal', now()->toDateString())" required />
             <x-ui.input label="Sampai Tanggal (opsional)" name="tanggal_selesai" type="date" :value="old('tanggal_selesai')" />
-            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Kosongkan "Sampai Tanggal" jika dispensasi hanya berlaku 1 hari. Isi jika berlaku lebih dari 1 hari (mis. sakit 3 hari).</p>
+            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">Kosongkan kolom ini jika dispensasi hanya berlaku satu hari. Isi tanggal akhir jika dispensasi berlaku beberapa hari.</p>
 
             <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai">
                 <option value="">Sehari penuh</option>
@@ -31,17 +31,11 @@
                 @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_selesai') == $i)>Jam ke-{{ $i }}</option>@endfor
             </x-ui.select>
             <p class="-mt-2 text-xs text-muted-2 sm:col-span-2">
-                Kosongkan keduanya jika izin berlaku sehari penuh. Jika hanya mengetahui jam
-                mulainya (mis. keluar dari jam ke-4), boleh isi "mulai" saja dan biarkan
-                "selesai" kosong — otomatis berarti sampai selesai hari itu.
+                Kosongkan kedua kolom jika dispensasi berlaku sehari penuh. Jika dispensasi
+                dimulai pada jam tertentu hingga akhir kegiatan sekolah, isi jam mulai saja.
             </p>
 
             <x-ui.textarea label="Alasan Dispensasi" name="alasan" :rows="3" class="sm:col-span-2" placeholder="Contoh: mengikuti lomba tingkat kabupaten." required>{{ old('alasan') }}</x-ui.textarea>
-
-            {{-- sm:col-span-2 -- field sebelum (Alasan) & sesudah (Upload) di sini
-                 sama-sama span2, jadi No. HP selalu nyisa sendirian kalau nggak
-                 di-stretch. --}}
-            <x-ui.input label="No. HP yang bisa dihubungi (opsional)" name="no_hp" inputmode="numeric" :value="old('no_hp')" class="sm:col-span-2" />
 
             <x-ui.upload label="Surat / Bukti Pendukung (opsional)" name="surat" accept="image/*,application/pdf" title="Lampirkan surat atau foto" hint="JPG, PNG, atau PDF" class="sm:col-span-2" />
         </div>

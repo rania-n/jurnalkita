@@ -144,7 +144,7 @@ class SuratDispensasiTest extends TestCase
             ->assertSee('Daftar Siswa (2)')
             ->assertSee('Budi')
             ->assertSee('Siti')
-            ->assertSee('Setujui 2 Siswa');
+            ->assertSee('Setujui');
 
         $this->post($tautan, ['keputusan' => 'approved'])->assertOk();
 

@@ -32,27 +32,23 @@
         <x-ui.field-static label="Jam">{{ $dispensasi->labelJam() }}</x-ui.field-static>
         <x-ui.field-static label="Diajukan oleh (guru piket)">{{ $dispensasi->pengaju->name }}</x-ui.field-static>
         <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $dispensasi->alasan }}</x-ui.field-static>
-        {{-- sm:col-span-2 -- ini satu-satunya field kondisional yang lebarnya
-             cuma setengah, jadi kalau muncul dia selalu SENDIRIAN di barisnya
-             (field sebelum & sesudahnya di sini semua full-width), nyisain
-             gap kosong di sebelahnya kalau nggak di-stretch. --}}
-        @if ($dispensasi->no_hp)
-            <x-ui.field-static label="No. HP" icon="call" class="sm:col-span-2">{{ $dispensasi->no_hp }}</x-ui.field-static>
-        @elseif ($bisaUbahNoHp)
-            {{-- Piket lupa isi pas ngajuin (field-nya opsional) -- boleh
-                 ditambahkan belakangan di sini, oleh piket atau Waka, biar
-                 tombol "Kirim Surat ke Siswa (WA)" di bawah bisa kepakai. --}}
-            <form method="POST" action="{{ route('dispensasi.no-hp.update', $dispensasi) }}" class="flex items-end gap-2 sm:col-span-2">
+        @if ($bisaUbahNoHp)
+            <form method="POST" action="{{ route('dispensasi.no-hp.update', $dispensasi) }}" class="flex flex-col gap-2 rounded-xl border border-surface-alt bg-surface p-3 sm:col-span-2">
                 @csrf
-                <x-ui.input
-                    label="No. HP (siswa/wali, atau satpam gerbang)"
-                    name="no_hp"
-                    :value="old('no_hp')"
-                    placeholder="08xxxxxxxxxx"
-                    class="flex-1"
-                    required
-                />
-                <x-ui.button type="submit" variant="secondary" icon="save">Simpan</x-ui.button>
+                <p class="text-sm font-bold text-ink">Kirim bukti melalui WhatsApp</p>
+                <p class="text-xs leading-relaxed text-muted-2">Masukkan nomor siswa, orang tua, atau wali yang akan menerima surat dispensasi.</p>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+                    <x-ui.input
+                        label="Nomor WhatsApp penerima"
+                        name="no_hp"
+                        inputmode="tel"
+                        :value="old('no_hp', $dispensasi->no_hp)"
+                        placeholder="08xxxxxxxxxx"
+                        class="min-w-0 flex-1"
+                        required
+                    />
+                    <x-ui.button type="submit" variant="secondary" icon="save" class="w-full sm:w-auto">Simpan Nomor</x-ui.button>
+                </div>
             </form>
         @endif
         @if ($dispensasi->surat_path)
@@ -93,13 +89,13 @@
         @if ($waLinkWaka && auth()->user()->role !== 'waka')
             <a href="{{ $waLinkWaka }}" target="_blank" rel="noopener"
                class="press flex h-11 items-center justify-center gap-2 rounded-xl bg-hadir-soft text-sm font-bold text-hadir">
-                <x-icon name="chat" :size="18" /> Kirim Link Persetujuan ke Waka (WA)
+                <x-icon name="chat" :size="18" /> Kirim Tautan Persetujuan melalui WhatsApp
             </a>
         @endif
         @if ($waLinkSiswa)
             <a href="{{ $waLinkSiswa }}" target="_blank" rel="noopener"
                class="press flex h-11 items-center justify-center gap-2 rounded-xl bg-izin-soft text-sm font-bold text-izin">
-                <x-icon name="chat" :size="18" /> Kirim Surat ke Siswa (WA)
+                <x-icon name="chat" :size="18" /> Kirim Bukti melalui WhatsApp
             </a>
         @endif
         @if ($dispensasi->status_akhir === 'approved')
@@ -121,8 +117,8 @@
                  kanan-kiri di semua ukuran layar, samain sama pola tombol
                  berpasangan lain di app. --}}
             <div class="flex gap-2">
-                <x-ui.button type="submit" name="keputusan" value="approved" variant="success" icon="check" class="flex-1">Setujui {{ $anggota->count() }} Siswa</x-ui.button>
-                <x-ui.button type="submit" name="keputusan" value="rejected" variant="danger" icon="close" data-confirm="Yakin menolak dispensasi {{ $anggota->count() }} siswa ini?" class="flex-1">Tolak Semua</x-ui.button>
+                <x-ui.button type="submit" name="keputusan" value="approved" variant="success" icon="check" class="min-w-0 flex-1 px-2">Setujui</x-ui.button>
+                <x-ui.button type="submit" name="keputusan" value="rejected" variant="danger" icon="close" data-confirm="Yakin ingin menolak pengajuan dispensasi untuk {{ $anggota->count() }} siswa?" class="min-w-0 flex-1 px-2">Tolak</x-ui.button>
             </div>
         </form>
     @endif

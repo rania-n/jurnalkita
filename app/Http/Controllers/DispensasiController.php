@@ -227,7 +227,6 @@ class DispensasiController extends Controller
             'jam_ke_mulai' => ['nullable', 'required_with:jam_ke_selesai', 'integer', 'min:1', 'max:15'],
             'jam_ke_selesai' => ['nullable', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
             'alasan' => ['required', 'string'],
-            'no_hp' => ['nullable', 'string', 'max:20'],
             'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
 
@@ -323,7 +322,8 @@ class DispensasiController extends Controller
             // Piket kadang lupa isi No. HP pas ngajuin (field-nya opsional) --
             // boleh diisi belakangan kapan saja (nggak cuma sekali di form
             // awal), oleh piket ATAU Waka, bukan cuma pengaju aslinya.
-            'bisaUbahNoHp' => $user->role === 'waka' || $user->isPiket(),
+            'bisaUbahNoHp' => $dispensasi->status_akhir === 'approved'
+                && ($user->role === 'waka' || $user->isPiket()),
             'waLinkWaka' => $waLinkWaka,
             'waLinkSiswa' => $waLinkSiswa,
         ]);
@@ -338,15 +338,16 @@ class DispensasiController extends Controller
     {
         $user = auth()->user();
         abort_unless($user->role === 'waka' || $user->isPiket(), 403, 'Hanya guru piket dan Waka Kesiswaan yang bisa mengisi ini.');
+        abort_unless($dispensasi->status_akhir === 'approved', 403, 'Nomor WhatsApp dapat diisi setelah dispensasi disetujui.');
 
         $data = $request->validate([
-            'no_hp' => ['required', 'string', 'max:20'],
+            'no_hp' => ['required', 'string', 'max:20', 'regex:/^[0-9+()\-\s]+$/'],
         ]);
 
         $dispensasi->anggotaKelompok()->each->update($data);
 
         return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])
-            ->with('success', 'No. HP disimpan. Sekarang bukti dispensasi sudah bisa dikirim lewat WA.');
+            ->with('success', 'Nomor WhatsApp disimpan. Bukti dispensasi sekarang dapat dikirim.');
     }
 
     /**

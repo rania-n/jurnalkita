@@ -50,11 +50,11 @@
             <div class="flex gap-2">
                 <button type="submit" name="keputusan" value="approved"
                     class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-hadir/25 bg-hadir-soft text-base font-bold text-hadir">
-                    <x-icon name="check" :size="20" /> Setujui {{ $anggota->count() }} Siswa
+                    <x-icon name="check" :size="20" /> Setujui
                 </button>
                 <button type="submit" name="keputusan" value="rejected"
                     class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-alpha/25 bg-alpha-soft text-base font-bold text-alpha">
-                    <x-icon name="close" :size="20" /> Tolak Semua
+                    <x-icon name="close" :size="20" /> Tolak
                 </button>
             </div>
         </form>

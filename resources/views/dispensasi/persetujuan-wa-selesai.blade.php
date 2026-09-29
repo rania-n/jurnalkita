@@ -6,7 +6,7 @@
             </span>
             <h1 class="text-xl font-bold text-hadir">Dispensasi Disetujui</h1>
             <p class="text-sm text-muted">
-                Presensi <strong>{{ $dispensasi->siswa->nama }}</strong> sudah otomatis diperbarui.
+                Presensi {{ $dispensasi->jumlahAnggota() }} siswa telah diperbarui secara otomatis.
                 Terima kasih.
             </p>
         @else

@@ -18,11 +18,11 @@
              -- biar kalau kirim WA-nya dibatalkan, baliknya ke daftar (netral),
              bukan nyangkut di halaman form/detail. --}}
         <x-alert type="info" class="mb-4">
-            Dispensasi diajukan —
+            Pengajuan dispensasi berhasil disimpan.
             <a href="{{ $waLinkAutoKirim }}" id="link-wa-auto-kirim" target="_blank" rel="noopener" class="font-bold underline">
-                buka WhatsApp untuk mengirim ke Waka
+                Buka WhatsApp untuk mengirim tautan persetujuan
             </a>
-            jika tidak terbuka secara otomatis.
+            jika halaman tidak terbuka secara otomatis.
         </x-alert>
         @push('scripts')
             <script>document.getElementById('link-wa-auto-kirim')?.click();</script>
@@ -39,14 +39,14 @@
                     <a href="{{ $urlEkspor }}"
                        class="press inline-flex h-7 w-full shrink-0 items-center justify-center gap-2.5 rounded-md bg-surface-alt px-2.5 text-xs font-semibold text-ink hover:bg-[#cbd5e1] sm:w-auto">
                         <x-icon name="download" :size="13" class="shrink-0" />
-                        Ekspor Ringkasan
+                        Unduh Ringkasan
                     </a>
                 @endif
                 @if ($bolehAjukan)
                     <a href="{{ route('dispensasi.create') }}"
                        class="press inline-flex h-7 w-full shrink-0 items-center justify-center gap-1 rounded-md bg-navy px-2.5 text-xs font-semibold text-card hover:bg-navy-hover sm:w-auto">
                         <x-icon name="add" :size="13" class="shrink-0" />
-                        Buat Dispen
+                        Ajukan Dispensasi
                     </a>
                 @endif
             </x-slot:action>
@@ -56,9 +56,9 @@
              -- !h-10 dkk override h-12 bawaan komponen (pola yang sama kayak
              notifikasi/index.blade.php), biar nggak sebesar tombol form biasa
              tapi tetap lebih jelas dari desain kecil kustom sebelumnya. --}}
-        <x-page-header title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran" always-row size="sm">
+        <x-page-header title="Dispensasi Siswa" subtitle="Pengajuan dan persetujuan dispensasi siswa" size="sm">
             @if ($bolehEkspor)
-                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ekspor Ringkasan</x-ui.button>
+                <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Unduh Ringkasan</x-ui.button>
             @endif
             @if ($bolehAjukan)
                 <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ajukan Dispensasi</x-ui.button>
@@ -95,7 +95,7 @@
          tiap Kelas/Tanggal diganti. Teks cari tetap dibawa lewat hidden
          input "cari" yang sudah ada. --}}
     <div class="mb-4 flex flex-col gap-2">
-        <form method="GET" action="{{ route('dispensasi.index') }}" class="flex w-full items-end gap-2">
+        <form method="GET" action="{{ route('dispensasi.index') }}" class="flex w-full flex-col gap-2 sm:flex-row sm:items-end">
             <input type="hidden" name="tab" value="{{ $tab }}">
             @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
             @if(request('kelas_id')) <input type="hidden" name="kelas_id" value="{{ request('kelas_id') }}"> @endif
@@ -110,14 +110,14 @@
                     $sisaFilterTanggal = request()->except(['dari', 'sampai']);
                 @endphp
                 <a href="{{ url()->current() . ($sisaFilterTanggal ? '?' . http_build_query($sisaFilterTanggal) : '') }}"
-                   class="flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-surface-alt bg-card px-3 text-sm font-semibold text-muted hover:border-alpha hover:text-alpha">
+                   class="flex h-10 w-full shrink-0 items-center justify-center gap-1.5 rounded-lg border border-surface-alt bg-card px-3 text-sm font-semibold text-muted hover:border-alpha hover:text-alpha sm:w-auto">
                     <x-icon name="close" :size="16" /> Reset
                 </a>
             @endif
         </form>
 
-        <div class="flex w-full gap-2">
-            <div class="flex-1">
+        <div class="flex w-full flex-col gap-2 sm:flex-row">
+            <div class="min-w-0 flex-1">
                 {{-- Label ditambah manual (x-ui.search-bar nggak punya prop
                      label) -- gaya disamain persis kayak label "Kelas"/"Dari
                      tanggal" di sebelahnya (x-admin.f-date), biar nggak
@@ -130,7 +130,7 @@
                 @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
                 @if(request('dari')) <input type="hidden" name="dari" value="{{ request('dari') }}"> @endif
                 @if(request('sampai')) <input type="hidden" name="sampai" value="{{ request('sampai') }}"> @endif
-                <div class="flex-1">
+                <div class="min-w-0 flex-1">
                     <x-ui.cari-pilihan name="kelas_id" label="Kelas" :options="$kelasList" all="Semua Kelas" />
                 </div>
             </form>
