@@ -220,8 +220,6 @@
                 $selesaiAwal = old('jam_ke_selesai', $jadwalTerpilih->jam_ke_selesai ?? $jpSekarang);
                 $hariJadwalTerpilih = $jadwalTerpilih->hari ?? \App\Support\HariSekolah::hariIni();
                 $jamAwal = $hariJadwalTerpilih ? \App\Support\Waktu::rentangJamUntukHari($hariJadwalTerpilih, $mulaiAwal, $selesaiAwal) : null;
-                $jamMulaiAwal = $hariJadwalTerpilih ? \App\Support\Waktu::jamMulaiUntukHari($hariJadwalTerpilih, $mulaiAwal) : null;
-                $jamSelesaiAwal = $hariJadwalTerpilih ? \App\Support\Waktu::jamSelesaiUntukHari($hariJadwalTerpilih, $selesaiAwal) : null;
             @endphp
 
             {{-- Kelas & Mata Pelajaran -- diletakkan SETELAH blok Tidak Hadir
@@ -259,37 +257,31 @@
                 @endif
             </div>
 
-            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="mt-4">
 
-            {{-- Jam mulai & selesai SELALU ngikut jadwal (statis, nggak bisa diedit
+            {{-- Rentang jam SELALU mengikuti jadwal (statis, tidak bisa diedit
                  manual) -- guru nggak perlu (dan nggak boleh) ngarang jam sendiri,
-                 itu udah ditentuin jadwalnya. Pas jadwal diganti lewat dropdown di
-                 atas, dua-duanya ikut kesinkron otomatis (lihat sync() di bawah).
+                 itu sudah ditentukan jadwalnya. Pas jadwal diganti lewat dropdown,
+                 rentangnya ikut tersinkron otomatis (lihat sync() di bawah).
                  Hanya ditampilkan saat status "Hadir" -- di saat tidak hadir,
                  info jam pelajaran tidak relevan untuk ditampilkan. --}}
-            <div id="tampilan-jam-mulai-wrap">
-                <x-ui.field-static label="Jam ke- (mulai)" icon="schedule" tone="muted">
-                    <span id="tampilan-jam-mulai">Jam ke-{{ $mulaiAwal }}{{ $jamMulaiAwal ? " ({$jamMulaiAwal})" : '' }}</span>
+            <div id="tampilan-jam-wrap">
+                <x-ui.field-static label="Jam ke-" icon="schedule" tone="muted">
+                    <span id="tampilan-jam">
+                        {{ $mulaiAwal === $selesaiAwal ? $mulaiAwal : "{$mulaiAwal}–{$selesaiAwal}" }}
+                        @if ($jamAwal) · {{ $jamAwal }} @endif
+                    </span>
                 </x-ui.field-static>
                 <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
-            </div>
-            <div id="tampilan-jam-selesai-wrap">
-                <x-ui.field-static label="Jam ke- (selesai)" icon="schedule" tone="muted">
-                    <span id="tampilan-jam-selesai">Jam ke-{{ $selesaiAwal }}{{ $jamSelesaiAwal ? " ({$jamSelesaiAwal})" : '' }}</span>
-                </x-ui.field-static>
                 <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">
             </div>
-            <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">
-                Jam mengajar otomatis mengikuti jadwal yang dipilih.
-                @if ($jamAwal) <span id="keterangan-jam-aktual">Waktunya {{ $jamAwal }}.</span> @endif
-            </p>
 
             {{-- Acuan dari jurnal TERAKHIR di jadwal yang sama (bisa minggu lalu,
                  bisa lebih lama kalau libur) -- biar guru/pengurus kelas yang isi
                  nggak lupa nyambungin dari mana terakhir kali, tanpa harus buka
                  Riwayat Jurnal dulu di tab lain. --}}
             @if ($jurnalSebelumnya)
-                <div class="sm:col-span-2 rounded-xl bg-surface-alt/60 px-3.5 py-2.5 text-xs text-muted">
+                <div class="mt-4 rounded-xl bg-surface-alt/60 px-3.5 py-2.5 text-xs text-muted">
                     <span class="font-semibold text-ink">
                         Terakhir diisi ({{ $jurnalSebelumnya->tanggal->translatedFormat('d M Y') }}{{ $jurnalSebelumnya->status_guru === 'tidak_hadir' ? ', gurunya tidak hadir' : '' }}):
                     </span>
@@ -394,7 +386,7 @@
                  sama pola tombol submit/batal modal lain di app (mis. modal
                  Tambah/Ubah di Admin), bukan bikin pola baru. --}}
             <div class="mt-4 flex gap-2">
-                <x-ui.button type="button" id="tombol-kirim-jurnal" icon="send" class="flex-1">Kirim Jurnal</x-ui.button>
+                <x-ui.button type="button" id="tombol-kirim-jurnal" icon="send" class="flex-1">Kirim</x-ui.button>
                 <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Cek Lagi</x-ui.button>
             </div>
         </x-ui.modal>
@@ -548,27 +540,24 @@
                     // sama sekali, jadi elemen ini bisa null.
                     const jadwal = document.getElementById('jadwal_id');
                     if (jadwal) {
-                        const tampilanMulai = document.getElementById('tampilan-jam-mulai');
+                        const tampilanJam = document.getElementById('tampilan-jam');
                         const inputMulai = document.getElementById('jam_ke_mulai');
-                        const tampilanSelesai = document.getElementById('tampilan-jam-selesai');
                         const inputSelesai = document.getElementById('jam_ke_selesai');
 
-                        // Teks "keterangan-jam" (termasuk jam aktualnya, mis. "07:00–08:30")
-                        // udah di-render server sesuai jadwal yang kepilih -- nggak perlu
-                        // diutak-atik JS di sini. Ganti jadwal lewat dropdown SELALU muat
-                        // ulang halaman (lihat listener 'change' di bawah), jadi yang perlu
-                        // disinkron JS cuma buat kasus browser auto-select opsi tunggal TANPA
-                        // memicu 'change' -- dan di situ pun server udah render value yang
-                        // benar dari awal, sync() ini cuma jaga-jaga.
+                        // Sinkronkan rentang JP jika browser otomatis memilih satu-satunya
+                        // opsi tanpa memicu event change.
                         function sync() {
                             const opt = jadwal.selectedOptions[0];
                             const mulai = opt?.dataset.mulai;
                             const selesai = opt?.dataset.selesai;
                             if (!mulai) return;
 
-                            tampilanMulai.textContent = 'Jam ke-' + mulai + (opt.dataset.mulaiJam ? ' (' + opt.dataset.mulaiJam + ')' : '');
+                            const rentangJp = mulai === selesai ? mulai : `${mulai}–${selesai}`;
+                            const rentangWaktu = opt.dataset.mulaiJam && opt.dataset.selesaiJam
+                                ? ` · ${opt.dataset.mulaiJam}–${opt.dataset.selesaiJam}`
+                                : '';
+                            tampilanJam.textContent = rentangJp + rentangWaktu;
                             inputMulai.value = mulai;
-                            tampilanSelesai.textContent = 'Jam ke-' + selesai + (opt.dataset.selesaiJam ? ' (' + opt.dataset.selesaiJam + ')' : '');
                             inputSelesai.value = selesai;
                         }
 
@@ -614,9 +603,7 @@
                     const blokTidakHadir = document.getElementById('blok-tidak-hadir');
                     const blokTugasTidakHadir = document.getElementById('blok-tugas-tidak-hadir');
                     const blokPilihJadwal = document.getElementById('blok-pilih-jadwal');
-                    const jamMulaiWrap = document.getElementById('tampilan-jam-mulai-wrap');
-                    const jamSelesaiWrap = document.getElementById('tampilan-jam-selesai-wrap');
-                    const keteranganJam = document.getElementById('keterangan-jam');
+                    const jamWrap = document.getElementById('tampilan-jam-wrap');
                     const blokMassal = document.getElementById('blok-massal-kelas');
                     const blokPresensi = document.getElementById('blok-presensi');
                     const blokAlertPilihJadwal = document.getElementById('blok-alert-pilih-jadwal');
@@ -646,9 +633,7 @@
                         // dulu" cuma relevan kalau guru beneran hadir di kelas --
                         // presensi ikut dinonaktifkan (bukan cuma disembunyikan)
                         // biar nggak ada input presensi basi yang ikut kesubmit.
-                        if (jamMulaiWrap) jamMulaiWrap.hidden = !hadir;
-                        if (jamSelesaiWrap) jamSelesaiWrap.hidden = !hadir;
-                        if (keteranganJam) keteranganJam.hidden = !hadir;
+                        if (jamWrap) jamWrap.hidden = !hadir;
                         if (blokPresensi) {
                             blokPresensi.hidden = !hadir;
                             blokPresensi.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
