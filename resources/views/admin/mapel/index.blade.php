@@ -4,7 +4,7 @@
         ->orderBy('nama')->get();
 @endphp
 
-<x-layouts.admin title="Mata Pelajaran" heading="Mata Pelajaran">
+<x-layouts.admin title="Mata Pelajaran" heading="Mata Pelajaran" :subtitle="$rows->count() . ' mapel'">
     <x-admin.page title="Mata Pelajaran" :subtitle="$rows->count() . ' mapel'">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-mapel" data-modal-title="Tambah Mata Pelajaran">Tambah Mapel</x-ui.button>

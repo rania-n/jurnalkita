@@ -1,4 +1,4 @@
-<x-layouts.admin title="Detail Guru" :heading="$guru->nama">
+<x-layouts.admin title="Detail Guru" :heading="$guru->nama" :subtitle="$guru->mapelUtama?->nama ?? 'Belum ada mapel utama'">
     <x-admin.page :title="$guru->nama" :subtitle="$guru->mapelUtama?->nama ?? 'Belum ada mapel utama'" :back="route('master.guru.index')" />
 
     {{-- ── Info utama ──────────────────────────────────────────── --}}

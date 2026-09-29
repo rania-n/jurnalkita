@@ -53,7 +53,7 @@
         : collect();
 @endphp
 
-<x-layouts.admin title="Data Siswa" heading="Data Siswa">
+<x-layouts.admin title="Data Siswa" heading="Data Siswa" :subtitle="$rows->total() . ' siswa'">
     <x-admin.page title="Data Siswa" :subtitle="$rows->total() . ' siswa'">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-siswa" data-modal-title="Tambah Siswa">Tambah Siswa</x-ui.button>

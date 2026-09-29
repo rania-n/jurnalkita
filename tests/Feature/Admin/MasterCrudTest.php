@@ -235,6 +235,44 @@ class MasterCrudTest extends TestCase
         $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'jumat', 'jam_ke' => 1]);
     }
 
+    public function test_jam_pelajaran_bulk_save_menyisipkan_jeda_dari_pengaturan_jeda(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
+            'kategori' => 'senin_kamis',
+            'mulai' => ['07:00', '07:40', '08:40', '09:20'],
+            'selesai' => ['07:40', '08:20', '09:20', '10:00'],
+            'jeda' => [
+                ['setelah' => '2', 'durasi' => '20', 'label' => 'Istirahat'],
+            ],
+        ])->assertRedirect(route('master.jam-pelajaran.index', ['set' => 'senin_kamis']))
+            ->assertSessionHas('success');
+
+        $this->assertSame(4, JamPelajaran::where('kategori', 'senin_kamis')->count());
+        $this->assertDatabaseHas('jam_pelajarans', [
+            'kategori' => 'senin_kamis',
+            'jam_ke' => 3,
+            'jeda_sebelum_menit' => 20,
+            'jeda_label' => 'Istirahat',
+        ]);
+        $this->assertDatabaseHas('jam_pelajarans', [
+            'kategori' => 'senin_kamis',
+            'jam_ke' => 1,
+            'jeda_sebelum_menit' => null,
+        ]);
+    }
+
+    public function test_jam_pelajaran_bulk_save_menolak_jeda_setelah_jp_terakhir(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
+            'kategori' => 'senin_kamis',
+            'mulai' => ['07:00', '07:40'],
+            'selesai' => ['07:40', '08:20'],
+            'jeda' => [
+                ['setelah' => '2', 'durasi' => '15', 'label' => 'Pulang'],
+            ],
+        ])->assertSessionHasErrors('jeda', null, 'jp');
+    }
+
     public function test_generator_jp_membuat_jam_40_menit_dan_menyisipkan_jeda(): void
     {
         // Semua nilai SENGAJA dikirim sebagai string (kayak form HTML beneran
@@ -315,5 +353,74 @@ class MasterCrudTest extends TestCase
         $this->actingAs($this->admin())->delete('/admin/jam-pelajaran/ujian')->assertRedirect();
 
         $this->assertSame(0, JamPelajaran::where('kategori', 'ujian')->count());
+    }
+
+    public function test_kategori_baru_tidak_bisa_menimpa_kategori_yang_sudah_ada_saat_generate(): void
+    {
+        JamPelajaran::create(['kategori' => 'jumat', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:30']);
+
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran/generate', [
+            'kategori' => 'jumat',
+            'baru' => 1,
+            'mulai' => '08:00',
+            'durasi_jp' => 40,
+            'jumlah_jp' => 3,
+        ])->assertSessionHasErrors('kategori', null, 'jp');
+
+        // Pastikan jumat tidak tertimpa
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'jumat', 'jam_ke' => 1, 'mulai' => '07:00']);
+        $this->assertSame(1, JamPelajaran::where('kategori', 'jumat')->count());
+    }
+
+    public function test_kategori_baru_tidak_bisa_menimpa_kategori_yang_sudah_ada_saat_save(): void
+    {
+        JamPelajaran::create(['kategori' => 'jumat', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:30']);
+
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
+            'kategori' => 'Jumat',
+            'baru' => 1,
+            'mulai' => ['08:00'],
+            'selesai' => ['08:40'],
+        ])->assertSessionHasErrors('kategori', null, 'jp');
+
+        // Pastikan jumat tidak tertimpa
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'jumat', 'jam_ke' => 1, 'mulai' => '07:00']);
+        $this->assertSame(1, JamPelajaran::where('kategori', 'jumat')->count());
+    }
+
+    public function test_admin_bisa_mengubah_nama_kategori_jam_pelajaran(): void
+    {
+        JamPelajaran::create(['kategori' => 'jumat', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:30']);
+        DB::table('jam_pelajaran_hari')->updateOrInsert(['hari' => 'jumat'], ['kategori' => 'jumat', 'created_at' => now(), 'updated_at' => now()]);
+
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
+            'kategori' => 'Jumat Pendek',
+            'kategori_lama' => 'jumat',
+            'baru' => 0,
+            'mulai' => ['07:15'],
+            'selesai' => ['07:45'],
+        ])->assertRedirect(route('master.jam-pelajaran.index', ['set' => 'jumat_pendek']));
+
+        $this->assertDatabaseMissing('jam_pelajarans', ['kategori' => 'jumat', 'deleted_at' => null]);
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'jumat_pendek', 'jam_ke' => 1, 'mulai' => '07:15', 'deleted_at' => null]);
+        $this->assertDatabaseHas('jam_pelajaran_hari', ['hari' => 'jumat', 'kategori' => 'jumat_pendek']);
+    }
+
+    public function test_ubah_nama_kategori_tidak_bisa_menabrak_kategori_lain(): void
+    {
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:40']);
+        JamPelajaran::create(['kategori' => 'jumat', 'jam_ke' => 1, 'mulai' => '07:00', 'selesai' => '07:30']);
+
+        $this->actingAs($this->admin())->post('/admin/jam-pelajaran', [
+            'kategori' => 'Senin-Kamis',
+            'kategori_lama' => 'jumat',
+            'baru' => 0,
+            'mulai' => ['07:15'],
+            'selesai' => ['07:45'],
+        ])->assertSessionHasErrors('kategori', null, 'jp');
+
+        // Pastikan keduanya tetap ada dan tidak tertimpa
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'senin_kamis', 'jam_ke' => 1]);
+        $this->assertDatabaseHas('jam_pelajarans', ['kategori' => 'jumat', 'jam_ke' => 1]);
     }
 }

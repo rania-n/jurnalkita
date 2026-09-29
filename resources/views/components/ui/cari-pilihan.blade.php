@@ -75,7 +75,9 @@
     @if ($autoSubmit) data-auto-submit @endif
 >
     @if ($label && $compact)
-        <span class="text-xs font-semibold text-muted-2">{{ $label }}</span>
+        <span @class(['text-xs font-semibold', 'text-muted-2' => $modeFilter, 'text-ink' => ! $modeFilter])>
+            {{ $label }}@if ($required && ! $modeFilter) <span class="text-alpha" aria-hidden="true">*</span>@endif
+        </span>
     @elseif ($label)
         <x-ui.label :for="$id" :required="$required">{{ $label }}</x-ui.label>
     @endif

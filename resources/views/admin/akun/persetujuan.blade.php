@@ -7,7 +7,7 @@
     $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan'];
 @endphp
 
-<x-layouts.admin title="Persetujuan Akun" heading="Persetujuan Akun">
+<x-layouts.admin title="Persetujuan Akun" heading="Persetujuan Akun" :subtitle="$users->count() . ' pendaftaran menunggu diputuskan'">
     <x-admin.page
         title="Persetujuan Akun"
         :subtitle="$users->count() . ' pendaftaran menunggu diputuskan'"

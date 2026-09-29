@@ -7,7 +7,7 @@
     $icon = ['disiplin' => 'lock_clock', 'bebas_hari_ini' => 'today', 'bebas_selamanya' => 'event_repeat'];
 @endphp
 
-<x-layouts.admin title="Pengaturan Isi Jurnal" heading="Pengaturan Isi Jurnal">
+<x-layouts.admin title="Pengaturan Isi Jurnal" heading="Pengaturan Isi Jurnal" subtitle="Atur seberapa ketat aturan jam untuk guru mengisi jurnal mengajar">
     <x-admin.page title="Pengaturan Isi Jurnal" subtitle="Atur seberapa ketat aturan jam untuk guru mengisi jurnal mengajar" />
 
     <form method="POST" action="{{ route('master.pengaturan-jurnal.save') }}">

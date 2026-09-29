@@ -52,7 +52,7 @@
         : $guruList;
 
     $ruangList = collect(config('akademik.ruangan'))->map(fn ($r) => ['id' => $r, 'nama' => $r]);
-    $jpList = collect(range(1, 13))->mapWithKeys(fn ($i) => [$i => "Jam ke-{$i}"]);
+    $jpList = collect(range(1, 13))->map(fn ($i) => ['id' => $i, 'nama' => "JP {$i}", 'keterangan' => "Jam ke-{$i}"]);
     $queryTanpaHari = request()->except('page', 'hari');
 
     $kelasDipilih = request()->query('kelas_id');
@@ -83,7 +83,7 @@
     }
 @endphp
 
-<x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran">
+<x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran" :subtitle="$rows->count() . ' jadwal'">
     <x-admin.page title="Jadwal Pelajaran" :subtitle="$rows->count() . ' jadwal'">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-jadwal" data-modal-title="Tambah Jadwal">Tambah Jadwal</x-ui.button>
@@ -107,7 +107,7 @@
         <x-ui.cari-pilihan name="guru" label="Guru" :options="$guruListFilter" all="Semua Guru" />
         <x-ui.cari-pilihan name="mapel" label="Mapel" :options="$mapelList" all="Semua Mapel" />
         <x-ui.cari-pilihan name="ruang" label="Ruang" :options="$ruangList" all="Semua Ruang" />
-        <x-admin.f-select name="jp" label="JP" :options="$jpList" all="Semua JP" />
+        <x-ui.cari-pilihan name="jp" label="JP" :options="$jpList" all="Semua JP" />
     </x-admin.filters>
 
     @if ($rows->isEmpty())

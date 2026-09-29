@@ -1,4 +1,4 @@
-<x-layouts.admin title="Detail Kelas" :heading="$kelas->nama">
+<x-layouts.admin title="Detail Kelas" :heading="$kelas->nama" :subtitle="$kelas->jurusanNama() . ' · ' . $siswas->count() . ' siswa'">
     <x-admin.page :title="$kelas->nama" :subtitle="$kelas->jurusanNama() . ' · ' . $siswas->count() . ' siswa'" :back="route('master.kelas.index')" />
 
     <div class="mb-4 flex flex-wrap gap-1.5">

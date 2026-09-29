@@ -19,7 +19,7 @@
     $userList = \App\Models\User::orderBy('name')->get(['id', 'name']);
 @endphp
 
-<x-layouts.admin title="Audit Log" heading="Audit Log">
+<x-layouts.admin title="Audit Log" heading="Audit Log" :subtitle="$rows->total() . ' entri'">
     <x-admin.page title="Audit Log" :subtitle="$rows->total() . ' entri'" />
 
     <x-admin.filters :action="route('master.audit-log.index')">

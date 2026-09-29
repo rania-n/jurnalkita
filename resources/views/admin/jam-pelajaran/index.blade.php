@@ -36,16 +36,35 @@
     // mana yang error (save() pakai "mulai.0" array, generate() pakai "mulai"
     // tunggal) -- biar admin nggak balik ke mode yang beda dari yang tadi
     // disubmit, errornya jadi kelihatan lagi di tempat yang tepat.
-    $modeAwal = $errors->getBag('jp')->has('mulai.0') ? 'manual' : 'otomatis';
+    $modeAwal = is_array(old('mulai')) ? 'manual' : ($errors->getBag('jp')->has('mulai.0') ? 'manual' : 'otomatis');
 
     // Opsi "Jeda setelah JP..." pas render server (baris re-tampil abis gagal
     // validasi) -- JS (syncOpsiJeda) yang ngurus nyesuain ulang pas Jumlah JP
     // diketik ganti-ganti di browser, ini cuma buat render awal.
     $jumlahJpAwal = max(1, (int) old('jumlah_jp', 20));
     $opsiSetelahJp = collect(range(1, $jumlahJpAwal - 1))->map(fn ($n) => ['id' => $n, 'nama' => "JP {$n}"]);
+
+    $jumlahJpManualAwal = max(1, $rows->count() ?: 10);
+    $opsiSetelahJpManual = collect(range(1, max(1, $jumlahJpManualAwal - 1)))->map(fn ($n) => ['id' => $n, 'nama' => "JP {$n}"]);
+
+    $jedaOtomatisAwal = (! is_array(old('mulai')) && old('jeda')) ? old('jeda') : [];
+    $jedaManualAwal = [];
+    if (is_array(old('mulai')) && old('jeda')) {
+        $jedaManualAwal = old('jeda');
+    } else {
+        foreach ($rows as $jp) {
+            if ($jp->jeda_sebelum_menit && $jp->jam_ke > 1) {
+                $jedaManualAwal[] = [
+                    'setelah' => $jp->jam_ke - 1,
+                    'durasi' => $jp->jeda_sebelum_menit,
+                    'label' => $jp->jeda_label ?? '',
+                ];
+            }
+        }
+    }
 @endphp
 
-<x-layouts.admin title="Jam Pelajaran" heading="Jam Pelajaran">
+<x-layouts.admin title="Jam Pelajaran" heading="Jam Pelajaran" subtitle="Rentang waktu tiap jam pelajaran">
     <x-admin.page title="Jam Pelajaran" subtitle="Rentang waktu tiap jam pelajaran">
         <x-slot:action>
             <x-ui.button type="button" variant="secondary" icon="add" data-jp-trigger data-jp-baru="1"
@@ -208,7 +227,7 @@
             <x-alert type="error" class="mb-4">{{ $errors->getBag('jp')->first() }}</x-alert>
         @endif
 
-        <x-ui.input id="jp-kategori-nama" label="Nama Kategori" placeholder="Contoh: Senin–Kamis, Ramadhan" required class="mb-4" />
+        <x-ui.input id="jp-kategori-nama" name="kategori" label="Nama Kategori" placeholder="Contoh: Senin–Kamis, Ramadhan" required errorBag="jp" class="mb-4" />
 
         <x-ui.choice
             label="Cara mengisi"
@@ -225,6 +244,8 @@
         <form method="POST" action="{{ route('master.jam-pelajaran.generate') }}" id="form-jp-otomatis" data-panel-otomatis
               class="flex flex-col gap-4">
             @csrf
+            <input type="hidden" name="baru" value="0" data-kategori-baru>
+            <input type="hidden" name="kategori_lama" data-kategori-lama value="{{ $set }}">
             <input type="hidden" name="kategori" data-kategori-target value="{{ $set }}">
             <x-alert type="info">
                 Isi JP berurutan dengan durasi standar 40 menit. Tambahkan jeda istirahat atau MBG di antara JP; waktu JP berikutnya otomatis bergeser setelah jeda.
@@ -234,6 +255,11 @@
                 <x-ui.input label="Durasi tiap JP (menit)" name="durasi_jp" type="number" min="20" max="120" :value="old('durasi_jp', 40)" required errorBag="jp" />
                 <x-ui.input label="Jumlah JP" name="jumlah_jp" type="number" min="1" max="20" :value="old('jumlah_jp', $rows->count() ?: 10)" required data-jp-jumlah errorBag="jp" />
             </div>
+
+            <label class="flex flex-col gap-1 text-xs font-semibold text-ink">
+                <span>Catatan JP (opsional)</span>
+                <input type="text" name="keterangan_global" maxlength="100" value="{{ old('keterangan_global') }}" placeholder="Catatan untuk semua JP, misal: Jam reguler" class="h-9 w-full rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy">
+            </label>
 
             <div>
                 <div class="flex items-start justify-between gap-3">
@@ -246,12 +272,8 @@
                     </button>
                 </div>
                 <div data-jeda-rows class="mt-3 flex flex-col gap-2">
-                    @foreach (old('jeda', []) as $jedaIndex => $jedaLama)
-                        <div data-jeda-row class="grid grid-cols-1 items-end gap-2 rounded-xl border border-surface-alt p-3 sm:grid-cols-[1.2fr_1fr_1.2fr_auto]">
-                            {{-- Sama kayak dropdown "cari" yang udah dipakai di form lain
-                                 (mis. pilih mapel/guru/kelas) -- bukan select browser bawaan,
-                                 biar konsisten. data-jeda-setelah tetap dipasang di wrapper-nya
-                                 buat dipegang JS pas Jumlah JP berubah (lihat script bawah). --}}
+                    @foreach ($jedaOtomatisAwal as $jedaIndex => $jedaLama)
+                        <div data-jeda-row class="grid grid-cols-1 items-end gap-2 rounded-lg border border-surface-alt/80 p-2.5 sm:grid-cols-[1.3fr_0.9fr_1.3fr_auto]">
                             <x-ui.cari-pilihan
                                 label="Jeda setelah"
                                 name="jeda[{{ $jedaIndex }}][setelah]"
@@ -259,39 +281,43 @@
                                 :value="$jedaLama['setelah'] ?? null"
                                 placeholder="Ketik atau pilih JP..."
                                 required
+                                compact
                                 errorBag="jp"
                                 data-jeda-setelah
                             />
-                            <label class="flex flex-col gap-1.5 text-sm font-semibold text-ink">Durasi (menit) <span class="text-alpha" aria-hidden="true">*</span>
-                                <input type="number" name="jeda[{{ $jedaIndex }}][durasi]" min="1" max="180" value="{{ $jedaLama['durasi'] ?? 15 }}" required class="h-[52px] w-full rounded-xl border border-surface-alt bg-card px-4 text-[15px] text-ink outline-none focus:border-navy">
+                            <label class="flex flex-col gap-1 text-xs font-semibold text-ink">
+                                <span class="whitespace-nowrap">Durasi (menit) <span class="text-alpha" aria-hidden="true">*</span></span>
+                                <input type="number" name="jeda[{{ $jedaIndex }}][durasi]" min="1" max="180" value="{{ $jedaLama['durasi'] ?? 15 }}" required class="h-10 w-full rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy">
                             </label>
-                            <label class="flex flex-col gap-1.5 text-sm font-semibold text-ink">Nama jeda (opsional)
-                                <input type="text" name="jeda[{{ $jedaIndex }}][label]" maxlength="40" value="{{ $jedaLama['label'] ?? '' }}" placeholder="Istirahat / MBG" class="h-[52px] w-full rounded-xl border border-surface-alt bg-card px-4 text-[15px] text-ink outline-none focus:border-navy">
+                            <label class="flex flex-col gap-1 text-xs font-semibold text-ink">
+                                <span class="whitespace-nowrap">Nama jeda (opsional)</span>
+                                <input type="text" name="jeda[{{ $jedaIndex }}][label]" maxlength="40" value="{{ $jedaLama['label'] ?? '' }}" placeholder="Istirahat / MBG" class="h-10 w-full rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy">
                             </label>
-                            <button type="button" data-jeda-remove class="flex h-10 items-center justify-center rounded-lg bg-alpha-soft px-3 text-sm font-bold text-alpha">Hapus</button>
+                            <button type="button" data-jeda-remove class="flex h-10 items-center justify-center rounded-lg bg-alpha-soft px-3 text-xs font-bold text-alpha hover:bg-[#fecdd3]">Hapus</button>
                         </div>
                     @endforeach
                 </div>
             </div>
 
             <div class="flex gap-2">
-                <x-ui.button type="submit" icon="auto_awesome" class="flex-1">Buat Jadwal</x-ui.button>
+                <x-ui.button type="submit" icon="auto_awesome" class="flex-1" data-buat-jadwal>Buat Jadwal</x-ui.button>
                 <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
             </div>
         </form>
 
-        {{-- Panel MANUAL -- edit baris satu-satu, bar durasi cepat & toggle
-             jeda per baris (lihat _baris.blade.php). Cocok buat nge-tweak
-             dikit dari yang udah ada. --}}
+        {{-- Panel MANUAL -- edit baris jam pelajaran satu-satu secara leluasa,
+             ditambah pengaturan jeda istirahat / MBG terpusat di bawahnya. --}}
         <form method="POST" action="{{ route('master.jam-pelajaran.save') }}" id="form-jp-manual" data-panel-manual hidden class="flex flex-col gap-3">
             @csrf
+            <input type="hidden" name="baru" value="0" data-kategori-baru>
+            <input type="hidden" name="kategori_lama" data-kategori-lama value="{{ $set }}">
             <input type="hidden" name="kategori" data-kategori-target value="{{ $set }}">
 
             <div class="hidden gap-2 border-b border-surface-alt pb-2 text-xs font-bold uppercase tracking-wide text-muted-2 sm:flex">
                 <span class="w-8 shrink-0">JP</span><span class="w-28 shrink-0">Mulai <span class="text-alpha">*</span></span><span class="w-28 shrink-0">Selesai <span class="text-alpha">*</span></span><span class="flex-1">Keterangan</span><span class="w-8 shrink-0"></span>
             </div>
 
-            <div data-jp-rows class="max-h-[50vh] overflow-y-auto">
+            <div data-jp-rows class="max-h-[215px] overflow-y-auto pr-1">
                 @forelse ($rows as $jp)
                     @include('admin.jam-pelajaran._baris', ['jp' => $jp, 'nomor' => $loop->iteration])
                 @empty
@@ -302,6 +328,44 @@
             <button type="button" data-jp-add class="flex w-full items-center justify-center gap-2 rounded-lg border border-izin/40 bg-izin-soft py-2.5 text-sm font-bold text-izin hover:bg-[#bae6fd]">
                 <x-icon name="add" :size="18" /> Tambah Baris
             </button>
+
+            <div class="mt-1">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h4 class="text-sm font-bold text-ink">Jeda istirahat atau MBG</h4>
+                        <p class="mt-1 text-xs text-muted">Opsional. Tentukan jeda setelah JP tertentu, lalu isi durasinya.</p>
+                    </div>
+                    <button type="button" data-jeda-add class="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-izin-soft px-3 text-sm font-bold text-izin hover:bg-[#bae6fd]">
+                        <x-icon name="add" :size="16" /> Tambah Jeda
+                    </button>
+                </div>
+                <div data-jeda-rows class="mt-3 flex flex-col gap-2">
+                    @foreach ($jedaManualAwal as $jedaIndex => $jedaLama)
+                        <div data-jeda-row class="grid grid-cols-1 items-end gap-2 rounded-lg border border-surface-alt/80 p-2.5 sm:grid-cols-[1.3fr_0.9fr_1.3fr_auto]">
+                            <x-ui.cari-pilihan
+                                label="Jeda setelah"
+                                name="jeda[{{ $jedaIndex }}][setelah]"
+                                :options="$opsiSetelahJpManual"
+                                :value="$jedaLama['setelah'] ?? null"
+                                placeholder="Ketik atau pilih JP..."
+                                required
+                                compact
+                                errorBag="jp"
+                                data-jeda-setelah
+                            />
+                            <label class="flex flex-col gap-1 text-xs font-semibold text-ink">
+                                <span class="whitespace-nowrap">Durasi (menit) <span class="text-alpha" aria-hidden="true">*</span></span>
+                                <input type="number" name="jeda[{{ $jedaIndex }}][durasi]" min="1" max="180" value="{{ $jedaLama['durasi'] ?? 15 }}" required class="h-10 w-full rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy">
+                            </label>
+                            <label class="flex flex-col gap-1 text-xs font-semibold text-ink">
+                                <span class="whitespace-nowrap">Nama jeda (opsional)</span>
+                                <input type="text" name="jeda[{{ $jedaIndex }}][label]" maxlength="40" value="{{ $jedaLama['label'] ?? '' }}" placeholder="Istirahat / MBG" class="h-10 w-full rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy">
+                            </label>
+                            <button type="button" data-jeda-remove class="flex h-10 items-center justify-center rounded-lg bg-alpha-soft px-3 text-xs font-bold text-alpha hover:bg-[#fecdd3]">Hapus</button>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
 
             <div class="mt-1 flex gap-2">
                 <x-ui.button type="submit" icon="save" class="flex-1">Simpan Perubahan</x-ui.button>
@@ -319,6 +383,9 @@
                 const namaInput = document.getElementById('jp-kategori-nama');
                 const panelOtomatis = modal.querySelector('[data-panel-otomatis]');
                 const panelManual = modal.querySelector('[data-panel-manual]');
+                const btnBuatJadwal = panelOtomatis.querySelector('[data-buat-jadwal]');
+                const jpRows = modal.querySelector('[data-jp-rows]');
+                const jumlahInput = panelOtomatis.querySelector('input[name="jumlah_jp"]');
 
                 // Bar Otomatis/Manual -- tampilin 1 panel, DISABLE semua field di
                 // panel yang lagi disembunyiin (pola yang sama dipakai di banyak
@@ -333,56 +400,145 @@
                 modal.querySelectorAll('input[name="jp_mode"]').forEach((el) => el.addEventListener('change', syncMode));
                 syncMode();
 
-                // "Nama Kategori" itu 1 input yang kelihatan doang (nggak punya
-                // name="", nggak kesubmit langsung) -- nilainya disalin ke field
-                // kategori tersembunyi di form yang lagi aktif, biar 2 form
-                // (Otomatis/Manual) nggak perlu 2 kotak nama kategori sendiri-sendiri.
-                // CUMA disalin pas mode "kategori baru" -- mode Edit nampilin
-                // LABEL cantik ("Senin–Kamis"), bukan KEY aslinya ("senin_kamis"),
-                // jadi field tersembunyi WAJIB tetap pegang key asli dari server
-                // ({{ $set }}), kalau ikut disalin malah kesimpen sebagai kategori
-                // BARU yang salah nama pas disubmit.
+                // Setup pengelolaan Jeda untuk Otomatis dan Manual
+                function setupJedaSection(panel, prefix, getOptions) {
+                    const jedaRows = panel.querySelector('[data-jeda-rows]');
+                    const jedaAdd = panel.querySelector('[data-jeda-add]');
+                    if (!jedaRows || !jedaAdd) return { sync: () => {}, clear: () => {}, setHtml: () => {} };
+
+                    let nextIndex = jedaRows.querySelectorAll('[data-jeda-row]').length;
+
+                    function sync() {
+                        const opsi = getOptions();
+                        jedaRows.querySelectorAll('[data-jeda-setelah]').forEach((wrap) => {
+                            wrap.dataset.list = JSON.stringify(opsi);
+                            const hidden = wrap.querySelector('[data-cari-pilihan-value]');
+                            if (hidden?.value && !opsi.some((o) => String(o.id) === String(hidden.value))) {
+                                hidden.value = '';
+                                const input = wrap.querySelector('[data-cari-pilihan-input]');
+                                const tombolClear = wrap.querySelector('[data-cari-pilihan-clear]');
+                                if (input) input.value = '';
+                                if (tombolClear) tombolClear.hidden = true;
+                            }
+                        });
+                    }
+
+                    jedaAdd.addEventListener('click', () => {
+                        if (jedaRows.querySelectorAll('[data-jeda-row]').length >= 10) return;
+
+                        const row = document.createElement('div');
+                        row.dataset.jedaRow = '';
+                        row.className = 'grid grid-cols-1 items-end gap-2 rounded-lg border border-surface-alt/80 p-2.5 sm:grid-cols-[1.3fr_0.9fr_1.3fr_auto]';
+                        const opsiJson = JSON.stringify(getOptions()).replace(/'/g, '&#39;');
+                        row.innerHTML = `
+                            <div class="flex flex-col gap-1 min-w-[7rem]" data-cari-pilihan data-list='${opsiJson}' data-jeda-setelah>
+                                <label class="text-xs font-semibold text-ink whitespace-nowrap" for="${prefix}-setelah-${nextIndex}">Jeda setelah <span class="text-alpha" aria-hidden="true">*</span></label>
+                                <div class="relative">
+                                    <div class="flex h-10 items-center gap-2 rounded-lg border border-surface-alt bg-card px-3 transition-colors focus-within:border-navy">
+                                        <span class="material-symbols-rounded select-none leading-none shrink-0 text-muted-2" style="font-size: 16px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 16;" aria-hidden="true">search</span>
+                                        <input type="text" id="${prefix}-setelah-${nextIndex}" autocomplete="off" placeholder="Ketik atau pilih JP..." data-cari-pilihan-input class="w-full border-none bg-transparent text-sm font-medium text-ink outline-none placeholder:text-muted">
+                                        <button type="button" data-cari-pilihan-clear hidden class="flex shrink-0 items-center text-muted-2 hover:text-alpha" aria-label="Ganti pilihan">
+                                            <span class="material-symbols-rounded select-none leading-none" style="font-size: 16px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 16;" aria-hidden="true">close</span>
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="jeda[${nextIndex}][setelah]" value="" data-cari-pilihan-value>
+                                    <div data-cari-pilihan-hasil hidden class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-surface-alt bg-card py-1 shadow-lg">
+                                        <div data-cari-pilihan-daftar></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <label class="flex flex-col gap-1 text-xs font-semibold text-ink">
+                                <span class="whitespace-nowrap">Durasi (menit) <span class="text-alpha" aria-hidden="true">*</span></span>
+                                <input type="number" name="jeda[${nextIndex}][durasi]" min="1" max="180" value="15" required class="h-10 w-full rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy">
+                            </label>
+                            <label class="flex flex-col gap-1 text-xs font-semibold text-ink">
+                                <span class="whitespace-nowrap">Nama jeda (opsional)</span>
+                                <input type="text" name="jeda[${nextIndex}][label]" maxlength="40" placeholder="Istirahat / MBG" class="h-10 w-full rounded-lg border border-surface-alt bg-card px-3 text-sm text-ink outline-none focus:border-navy">
+                            </label>
+                            <button type="button" data-jeda-remove class="flex h-10 items-center justify-center rounded-lg bg-alpha-soft px-3 text-xs font-bold text-alpha hover:bg-[#fecdd3]">Hapus</button>
+                        `;
+                        jedaRows.append(row);
+                        window.initCariPilihan?.();
+                        nextIndex++;
+                    });
+
+                    jedaRows.addEventListener('click', (event) => {
+                        if (event.target.closest('[data-jeda-remove]')) {
+                            event.target.closest('[data-jeda-row]')?.remove();
+                        }
+                    });
+
+                    return {
+                        sync,
+                        clear: () => {
+                            jedaRows.innerHTML = '';
+                            nextIndex = 0;
+                        },
+                        setHtml: (html) => {
+                            jedaRows.innerHTML = html;
+                            nextIndex = jedaRows.querySelectorAll('[data-jeda-row]').length;
+                            window.initCariPilihan?.();
+                            sync();
+                        },
+                    };
+                }
+
+                const handlerOtomatis = setupJedaSection(panelOtomatis, 'jeda-otomatis', () => {
+                    const n = Math.max(1, Math.min(19, Number(jumlahInput?.value) || 19));
+                    return Array.from({ length: Math.max(0, n - 1) }, (_, i) => ({ id: i + 1, nama: `JP ${i + 1}` }));
+                });
+                jumlahInput?.addEventListener('input', handlerOtomatis.sync);
+
+                const initialManualJedaHtml = panelManual.querySelector('[data-jeda-rows]')?.innerHTML || '';
+                const handlerManual = setupJedaSection(panelManual, 'jeda-manual', () => {
+                    const n = Math.max(1, Math.min(19, jpRows.querySelectorAll('[data-jp-row]').length));
+                    return Array.from({ length: Math.max(0, n - 1) }, (_, i) => ({ id: i + 1, nama: `JP ${i + 1}` }));
+                });
+
+                const existingSlugs = @json($semuaKategori->map(fn ($k) => \Illuminate\Support\Str::slug($k, '_'))->values());
+
+                // "Nama Kategori" sekarang bisa diedit baik saat kategori baru maupun edit.
+                // Nilai akan disinkronkan ke field tersembunyi [data-kategori-target].
                 let modeBaru = false;
                 namaInput?.addEventListener('input', () => {
-                    if (!modeBaru) return;
-                    modal.querySelectorAll('[data-kategori-target]').forEach((el) => { el.value = namaInput.value; });
+                    const val = (namaInput.value || '').trim();
+                    modal.querySelectorAll('[data-kategori-target]').forEach((el) => { el.value = val; });
                 });
 
                 // Tombol "Kategori Baru" / "Edit" -- atur isi awal modal SEBELUM
-                // initModals() bawaan nampilin dialognya (listener ini didaftarin
-                // duluan di source, jadi jalan duluan juga pas event yang sama).
+                // initModals() bawaan nampilin dialognya.
                 document.addEventListener('click', (e) => {
                     const btn = e.target.closest('[data-jp-trigger]');
                     if (!btn) return;
                     const baru = btn.dataset.jpBaru === '1';
                     modeBaru = baru;
-                    namaInput.value = baru ? '' : (btn.dataset.jpNama || '');
-                    namaInput.readOnly = ! baru;
-                    // Konfirmasi "ganti jadwal" cuma masuk akal kalau kategorinya
-                    // SUDAH ADA isinya (Buat Otomatis bakal nimpa) -- kategori baru
-                    // belum punya apa-apa buat ditimpa, jadi nggak perlu ditanya.
-                    if (baru) {
-                        panelOtomatis.removeAttribute('data-confirm');
-                        modal.querySelectorAll('[data-kategori-target]').forEach((el) => { el.value = namaInput.value; });
-                        jedaRows.innerHTML = '';
-                        // setTimeout(0) -- initModals() (di app.js) juga dengerin klik yang
-                        // SAMA buat nge-reset <form> pas modal dibuka (form.reset(), balikin
-                        // field ke value hasil render server, mis. Jumlah JP=13 dari kategori
-                        // yang lagi kebuka). Listener KITA didaftarin duluan jadi kepanggil
-                        // duluan juga -- tapi itu artinya form.reset() dari initModals() jalan
-                        // BELAKANGAN di event yang sama, nimpa lagi nilai yang barusan kita
-                        // set (bug asli yang dilaporin: Jumlah JP nunjuk 13 padahal kategori
-                        // baru). Ditunda ke tick berikutnya biar kita yang jalan PALING
-                        // AKHIR, setelah reset-nya kelar.
-                        setTimeout(() => {
+                    namaInput.readOnly = false;
+
+                    setTimeout(() => {
+                        if (baru) {
+                            namaInput.value = '';
+                            modal.querySelectorAll('[data-kategori-target]').forEach((el) => { el.value = ''; });
+                            modal.querySelectorAll('[data-kategori-lama]').forEach((el) => { el.value = ''; });
+                            modal.querySelectorAll('[data-kategori-baru]').forEach((el) => { el.value = '1'; });
+                            btnBuatJadwal?.removeAttribute('data-confirm');
+                            handlerOtomatis.clear();
+                            handlerManual.clear();
                             panelOtomatis.querySelector('input[name="mulai"]').value = '07:00';
                             panelOtomatis.querySelector('input[name="durasi_jp"]').value = '40';
                             panelOtomatis.querySelector('input[name="jumlah_jp"]').value = '10';
-                            syncOpsiJeda();
-                        }, 0);
-                    } else {
-                        panelOtomatis.setAttribute('data-confirm', `Ganti seluruh jadwal kategori ${btn.dataset.jpNama || ''} dengan jadwal otomatis yang baru?`);
-                    }
+                            handlerOtomatis.sync();
+                            handlerManual.sync();
+                        } else {
+                            const namaKategori = btn.dataset.jpNama || '';
+                            namaInput.value = namaKategori;
+                            modal.querySelectorAll('[data-kategori-target]').forEach((el) => { el.value = namaKategori; });
+                            modal.querySelectorAll('[data-kategori-lama]').forEach((el) => { el.value = @json($set); });
+                            modal.querySelectorAll('[data-kategori-baru]').forEach((el) => { el.value = '0'; });
+                            btnBuatJadwal?.setAttribute('data-confirm', `Ganti seluruh jadwal kategori ${namaKategori} dengan jadwal otomatis yang baru?`);
+                            handlerManual.setHtml(initialManualJedaHtml);
+                        }
+                    }, 0);
+
                     // Kategori baru -> mulai dari Otomatis (paling cepat dari nol).
                     // Edit yang udah ada -> mulai dari Manual (data lama kelihatan
                     // apa adanya, nggak digenerate ulang tiba-tiba).
@@ -391,147 +547,67 @@
                     syncMode();
                 });
 
-                // "Jumlah JP" berubah -> opsi "Jeda setelah JP..." di baris yang
-                // UDAH ADA ikut disesuaikan, biar nggak bisa milih "setelah JP 15"
-                // padahal Jumlah JP cuma 6 (dulu opsinya statis 1-19 terus, baru
-                // ketauan salah pas submit ditolak server -- sekarang dicegah dari
-                // awal langsung di pilihannya).
-                // "input[name=jumlah_jp]" LANGSUNG (bukan cari elemen ber-atribut
-                // data-jp-jumlah) -- x-ui.input SENGAJA nglempar semua data-* ke DIV
-                // pembungkus, bukan ke <input>-nya (lihat components/ui/input.blade.php),
-                // jadi selector data-jp-jumlah dulu nggak pernah kena inputnya sendiri
-                // (.value selalu undefined -> opsi jeda kebaca default 19 terus, nggak
-                // pernah ngikut angka yang beneran diketik -- ini akar bug yang dilaporin).
-                const jumlahInput = panelOtomatis.querySelector('input[name="jumlah_jp"]');
-                function opsiSetelahJp() {
-                    const n = Math.max(1, Math.min(19, Number(jumlahInput?.value) || 19));
-                    return Array.from({ length: n - 1 }, (_, i) => ({ id: i + 1, nama: `JP ${i + 1}` }));
-                }
-                // Field "Jeda setelah" pakai dropdown cari (x-ui.cari-pilihan) yang sama
-                // kayak field lain di app ini (pilih mapel/guru/kelas), BUKAN <select>
-                // bawaan browser -- data opsinya disimpan di atribut data-list (JSON),
-                // bukan <option> HTML, jadi cara nyinkronnya beda dari sebelumnya.
-                function syncOpsiJeda() {
-                    const opsi = opsiSetelahJp();
-                    modal.querySelectorAll('[data-jeda-setelah]').forEach((wrap) => {
-                        wrap.dataset.list = JSON.stringify(opsi);
-                        const hidden = wrap.querySelector('[data-cari-pilihan-value]');
-                        if (hidden?.value && !opsi.some((o) => String(o.id) === hidden.value)) {
-                            // Nilai lama udah di luar jangkauan (Jumlah JP diperkecil) --
-                            // kosongin biar admin milih ulang, jangan diam-diam ngirim
-                            // JP yang udah nggak ada.
-                            hidden.value = '';
-                            const input = wrap.querySelector('[data-cari-pilihan-input]');
-                            const tombolClear = wrap.querySelector('[data-cari-pilihan-clear]');
-                            if (input) input.value = '';
-                            if (tombolClear) tombolClear.hidden = true;
+                function validasiDanSubmit(e) {
+                    const nama = (namaInput?.value || '').trim();
+                    if (!nama) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('Nama kategori wajib diisi.');
+                        namaInput?.focus();
+                        return false;
+                    }
+
+                    const slug = nama.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+                    const currentSet = @json($set);
+
+                    if (modeBaru) {
+                        if (existingSlugs.includes(slug)) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            alert(`Kategori "${nama}" sudah ada. Silakan gunakan nama lain atau edit kategori tersebut.`);
+                            namaInput?.focus();
+                            return false;
                         }
-                    });
+                    } else {
+                        if (slug !== currentSet && existingSlugs.includes(slug)) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            alert(`Kategori "${nama}" sudah ada. Silakan gunakan nama lain.`);
+                            namaInput?.focus();
+                            return false;
+                        }
+                    }
+
+                    e.target.querySelectorAll('[data-kategori-target]').forEach((el) => { el.value = nama; });
+                    e.target.querySelectorAll('[data-kategori-baru]').forEach((el) => { el.value = modeBaru ? '1' : '0'; });
+                    if (!modeBaru) {
+                        e.target.querySelectorAll('[data-kategori-lama]').forEach((el) => { el.value = currentSet; });
+                    }
                 }
-                jumlahInput?.addEventListener('input', syncOpsiJeda);
 
-                const jedaRows = modal.querySelector('[data-jeda-rows]');
-                const jedaAdd = modal.querySelector('[data-jeda-add]');
-                let jedaIndex = jedaRows?.querySelectorAll('[data-jeda-row]').length || 0;
-                jedaAdd?.addEventListener('click', () => {
-                    if (!jedaRows || jedaRows.querySelectorAll('[data-jeda-row]').length >= 10) return;
+                panelOtomatis?.addEventListener('submit', validasiDanSubmit);
+                panelManual?.addEventListener('submit', validasiDanSubmit);
 
-                    const row = document.createElement('div');
-                    row.dataset.jedaRow = '';
-                    row.className = 'grid grid-cols-1 items-end gap-2 rounded-xl border border-surface-alt p-3 sm:grid-cols-[1.2fr_1fr_1.2fr_auto]';
-                    // Markup di bawah SENGAJA niru persis output x-ui.cari-pilihan
-                    // (lihat components/ui/cari-pilihan.blade.php) -- baris ini
-                    // ditambah lewat JS jadi nggak bisa manggil komponen Blade,
-                    // tapi harus tetap struktur yang sama biar initCariPilihan()
-                    // (dipanggil ulang di bawah, sengaja diekspos ke window buat
-                    // kasus ini doang -- lihat resources/js/app.js) bisa nge-wire.
-                    const opsiJson = JSON.stringify(opsiSetelahJp()).replace(/'/g, '&#39;');
-                    row.innerHTML = `
-                        <div class="flex flex-col gap-1.5" data-cari-pilihan data-list='${opsiJson}' data-jeda-setelah>
-                            <label class="text-sm font-semibold text-ink" for="jeda-setelah-${jedaIndex}">Jeda setelah <span class="text-alpha" aria-hidden="true">*</span><span class="sr-only">(wajib diisi)</span></label>
-                            <div class="relative">
-                                <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy">
-                                    <span class="material-symbols-rounded select-none leading-none shrink-0 text-muted-2" style="font-size: 20px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;" aria-hidden="true">search</span>
-                                    <input type="text" id="jeda-setelah-${jedaIndex}" autocomplete="off" placeholder="Ketik atau pilih JP..." data-cari-pilihan-input class="w-full border-none bg-transparent text-[15px] text-ink outline-none placeholder:text-placeholder">
-                                    <button type="button" data-cari-pilihan-clear hidden class="flex shrink-0 items-center text-muted-2 hover:text-alpha" aria-label="Ganti pilihan">
-                                        <span class="material-symbols-rounded select-none leading-none" style="font-size: 18px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 18;" aria-hidden="true">close</span>
-                                    </button>
-                                </div>
-                                <input type="hidden" name="jeda[${jedaIndex}][setelah]" value="" data-cari-pilihan-value>
-                                <div data-cari-pilihan-hasil hidden class="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-surface-alt bg-card py-1 shadow-lg">
-                                    <div data-cari-pilihan-daftar></div>
-                                </div>
-                            </div>
-                        </div>
-                        <label class="flex flex-col gap-1.5 text-sm font-semibold text-ink">Durasi (menit) <span class="text-alpha" aria-hidden="true">*</span>
-                            <input type="number" name="jeda[${jedaIndex}][durasi]" min="1" max="180" value="15" required class="h-[52px] w-full rounded-xl border border-surface-alt bg-card px-4 text-[15px] text-ink outline-none focus:border-navy">
-                        </label>
-                        <label class="flex flex-col gap-1.5 text-sm font-semibold text-ink">Nama jeda (opsional)
-                            <input type="text" name="jeda[${jedaIndex}][label]" maxlength="40" placeholder="Istirahat / MBG" class="h-[52px] w-full rounded-xl border border-surface-alt bg-card px-4 text-[15px] text-ink outline-none focus:border-navy">
-                        </label>
-                        <button type="button" data-jeda-remove class="flex h-10 items-center justify-center rounded-lg bg-alpha-soft px-3 text-sm font-bold text-alpha">Hapus</button>
-                    `;
-                    jedaRows.append(row);
-                    window.initCariPilihan?.();
-                    jedaIndex++;
-                });
-
-                jedaRows?.addEventListener('click', (event) => {
-                    if (event.target.closest('[data-jeda-remove]')) event.target.closest('[data-jeda-row]')?.remove();
-                });
-
-                // --- Panel Manual: tambah/hapus baris, bar durasi cepat, toggle jeda ---
-                const jpRows = modal.querySelector('[data-jp-rows]');
-                const jpRenumber = () => jpRows.querySelectorAll('[data-jp-no]').forEach((el, i) => (el.textContent = i + 1));
+                // --- Panel Manual: tambah/hapus baris ---
+                const jpRenumber = () => {
+                    jpRows.querySelectorAll('[data-jp-no]').forEach((el, i) => (el.textContent = i + 1));
+                    handlerManual.sync();
+                };
 
                 modal.querySelector('[data-jp-add]').addEventListener('click', () => {
                     const clone = jpRows.querySelector('[data-jp-row]')?.cloneNode(true);
                     if (!clone) return;
                     clone.querySelectorAll('input[type="text"], input[type="time"], input[type="number"]').forEach((i) => (i.value = ''));
-                    // Checkbox jeda & kotak-kotaknya HARUS direset manual -- cloneNode
-                    // ikut nyalin status "checked" & kotaknya kelihatan/nggak dari
-                    // baris yang di-clone, bukan otomatis balik ke kosongan.
-                    const jedaToggle = clone.querySelector('[data-jp-jeda-toggle]');
-                    if (jedaToggle) jedaToggle.checked = false;
-                    const jedaFields = clone.querySelector('[data-jp-jeda-fields]');
-                    if (jedaFields) jedaFields.hidden = true;
                     jpRows.appendChild(clone);
                     jpRenumber();
                 });
 
                 jpRows.addEventListener('click', (e) => {
-                    // Bar durasi cepat -- isi "Selesai" = "Mulai" + durasi yang diklik,
-                    // biar nggak itung manual & durasi antar baris konsisten.
-                    const tombolDurasi = e.target.closest('[data-jp-durasi]');
-                    if (tombolDurasi) {
-                        const baris = tombolDurasi.closest('[data-jp-row]');
-                        const mulai = baris.querySelector('[data-jp-mulai]');
-                        const selesai = baris.querySelector('[data-jp-selesai]');
-                        if (mulai?.value) {
-                            const [jam, menit] = mulai.value.split(':').map(Number);
-                            const totalMenit = jam * 60 + menit + Number(tombolDurasi.dataset.jpDurasi);
-                            const jamSelesai = Math.floor(totalMenit / 60) % 24;
-                            const menitSelesai = totalMenit % 60;
-                            selesai.value = `${String(jamSelesai).padStart(2, '0')}:${String(menitSelesai).padStart(2, '0')}`;
-                        }
-                        return;
-                    }
-
                     if (!e.target.closest('[data-jp-remove]')) return;
                     if (jpRows.querySelectorAll('[data-jp-row]').length <= 1) return;
                     if (!confirm('Hapus baris jam pelajaran ini?')) return;
                     e.target.closest('[data-jp-row]').remove();
                     jpRenumber();
-                });
-
-                // Checkbox "Ada jeda sebelum baris ini" -- munculin/sembunyiin kotak
-                // menit+label. Field-nya SENGAJA nggak di-disable pas disembunyiin
-                // (beda dari pola disable-blok biasa) -- lihat catatan di _baris.blade.php.
-                jpRows.addEventListener('change', (e) => {
-                    if (!e.target.matches('[data-jp-jeda-toggle]')) return;
-                    const fields = e.target.closest('[data-jp-row]').querySelector('[data-jp-jeda-fields]');
-                    fields.hidden = !e.target.checked;
-                    if (!e.target.checked) fields.querySelectorAll('input').forEach((i) => (i.value = ''));
                 });
             })();
         </script>
