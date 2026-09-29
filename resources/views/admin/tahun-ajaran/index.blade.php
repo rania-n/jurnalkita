@@ -21,7 +21,7 @@
     $riwayat = \App\Models\TahunAjaran::withCount('kelas')->orderByDesc('id')->get();
 @endphp
 
-<x-layouts.admin title="Tahun Ajaran" heading="Tahun Ajaran">
+<x-layouts.admin title="Tahun Ajaran" heading="Tahun Ajaran" :subtitle="'Tahun ajaran aktif: ' . ($aktif?->nama ?? '— belum diset —')">
     <x-admin.page title="Tahun Ajaran & Kenaikan Kelas" subtitle="Tahun ajaran aktif: {{ $aktif?->nama ?? '— belum diset —' }}" />
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">

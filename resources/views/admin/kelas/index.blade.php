@@ -19,7 +19,7 @@
     $kelasAktifList = \App\Models\Kelas::aktif()->orderedByHierarchy()->get(['id', 'nama']);
 @endphp
 
-<x-layouts.admin title="Data Kelas" heading="Data Kelas">
+<x-layouts.admin title="Data Kelas" heading="Data Kelas" :subtitle="$rows->count() . ' kelas'">
     <x-admin.page title="Data Kelas" :subtitle="$rows->count() . ' kelas'">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-kelas" data-modal-title="Tambah Kelas">Tambah Kelas</x-ui.button>

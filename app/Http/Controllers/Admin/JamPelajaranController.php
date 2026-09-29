@@ -37,42 +37,80 @@ class JamPelajaranController extends Controller
         // beneran, baru ketauan pas ditelusuri kenapa error nggak muncul).
         $data = $request->validateWithBag('jp', [
             'kategori' => ['required', 'string', 'max:50'],
+            'kategori_lama' => ['nullable', 'string', 'max:50'],
+            'baru' => ['nullable', 'boolean'],
             'mulai' => ['required', 'array', 'min:1'],
             'mulai.*' => ['required', 'date_format:H:i'],
             'selesai' => ['required', 'array'],
             'selesai.*' => ['required', 'date_format:H:i'],
             'keterangan' => ['nullable', 'array'],
             'keterangan.*' => ['nullable', 'string', 'max:100'],
-            // Jeda per baris -- checkbox "Ada jeda sebelum baris ini" di view
-            // ngirim jeda_menit[i] cuma kalau dicentang (lihat syncJeda() di
-            // JS), jadi array-nya bisa "bolong" (nggak semua index keisi).
+            'jeda' => ['sometimes', 'array', 'max:10'],
+            'jeda.*.setelah' => ['required', 'integer', 'min:1', 'max:19', 'distinct'],
+            'jeda.*.durasi' => ['required', 'integer', 'min:1', 'max:180'],
+            'jeda.*.label' => ['nullable', 'string', 'max:40'],
             'jeda_menit' => ['nullable', 'array'],
             'jeda_menit.*' => ['nullable', 'integer', 'min:1', 'max:180'],
             'jeda_label' => ['nullable', 'array'],
             'jeda_label.*' => ['nullable', 'string', 'max:40'],
         ]);
 
-        // Slug rapi (huruf kecil, spasi jadi underscore) -- konsisten dipakai
-        // balik sebagai key kategori, idempotent kalau kategorinya emang
-        // udah slug (edit kategori yang sudah ada nggak berubah apa-apa).
-        $data['kategori'] = Str::slug($data['kategori'], '_');
+        $totalJp = count($data['mulai']);
+        foreach ($data['jeda'] ?? [] as $slotJeda) {
+            if ((int) $slotJeda['setelah'] >= $totalJp) {
+                return back()->withErrors(['jeda' => 'Jeda harus ditempatkan di antara jam pelajaran, bukan setelah JP terakhir.'], 'jp')->withInput();
+            }
+        }
+
+        if (! empty($data['jeda'])) {
+            foreach ($data['jeda'] as &$slotJedaRef) {
+                $slotJedaRef['durasi'] = (int) $slotJedaRef['durasi'];
+                $slotJedaRef['setelah'] = (int) $slotJedaRef['setelah'];
+            }
+            unset($slotJedaRef);
+        }
+
+        $kategoriLama = $request->filled('kategori_lama') ? Str::slug($request->input('kategori_lama'), '_') : null;
+        $slug = Str::slug($data['kategori'], '_');
+
+        if ($request->boolean('baru')) {
+            if (JamPelajaran::where('kategori', $slug)->exists()) {
+                return back()->withErrors(['kategori' => "Kategori '{$data['kategori']}' sudah ada. Silakan gunakan nama lain atau edit kategori tersebut."], 'jp')->withInput();
+            }
+        } elseif ($kategoriLama && $slug !== $kategoriLama) {
+            if (JamPelajaran::where('kategori', $slug)->exists()) {
+                return back()->withErrors(['kategori' => "Kategori '{$data['kategori']}' sudah ada. Silakan gunakan nama lain."], 'jp')->withInput();
+            }
+        }
+
+        $data['kategori'] = $slug;
+
+        $jedaSetelah = collect($data['jeda'] ?? [])->keyBy(fn ($item) => (int) $item['setelah']);
 
         $baris = [];
         foreach (array_values($data['mulai']) as $i => $mulai) {
-            $jedaMenit = $data['jeda_menit'][$i] ?? null;
+            $jamKe = $i + 1;
+            $jedaSebelum = $jedaSetelah->get($jamKe - 1);
+            $labelJeda = trim($jedaSebelum['label'] ?? '');
+
+            $jedaMenit = $jedaSebelum['durasi'] ?? ($data['jeda_menit'][$i] ?? null);
+            $jedaLabel = $jedaSebelum
+                ? ($labelJeda !== '' ? $labelJeda : 'Jeda')
+                : ($data['jeda_label'][$i] ?? null);
+
             $baris[] = [
-                'jam_ke' => $i + 1,
+                'jam_ke' => $jamKe,
                 'mulai' => $mulai,
                 'selesai' => $data['selesai'][$i] ?? $mulai,
                 'keterangan' => $data['keterangan'][$i] ?? null,
-                'jeda_sebelum_menit' => $jedaMenit,
-                'jeda_label' => $jedaMenit ? (trim($data['jeda_label'][$i] ?? '') ?: 'Jeda') : null,
+                'jeda_sebelum_menit' => $jedaMenit ? (int) $jedaMenit : null,
+                'jeda_label' => $jedaMenit ? (trim((string) $jedaLabel) ?: 'Jeda') : null,
             ];
         }
 
-        $this->gantiBaris($data['kategori'], $baris);
+        $this->gantiBaris($data['kategori'], $baris, $kategoriLama);
 
-        AuditLog::catat('Ubah Jam Pelajaran', "Ubah jam pelajaran kategori {$data['kategori']}");
+        AuditLog::catat('Ubah Jam Pelajaran', "Ubah jam pelajaran kategori {$data['kategori']}".($kategoriLama && $kategoriLama !== $slug ? " (sebelumnya {$kategoriLama})" : ''));
 
         return redirect()->route('master.jam-pelajaran.index', ['set' => $data['kategori']])
             ->with('success', 'Jam pelajaran disimpan.');
@@ -82,19 +120,32 @@ class JamPelajaranController extends Controller
     {
         $data = $request->validateWithBag('jp', [
             'kategori' => ['required', 'string', 'max:50'],
+            'kategori_lama' => ['nullable', 'string', 'max:50'],
+            'baru' => ['nullable', 'boolean'],
             'mulai' => ['required', 'date_format:H:i'],
             'durasi_jp' => ['required', 'integer', 'min:20', 'max:120'],
             'jumlah_jp' => ['required', 'integer', 'min:1', 'max:20'],
+            'keterangan_global' => ['nullable', 'string', 'max:100'],
             'jeda' => ['sometimes', 'array', 'max:10'],
             'jeda.*.setelah' => ['required', 'integer', 'min:1', 'max:19', 'distinct'],
             'jeda.*.durasi' => ['required', 'integer', 'min:1', 'max:180'],
             'jeda.*.label' => ['nullable', 'string', 'max:40'],
         ]);
 
-        // Slug rapi -- samain sama save(), biar kategori yang sama ditulis beda
-        // kapital/spasi (mis. "Bulan Ramadhan" vs "bulan_ramadhan") tetap
-        // dianggap kategori yang sama persis, nggak kebentuk 2 kategori beda.
-        $data['kategori'] = Str::slug($data['kategori'], '_');
+        $kategoriLama = $request->filled('kategori_lama') ? Str::slug($request->input('kategori_lama'), '_') : null;
+        $slug = Str::slug($data['kategori'], '_');
+
+        if ($request->boolean('baru')) {
+            if (JamPelajaran::where('kategori', $slug)->exists()) {
+                return back()->withErrors(['kategori' => "Kategori '{$data['kategori']}' sudah ada. Silakan gunakan nama lain atau edit kategori tersebut."], 'jp')->withInput();
+            }
+        } elseif ($kategoriLama && $slug !== $kategoriLama) {
+            if (JamPelajaran::where('kategori', $slug)->exists()) {
+                return back()->withErrors(['kategori' => "Kategori '{$data['kategori']}' sudah ada. Silakan gunakan nama lain."], 'jp')->withInput();
+            }
+        }
+
+        $data['kategori'] = $slug;
 
         // request()->validate() TIDAK nge-cast tipe -- 'integer' cuma ngecek
         // isinya angka, hasilnya tetap STRING kayak dari form. Carbon versi
@@ -120,6 +171,7 @@ class JamPelajaranController extends Controller
             }
         }
 
+        $keteranganGlobal = trim($data['keterangan_global'] ?? '') ?: null;
         $jedaSetelah = collect($data['jeda'] ?? [])->keyBy('setelah');
         $waktu = Carbon::createFromFormat('!H:i', $data['mulai']);
         $baris = [];
@@ -137,6 +189,7 @@ class JamPelajaranController extends Controller
                 'jam_ke' => $jamKe,
                 'mulai' => $mulai->format('H:i'),
                 'selesai' => $selesai->format('H:i'),
+                'keterangan' => $keteranganGlobal,
                 'jeda_sebelum_menit' => $jedaSebelum['durasi'] ?? null,
                 'jeda_label' => $jedaSebelum ? ($labelJeda !== '' ? $labelJeda : 'Jeda') : null,
             ];
@@ -147,9 +200,9 @@ class JamPelajaranController extends Controller
             }
         }
 
-        $this->gantiBaris($data['kategori'], $baris);
+        $this->gantiBaris($data['kategori'], $baris, $kategoriLama);
 
-        AuditLog::catat('Generate Jam Pelajaran', "Buat {$data['jumlah_jp']} JP kategori {$data['kategori']} (durasi {$data['durasi_jp']} menit).");
+        AuditLog::catat('Generate Jam Pelajaran', "Buat {$data['jumlah_jp']} JP kategori {$data['kategori']} (durasi {$data['durasi_jp']} menit)".($kategoriLama && $kategoriLama !== $slug ? " (sebelumnya {$kategoriLama})" : '').'.');
 
         return redirect()->route('master.jam-pelajaran.index', ['set' => $data['kategori']])
             ->with('success', "{$data['jumlah_jp']} jam pelajaran berhasil dibuat otomatis.");
@@ -324,11 +377,17 @@ class JamPelajaranController extends Controller
     }
 
     /** @param array<int, array{jam_ke: int, mulai: string, selesai: string, keterangan: ?string, jeda_sebelum_menit?: ?int, jeda_label?: ?string}> $baris */
-    private function gantiBaris(string $kategori, array $baris): void
+    private function gantiBaris(string $kategori, array $baris, ?string $kategoriLama = null): void
     {
-        DB::transaction(function () use ($kategori, $baris) {
-            $this->simpanSnapshot($kategori, JamPelajaran::where('kategori', $kategori)->orderBy('jam_ke')->get());
-            JamPelajaran::where('kategori', $kategori)->delete();
+        DB::transaction(function () use ($kategori, $baris, $kategoriLama) {
+            $targetLama = ($kategoriLama && $kategoriLama !== $kategori) ? $kategoriLama : $kategori;
+            $this->simpanSnapshot($kategori, JamPelajaran::where('kategori', $targetLama)->orderBy('jam_ke')->get());
+            JamPelajaran::where('kategori', $targetLama)->delete();
+
+            if ($kategoriLama && $kategoriLama !== $kategori) {
+                DB::table('jam_pelajaran_hari')->where('kategori', $kategoriLama)->update(['kategori' => $kategori]);
+                DB::table('jam_pelajaran_snapshots')->where('kategori', $kategoriLama)->update(['kategori' => $kategori]);
+            }
 
             foreach ($baris as $data) {
                 JamPelajaran::create($data + ['kategori' => $kategori]);

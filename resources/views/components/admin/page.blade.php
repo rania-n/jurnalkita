@@ -18,9 +18,6 @@
                 <x-icon name="arrow_back" :size="14" /> Kembali
             </a>
         @endif
-        @if ($subtitle)
-            <p class="text-sm text-muted">{{ $subtitle }}</p>
-        @endif
     </div>
 
     {{-- flex-col di HP biar tombol yang lebih dari satu numpuk rapi & stretch

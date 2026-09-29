@@ -19,7 +19,7 @@
     $semua = $hari === 'semua';
 @endphp
 
-<x-layouts.admin title="Jadwal Piket" heading="Jadwal Piket">
+<x-layouts.admin title="Jadwal Piket" heading="Jadwal Piket" subtitle="Penugasan piket guru per tanggal (ulang tiap 2 minggu)">
     <x-admin.page title="Jadwal Piket" subtitle="Penugasan piket guru per tanggal (ulang tiap 2 minggu)">
         <x-slot:action>
             <x-ui.button type="button" icon="add" data-modal-open="modal-piket-tambah" data-modal-title="Tambah Jadwal Piket">Tambah Piket</x-ui.button>

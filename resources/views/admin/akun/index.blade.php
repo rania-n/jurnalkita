@@ -30,7 +30,7 @@
     $queryTanpaRole = request()->except('page', 'role');
 @endphp
 
-<x-layouts.admin title="Manajemen Akun" heading="Manajemen Akun">
+<x-layouts.admin title="Manajemen Akun" heading="Manajemen Akun" :subtitle="$users->count() . ' akun aktif/ditolak'">
     <x-admin.page title="Manajemen Akun" :subtitle="$users->count() . ' akun aktif/ditolak'">
         <x-slot:action>
             @if ($pendingCount > 0)

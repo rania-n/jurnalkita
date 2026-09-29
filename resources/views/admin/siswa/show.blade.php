@@ -1,4 +1,4 @@
-<x-layouts.admin title="Detail Siswa" :heading="$siswa->nama">
+<x-layouts.admin title="Detail Siswa" :heading="$siswa->nama" :subtitle="($siswa->kelas?->nama ?? '—') . ' · ' . $siswa->nis">
     <x-admin.page
         :title="$siswa->nama"
         :subtitle="($siswa->kelas?->nama ?? '—') . ' · ' . $siswa->nis"

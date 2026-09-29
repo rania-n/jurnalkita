@@ -1,4 +1,4 @@
-<x-layouts.admin title="Backup Data" heading="Backup Data">
+<x-layouts.admin title="Backup Data" heading="Backup Data" subtitle="Unduh salinan lengkap database">
     <x-admin.page title="Backup Data" subtitle="Unduh salinan lengkap database" />
 
     <div class="rounded-2xl border border-surface-alt bg-card p-6">

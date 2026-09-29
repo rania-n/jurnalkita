@@ -568,8 +568,10 @@ function initCariPilihan() {
             const qClean = q.replace(/\s+/g, '');
             const data = dataSekarang();
             const cocok = q ? data.filter((s) => {
-                const nama = s.nama.toLowerCase();
-                return nama.includes(q) || (qClean.length > 0 && nama.replace(/\s+/g, '').includes(qClean));
+                const nama = (s.nama || '').toLowerCase();
+                const ket = (s.keterangan || '').toLowerCase();
+                return nama.includes(q) || (qClean.length > 0 && nama.replace(/\s+/g, '').includes(qClean))
+                    || ket.includes(q) || (qClean.length > 0 && ket.replace(/\s+/g, '').includes(qClean));
             }) : data;
             render(cocok);
             hasil.hidden = false;

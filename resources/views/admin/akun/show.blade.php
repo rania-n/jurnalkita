@@ -2,7 +2,7 @@
     $statusBadge = match ($user->status) { 'approved' => 'disetujui', 'rejected' => 'ditolak', default => 'menunggu' };
 @endphp
 
-<x-layouts.admin title="Detail Akun" :heading="$user->name">
+<x-layouts.admin title="Detail Akun" :heading="$user->name" :subtitle="$user->roleLabel()">
     <x-admin.page :title="$user->name" :subtitle="$user->roleLabel()" :back="route('master.akun.index')" />
 
     <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

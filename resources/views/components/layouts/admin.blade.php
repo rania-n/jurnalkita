@@ -1,6 +1,7 @@
 @props([
     'title' => null,
     'heading' => null,
+    'subtitle' => null,
 ])
 
 @php
@@ -102,14 +103,16 @@
                     <button type="button" class="lg:hidden" onclick="document.getElementById('admin-sidebar').classList.toggle('hidden')" aria-label="Menu">
                         <x-icon name="menu" :size="24" class="text-ink" />
                     </button>
-                    <h1 class="text-lg font-bold text-ink">{{ $heading ?? $title }}</h1>
+                    <div>
+                        <h1 class="text-lg font-bold text-ink leading-tight">{{ $heading ?? $title }}</h1>
+                        @if ($subtitle)
+                            <p class="text-xs text-muted leading-tight mt-0.5">{{ $subtitle }}</p>
+                        @endif
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
                     {{-- Format nama+role sama persis kayak shell non-admin (x-app-topbar) --}}
-                    <span class="flex flex-col items-end leading-tight">
-                        <span class="text-sm font-semibold text-ink">{{ $user?->name }}</span>
-                        <span class="text-[11px] font-bold text-muted">{{ $user?->roleLabel() }}</span>
-                    </span>
+                    <span class="text-sm font-semibold text-ink">{{ $user?->name }}</span>
 
                     <button type="button" data-modal-open="modal-notifikasi" class="relative ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-surface-alt text-muted transition-colors hover:text-navy" aria-label="Notifikasi">
                         <x-icon name="notifications" :size="20" />
