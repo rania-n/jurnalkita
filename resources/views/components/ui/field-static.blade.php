@@ -1,9 +1,6 @@
 @props([
     'label' => null,
     'icon' => null,
-    // 'default' (putih+border) | 'muted' (abu-abu, buat field yang DIKUNCI dari
-    // input form -- biar beda kesannya dari field view-only biasa yang emang
-    // dari sononya cuma buat dilihat, bukan "sebenarnya bisa diisi tapi dikunci").
     'tone' => 'default',
 ])
 
@@ -17,20 +14,18 @@
     $box = $attributes->except($wrapKeys);
 @endphp
 
-{{-- Nilai read-only bergaya seperti input (dipakai di layar detail). --}}
+{{-- Informasi tampil sebagai teks, tanpa bingkai kolom isian. --}}
 <div {{ $wrap->class('flex flex-col gap-1.5') }}>
     @if ($label)
-        <x-ui.label>{{ $label }}</x-ui.label>
+        <p class="text-xs font-semibold text-muted-2">{{ $label }}</p>
     @endif
 
     <div {{ $box->class([
-        'flex min-h-[52px] items-center gap-2 rounded-xl px-4 text-[15px] text-ink',
-        'border border-surface-alt bg-card' => $tone === 'default',
-        'bg-surface-alt' => $tone === 'muted',
+        'flex min-w-0 items-start gap-2 text-[15px] text-ink',
     ]) }}>
         @if ($icon)
             <x-icon :name="$icon" :size="20" class="shrink-0 text-muted-2" />
         @endif
-        <span class="flex-1">{{ $slot }}</span>
+        <span class="min-w-0 flex-1 whitespace-pre-line break-words">{{ $slot }}</span>
     </div>
 </div>

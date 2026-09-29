@@ -31,7 +31,7 @@
          field info yang emang selalu dikunci (x-ui.field-static tone=muted)
          -- begitu Edit ditekan, field yang beneran bisa diisi berubah putih,
          yang cuma info tetap abu-abu. --}}
-    <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy has-[:disabled]:bg-surface-alt has-[:readonly]:bg-surface-alt @error($name, $errorBag) !border-alpha @enderror">
+    <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy has-[:disabled]:bg-surface-alt has-[[readonly]]:bg-surface-alt @error($name, $errorBag) !border-alpha @enderror">
         @if ($icon)
             <x-icon :name="$icon" :size="20" class="shrink-0 text-muted-2" />
         @endif
