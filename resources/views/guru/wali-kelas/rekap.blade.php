@@ -21,9 +21,19 @@
          client-side langsung filter baris yang sudah dimuat -- sama pola
          kayak Rekap Kehadiran Siswa (Waka). --}}
     <x-admin.filters :action="route('guru.wali-kelas.rekap', $kelas)">
+        <input type="hidden" name="mode" value="{{ $mode }}">
         <x-admin.f-date name="dari" label="Dari tanggal" data-pasangan="sampai" />
         <x-admin.f-date name="sampai" label="Sampai tanggal" onchange="this.form.submit()" />
     </x-admin.filters>
+
+    <div class="mb-4 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">
+        @foreach (['mapel' => 'Per Mata Pelajaran', 'hari' => 'Per Hari'] as $key => $label)
+            <a href="{{ route('guru.wali-kelas.rekap', array_filter(['kelas' => $kelas, 'mode' => $key, 'dari' => $dari?->toDateString(), 'sampai' => $sampai?->toDateString()])) }}"
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold', 'bg-navy text-card' => $mode === $key, 'text-muted-2 hover:text-ink' => $mode !== $key])>
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
 
     <div class="mb-4">
         <x-ui.search-bar id="cari-rekap-wali" placeholder="Cari nama siswa..." />
@@ -36,7 +46,10 @@
             <x-admin.table :head="['No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi']">
                 @foreach ($siswas as $s)
                     @php $r = $rekap[$s->id] ?? collect(); @endphp
-                    <tr data-baris-rekap-wali data-cari="{{ strtolower($s->nama) }}">
+                    <tr data-baris-rekap-wali data-cari="{{ strtolower($s->nama) }}"
+                        data-modal-open="modal-rincian-siswa" data-modal-title="Rincian Kehadiran {{ $s->nama }}"
+                        data-ajax-url="{{ route('guru.wali-kelas.siswa.fragment', ['kelas' => $kelas, 'siswa' => $s, 'dari' => $dari?->toDateString(), 'sampai' => $sampai?->toDateString()]) }}"
+                        class="cursor-pointer hover:bg-surface-alt/60">
                         <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
                         <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
                         <td class="px-4 py-2.5"><x-ui.rekap-badge tone="hadir">{{ $r['hadir'] ?? 0 }}</x-ui.rekap-badge></td>
@@ -64,6 +77,10 @@
                         :izin="$r['izin'] ?? 0"
                         :alpha="$r['alpha'] ?? 0"
                         :dispensasi="$r['dispensasi'] ?? 0"
+                        data-modal-open="modal-rincian-siswa"
+                        data-modal-title="Rincian Kehadiran {{ $s->nama }}"
+                        data-ajax-url="{{ route('guru.wali-kelas.siswa.fragment', ['kelas' => $kelas, 'siswa' => $s, 'dari' => $dari?->toDateString(), 'sampai' => $sampai?->toDateString()]) }}"
+                        class="cursor-pointer"
                     />
                 @endforeach
             </div>
@@ -72,9 +89,13 @@
             Tidak ada siswa yang cocok dengan pencarian.
         </p>
         <p class="mt-3 text-xs text-muted-2">
-            Dihitung dari jurnal yang sudah diisi {{ ($dari || $sampai) ? 'pada rentang tanggal ini' : 'sepanjang riwayat' }}. Belum termasuk jam pelajaran yang jurnalnya belum diisi guru.
+            Mode {{ $mode === 'hari' ? 'Per Hari menghitung satu status utama setiap hari' : 'Per Mata Pelajaran menghitung setiap pelajaran' }} dari jurnal yang sudah diisi. Ketuk nama siswa untuk melihat rinciannya.
         </p>
     @endif
+
+    <x-ui.modal id="modal-rincian-siswa" title="Rincian Kehadiran" size="lg" errorBag="tidak-dipakai">
+        <div data-modal-ajax-target></div>
+    </x-ui.modal>
 
     @push('scripts')
         <script>

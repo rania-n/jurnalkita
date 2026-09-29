@@ -18,4 +18,6 @@
     "bulet-bulet" lucu yang tadinya cuma ada di HP konsisten muncul juga di
     desktop -- bukan cuma angka polos.
 --}}
-<span {{ $attributes->class("inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full px-1.5 text-[11px] font-bold {$cls}") }}>{{ $slot }}</span>
+@if ((int) trim((string) $slot) > 0)
+    <span {{ $attributes->class("inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full px-1.5 text-[11px] font-bold {$cls}") }}>{{ $slot }}</span>
+@endif

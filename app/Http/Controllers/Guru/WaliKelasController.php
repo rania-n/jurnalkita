@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Jurnal;
 use App\Models\Kelas;
+use App\Models\Siswa;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -46,17 +47,43 @@ class WaliKelasController extends Controller
 
         $siswas = $kelas->siswas()->orderBy('no_absen')->get();
 
-        $rekap = Absensi::whereIn('siswa_id', $siswas->pluck('id'))
+        $mode = request()->query('mode') === 'hari' ? 'hari' : 'mapel';
+        $absensis = Absensi::whereIn('siswa_id', $siswas->pluck('id'))
             ->whereHas('jurnal', fn ($q) => $q
                 ->when($dari, fn ($q2) => $q2->whereDate('tanggal', '>=', $dari))
                 ->when($sampai, fn ($q2) => $q2->whereDate('tanggal', '<=', $sampai)))
-            ->get()
-            ->groupBy('siswa_id')
-            ->map(fn ($rows) => $rows->countBy('status'));
+            ->with('jurnal:id,tanggal')
+            ->get();
+
+        $rekap = $mode === 'hari'
+            ? $absensis->groupBy('siswa_id')->map(fn ($rows) => $rows
+                ->groupBy(fn (Absensi $absensi) => $absensi->jurnal->tanggal->toDateString())
+                ->map(fn ($barisHari) => collect(['alpha', 'sakit', 'izin', 'dispensasi', 'hadir'])
+                    ->first(fn ($status) => $barisHari->contains('status', $status)))
+                ->countBy())
+            : $absensis->groupBy('siswa_id')->map(fn ($rows) => $rows->countBy('status'));
 
         $adaKelasLain = auth()->user()->kelasWaliList()->count() > 1;
 
-        return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'adaKelasLain', 'dari', 'sampai'));
+        return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'adaKelasLain', 'dari', 'sampai', 'mode'));
+    }
+
+    public function siswaFragment(Kelas $kelas, Siswa $siswa): View
+    {
+        abort_unless($kelas->wali_id === auth()->user()->guru?->id, 403, 'Anda bukan wali kelas ini.');
+        abort_unless($siswa->kelas_id === $kelas->id, 404);
+
+        $dari = request()->filled('dari') ? Carbon::parse(request()->date('dari')) : null;
+        $sampai = request()->filled('sampai') ? Carbon::parse(request()->date('sampai')) : null;
+        $absensis = $siswa->absensis()
+            ->whereHas('jurnal', fn ($query) => $query
+                ->when($dari, fn ($q) => $q->whereDate('tanggal', '>=', $dari))
+                ->when($sampai, fn ($q) => $q->whereDate('tanggal', '<=', $sampai)))
+            ->with('jurnal.jadwal.mapel')
+            ->get()
+            ->sortByDesc(fn (Absensi $absensi) => $absensi->jurnal->tanggal->toDateString().sprintf('%02d', $absensi->jurnal->jam_ke_mulai));
+
+        return view('guru.wali-kelas._siswa-fragment', compact('siswa', 'absensis'));
     }
 
     /**
