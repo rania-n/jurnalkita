@@ -355,8 +355,8 @@
             @endif
 
             <x-ui.sticky-bar>
-                <x-ui.button type="submit" block icon="save">
-                    <span id="teks-tombol-submit">{{ $statusGuruAwal === 'tidak_hadir' ? 'Simpan Jurnal' : 'Simpan Jurnal & Presensi' }}</span>
+                <x-ui.button type="submit" block icon="fact_check">
+                    <span id="teks-tombol-submit">Periksa Jurnal</span>
                 </x-ui.button>
             </x-ui.sticky-bar>
         </form>
@@ -365,7 +365,7 @@
              udah bener (biasanya isi jurnal buru-buru pas lagi jalan ke kelas
              lain), baru pilih "Kirim". Bukan validasi ulang (itu tetap di
              server) -- cuma tampilan ringkas dari apa yang udah diisi di form. --}}
-        <x-ui.modal id="modal-ringkasan-jurnal" title="Cek Dulu Sebelum Kirim">
+        <x-ui.modal id="modal-ringkasan-jurnal" title="Periksa Jurnal">
             <div class="flex flex-col gap-3 text-sm">
                 <x-ui.field-static label="Kelas & Mata Pelajaran"><span data-ringkasan="kelas-mapel">—</span></x-ui.field-static>
                 <x-ui.field-static label="Status Kehadiran Anda"><span data-ringkasan="status-guru">—</span></x-ui.field-static>
@@ -393,7 +393,7 @@
                  sama pola tombol submit/batal modal lain di app (mis. modal
                  Tambah/Ubah di Admin), bukan bikin pola baru. --}}
             <div class="mt-4 flex gap-2">
-                <x-ui.button type="button" id="tombol-kirim-jurnal" icon="send" class="flex-1">Sudah Benar, Kirim</x-ui.button>
+                <x-ui.button type="button" id="tombol-kirim-jurnal" icon="send" class="flex-1">Kirim Jurnal</x-ui.button>
                 <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Cek Lagi</x-ui.button>
             </div>
         </x-ui.modal>
@@ -406,6 +406,7 @@
                     if (!form || !modalRingkasan) return;
 
                     let dikonfirmasi = false;
+                    let sedangMengirim = false;
 
                     function teksTerpilih(name) {
                         const opt = form.querySelector(`select[name="${name}"] option:checked`);
@@ -499,16 +500,33 @@
                     }
 
                     form.addEventListener('submit', (e) => {
-                        if (dikonfirmasi) return;
+                        if (sedangMengirim) { e.preventDefault(); return; }
+                        if (dikonfirmasi) {
+                            sedangMengirim = true;
+                            form.setAttribute('aria-busy', 'true');
+                            form.querySelectorAll('[type="submit"]').forEach((button) => { button.disabled = true; });
+                            document.getElementById('teks-tombol-submit').textContent = 'Mengirim…';
+                            return;
+                        }
                         e.preventDefault();
                         isiRingkasan();
                         modalRingkasan.showModal();
                     });
 
                     document.getElementById('tombol-kirim-jurnal')?.addEventListener('click', () => {
+                        if (sedangMengirim) return;
+                        if (!form.reportValidity()) { modalRingkasan.close(); return; }
                         dikonfirmasi = true;
                         modalRingkasan.close();
                         form.requestSubmit();
+                        dikonfirmasi = false;
+                    });
+                    window.addEventListener('pageshow', () => {
+                        sedangMengirim = false;
+                        dikonfirmasi = false;
+                        form.removeAttribute('aria-busy');
+                        form.querySelectorAll('[type="submit"]').forEach((button) => { button.disabled = false; });
+                        document.getElementById('teks-tombol-submit').textContent = 'Periksa Jurnal';
                     });
                 })();
             </script>
@@ -629,7 +647,7 @@
                             blokPresensi.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
                         }
                         if (blokAlertPilihJadwal) blokAlertPilihJadwal.hidden = !hadir;
-                        if (teksTombolSubmit) teksTombolSubmit.textContent = hadir ? 'Simpan Jurnal & Presensi' : 'Simpan Jurnal';
+                        if (teksTombolSubmit) teksTombolSubmit.textContent = 'Periksa Jurnal';
                     }
                     // Ganti ke "Tidak Hadir" ngaktifin ULANG semua field di blok itu
                     // (termasuk checklist massal di dalamnya) -- syncMassal() dipanggil
