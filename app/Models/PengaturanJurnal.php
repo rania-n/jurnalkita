@@ -13,6 +13,8 @@ class PengaturanJurnal extends Model
 {
     protected $fillable = ['mode', 'tampilkan_di_login'];
 
+    protected $attributes = ['tampilkan_di_login' => false];
+
     protected function casts(): array
     {
         return ['tampilkan_di_login' => 'boolean'];

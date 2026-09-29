@@ -16,6 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\TestWith;
 use Tests\TestCase;
 
 class JurnalTest extends TestCase
@@ -605,5 +606,30 @@ class JurnalTest extends TestCase
 
         $this->assertDatabaseHas('jurnals', ['jadwal_id' => $this->jadwal->id, 'tugas_tambahan' => 'Latihan halaman 12']);
         $this->assertDatabaseHas('jurnals', ['jadwal_id' => $jadwalLain->id, 'tugas_tambahan' => 'Latihan halaman 5']);
+    }
+
+    #[TestWith(['06:00:00', false])]
+    #[TestWith(['08:15:00', true])]
+    #[TestWith(['16:00:00', false])]
+    public function test_popup_awal_mengikuti_pelajaran_aktif(string $jam, bool $tampil): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28 '.$jam));
+        JamPelajaran::create(['kategori' => 'senin_kamis', 'jam_ke' => 1, 'mulai' => '08:00', 'selesai' => '08:45']);
+        $response = $this->actingAs($this->user)->get('/guru')->assertOk();
+
+        if ($tampil) {
+            $response->assertSee('id="modal-pilihan-awal"', false);
+        } else {
+            $response->assertDontSee('id="modal-pilihan-awal"', false);
+        }
+    }
+
+    public function test_petunjuk_admin_memakai_email_jika_nomor_wa_kosong(): void
+    {
+        User::factory()->role('admin')->create(['email' => 'admin@example.test', 'no_hp' => null]);
+
+        $this->assertStringContainsString('href="mailto:admin@example.test"', view('components.ui.contact-text', [
+            'text' => 'Hubungi admin untuk bantuan.',
+        ])->render());
     }
 }

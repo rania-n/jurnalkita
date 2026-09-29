@@ -185,7 +185,7 @@
         <main class="w-full flex-1 px-5 py-6 sm:px-6 lg:px-10 lg:py-8 2xl:px-16">
             @foreach (['success', 'error', 'info'] as $key)
                 @if (session($key))
-                    <x-alert :type="$key === 'error' ? 'error' : ($key === 'info' ? 'info' : 'success')" class="mb-4">{{ session($key) }}</x-alert>
+                    <x-alert :type="$key === 'error' ? 'error' : ($key === 'info' ? 'info' : 'success')" class="mb-4"><x-ui.contact-text :text="session($key)" /></x-alert>
                 @endif
             @endforeach
 
@@ -199,7 +199,7 @@
                  Pelajaran) SENGAJA nggak ikut di sini -- itu bag punya
                  modal sendiri, biar nggak dobel ditampilin. --}}
             @if ($errors->getBag('default')->any())
-                <x-alert type="error" class="mb-4">{{ $errors->getBag('default')->first() }}</x-alert>
+                <x-alert type="error" class="mb-4"><x-ui.contact-text :text="$errors->getBag('default')->first()" /></x-alert>
             @endif
 
             {{ $slot }}

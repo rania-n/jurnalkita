@@ -53,7 +53,7 @@
     </div>
 
     @error($name, $errorBag)
-        <p class="text-xs font-medium text-alpha">{{ $message }}</p>
+        <p class="text-xs font-medium text-alpha"><x-ui.contact-text :text="$message" /></p>
     @else
         @if ($hint)
             <p class="text-xs text-muted-2">{{ $hint }}</p>
