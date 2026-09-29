@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DispensasiController extends Controller
@@ -185,7 +186,7 @@ class DispensasiController extends Controller
         // langsung, nggak perlu tahu/pilih kelasnya dulu (dulu 1 <select>
         // raksasa dikelompokkan per kelas, capek nyarinya kalau lupa kelasnya).
         $siswaList = $kelasList->flatMap(fn ($k) => $k->siswas->map(fn ($s) => [
-            'id' => $s->id, 'nama' => $s->nama, 'nis' => $s->nis, 'kelas' => $k->nama,
+            'id' => $s->id, 'nama' => "{$s->nama} · {$k->nama} · {$s->nis}",
         ]))->sortBy('nama')->values();
 
         return view('dispensasi.create', ['siswaList' => $siswaList]);
@@ -195,8 +196,13 @@ class DispensasiController extends Controller
     {
         $this->pastikanPiket();
 
+        if (! $request->has('siswa_ids') && $request->filled('siswa_id')) {
+            $request->merge(['siswa_ids' => [$request->input('siswa_id')]]);
+        }
+
         $data = $request->validate([
-            'siswa_id' => ['required', 'exists:siswas,id'],
+            'siswa_ids' => ['required', 'array', 'min:1'],
+            'siswa_ids.*' => ['required', 'integer', 'distinct', 'exists:siswas,id'],
             'tanggal' => ['required', 'date'],
             // Kosong = 1 hari saja. Diisi = dispensasi berlaku beberapa hari sekaligus.
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal'],
@@ -209,21 +215,32 @@ class DispensasiController extends Controller
             'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
 
-        $dispensasi = Dispensasi::create([
-            ...collect($data)->except('surat')->all(),
-            'diajukan_oleh_id' => auth()->id(),
-            'surat_path' => $request->file('surat')?->store('dispensasi-surat', 'public'),
-            // Pengaju = guru piket, jadi tahap piket otomatis lolos.
-            'status_piket' => 'approved',
-            'piket_id' => auth()->id(),
-        ]);
-        $dispensasi->segarkanStatusAkhir();
+        $suratPath = $request->file('surat')?->store('dispensasi-surat', 'public');
+        $dataPengajuan = collect($data)->except(['siswa_ids', 'surat'])->all();
+        $dispensasis = DB::transaction(function () use ($data, $dataPengajuan, $suratPath) {
+            return collect($data['siswa_ids'])->map(function ($siswaId) use ($dataPengajuan, $suratPath) {
+                $dispensasi = Dispensasi::create([
+                    ...$dataPengajuan,
+                    'siswa_id' => $siswaId,
+                    'diajukan_oleh_id' => auth()->id(),
+                    'surat_path' => $suratPath,
+                    'status_piket' => 'approved',
+                    'piket_id' => auth()->id(),
+                ]);
+                $dispensasi->segarkanStatusAkhir();
+                AuditLog::catat('Ajukan Dispensasi', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);
 
-        AuditLog::catat('Ajukan Dispensasi', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);
+                return $dispensasi;
+            });
+        });
 
-        foreach (User::where('role', 'waka')->get() as $waka) {
-            $waka->notify(new DispensasiBaru($dispensasi));
+        foreach ($dispensasis as $dispensasi) {
+            foreach (User::where('role', 'waka')->get() as $waka) {
+                $waka->notify(new DispensasiBaru($dispensasi));
+            }
         }
+
+        $dispensasi = $dispensasis->firstOrFail();
 
         // Balik ke Riwayat (bukan halaman detail) -- link WA-nya dibukakan
         // otomatis dari SANA (lihat index()), biar piket nggak perlu tap
@@ -233,7 +250,7 @@ class DispensasiController extends Controller
         // atas Riwayat (pola yang sama kayak abis Waka mutusin), jadi piket
         // langsung lihat ringkasannya tanpa harus tap "Lihat" manual lagi.
         return redirect()->route('dispensasi.index', ['kirim_wa' => $dispensasi->id, 'lihat' => $dispensasi->id])
-            ->with('success', 'Dispensasi diajukan. Menunggu persetujuan Waka Kesiswaan.');
+            ->with('success', $dispensasis->count().' siswa diajukan untuk dispensasi. Menunggu persetujuan Waka Kesiswaan.');
     }
 
     /** Link WA ke Waka yang bertugas hari ini buat minta persetujuan dispensasi ini. */

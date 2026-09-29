@@ -79,6 +79,27 @@ class DispensasiTest extends TestCase
         $this->assertSame('pending', $d->status_akhir);
     }
 
+    public function test_piket_bisa_mengajukan_dispensasi_untuk_banyak_siswa_sekaligus(): void
+    {
+        $siswaKedua = Siswa::create([
+            'kelas_id' => $this->siswa->kelas_id,
+            'nis' => '002',
+            'nama' => 'Siti',
+            'jenis_kelamin' => 'P',
+            'no_absen' => 2,
+        ]);
+
+        $this->actingAs($this->piket)->post('/dispensasi', [
+            'siswa_ids' => [$this->siswa->id, $siswaKedua->id],
+            'tanggal' => today()->toDateString(),
+            'alasan' => 'Turnamen futsal',
+        ])->assertRedirect();
+
+        $this->assertDatabaseCount('dispensasis', 2);
+        $this->assertDatabaseHas('dispensasis', ['siswa_id' => $this->siswa->id, 'alasan' => 'Turnamen futsal']);
+        $this->assertDatabaseHas('dispensasis', ['siswa_id' => $siswaKedua->id, 'alasan' => 'Turnamen futsal']);
+    }
+
     public function test_alur_penuh_approve_menerapkan_dispensasi_ke_presensi(): void
     {
         // presensi awal siswa untuk jurnal hari ini

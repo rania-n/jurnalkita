@@ -9,7 +9,14 @@
         @csrf
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-ui.cari-siswa name="siswa_id" :siswas="$siswaList" class="sm:col-span-2" required />
+            <x-ui.cari-checkbox
+                label="Siswa"
+                name="siswa_ids"
+                :options="$siswaList"
+                hint="Pilih satu atau beberapa siswa yang mengikuti kegiatan yang sama."
+                class="sm:col-span-2"
+                required
+            />
 
             <x-ui.input label="Tanggal" name="tanggal" type="date" :value="old('tanggal', now()->toDateString())" required />
             <x-ui.input label="Sampai Tanggal (opsional)" name="tanggal_selesai" type="date" :value="old('tanggal_selesai')" />
