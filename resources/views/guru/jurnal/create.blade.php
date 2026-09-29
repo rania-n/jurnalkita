@@ -16,8 +16,8 @@
                         <x-icon name="history_edu" :size="20" />
                     </span>
                     <div>
-                        <h3 class="text-sm font-bold text-ink">Bebas Isi Jurnal (Tanggal Pilihan Sendiri)</h3>
-                        <p class="text-xs text-muted">Anda dapat mengisi jurnal untuk hari-hari sebelumnya yang belum sempat dibuat. Pilih tanggal di sebelah kanan.</p>
+                        <h3 class="text-sm font-bold text-ink">Pilih Tanggal Jurnal</h3>
+                        <p class="text-xs text-muted">Pilih tanggal hari ini atau sebelumnya.</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -57,8 +57,8 @@
         @if ($jadwals->isEmpty())
             <x-ui.empty
                 icon="event_busy"
-                :title="$hariTanpaKbm ? $hariKhusus->nama : ($jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi' : 'Belum ada jadwal mengajar')"
-                :desc="$hariTanpaKbm ? 'KBM dan piket ditiadakan pada tanggal ini.' : ($jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi. Jika ada yang perlu diubah, buka dari Riwayat.' : 'Hubungi admin untuk menambahkan jadwal Anda.')"
+                :title="$hariTanpaKbm ? $hariKhusus->nama : ($jumlahSudahDiisiHariIni > 0 ? 'Semua jurnal pada tanggal ini sudah diisi' : 'Belum ada jadwal mengajar')"
+                :desc="$hariTanpaKbm ? 'KBM dan piket ditiadakan pada tanggal ini.' : ($jumlahSudahDiisiHariIni > 0 ? 'Buka Riwayat untuk melihat atau mengubah jurnal.' : 'Hubungi admin untuk menambahkan jadwal Anda.')"
             />
     @elseif ($jurnalDiblokirIstirahat)
         {{-- Lagi istirahat/pergantian jam (masih dalam rentang jam sekolah,
@@ -73,7 +73,7 @@
         <x-ui.empty
             icon="hourglass_empty"
             title="Belum waktunya mengisi jurnal"
-            desc="Sedang di luar jam pelajaran (istirahat/pergantian jam). Coba lagi begitu jam pelajaran Anda mulai."
+            desc="Jurnal dapat diisi saat pelajaran Anda dimulai."
         />
     @else
         <form id="form-jurnal" method="POST" action="{{ route('jurnal.store') }}" enctype="multipart/form-data">
@@ -159,10 +159,10 @@
                          blok-pilih-jadwal) -- kelasnya udah dipilih lewat
                          checklist ini, dropdown itu jadi nggak relevan lagi. --}}
                     <x-ui.choice
-                        label="Tidak Hadir 1 Hari Penuh?"
+                        label="Kelas Tujuan"
                         name="tidak_hadir_sehari_penuh"
-                        :options="['tidak' => 'Hanya Kelas Ini', 'ya' => 'Ya, Semua Kelas']"
-                        value="tidak"
+                        :options="['tidak' => 'Satu Kelas', 'ya' => 'Pilih Beberapa Kelas']"
+                        :value="old('tidak_hadir_sehari_penuh', 'tidak')"
                         data-toggle-massal
                     />
 
@@ -170,7 +170,7 @@
                          disabled selama "Cuma Kelas Ini" -- sync() di script
                          bawah yang nampilin/nyembunyiin & disable/enable-nya. --}}
                     <div id="blok-massal-kelas" class="flex flex-col gap-2" hidden>
-                        <x-ui.label>Kelas yang Ditandai</x-ui.label>
+                        <x-ui.label>Kelas Terpilih</x-ui.label>
                         <p class="-mt-1 text-xs text-muted-2">Pilih kelas tujuan. Isi tugas per kelas jika berbeda; tugas umum hanya dipakai oleh kelas tanpa tugas khusus.</p>
 
                         <div class="flex flex-col gap-2">
@@ -336,7 +336,7 @@
                     <x-ui.upload-kamera
                         label="Foto Suasana Kelas"
                         name="foto_bukti"
-                        :hint="$isHariIni ? 'Wajib diisi — bukti pembelajaran sedang berlangsung' : 'Opsional untuk jurnal susulan (tanggal lampau)'"
+                        :hint="$isHariIni ? 'Ambil foto saat pembelajaran berlangsung.' : 'Opsional untuk tanggal sebelumnya.'"
                         :required="$isHariIni"
                     />
                 @endif
@@ -351,7 +351,7 @@
                 </div>
             @else
                 <div id="blok-alert-pilih-jadwal" @if($statusGuruAwal !== 'hadir') hidden @endif>
-                    <x-alert type="info" class="mt-6">Pilih kelas dan mata pelajaran terlebih dahulu di atas untuk mengisi presensi siswa.</x-alert>
+                    <x-alert type="info" class="mt-6">Pilih jadwal untuk mengisi presensi siswa.</x-alert>
                 </div>
             @endif
 
@@ -470,7 +470,7 @@
 
                             const suratInput = form.querySelector('[data-upload-input]:not(:disabled)');
                             modalRingkasan.querySelector('[data-ringkasan="surat"]').textContent =
-                                (suratInput?.files?.length > 0) ? 'Sudah dilampirkan' : 'Tidak dilampirkan (opsional)';
+                                (suratInput?.files?.length > 0) ? 'Sudah dilampirkan' : 'Tidak dilampirkan';
                         }
 
                         // Presensi cuma relevan kalau ada grid-nya beneran kelihatan
@@ -683,7 +683,7 @@
                     form.addEventListener('input', syncTugasUmum);
                     form.addEventListener('change', syncTugasUmum);
 
-                    // "Tidak Hadir 1 Hari Penuh?" -> pilih "Ya" munculin checklist
+                    // "Kelas Tujuan" -> pilih "Ya" munculin checklist
                     // kelas LANGSUNG di bawahnya (nggak pindah halaman), sekalian
                     // ganti tujuan form ke endpoint massal.
                     if (blokMassal) {
@@ -729,7 +729,7 @@
                             cb.addEventListener('change', () => {
                                 if (!cb.checked && ! Array.from(semuaCheckboxMassal).some((c) => c.checked)) {
                                     cb.checked = true;
-                                    alert('Minimal 1 kelas harus tetap ditandai.');
+                                    alert('Pilih setidaknya satu kelas.');
                                     return;
                                 }
                                 const khusus = document.getElementById('tugas-khusus-' + cb.value);

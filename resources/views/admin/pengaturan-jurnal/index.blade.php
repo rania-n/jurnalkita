@@ -1,8 +1,8 @@
 @php
     $deskripsi = [
-        'disiplin' => 'Guru hanya dapat mengisi jurnal saat jam pelajarannya benar-benar sedang berlangsung -- dikunci otomatis ke jadwal tersebut. Istirahat dan pergantian jam diblokir sepenuhnya, tidak dapat mengisi apa pun. Guru baru bebas memilih jadwal lain apabila sudah benar-benar pulang sekolah (untuk susulan/pengujian).',
-        'bebas_hari_ini' => 'Guru bebas memilih jadwal HARI INI kapan saja sepanjang hari -- tidak dikunci ke jam pelajaran yang sedang berlangsung, tidak diblokir saat istirahat. Cocok apabila sekolah belum siap menerapkan disiplin ketat terhadap jam.',
-        'bebas_selamanya' => 'Guru bebas mengisi jurnal kapan saja dan untuk tanggal berapa pun (tanggal dapat dipilih bebas). Cocok agar jurnal yang sebelumnya belum sempat dibuat dapat diakses dan dilengkapi.',
+        'disiplin' => 'Saat jam sekolah, guru hanya dapat mengisi pelajaran yang sedang berlangsung. Di luar jam sekolah, guru dapat memilih jadwal lain.',
+        'bebas_hari_ini' => 'Guru dapat mengisi jurnal hari ini tanpa batasan jam.',
+        'bebas_selamanya' => 'Guru dapat memilih tanggal hari ini atau sebelumnya untuk melengkapi jurnal.',
     ];
     $icon = ['disiplin' => 'lock_clock', 'bebas_hari_ini' => 'today', 'bebas_selamanya' => 'event_repeat'];
 @endphp

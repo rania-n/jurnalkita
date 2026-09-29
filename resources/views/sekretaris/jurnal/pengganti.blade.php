@@ -1,7 +1,7 @@
 <x-layouts.app title="Jurnal Pengganti">
     <x-page-header
         title="Isi Jurnal Pengganti"
-        subtitle="Untuk guru yang memberi tugas melalui WhatsApp dan tidak sempat mengisi sendiri"
+        subtitle="Catat tugas dari guru yang tidak hadir."
         :back="route('sekretaris.jurnal.index')"
         size="sm"
     />
@@ -20,7 +20,7 @@
                     </span>
                     <div>
                         <h3 class="text-sm font-bold text-ink">Bebas Isi Jurnal (Tanggal Pilihan Sendiri)</h3>
-                        <p class="text-xs text-muted">Anda dapat mengisi jurnal pengganti untuk hari-hari sebelumnya yang belum sempat dibuat. Pilih tanggal di sebelah kanan.</p>
+                        <p class="text-xs text-muted">Pilih tanggal hari ini atau sebelumnya.</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -59,7 +59,7 @@
         <x-ui.empty
             icon="hourglass_empty"
             title="Belum waktunya mengisi jurnal"
-            desc="Sedang di luar jam pelajaran (istirahat/pergantian jam). Coba lagi begitu jam pelajaran berikutnya mulai."
+            desc="Jurnal dapat diisi saat pelajaran berikutnya dimulai."
         />
     @elseif ($jadwals->isEmpty())
         <x-ui.empty
@@ -98,7 +98,7 @@
                 <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" id="jam_ke_selesai">
                     @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_selesai') == $i)>Jam ke-{{ $i }}</option>@endfor
                 </x-ui.select>
-                <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">Pilih jadwal terlebih dahulu — jam mulai dan selesai otomatis mengikuti jadwal tersebut. Dapat diubah manual jika perlu.</p>
+                <p class="-mt-2 text-xs text-muted-2 sm:col-span-2" id="keterangan-jam">Pilih jadwal. Sesuaikan jam selesai jika pelajaran berakhir lebih lambat.</p>
 
                 {{-- status_guru nggak lagi dipilih di sini -- pengganti = guru
                      nggak hadir, jadi server selalu simpen 'tidak_hadir'
