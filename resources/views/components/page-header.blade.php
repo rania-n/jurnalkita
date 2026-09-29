@@ -39,13 +39,13 @@
             <div class="flex flex-1 flex-col gap-0.5 min-w-0">
                 @if ($title)
                     <h1 @class([
-                        'font-bold leading-tight text-ink',
+                        'break-words font-bold leading-tight text-ink',
                         'text-base lg:text-lg' => $size === 'sm',
                         'text-[22px] lg:text-[26px]' => $size !== 'sm',
                     ])>{{ $title }}</h1>
                 @endif
                 @if ($subtitle)
-                    <p class="text-sm leading-snug text-muted lg:text-[15px]">{{ $subtitle }}</p>
+                    <x-ui.short-text :text="$subtitle" class="text-sm leading-snug text-muted lg:text-[15px]" />
                 @endif
             </div>
         </div>

@@ -21,10 +21,10 @@
             <div>{{ $badge }}</div>
         @endisset
 
-        <p class="text-[15px] font-bold leading-tight text-ink">{{ $title }}</p>
+        <p class="break-words text-[15px] font-bold leading-tight text-ink">{{ $title }}</p>
 
         @foreach ($meta as $line)
-            <p class="text-xs leading-tight text-muted">{{ $line }}</p>
+            <x-ui.short-text :text="$line" :limit="80" class="text-xs leading-tight text-muted" />
         @endforeach
 
         {{ $slot }}
