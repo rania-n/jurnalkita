@@ -12,6 +12,7 @@ use App\Models\Siswa;
 use App\Support\Versi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -149,6 +150,16 @@ class PiketController extends Controller
         return view('piket._popup-jurnal-hari-ini', compact('jurnals'));
     }
 
+    /** Detail referensi publik tetap dibatasi ke jurnal hari ini dan tanpa presensi siswa. */
+    public function popupDetailHariIni(Jurnal $jurnal): View
+    {
+        abort_unless($jurnal->tanggal?->isToday(), 404);
+
+        $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'guru', 'absensis.siswa');
+
+        return view('piket._popup-jurnal-hari-ini-detail', compact('jurnal'));
+    }
+
     public function index(Request $request): View
     {
         [$dari, $sampai] = $this->rentangTanggal($request);
@@ -198,7 +209,7 @@ class PiketController extends Controller
     public function versi(Request $request): JsonResponse
     {
         [$dari, $sampai] = $this->rentangTanggal($request);
-        $haris = collect(\Carbon\CarbonPeriod::create($dari, $sampai))
+        $haris = collect(CarbonPeriod::create($dari, $sampai))
             ->map(fn ($d) => ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$d->dayOfWeek - 1] ?? null)
             ->filter()->unique();
         $jadwalIds = Jadwal::whereIn('hari', $haris)->pluck('id');

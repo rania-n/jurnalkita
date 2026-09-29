@@ -15,15 +15,9 @@
     // mis. Profil, karena keduanya sama-sama nempel ke tepi kanan). Menu
     // yang tersisa jadi rata bagi SISA lebar (bukan lebar penuh) di kiri
     // slot ini, jadi otomatis geser kiri & nggak ada yang numpuk.
-    //
-    // Kalau lagi BERADA di halaman tujuan FAB ini sendiri (Isi Jurnal),
-    // FAB-nya disembunyikan total (bukan cuma diem di situ) -- percuma ada
-    // shortcut ke halaman yang lagi dibuka, dan di halaman itu ada sticky-bar
-    // "Simpan Jurnal" nempel di atas nav yang bisa numpuk sama FAB kalau
-    // dipaksa tetap tampil (lihat components/ui/sticky-bar.blade.php).
     $itemFabRaw = $items->first(fn ($item) => $item['fab'] ?? false);
     $itemsMenu = $itemFabRaw ? $items->reject(fn ($item) => $item['fab'] ?? false)->values() : $items;
-    $itemFab = ($itemFabRaw && ! $itemFabRaw['active']) ? $itemFabRaw : null;
+    $itemFab = $itemFabRaw;
 @endphp
 
 @if ($items->isNotEmpty())
@@ -42,15 +36,9 @@
             @if ($itemFab)
                 {{-- Slot kosong selebar tombolnya -- jatah ruang doang biar menu di
                      kiri nggak numpuk ke sini, BUKAN tempat tombolnya nangkring
-                     (tombolnya absolute, lihat di bawah). Disembunyikan bareng
-                     tombolnya (lihat $itemFab di atas) pas lagi di halaman Isi
-                     Jurnal sendiri, jadi menu lain otomatis kebagian lebar penuh. --}}
+                     (tombolnya absolute, lihat di bawah). --}}
                 <div class="w-24 shrink-0" aria-hidden="true"></div>
 
-                {{-- Cuma naik SEDIKIT (-translate-y-3.5) dari batas atas nav,
-                     BUKAN melayang tinggi di atas nav -- kalau kelewat tinggi,
-                     dia numpuk sama tombol submit di sticky-bar yang nempel
-                     PERSIS di atas nav. --}}
                 <a
                     href="{{ $itemFab['url'] }}"
                     data-nav-fab

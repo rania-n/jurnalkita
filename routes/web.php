@@ -63,6 +63,7 @@ Route::get('/satpam/scan', [SatpamController::class, 'scan'])->name('satpam.scan
    sudah diisi, dan CUMA level guru/kelas/mapel -- tidak ada data siswa sama
    sekali, jadi aman dibuka tanpa login. */
 Route::get('/jurnal-hari-ini', [PiketController::class, 'popupHariIni'])->name('piket.popup-hari-ini');
+Route::get('/jurnal-hari-ini/{jurnal}', [PiketController::class, 'popupDetailHariIni'])->name('piket.popup-hari-ini.detail');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 

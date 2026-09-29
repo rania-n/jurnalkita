@@ -185,7 +185,9 @@
         @push('scripts')
             <script>
                 document.getElementById('tombol-edit-profil')?.addEventListener('click', function () {
-                    document.querySelectorAll('[data-field-profil]').forEach((el) => el.disabled = false);
+                    document.querySelectorAll('[data-field-profil]').forEach((wrapper) => {
+                        wrapper.querySelectorAll('input, select, textarea').forEach((field) => field.disabled = false);
+                    });
                     this.hidden = true;
                     document.getElementById('tombol-simpan-profil').hidden = false;
                 });

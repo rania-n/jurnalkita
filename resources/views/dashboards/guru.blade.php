@@ -459,6 +459,8 @@
                         <x-slot:actions>
                             @if ($sudahIsiIni)
                                 <x-ui.action-button label="Sudah diisi" icon="check_circle" variant="success" href="{{ route('jurnal.index') }}" />
+                            @elseif ($statusJamAsli === 'belum')
+                                <x-ui.action-button label="Belum dimulai" icon="schedule" variant="neutral" disabled />
                             @elseif ($terlewatTerkunci)
                                 <x-ui.action-button label="Terlewat" icon="block" variant="neutral" disabled />
                             @else
