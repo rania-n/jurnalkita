@@ -173,12 +173,7 @@
 
             <x-alert type="info" class="mt-5">
                 Perubahan nama, kelas, atau mata pelajaran dilakukan oleh Admin.
-                @if ($waLinkAdmin)
-                    <a href="{{ $waLinkAdmin }}" target="_blank" rel="noopener" class="font-bold underline">Hubungi Admin melalui WhatsApp</a>
-                    jika ada yang perlu diperbaiki.
-                @else
-                    Hubungi Admin jika ada yang perlu diperbaiki.
-                @endif
+                <x-ui.admin-contact /> jika ada yang perlu diperbaiki.
             </x-alert>
         </div>
 

@@ -8,7 +8,7 @@
     <x-icon :name="$icon" :size="32" class="text-muted-2" />
     <p class="text-sm font-semibold text-ink">{{ $title }}</p>
     @if ($desc)
-        <p class="text-xs text-muted-2">{{ $desc }}</p>
+        <p class="text-xs text-muted-2"><x-ui.contact-text :text="$desc" /></p>
     @endif
     {{ $slot }}
 </div>

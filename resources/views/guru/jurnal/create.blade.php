@@ -238,7 +238,7 @@
                         </span>
                     </x-ui.field-static>
                     <input type="hidden" name="jadwal_id" value="{{ $jadwalTerpilih->id }}">
-                    <p class="-mt-1 text-xs text-muted-2">Otomatis mengikuti jadwal Anda saat ini. Jika jadwal ini salah, hubungi Admin.</p>
+                    <p class="-mt-1 text-xs text-muted-2">Otomatis mengikuti jadwal Anda saat ini. Jika jadwal ini salah, <x-ui.admin-contact label="hubungi Admin" />.</p>
                 @else
                     {{-- Ganti jadwal -> muat ulang halaman (bukan AJAX) biar presensi kelas
                          yang tepat ikut kerender dari server. Materi/dll yang sudah

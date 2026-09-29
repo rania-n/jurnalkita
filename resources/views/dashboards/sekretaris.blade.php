@@ -37,7 +37,7 @@
     @endif
 
     @unless ($kelas)
-        <x-alert type="warning">Akun ini bukan pengurus kelas atau belum terhubung ke kelas. Hubungi admin.</x-alert>
+        <x-alert type="warning">Akun ini bukan pengurus kelas atau belum terhubung ke kelas. <x-ui.admin-contact />.</x-alert>
     @else
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 grid-fill-last">
             <a href="{{ route('sekretaris.jurnal.index') }}" class="press flex items-center gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
