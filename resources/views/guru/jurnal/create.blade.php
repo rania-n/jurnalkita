@@ -266,10 +266,10 @@
                  Hanya ditampilkan saat status "Hadir" -- di saat tidak hadir,
                  info jam pelajaran tidak relevan untuk ditampilkan. --}}
             <div id="tampilan-jam-wrap">
-                <x-ui.field-static label="Jam ke-" icon="schedule" tone="muted">
+                <x-ui.field-static label="Jam Pelajaran" icon="schedule" tone="muted">
                     <span id="tampilan-jam">
-                        {{ $mulaiAwal === $selesaiAwal ? $mulaiAwal : "{$mulaiAwal}–{$selesaiAwal}" }}
-                        @if ($jamAwal) · {{ $jamAwal }} @endif
+                        {{ $mulaiAwal === $selesaiAwal ? "Jam ke-{$mulaiAwal}" : "Jam ke-{$mulaiAwal} sampai ke-{$selesaiAwal}" }}
+                        @if ($jamAwal) ({{ str_replace(':', '.', $jamAwal) }}) @endif
                     </span>
                 </x-ui.field-static>
                 <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
@@ -552,9 +552,9 @@
                             const selesai = opt?.dataset.selesai;
                             if (!mulai) return;
 
-                            const rentangJp = mulai === selesai ? mulai : `${mulai}–${selesai}`;
+                            const rentangJp = mulai === selesai ? `Jam ke-${mulai}` : `Jam ke-${mulai} sampai ke-${selesai}`;
                             const rentangWaktu = opt.dataset.mulaiJam && opt.dataset.selesaiJam
-                                ? ` · ${opt.dataset.mulaiJam}–${opt.dataset.selesaiJam}`
+                                ? ` (${opt.dataset.mulaiJam.replace(':', '.')}–${opt.dataset.selesaiJam.replace(':', '.')})`
                                 : '';
                             tampilanJam.textContent = rentangJp + rentangWaktu;
                             inputMulai.value = mulai;
