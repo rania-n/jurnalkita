@@ -238,7 +238,7 @@ class JurnalController extends Controller
         // nggak dikasih di sini (belum tau jadwal mana yang bakal dipilih di
         // form ini -- presensinya di-render sebelum jadwalnya kepilih), jadi
         // dispensasi yang dicek sepanjang hari itu, bukan yang spesifik 1 JP.
-        $siswas = $kelas->siswas()->orderBy('no_absen')->get();
+        $siswas = $kelas->siswas()->where('status', 'aktif')->orderBy('no_absen')->get();
         $presensiAwal = PresensiDefault::untukKelas($siswas, $kelas->id, $tanggalAktif->toDateString());
 
         // Peta jam_ke -> mulai/selesai buat HARI itu -- dikirim ke JS biar bisa
@@ -318,11 +318,12 @@ class JurnalController extends Controller
                 ->with('info', 'Jurnal untuk jadwal ini pada tanggal tersebut sudah ada.');
         }
 
+        $siswasAktif = $jadwal->kelas->siswas()->where('status', 'aktif')->orderBy('no_absen')->get();
         $presensiFallback = PresensiDefault::untukKelas(
-            $jadwal->kelas->siswas, $jadwal->kelas_id, $tanggalAktif->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
+            $siswasAktif, $jadwal->kelas_id, $tanggalAktif->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
         );
 
-        $jurnal = DB::transaction(function () use ($data, $jadwal, $presensiFallback, $tanggalAktif) {
+        $jurnal = DB::transaction(function () use ($data, $jadwal, $presensiFallback, $tanggalAktif, $siswasAktif) {
             $jurnal = Jurnal::create([
                 ...collect($data)->except('presensi')->all(),
                 'guru_id' => $jadwal->guru_id,
@@ -332,7 +333,7 @@ class JurnalController extends Controller
                 'verifikator_id' => auth()->user()->siswa->id,
             ]);
 
-            foreach ($jadwal->kelas->siswas as $siswa) {
+            foreach ($siswasAktif as $siswa) {
                 $isi = $data['presensi'][$siswa->id] ?? $presensiFallback[$siswa->id] ?? ['status' => 'hadir', 'catatan' => null];
                 Absensi::create([
                     'jurnal_id' => $jurnal->id,

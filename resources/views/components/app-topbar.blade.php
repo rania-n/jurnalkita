@@ -30,9 +30,20 @@
     }
 
     if ($isPiketHariIni) {
-        $jpTerakhirHariIni = \App\Models\JamPelajaran::where('kategori', \App\Support\Waktu::kategori())
-            ->orderByDesc('jam_ke')->first();
-        $subHeader = 'Bertugas Piket'.($jpTerakhirHariIni ? ' s/d '.$jpTerakhirHariIni->selesai->format('H.i') : ' Hari Ini');
+        $sekarang = now()->format('H:i:s');
+        $shiftPiketAktif = $user->guru->jadwalPikets()
+            ->berlakuPada(today())
+            ->get()
+            ->filter(fn ($shift) => ! $shift->mulai || ! $shift->selesai
+                || ($sekarang >= $shift->mulai->format('H:i:s') && $sekarang <= $shift->selesai->format('H:i:s')));
+        $shiftSeharian = $shiftPiketAktif->contains(fn ($shift) => ! $shift->mulai || ! $shift->selesai);
+        $selesaiPiket = $shiftPiketAktif
+            ->pluck('selesai')
+            ->filter()
+            ->map(fn ($selesai) => $selesai->format('H.i'))
+            ->max();
+
+        $subHeader = 'Bertugas Piket'.(! $shiftSeharian && $selesaiPiket ? ' s/d '.$selesaiPiket : ' Hari Ini');
     } else {
         $subHeader = $roleLabel;
     }

@@ -318,7 +318,10 @@ class JurnalController extends Controller
         $jurnalSebelumnya = null;
         if ($jadwalTerpilih) {
             $jadwalTerpilih->loadMissing('kelas.siswas');
-            $siswas = $jadwalTerpilih->kelas->siswas->sortBy('no_absen')->values();
+            $siswas = $jadwalTerpilih->kelas->siswas
+                ->where('status', 'aktif')
+                ->sortBy('no_absen')
+                ->values();
             $presensiAwal = PresensiDefault::untukKelas(
                 $siswas, $jadwalTerpilih->kelas_id, $tanggalAktif->toDateString(), $jadwalTerpilih->jam_ke_mulai, $jadwalTerpilih->jam_ke_selesai
             );
@@ -448,12 +451,13 @@ class JurnalController extends Controller
         }
 
         $presensiSubmit = $data['status_guru'] === 'tidak_hadir' ? [] : ($data['presensi'] ?? []);
+        $siswasAktif = $jadwal->kelas->siswas()->where('status', 'aktif')->orderBy('no_absen')->get();
         $presensiFallback = PresensiDefault::untukKelas(
-            $jadwal->kelas->siswas, $jadwal->kelas_id, $tanggal->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
+            $siswasAktif, $jadwal->kelas_id, $tanggal->toDateString(), $data['jam_ke_mulai'], $data['jam_ke_selesai']
         );
         $fotoPath = $request->file('foto_bukti')?->store('jurnal-bukti', 'public');
 
-        $jurnal = DB::transaction(function () use ($data, $jadwal, $guru, $presensiSubmit, $presensiFallback, $fotoPath, $tanggal) {
+        $jurnal = DB::transaction(function () use ($data, $guru, $presensiSubmit, $presensiFallback, $fotoPath, $tanggal, $siswasAktif) {
             $jurnal = Jurnal::create([
                 ...collect($data)->except(['presensi', 'foto_bukti', 'metode_pilihan', 'metode_custom'])->all(),
                 'guru_id' => $guru->id,
@@ -466,7 +470,7 @@ class JurnalController extends Controller
             // guru tidak hadir atau nggak sempat sentuh grid presensinya (mis. kirim
             // manual lewat API), tetap jatuh ke default (dispensasi/carry-over/hadir,
             // lihat PresensiDefault).
-            foreach ($jadwal->kelas->siswas as $siswa) {
+            foreach ($siswasAktif as $siswa) {
                 if (isset($presensiSubmit[$siswa->id])) {
                     $isi = $presensiSubmit[$siswa->id];
                 } else {
@@ -573,10 +577,11 @@ class JurnalController extends Controller
                 // ikut default (dispensasi hari ini / carry-over jurnal lain
                 // kelas ini hari ini / Hadir), sama kayak store() biasa.
                 // Pengurus kelas yang koreksi kalau ada yang beda pas Verifikasi.
+                $siswasAktif = $jadwal->kelas->siswas->where('status', 'aktif')->values();
                 $presensiDefault = PresensiDefault::untukKelas(
-                    $jadwal->kelas->siswas, $jadwal->kelas_id, $tanggal, $jadwal->jam_ke_mulai, $jadwal->jam_ke_selesai
+                    $siswasAktif, $jadwal->kelas_id, $tanggal, $jadwal->jam_ke_mulai, $jadwal->jam_ke_selesai
                 );
-                foreach ($jadwal->kelas->siswas as $siswa) {
+                foreach ($siswasAktif as $siswa) {
                     $isi = $presensiDefault[$siswa->id] ?? ['status' => 'hadir', 'catatan' => null];
                     Absensi::create([
                         'jurnal_id' => $jurnal->id,
@@ -612,7 +617,10 @@ class JurnalController extends Controller
 
         $jurnal->load('jadwal.kelas.siswas', 'jadwal.mapel', 'absensis');
 
-        $siswas = $jurnal->jadwal->kelas->siswas->sortBy('no_absen')->values();
+        $siswas = $jurnal->jadwal->kelas->siswas
+            ->where('status', 'aktif')
+            ->sortBy('no_absen')
+            ->values();
         // 'sumber' null di sini -- ini data jurnal INI SENDIRI yang udah
         // tersimpan sebelumnya, bukan "ikut" dari jurnal/piket lain, jadi
         // badge "ikut jurnal lain"/"dicatat piket" di _presensi-grid TIDAK

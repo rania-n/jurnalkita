@@ -2,7 +2,7 @@
     <x-page-header
         title="Pilih Peran Daftar"
         subtitle="Silakan pilih jenis keanggotaan Anda"
-        :back="url()->previous(route('login'))"
+        :back="route('login')"
     />
 
     <div class="flex flex-col gap-5">
