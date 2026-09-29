@@ -613,11 +613,16 @@ class JurnalController extends Controller
         $jurnal->load('jadwal.kelas.siswas', 'jadwal.mapel', 'absensis');
 
         $siswas = $jurnal->jadwal->kelas->siswas->sortBy('no_absen')->values();
+        // 'sumber' null di sini -- ini data jurnal INI SENDIRI yang udah
+        // tersimpan sebelumnya, bukan "ikut" dari jurnal/piket lain, jadi
+        // badge "ikut jurnal lain"/"dicatat piket" di _presensi-grid TIDAK
+        // perlu (dan salah) ditampilkan buat baris yang nggak di-overwrite
+        // piket di bawah.
         $presensiAwal = $jurnal->absensis->mapWithKeys(fn ($a) => [
-            $a->siswa_id => ['status' => $a->status, 'catatan' => $a->catatan],
+            $a->siswa_id => ['status' => $a->status, 'catatan' => $a->catatan, 'sumber' => null],
         ])->all();
         foreach (PresensiDefault::presensiPiket($jurnal->jadwal->kelas_id, $jurnal->tanggal->toDateString()) as $siswaId => $presensiPiket) {
-            $presensiAwal[$siswaId] = ['status' => $presensiPiket->status, 'catatan' => $presensiPiket->catatan];
+            $presensiAwal[$siswaId] = ['status' => $presensiPiket->status, 'catatan' => $presensiPiket->catatan, 'sumber' => 'piket'];
         }
 
         $jadwalJurnal = $jurnal->jadwal;

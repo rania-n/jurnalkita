@@ -64,11 +64,22 @@
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-2" data-grid-presensi>
             @foreach ($siswas as $s)
                 @php
-                    $isiAwal = $presensiAwal[$s->id] ?? ['status' => 'hadir', 'catatan' => null];
+                    $isiAwal = $presensiAwal[$s->id] ?? ['status' => 'hadir', 'catatan' => null, 'sumber' => null];
                     $statusAwal = old("presensi.{$s->id}.status", $isiAwal['status']);
                     $catatanAwal = old("presensi.{$s->id}.catatan", $isiAwal['catatan']);
-                    $dariDispensasiOtomatis = $statusAwal === 'dispensasi' && str_starts_with((string) $catatanAwal, 'Dispensasi');
-                    $dariJurnalLain = ! $dariDispensasiOtomatis && $statusAwal !== 'hadir' && isset($presensiAwal[$s->id]);
+                    // Badge "kenapa status ini udah keisi" cuma ditampilkan pas
+                    // render AWAL (belum ada input guru sendiri lewat old()) --
+                    // sumbernya diambil dari PresensiDefault (null | 'dispensasi' |
+                    // 'piket' | 'jurnal_lain'), JANGAN disamaratakan "dari guru
+                    // piket" -- 'jurnal_lain' bisa dari guru MANA PUN yang udah
+                    // isi jurnal kelas ini hari ini, bukan cuma piket.
+                    $sumberAwal = old("presensi.{$s->id}.status") === null ? ($isiAwal['sumber'] ?? null) : null;
+                    $labelSumber = match ($sumberAwal) {
+                        'dispensasi' => 'Dispensasi disetujui untuk jam ini',
+                        'piket' => 'Dicatat guru piket hari ini',
+                        'jurnal_lain' => 'Mengikuti jurnal kelas ini jam lain hari ini',
+                        default => null,
+                    };
                     $catatanId = 'catatan-'.$s->id;
                 @endphp
                 <div
@@ -81,15 +92,14 @@
                         <x-ui.avatar :label="$s->no_absen ?? '–'" :gender="$s->jenis_kelamin" />
                         <div class="flex min-w-0 flex-col">
                             <span class="truncate text-sm font-semibold text-ink">{{ $s->nama }}</span>
-                            @if ($dariDispensasiOtomatis)
-                                <span class="flex items-center gap-1 text-[11px] font-semibold text-dispen">
+                            @if ($labelSumber)
+                                {{-- Warna ikut status-nya sendiri ($tones), bukan
+                                     dipukul rata satu warna -- biar Sakit/Izin/
+                                     Alpha/Dispensasi tetap kebeda kayak di tombol
+                                     pilihan di bawahnya. --}}
+                                <span class="flex items-center gap-1 text-[11px] font-semibold text-{{ $tones[$statusAwal] }}">
                                     <x-icon name="verified" :size="12" />
-                                    Dispensasi disetujui untuk jam ini
-                                </span>
-                            @elseif ($dariJurnalLain)
-                                <span class="flex items-center gap-1 text-[11px] font-semibold text-dispen">
-                                    <x-icon name="verified" :size="12" />
-                                    Ikut jurnal lain hari ini di kelas ini
+                                    {{ $labelSumber }}
                                 </span>
                             @endif
                         </div>

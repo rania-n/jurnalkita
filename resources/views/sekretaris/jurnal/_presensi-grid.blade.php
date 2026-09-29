@@ -49,16 +49,18 @@
         <div class="grid grid-cols-1 gap-3 lg:grid-cols-2" data-grid-presensi>
             @foreach ($siswas as $s)
                 @php
-                    $isiAwal = ($presensiAwal ?? [])[$s->id] ?? ['status' => 'hadir', 'catatan' => null];
+                    $isiAwal = ($presensiAwal ?? [])[$s->id] ?? ['status' => 'hadir', 'catatan' => null, 'sumber' => null];
                     $statusAwal = old("presensi.{$s->id}.status", $isiAwal['status']);
                     $catatanAwal = old("presensi.{$s->id}.catatan", $isiAwal['catatan']);
                     $catatanId = 'catatan-pengganti-'.$s->id;
-                    // Beri tahu asalnya kenapa status/catatan udah keisi duluan
-                    // (bukan "Hadir" polos) -- dispensasi ATAU ikutan jurnal lain
-                    // hari ini di kelas yang sama, lihat PresensiDefault.
-                    $keteranganAwal = match (true) {
-                        $statusAwal === 'dispensasi' && str_starts_with((string) $catatanAwal, 'Dispensasi') => 'Dispensasi disetujui hari ini',
-                        $statusAwal !== 'hadir' && isset(($presensiAwal ?? [])[$s->id]) => 'Ikut jurnal lain hari ini di kelas ini',
+                    // Badge "kenapa status ini udah keisi" cuma pas render AWAL,
+                    // sumbernya dari PresensiDefault -- JANGAN disamaratakan
+                    // "dari guru piket", 'jurnal_lain' bisa dari guru mana pun.
+                    $sumberAwal = old("presensi.{$s->id}.status") === null ? ($isiAwal['sumber'] ?? null) : null;
+                    $keteranganAwal = match ($sumberAwal) {
+                        'dispensasi' => 'Dispensasi disetujui untuk jam ini',
+                        'piket' => 'Dicatat guru piket hari ini',
+                        'jurnal_lain' => 'Mengikuti jurnal kelas ini jam lain hari ini',
                         default => null,
                     };
                 @endphp

@@ -24,7 +24,14 @@
         <x-ui.label :for="$id" :required="$attributes->has('required')">{{ $label }}</x-ui.label>
     @endif
 
-    <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy @error($name, $errorBag) !border-alpha @enderror">
+    {{-- has-[:disabled] -- kotaknya ikut jadi abu-abu pas input-nya disabled,
+         biar keliatan JELAS beda sama field yang lagi bisa diisi (bg-card,
+         putih). Dipakai khususnya di halaman Profil: sebelum tombol Edit
+         ditekan, field yang BISA diedit ini kelihatan sama abu-abunya kayak
+         field info yang emang selalu dikunci (x-ui.field-static tone=muted)
+         -- begitu Edit ditekan, field yang beneran bisa diisi berubah putih,
+         yang cuma info tetap abu-abu. --}}
+    <div class="flex h-[52px] items-center gap-2 rounded-xl border border-surface-alt bg-card px-4 transition-colors focus-within:border-navy has-[:disabled]:bg-surface-alt @error($name, $errorBag) !border-alpha @enderror">
         @if ($icon)
             <x-icon :name="$icon" :size="20" class="shrink-0 text-muted-2" />
         @endif

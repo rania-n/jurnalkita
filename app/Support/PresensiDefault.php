@@ -24,7 +24,13 @@ use Illuminate\Support\Collection;
 class PresensiDefault
 {
     /**
-     * @return array<int, array{status: string, catatan: ?string}> keyed by siswa_id
+     * @return array<int, array{status: string, catatan: ?string, sumber: ?string}> keyed by siswa_id
+     *
+     * 'sumber' dipakai UI (lihat _presensi-grid.blade.php) buat nentuin teks &
+     * warna badge "kenapa status ini udah keisi" -- HARUS akurat, jangan
+     * disamaratakan "dari guru piket" padahal 'jurnal_lain' bisa aja dari
+     * guru MANA PUN yang udah isi jurnal kelas ini hari ini (bukan cuma
+     * piket): null | 'dispensasi' | 'piket' | 'jurnal_lain'.
      */
     public static function untukKelas(Collection $siswas, int $kelasId, string $tanggal, ?int $jamMulai = null, ?int $jamSelesai = null): array
     {
@@ -56,13 +62,13 @@ class PresensiDefault
                     $catatan .= " (dispensasi {$labelJamDispen} -- cek manual buat jam di luar itu)";
                 }
 
-                return [$s->id => ['status' => 'dispensasi', 'catatan' => $catatan]];
+                return [$s->id => ['status' => 'dispensasi', 'catatan' => $catatan, 'sumber' => 'dispensasi']];
             }
 
             if ($presensiPiket->has($s->id)) {
                 $piket = $presensiPiket[$s->id];
 
-                return [$s->id => ['status' => $piket->status, 'catatan' => $piket->catatan]];
+                return [$s->id => ['status' => $piket->status, 'catatan' => $piket->catatan, 'sumber' => 'piket']];
             }
 
             $sebelumnya = $presensiSebelumnya[$s->id] ?? null;
@@ -79,7 +85,7 @@ class PresensiDefault
                 $sebelumnya = null;
             }
 
-            return [$s->id => $sebelumnya ?? ['status' => 'hadir', 'catatan' => null]];
+            return [$s->id => $sebelumnya ? [...$sebelumnya, 'sumber' => 'jurnal_lain'] : ['status' => 'hadir', 'catatan' => null, 'sumber' => null]];
         })->all();
     }
 
