@@ -671,7 +671,23 @@ function initCariCheckbox() {
 // dalamnya, jadi yang udah ke-init nggak kepasangin listener dobel.
 window.initCariPilihan = initCariPilihan;
 
+// Abaikan navigasi ke URL yang sama; filter, unduhan, dan tab baru tetap bekerja.
+function initCurrentPageLinks() {
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest?.('a[href]');
+        if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (link.hasAttribute('download') || link.hasAttribute('data-allow-reload') || (link.target && link.target !== '_self')) return;
+        const destination = new URL(link.href, window.location.href);
+        const current = new URL(window.location.href);
+        if (!['http:', 'https:'].includes(destination.protocol)) return;
+        destination.searchParams.sort();
+        current.searchParams.sort();
+        if (destination.href === current.href) event.preventDefault();
+    });
+}
+
 function init() {
+    initCurrentPageLinks();
     initPasswordToggles();
     initUploadPreview();
     initKameraWajib();
