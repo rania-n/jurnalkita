@@ -19,7 +19,7 @@
     $tanggalSingkat = $hariIndo[now()->dayOfWeek].', '.now()->day.' '.$bulanPendek[now()->month];
     $jpAktif = \App\Support\Waktu::jpAktifSekarang();
     $dalamJamSekolah = \App\Support\Waktu::dalamJamSekolah();
-    $statusWaktu = $jpAktif ? 'Sedang JP '.$jpAktif : ($dalamJamSekolah ? 'Waktu Istirahat' : 'Di luar jam pelajaran');
+    $statusWaktu = $jpAktif ? 'Jam pelajaran ke-'.$jpAktif : ($dalamJamSekolah ? 'Waktu istirahat' : 'Di luar jam pelajaran');
 @endphp
 
 <!DOCTYPE html>

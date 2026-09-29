@@ -43,6 +43,6 @@
         <span class="tabular-nums" data-jam-sekarang>{{ now()->format('H:i:s') }}</span>
     </div>
     <p class="text-xl font-bold leading-tight lg:text-2xl">
-        {{ $jpSekarang ? 'Sedang JP '.$jpSekarang : ($dalamJamSekolah ? 'Waktu Istirahat' : 'Di luar jam pelajaran') }}
+        {{ $jpSekarang ? 'Jam pelajaran ke-'.$jpSekarang : ($dalamJamSekolah ? 'Waktu istirahat' : 'Di luar jam pelajaran') }}
     </p>
 </div>

@@ -31,7 +31,7 @@
             ? $hariKhusus->nama
             : ($hariKhusus?->jenis === 'pulang_cepat' && now()->format('H:i:s') >= $hariKhusus->jam_selesai->format('H:i:s')
                 ? 'Kegiatan sekolah selesai'
-                : ($jpAktif ? 'Sedang JP '.$jpAktif : ($dalamJamSekolah ? 'Waktu Istirahat' : 'Di luar jam pelajaran')));
+                : ($jpAktif ? 'Jam pelajaran ke-'.$jpAktif : ($dalamJamSekolah ? 'Waktu istirahat' : 'Di luar jam pelajaran')));
     }
 
     if ($isPiketHariIni) {
