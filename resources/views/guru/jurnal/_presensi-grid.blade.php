@@ -14,7 +14,7 @@
 
 <div class="mt-6">
     <h2 class="mb-1 text-sm font-bold text-ink">Presensi ({{ $siswas->count() }} siswa)</h2>
-    <p class="mb-3 text-xs text-muted-2">Semua siswa otomatis berstatus <strong>Hadir</strong>, kecuali yang sudah otomatis ditandai berdasarkan dispensasi/jurnal lain di bawah. Ketik nama untuk mencari, lalu tandai siswa yang Sakit/Izin/Alpha/Dispensasi.</p>
+    <p class="mb-3 text-xs text-muted-2">Periksa status siswa. Cari nama untuk mengubah kehadiran; catatan sebelumnya sudah terisi.</p>
 
     {{-- Dropdown beneran (bukan filter kartu langsung) -- ketik nama, muncul
          daftar nama melayang di bawah kotaknya (pola sama kayak x-ui.cari-siswa),
@@ -23,7 +23,7 @@
          "kosong" pas belum ada yang ditandai, jadi pas ngetik cari kesannya
          nggak ada daftar yang muncul sama sekali. --}}
     <div class="relative">
-        <x-ui.search-bar id="cari-siswa" placeholder="Cari nama siswa yang tidak hadir..." />
+        <x-ui.search-bar id="cari-siswa" placeholder="Cari nama siswa…" />
         <div
             id="hasil-cari-siswa"
             hidden
@@ -41,7 +41,7 @@
              refresh() di bawah). --}}
         <label class="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-semibold text-navy">
             <input type="checkbox" id="tampilkan-tidak-hadir-saja" class="h-3.5 w-3.5 rounded border-surface-alt text-navy focus:ring-navy">
-            Tampilkan yang tidak hadir saja
+            Hanya tidak hadir
         </label>
     </div>
 
@@ -77,7 +77,7 @@
                     $labelSumber = match ($sumberAwal) {
                         'dispensasi' => 'Dispensasi disetujui untuk jam ini',
                         'piket' => 'Dicatat guru piket hari ini',
-                        'jurnal_lain' => 'Mengikuti jurnal kelas ini jam lain hari ini',
+                        'jurnal_lain' => 'Dari jurnal sebelumnya hari ini',
                         default => null,
                     };
                     $catatanId = 'catatan-'.$s->id;
