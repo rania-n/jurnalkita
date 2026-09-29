@@ -1,7 +1,7 @@
 @php
     $user = auth()->user();
     $perluApproval = \App\Models\Dispensasi::where('status_piket', 'approved')
-        ->where('status_waka', 'pending')->count();
+        ->where('status_waka', 'pending')->kelompokUtama()->count();
 
     $adaJadwalWaka = \App\Models\User::where('role', 'waka')->whereHas('jadwalWakas')->exists();
     $bertugasHariIni = $user->wakaBertugasHariIni();
@@ -11,13 +11,13 @@
     // dilengkapi statistik bulan berjalan + daftar dispensasi terbaru, biar
     // Waka lihat aktivitas tanpa harus buka Antrean Dispensasi dulu.
     $dispensasiBulanIni = \App\Models\Dispensasi::whereMonth('tanggal', now()->month)
-        ->whereYear('tanggal', now()->year);
+        ->whereYear('tanggal', now()->year)->kelompokUtama();
     $statistikBulanIni = [
         'diajukan' => (clone $dispensasiBulanIni)->count(),
         'disetujui' => (clone $dispensasiBulanIni)->where('status_akhir', 'approved')->count(),
         'ditolak' => (clone $dispensasiBulanIni)->where('status_akhir', 'rejected')->count(),
     ];
-    $dispensasiTerbaru = \App\Models\Dispensasi::with('siswa.kelas')->latest('created_at')->limit(5)->get();
+    $dispensasiTerbaru = \App\Models\Dispensasi::with('siswa.kelas')->kelompokUtama()->latest('created_at')->limit(5)->get();
 
     // Waka juga bisa punya jadwal mengajar sendiri (bukan cuma approve
     // dispensasi) -- kalau akunnya terhubung ke data Guru, tampilin jadwal hari
@@ -140,9 +140,10 @@
     @else
         <x-ui.card-list class="grid-fill-last">
             @foreach ($dispensasiTerbaru as $d)
+                @php $anggota = $d->anggotaKelompok(); @endphp
                 <x-ui.list-card
-                    :title="$d->siswa->nama"
-                    :meta="[$d->siswa->kelas?->nama . ' · ' . $d->labelTanggal(), str($d->alasan)->limit(50)]"
+                    :title="$anggota->count() > 1 ? $anggota->count().' siswa' : $d->siswa->nama"
+                    :meta="[$anggota->pluck('siswa.nama')->join(', '), $d->siswa->kelas?->nama . ' · ' . $d->labelTanggal(), str($d->alasan)->limit(50)]"
                 >
                     <x-slot:badge>
                         @if ($d->sudahKadaluarsa())

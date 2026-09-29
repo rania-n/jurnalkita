@@ -18,6 +18,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class DispensasiController extends Controller
@@ -52,6 +53,7 @@ class DispensasiController extends Controller
 
         $query = Dispensasi::with('siswa.kelas', 'pengaju')
             ->where('status_piket', 'approved')
+            ->kelompokUtama()
             ->latest('tanggal')->latest('id');
 
         $query->when($tab === 'menunggu', fn ($q) => $q->where('status_akhir', 'pending'))
@@ -61,13 +63,17 @@ class DispensasiController extends Controller
             ->when($request->filled('dari'), fn ($q) => $q->whereDate('tanggal', '>=', $request->date('dari')))
             ->when($request->filled('sampai'), fn ($q) => $q->whereDate('tanggal', '<=', $request->date('sampai')))
             ->when($request->filled('guru_id'), fn ($q) => $q->where('diajukan_oleh_id', $request->integer('guru_id')))
-            ->when($request->filled('kelas_id'), fn ($q) => $q->whereHas(
-                'siswa', fn ($q2) => $q2->where('kelas_id', $request->integer('kelas_id'))
-            ))
-            ->when($request->filled('cari'), fn ($q) => $q->whereHas(
-                'siswa', fn ($q2) => $q2->where('nama', 'like', '%'.$request->string('cari').'%')
-                    ->orWhere('nis', 'like', '%'.$request->string('cari').'%')
-            ));
+            ->when($request->filled('kelas_id'), fn ($q) => $q->where(function ($filter) use ($request) {
+                $filter->whereHas('siswa', fn ($siswa) => $siswa->where('kelas_id', $request->integer('kelas_id')))
+                    ->orWhereIn('kelompok_id', Dispensasi::select('kelompok_id')->whereNotNull('kelompok_id')
+                        ->whereHas('siswa', fn ($siswa) => $siswa->where('kelas_id', $request->integer('kelas_id'))));
+            }))
+            ->when($request->filled('cari'), fn ($q) => $q->where(function ($filter) use ($request) {
+                $kata = '%'.$request->string('cari').'%';
+                $cariSiswa = fn ($siswa) => $siswa->where('nama', 'like', $kata)->orWhere('nis', 'like', $kata);
+                $filter->whereHas('siswa', $cariSiswa)
+                    ->orWhereIn('kelompok_id', Dispensasi::select('kelompok_id')->whereNotNull('kelompok_id')->whereHas('siswa', $cariSiswa));
+            }));
 
         return $query;
     }
@@ -98,10 +104,20 @@ class DispensasiController extends Controller
         // Hitung jumlah per tab (tanpa filter tab, tapi ikut filter lain)
         $baseQuery = fn () => Dispensasi::with('siswa.kelas', 'pengaju')
             ->where('status_piket', 'approved')
+            ->kelompokUtama()
             ->when($request->filled('dari'), fn ($q) => $q->whereDate('tanggal', '>=', $request->date('dari')))
             ->when($request->filled('sampai'), fn ($q) => $q->whereDate('tanggal', '<=', $request->date('sampai')))
-            ->when($request->filled('kelas_id'), fn ($q) => $q->whereHas('siswa', fn ($q2) => $q2->where('kelas_id', $request->integer('kelas_id'))))
-            ->when($request->filled('cari'), fn ($q) => $q->whereHas('siswa', fn ($q2) => $q2->where('nama', 'like', '%'.$request->string('cari').'%')->orWhere('nis', 'like', '%'.$request->string('cari').'%')));
+            ->when($request->filled('kelas_id'), fn ($q) => $q->where(function ($filter) use ($request) {
+                $filter->whereHas('siswa', fn ($siswa) => $siswa->where('kelas_id', $request->integer('kelas_id')))
+                    ->orWhereIn('kelompok_id', Dispensasi::select('kelompok_id')->whereNotNull('kelompok_id')
+                        ->whereHas('siswa', fn ($siswa) => $siswa->where('kelas_id', $request->integer('kelas_id'))));
+            }))
+            ->when($request->filled('cari'), fn ($q) => $q->where(function ($filter) use ($request) {
+                $kata = '%'.$request->string('cari').'%';
+                $cariSiswa = fn ($siswa) => $siswa->where('nama', 'like', $kata)->orWhere('nis', 'like', $kata);
+                $filter->whereHas('siswa', $cariSiswa)
+                    ->orWhereIn('kelompok_id', Dispensasi::select('kelompok_id')->whereNotNull('kelompok_id')->whereHas('siswa', $cariSiswa));
+            }));
 
         $jumlahTab = [
             'semua' => $baseQuery()->count(),
@@ -217,10 +233,12 @@ class DispensasiController extends Controller
 
         $suratPath = $request->file('surat')?->store('dispensasi-surat', 'public');
         $dataPengajuan = collect($data)->except(['siswa_ids', 'surat'])->all();
-        $dispensasis = DB::transaction(function () use ($data, $dataPengajuan, $suratPath) {
-            return collect($data['siswa_ids'])->map(function ($siswaId) use ($dataPengajuan, $suratPath) {
+        $kelompokId = count($data['siswa_ids']) > 1 ? (string) Str::uuid() : null;
+        $dispensasis = DB::transaction(function () use ($data, $dataPengajuan, $suratPath, $kelompokId) {
+            return collect($data['siswa_ids'])->map(function ($siswaId) use ($dataPengajuan, $suratPath, $kelompokId) {
                 $dispensasi = Dispensasi::create([
                     ...$dataPengajuan,
+                    'kelompok_id' => $kelompokId,
                     'siswa_id' => $siswaId,
                     'diajukan_oleh_id' => auth()->id(),
                     'surat_path' => $suratPath,
@@ -234,13 +252,10 @@ class DispensasiController extends Controller
             });
         });
 
-        foreach ($dispensasis as $dispensasi) {
-            foreach (User::where('role', 'waka')->get() as $waka) {
-                $waka->notify(new DispensasiBaru($dispensasi));
-            }
-        }
-
         $dispensasi = $dispensasis->firstOrFail();
+        foreach (User::where('role', 'waka')->get() as $waka) {
+            $waka->notify(new DispensasiBaru($dispensasi));
+        }
 
         // Balik ke Riwayat (bukan halaman detail) -- link WA-nya dibukakan
         // otomatis dari SANA (lihat index()), biar piket nggak perlu tap
@@ -269,9 +284,11 @@ class DispensasiController extends Controller
 
         $tautan = SuratDispensasiController::tautanPersetujuan($dispensasi, $waka);
 
-        return WaLink::url($waka->no_hp, "Permohonan dispensasi siswa:\n\n"
-            ."Nama: {$dispensasi->siswa->nama}\n"
-            ."Kelas: {$dispensasi->siswa->kelas?->nama}\n"
+        $anggota = $dispensasi->anggotaKelompok();
+        $namaSiswa = $anggota->map(fn ($item) => $item->siswa->nama.' ('.($item->siswa->kelas?->nama ?? '—').')')->join(', ');
+
+        return WaLink::url($waka->no_hp, "Permohonan dispensasi {$anggota->count()} siswa:\n\n"
+            ."Nama: {$namaSiswa}\n"
             ."Alasan: {$dispensasi->alasan}\n\n"
             ."Setujui/tolak lewat tautan ini:\n{$tautan}");
     }
@@ -294,7 +311,7 @@ class DispensasiController extends Controller
         $waLinkSiswa = null;
         if ($dispensasi->status_akhir === 'approved' && $dispensasi->no_hp) {
             $tautanSurat = SuratDispensasiController::tautanSurat($dispensasi);
-            $waLinkSiswa = WaLink::url($dispensasi->no_hp, "Dispensasi kamu sudah *disetujui*.\n\n"
+            $waLinkSiswa = WaLink::url($dispensasi->no_hp, "Dispensasi sudah *disetujui*.\n\n"
                 ."Tunjukkan surat ini ke satpam saat keluar sekolah:\n{$tautanSurat}");
         }
 
@@ -326,7 +343,7 @@ class DispensasiController extends Controller
             'no_hp' => ['required', 'string', 'max:20'],
         ]);
 
-        $dispensasi->update($data);
+        $dispensasi->anggotaKelompok()->each->update($data);
 
         return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])
             ->with('success', 'No. HP disimpan. Sekarang bukti dispensasi sudah bisa dikirim lewat WA.');
@@ -351,8 +368,9 @@ class DispensasiController extends Controller
             'Sudah diputuskan Waka Kesiswaan, tidak bisa dibatalkan.'
         );
 
-        $nama = $dispensasi->siswa->nama;
-        $dispensasi->delete();
+        $anggota = $dispensasi->anggotaKelompok();
+        $nama = $anggota->pluck('siswa.nama')->join(', ');
+        $anggota->each->delete();
 
         AuditLog::catat('Batalkan Dispensasi', "Batalkan dispensasi {$nama}", $dispensasi);
 
@@ -374,27 +392,35 @@ class DispensasiController extends Controller
             'catatan' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $dispensasi->update([
-            'status_waka' => $data['keputusan'],
-            'waka_id' => auth()->id(),
-            'catatan_waka' => $data['catatan'] ?? null,
-        ]);
-        $dispensasi->segarkanStatusAkhir();
+        $anggota = $dispensasi->anggotaKelompok();
+        DB::transaction(function () use ($anggota, $data) {
+            foreach ($anggota as $item) {
+                $item->update([
+                    'status_waka' => $data['keputusan'],
+                    'waka_id' => auth()->id(),
+                    'catatan_waka' => $data['catatan'] ?? null,
+                ]);
+                $item->segarkanStatusAkhir();
+            }
+        });
+        $dispensasi->refresh();
 
         AuditLog::catat('Keputusan Waka Dispensasi', "Waka {$data['keputusan']} dispensasi #{$dispensasi->id}", $dispensasi);
 
         $dispensasi->pengaju?->notify(new DispensasiDiputuskan($dispensasi));
 
         if ($dispensasi->status_akhir === 'approved') {
-            foreach ($this->guruMapelTerkait($dispensasi) as $guruUser) {
-                $guruUser->notify(new SiswaDispensasiDiKelasAnda($dispensasi));
+            foreach ($anggota as $item) {
+                foreach ($this->guruMapelTerkait($item) as $guruUser) {
+                    $guruUser->notify(new SiswaDispensasiDiKelasAnda($item));
+                }
             }
         }
 
         return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])->with(
             'success',
             $dispensasi->status_akhir === 'approved'
-                ? 'Dispensasi disetujui. Presensi siswa otomatis diperbarui.'
+                ? "Dispensasi {$anggota->count()} siswa disetujui. Presensi otomatis diperbarui."
                 : 'Keputusan Waka disimpan.'
         );
     }

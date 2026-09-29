@@ -361,6 +361,7 @@
         <x-ui.modal id="modal-ringkasan-jurnal" title="Periksa Jurnal">
             <div class="flex flex-col gap-3 text-sm">
                 <x-ui.field-static label="Kelas & Mata Pelajaran"><span data-ringkasan="kelas-mapel">—</span></x-ui.field-static>
+                <x-ui.field-static label="Jam Pelajaran"><span data-ringkasan="jam-pelajaran">—</span></x-ui.field-static>
                 <x-ui.field-static label="Status Kehadiran Anda"><span data-ringkasan="status-guru">—</span></x-ui.field-static>
 
                 {{-- Beda field & label tergantung Status Kehadiran -- jurnal
@@ -424,6 +425,8 @@
                                 : (document.querySelector('[data-jadwal-terkunci-teks]')?.textContent.trim() || '—');
                         }
                         modalRingkasan.querySelector('[data-ringkasan="kelas-mapel"]').textContent = kelasMapel;
+                        modalRingkasan.querySelector('[data-ringkasan="jam-pelajaran"]').textContent =
+                            document.getElementById('tampilan-jam')?.textContent.trim() || '—';
 
                         const statusGuru = form.querySelector('input[name="status_guru"]:checked')?.value;
                         const hadir = statusGuru === 'hadir';

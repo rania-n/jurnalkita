@@ -98,6 +98,33 @@ class DispensasiTest extends TestCase
         $this->assertDatabaseCount('dispensasis', 2);
         $this->assertDatabaseHas('dispensasis', ['siswa_id' => $this->siswa->id, 'alasan' => 'Turnamen futsal']);
         $this->assertDatabaseHas('dispensasis', ['siswa_id' => $siswaKedua->id, 'alasan' => 'Turnamen futsal']);
+
+        $dispensasi = Dispensasi::orderBy('id')->firstOrFail();
+        $this->assertNotNull($dispensasi->kelompok_id);
+        $this->assertSame(1, Dispensasi::kelompokUtama()->count());
+
+        $this->actingAs($this->waka)->get('/dispensasi?cari=Siti')
+            ->assertOk()
+            ->assertSee('2 siswa')
+            ->assertSee('Budi, Siti');
+
+        $this->actingAs($this->waka)->get("/dispensasi/{$dispensasi->id}/fragment")
+            ->assertOk()
+            ->assertSee('Budi')
+            ->assertSee('Siti')
+            ->assertSee('Setujui 2 Siswa');
+
+        $this->actingAs($this->waka)->post("/dispensasi/{$dispensasi->id}/waka", [
+            'keputusan' => 'approved',
+        ])->assertRedirect();
+
+        $this->assertSame(2, Dispensasi::where('status_akhir', 'approved')->count());
+
+        $this->actingAs($this->waka)->get("/dispensasi/{$dispensasi->id}/surat/fragment")
+            ->assertOk()
+            ->assertSee('Daftar Siswa (2)')
+            ->assertSee('Budi')
+            ->assertSee('Siti');
     }
 
     public function test_alur_penuh_approve_menerapkan_dispensasi_ke_presensi(): void

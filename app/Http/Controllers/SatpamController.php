@@ -25,11 +25,12 @@ class SatpamController extends Controller
             && $dispensasi->status_akhir === 'approved'
             && $dispensasi->berlakuPada()
             && QrDispensasi::valid($id, $token);
+        $anggota = $valid ? $dispensasi->anggotaKelompok() : collect();
 
         AuditLog::catat(
             'Scan QR Dispensasi',
             $valid
-                ? "Scan valid — {$dispensasi->siswa->nama} ({$dispensasi->siswa->kelas?->nama})"
+                ? 'Scan valid — '.$anggota->pluck('siswa.nama')->join(', ')
                 : 'Scan tidak valid / kedaluwarsa'.($dispensasi ? " — dispensasi #{$id}" : ''),
             $dispensasi
         );
@@ -37,6 +38,7 @@ class SatpamController extends Controller
         return view('satpam.hasil-scan', [
             'valid' => $valid,
             'dispensasi' => $valid ? $dispensasi : null,
+            'anggota' => $anggota,
         ]);
     }
 }

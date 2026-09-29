@@ -25,10 +25,12 @@ class DispensasiBaru extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $anggota = $this->dispensasi->anggotaKelompok();
+
         return [
             'icon' => 'fact_check',
             'title' => 'Dispensasi baru menunggu persetujuan',
-            'body' => $this->dispensasi->siswa->nama.' ('.($this->dispensasi->siswa->kelas?->nama ?? '—').') — '
+            'body' => ($anggota->count() > 1 ? $anggota->count().' siswa' : $this->dispensasi->siswa->nama).' — '
                 .str($this->dispensasi->alasan)->limit(60),
             'url' => route('dispensasi.index', ['lihat' => $this->dispensasi->id]),
         ];

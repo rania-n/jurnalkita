@@ -35,10 +35,7 @@
         {{-- Jam mulai & selesai ikut jadwal, nggak bisa diedit manual (sama
              kayak Form Jurnal baru). --}}
         <x-ui.field-static label="Jam Pelajaran" icon="schedule" tone="muted" class="sm:col-span-2">
-            JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}
-            @if ($jamJurnal)
-                <span class="text-muted-2">· {{ $jamJurnal }}</span>
-            @endif
+            Jam ke-{{ $jurnal->jam_ke_mulai }}{{ $jurnal->jam_ke_selesai !== $jurnal->jam_ke_mulai ? ' sampai ke-'.$jurnal->jam_ke_selesai : '' }}{{ $jamJurnal ? ' ('.str_replace(':', '.', $jamJurnal).')' : '' }}
         </x-ui.field-static>
         <input type="hidden" name="jam_ke_selesai" value="{{ $jurnal->jam_ke_selesai }}">
 

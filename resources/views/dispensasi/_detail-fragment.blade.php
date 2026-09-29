@@ -12,6 +12,7 @@
       $dispensasi, $bisaWaka, $bisaBatal, $bisaUbahNoHp, $waLinkWaka, $waLinkSiswa
 --}}
 @php
+    $anggota = $dispensasi->anggotaKelompok();
     [$waIcon, $waColor, $waText] = match ($dispensasi->status_waka) {
         'approved' => ['check_circle', 'text-hadir', 'Disetujui'],
         'rejected' => ['cancel', 'text-alpha', 'Ditolak'],
@@ -21,6 +22,13 @@
 
 <div class="flex flex-col gap-4">
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <x-ui.field-static label="Siswa" class="sm:col-span-2">
+            <ol class="list-inside list-decimal space-y-1">
+                @foreach ($anggota as $item)
+                    <li>{{ $item->siswa->nama }} <span class="text-muted-2">({{ $item->siswa->kelas?->nama ?? '—' }})</span></li>
+                @endforeach
+            </ol>
+        </x-ui.field-static>
         <x-ui.field-static label="Jam">{{ $dispensasi->labelJam() }}</x-ui.field-static>
         <x-ui.field-static label="Diajukan oleh (guru piket)">{{ $dispensasi->pengaju->name }}</x-ui.field-static>
         <x-ui.field-static label="Alasan" class="sm:col-span-2">{{ $dispensasi->alasan }}</x-ui.field-static>
@@ -113,8 +121,8 @@
                  kanan-kiri di semua ukuran layar, samain sama pola tombol
                  berpasangan lain di app. --}}
             <div class="flex gap-2">
-                <x-ui.button type="submit" name="keputusan" value="approved" variant="success" icon="check" class="flex-1">Setujui</x-ui.button>
-                <x-ui.button type="submit" name="keputusan" value="rejected" variant="danger" icon="close" data-confirm="Yakin tolak dispensasi ini?" class="flex-1">Tolak</x-ui.button>
+                <x-ui.button type="submit" name="keputusan" value="approved" variant="success" icon="check" class="flex-1">Setujui {{ $anggota->count() }} Siswa</x-ui.button>
+                <x-ui.button type="submit" name="keputusan" value="rejected" variant="danger" icon="close" data-confirm="Yakin menolak dispensasi {{ $anggota->count() }} siswa ini?" class="flex-1">Tolak Semua</x-ui.button>
             </div>
         </form>
     @endif

@@ -143,8 +143,10 @@
         <x-ui.card-list class="grid-fill-last">
             @foreach ($items as $d)
                 @php
+                    $anggota = $d->anggotaKelompok();
+                    $namaAnggota = $anggota->pluck('siswa.nama')->join(', ');
                     $cariStr = strtolower(
-                        $d->siswa->nama . ' ' .
+                        $namaAnggota . ' ' .
                         ($d->siswa->nis ?? '') . ' ' .
                         ($d->siswa->kelas?->nama ?? '') . ' ' .
                         $d->alasan
@@ -153,9 +155,10 @@
                 <x-ui.list-card
                     data-dispen-card
                     data-cari="{{ $cariStr }}"
-                    :title="$d->siswa->nama"
+                    :title="$anggota->count() > 1 ? $anggota->count().' siswa' : $d->siswa->nama"
                     :meta="[
-                        $d->siswa->kelas?->nama . ' · ' . $d->labelTanggal(),
+                        $namaAnggota,
+                        $anggota->pluck('siswa.kelas.nama')->filter()->unique()->join(', ') . ' · ' . $d->labelTanggal(),
                         $d->labelJam() . ' · ' . str($d->alasan)->limit(40),
                         $d->surat_path ? '📎 Ada bukti terlampir' : 'Tanpa bukti',
                     ]"
@@ -174,7 +177,7 @@
                             label="Detail"
                             icon="badge"
                             data-modal-open="modal-dispensasi-detail"
-                            data-modal-title="{{ $d->siswa->nama }}"
+                            data-modal-title="{{ $anggota->count() > 1 ? 'Dispensasi '.$anggota->count().' Siswa' : $d->siswa->nama }}"
                             data-ajax-url="{{ route('dispensasi.show.fragment', $d) }}"
                         />
                     </x-slot:actions>
@@ -205,7 +208,7 @@
                 hidden
                 data-auto-open-dispensasi
                 data-modal-open="modal-dispensasi-detail"
-                data-modal-title="{{ $lihatDispensasi->siswa->nama }}"
+                data-modal-title="{{ $lihatDispensasi->jumlahAnggota() > 1 ? 'Dispensasi '.$lihatDispensasi->jumlahAnggota().' Siswa' : $lihatDispensasi->siswa->nama }}"
                 data-ajax-url="{{ route('dispensasi.show.fragment', $lihatDispensasi) }}"
             ></button>
             @push('scripts')

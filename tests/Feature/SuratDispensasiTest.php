@@ -117,6 +117,41 @@ class SuratDispensasiTest extends TestCase
         $this->assertSame($this->waka->id, $this->menunggu->waka_id);
     }
 
+    public function test_persetujuan_wa_rombongan_menampilkan_dan_memutuskan_semua_siswa(): void
+    {
+        $siswaKedua = Siswa::create([
+            'kelas_id' => $this->menunggu->siswa->kelas_id,
+            'nis' => '002',
+            'nama' => 'Siti',
+            'jenis_kelamin' => 'P',
+        ]);
+        $kelompokId = (string) str()->uuid();
+        $this->menunggu->update(['kelompok_id' => $kelompokId]);
+        $anggotaKedua = Dispensasi::create([
+            'kelompok_id' => $kelompokId,
+            'siswa_id' => $siswaKedua->id,
+            'diajukan_oleh_id' => $this->piket->id,
+            'piket_id' => $this->piket->id,
+            'tanggal' => today(),
+            'alasan' => 'Sakit',
+            'status_piket' => 'approved',
+        ]);
+
+        $tautan = SuratDispensasiController::tautanPersetujuan($this->menunggu, $this->waka);
+
+        $this->get($tautan)
+            ->assertOk()
+            ->assertSee('Daftar Siswa (2)')
+            ->assertSee('Budi')
+            ->assertSee('Siti')
+            ->assertSee('Setujui 2 Siswa');
+
+        $this->post($tautan, ['keputusan' => 'approved'])->assertOk();
+
+        $this->assertSame('approved', $this->menunggu->fresh()->status_akhir);
+        $this->assertSame('approved', $anggotaKedua->fresh()->status_akhir);
+    }
+
     public function test_persetujuan_wa_tanpa_tanda_tangan_ditolak(): void
     {
         $this->post("/dispensasi/{$this->menunggu->id}/persetujuan", ['keputusan' => 'approved'])

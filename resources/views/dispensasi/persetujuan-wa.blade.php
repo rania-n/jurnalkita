@@ -1,4 +1,5 @@
 <x-layouts.guest title="Persetujuan Dispensasi">
+    @php $anggota = $dispensasi->anggotaKelompok(); @endphp
     <div class="mb-4 text-center">
         <span class="flex h-12 w-12 items-center justify-center mx-auto rounded-xl bg-navy text-card">
             <x-icon name="approval" :size="24" fill />
@@ -8,13 +9,13 @@
     </div>
 
     <div class="flex flex-col gap-3 text-sm">
-        <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
-            <span class="text-muted">Nama Siswa</span>
-            <span class="font-semibold text-ink text-right">{{ $dispensasi->siswa->nama }}</span>
-        </div>
-        <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
-            <span class="text-muted">Kelas</span>
-            <span class="font-semibold text-ink">{{ $dispensasi->siswa->kelas?->nama ?? '—' }}</span>
+        <div class="border-b border-surface-alt pb-2">
+            <span class="text-muted">Daftar Siswa ({{ $anggota->count() }})</span>
+            <ol class="mt-1 list-inside list-decimal space-y-1 font-semibold text-ink">
+                @foreach ($anggota as $item)
+                    <li>{{ $item->siswa->nama }} <span class="font-normal text-muted-2">({{ $item->siswa->kelas?->nama ?? '—' }})</span></li>
+                @endforeach
+            </ol>
         </div>
         <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
             <span class="text-muted">Tanggal / Jam</span>
@@ -49,11 +50,11 @@
             <div class="flex gap-2">
                 <button type="submit" name="keputusan" value="approved"
                     class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-hadir/25 bg-hadir-soft text-base font-bold text-hadir">
-                    <x-icon name="check" :size="20" /> Setujui
+                    <x-icon name="check" :size="20" /> Setujui {{ $anggota->count() }} Siswa
                 </button>
                 <button type="submit" name="keputusan" value="rejected"
                     class="press flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-alpha/25 bg-alpha-soft text-base font-bold text-alpha">
-                    <x-icon name="close" :size="20" /> Tolak
+                    <x-icon name="close" :size="20" /> Tolak Semua
                 </button>
             </div>
         </form>

@@ -7,6 +7,7 @@ use App\Models\Dispensasi;
 use App\Models\User;
 use App\Support\QrDispensasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
@@ -114,12 +115,18 @@ class SuratDispensasiController extends Controller
 
         $data = $request->validate(['keputusan' => ['required', 'in:approved,rejected']]);
 
-        $dispensasi->update([
-            'status_waka' => $data['keputusan'],
-            'waka_id' => $request->integer('waka'),
-            'catatan_waka' => 'Diputuskan lewat link WhatsApp (tanpa login).',
-        ]);
-        $dispensasi->segarkanStatusAkhir();
+        $anggota = $dispensasi->anggotaKelompok();
+        DB::transaction(function () use ($anggota, $data, $request) {
+            foreach ($anggota as $item) {
+                $item->update([
+                    'status_waka' => $data['keputusan'],
+                    'waka_id' => $request->integer('waka'),
+                    'catatan_waka' => 'Diputuskan lewat link WhatsApp (tanpa login).',
+                ]);
+                $item->segarkanStatusAkhir();
+            }
+        });
+        $dispensasi->refresh();
 
         AuditLog::catat(
             'Keputusan Waka Dispensasi (WA)',

@@ -7,6 +7,7 @@
     Variabel yang wajib ada di scope pemanggil: $dispensasi, $qrUrl
 --}}
 @php
+    $anggota = $dispensasi->anggotaKelompok();
     $labelAkhir = ['pending' => 'Menunggu Persetujuan', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'][$dispensasi->status_akhir];
     $sudahLewat = $dispensasi->status_akhir === 'approved' && ! $dispensasi->berlakuPada();
 @endphp
@@ -26,13 +27,13 @@
      yang panjang dulu bisa overflow keluar card di layar sempit karena
      flex item default nggak nyempit/wrap. --}}
 <div class="flex flex-col gap-3 text-sm">
-    <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
-        <span class="shrink-0 text-muted">Nama Siswa</span>
-        <span class="min-w-0 break-words text-right font-semibold text-ink">{{ $dispensasi->siswa->nama }}</span>
-    </div>
-    <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
-        <span class="shrink-0 text-muted">Kelas</span>
-        <span class="min-w-0 break-words text-right font-semibold text-ink">{{ $dispensasi->siswa->kelas?->nama ?? '—' }}</span>
+    <div class="border-b border-surface-alt pb-2">
+        <span class="text-muted">Daftar Siswa ({{ $anggota->count() }})</span>
+        <ol class="mt-1 list-inside list-decimal space-y-1 font-semibold text-ink">
+            @foreach ($anggota as $item)
+                <li>{{ $item->siswa->nama }} <span class="font-normal text-muted-2">({{ $item->siswa->kelas?->nama ?? '—' }})</span></li>
+            @endforeach
+        </ol>
     </div>
     <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
         <span class="shrink-0 text-muted">Tanggal</span>

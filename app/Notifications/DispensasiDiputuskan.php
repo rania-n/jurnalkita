@@ -26,11 +26,12 @@ class DispensasiDiputuskan extends Notification
     public function toArray(object $notifiable): array
     {
         $disetujui = $this->dispensasi->status_akhir === 'approved';
+        $anggota = $this->dispensasi->anggotaKelompok();
 
         return [
             'icon' => $disetujui ? 'check_circle' : 'cancel',
             'title' => $disetujui ? 'Dispensasi disetujui' : 'Dispensasi ditolak',
-            'body' => 'Dispensasi '.($this->dispensasi->siswa->nama ?? 'siswa')
+            'body' => 'Dispensasi '.($anggota->count() > 1 ? $anggota->count().' siswa' : ($this->dispensasi->siswa->nama ?? 'siswa'))
                 .' '.($disetujui ? 'disetujui' : 'ditolak').' oleh Waka Kesiswaan.',
             'url' => route('dispensasi.index', ['lihat' => $this->dispensasi->id]),
         ];

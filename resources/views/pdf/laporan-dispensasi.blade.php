@@ -130,25 +130,27 @@
         <tbody>
             @forelse ($daftar as $index => $d)
                 @php
+                    $anggota = $d->anggotaKelompok();
                     $jam = $d->jam_ke_mulai
                         ? ($d->jam_ke_selesai ? "Jam {$d->jam_ke_mulai}-{$d->jam_ke_selesai}" : "Jam {$d->jam_ke_mulai} s/d selesai")
                         : 'Sehari penuh';
-                    $statusClass = match ($d->status) {
-                        'disetujui' => 'badge-success',
-                        'ditolak' => 'badge-danger',
+                    $statusClass = match ($d->status_akhir) {
+                        'approved' => 'badge-success',
+                        'rejected' => 'badge-danger',
                         default => 'badge-warning',
                     };
+                    $statusLabel = ['approved' => 'Disetujui', 'rejected' => 'Ditolak', 'pending' => 'Menunggu'][$d->status_akhir];
                 @endphp
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $d->tanggal?->format('d/m/Y') ?? '-' }}</td>
-                    <td><strong>{{ $d->siswa->nama ?? '-' }}</strong><br><span style="color:#64748b; font-size:8px;">NIS: {{ $d->siswa->nis ?? '-' }}</span></td>
-                    <td>{{ $d->siswa->kelas->nama ?? '-' }}</td>
+                    <td><strong>{{ $anggota->pluck('siswa.nama')->join(', ') }}</strong></td>
+                    <td>{{ $anggota->pluck('siswa.kelas.nama')->filter()->unique()->join(', ') ?: '-' }}</td>
                     <td>{{ $jam }}</td>
                     <td>{{ $d->alasan }}</td>
                     <td>{{ $d->pengaju->name ?? '-' }}</td>
                     <td class="text-center">
-                        <span class="badge {{ $statusClass }}">{{ $d->status }}</span>
+                        <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
                     </td>
                     <td>{{ $d->catatan_waka ?? '-' }}</td>
                 </tr>

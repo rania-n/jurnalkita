@@ -6,8 +6,12 @@
             </span>
             <h1 class="text-2xl font-bold text-hadir">Disetujui</h1>
             <div class="mt-2 w-full rounded-xl bg-surface p-4 text-left text-sm">
-                <p class="text-lg font-bold text-ink">{{ $dispensasi->siswa->nama }}</p>
-                <p class="text-muted">{{ $dispensasi->siswa->kelas?->nama ?? '—' }}</p>
+                <p class="font-bold text-ink">Daftar Siswa ({{ $anggota->count() }})</p>
+                <ol class="mt-1 list-inside list-decimal space-y-1 text-ink">
+                    @foreach ($anggota as $item)
+                        <li>{{ $item->siswa->nama }} <span class="text-muted">({{ $item->siswa->kelas?->nama ?? '—' }})</span></li>
+                    @endforeach
+                </ol>
                 <p class="mt-2 text-muted">{{ $dispensasi->labelJam() }} · {{ $dispensasi->labelTanggal() }}</p>
                 <p class="mt-1 text-muted">{{ $dispensasi->alasan }}</p>
             </div>

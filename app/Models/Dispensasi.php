@@ -9,13 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class Dispensasi extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'siswa_id', 'diajukan_oleh_id', 'tanggal', 'tanggal_selesai', 'jam_ke_mulai', 'jam_ke_selesai',
+        'kelompok_id', 'siswa_id', 'diajukan_oleh_id', 'tanggal', 'tanggal_selesai', 'jam_ke_mulai', 'jam_ke_selesai',
         'alasan', 'surat_path', 'no_hp',
         'status_piket', 'piket_id', 'catatan_piket',
         'status_waka', 'waka_id', 'catatan_waka',
@@ -25,6 +26,12 @@ class Dispensasi extends Model
     protected function casts(): array
     {
         return ['tanggal' => 'date', 'tanggal_selesai' => 'date'];
+    }
+
+    /** Satu baris wakil untuk setiap pengajuan, termasuk pengajuan rombongan. */
+    public function scopeKelompokUtama(Builder $query): Builder
+    {
+        return $query->whereRaw('dispensasis.id = COALESCE((SELECT MIN(d2.id) FROM dispensasis d2 WHERE d2.kelompok_id = dispensasis.kelompok_id AND d2.deleted_at IS NULL), dispensasis.id)');
     }
 
     /** true kalau dispensasinya lebih dari 1 hari. */
@@ -121,11 +128,14 @@ class Dispensasi extends Model
             return false;
         }
 
-        $this->update([
-            'status_waka' => 'rejected',
-            'catatan_waka' => 'Otomatis dibatalkan sistem — melewati tanggal berlaku tanpa keputusan Waka Kesiswaan.',
-        ]);
-        $this->segarkanStatusAkhir();
+        foreach ($this->anggotaKelompok() as $item) {
+            $item->update([
+                'status_waka' => 'rejected',
+                'catatan_waka' => 'Otomatis dibatalkan sistem — melewati tanggal berlaku tanpa keputusan Waka Kesiswaan.',
+            ]);
+            $item->segarkanStatusAkhir();
+        }
+        $this->refresh();
 
         return true;
     }
@@ -158,6 +168,24 @@ class Dispensasi extends Model
     public function siswa(): BelongsTo
     {
         return $this->belongsTo(Siswa::class)->withTrashed();
+    }
+
+    /** Semua pengajuan siswa yang dibuat dalam satu pengajuan rombongan. */
+    public function anggotaKelompok(): Collection
+    {
+        if (! $this->kelompok_id) {
+            return collect([$this->loadMissing('siswa.kelas')]);
+        }
+
+        return static::where('kelompok_id', $this->kelompok_id)
+            ->with('siswa.kelas', 'pengaju', 'waka')
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function jumlahAnggota(): int
+    {
+        return $this->anggotaKelompok()->count();
     }
 
     /** withTrashed() -- dispensasi lama tetap harus kebaca siapa yang ajukan/proses walau akunnya belakangan dihapus admin. */
