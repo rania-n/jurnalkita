@@ -14,7 +14,8 @@
     $box = $attributes->except($wrapKeys);
 @endphp
 
-{{-- Informasi tampil sebagai teks, tanpa bingkai kolom isian. --}}
+{{-- Informasi biasa tampil sebagai teks. Tone muted dipakai ketika informasi
+     berdampingan dengan input nonaktif agar tampilan satu kelompok konsisten. --}}
 <div {{ $wrap->class('flex flex-col gap-1.5') }}>
     @if ($label)
         <p class="text-xs font-semibold text-muted-2">{{ $label }}</p>
@@ -22,6 +23,7 @@
 
     <div {{ $box->class([
         'flex min-w-0 items-start gap-2 text-[15px] text-ink',
+        'min-h-[52px] rounded-xl border border-surface-alt bg-surface-alt px-4 py-3' => $tone === 'muted',
     ]) }}>
         @if ($icon)
             <x-icon :name="$icon" :size="20" class="shrink-0 text-muted-2" />
