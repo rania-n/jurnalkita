@@ -87,7 +87,9 @@ class VerifikasiJurnalTest extends TestCase
         $jurnal->absensis()->create(['siswa_id' => Siswa::where('nis', '002')->value('id'), 'status' => 'hadir']);
 
         $this->actingAs($this->sekretaris)->get("/sekretaris/jurnal/{$jurnal->id}/fragment")
-            ->assertOk()->assertSee('Presensi');
+            ->assertOk()
+            ->assertSee('Data Sudah Sesuai')
+            ->assertSee('Perlu Diperbaiki');
         $this->actingAs($this->sekretaris)->get('/sekretaris/jurnal/pengganti')
             ->assertOk()->assertSee('Jurnal Pengganti');
         $this->actingAs($this->sekretaris)->get('/sekretaris')

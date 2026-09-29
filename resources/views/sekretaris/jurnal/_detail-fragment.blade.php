@@ -30,7 +30,7 @@
             @elseif ($jurnal->status_verifikasi === 'terverifikasi')
                 Sudah diverifikasi{{ $jurnal->verifikator ? ' oleh '.$jurnal->verifikator->nama : '' }}.
             @else
-                Sudah diminta revisi: {{ $jurnal->catatan_verifikasi }}
+                Perlu diperbaiki: {{ $jurnal->catatan_verifikasi }}
             @endif
         </x-alert>
     @elseif ($readOnly ?? false)
@@ -84,7 +84,7 @@
     @if ($bisaVerifikasi)
         <form method="POST" action="{{ route('sekretaris.jurnal.verifikasi', $jurnal) }}" class="flex flex-col gap-3">
             @csrf
-            <x-ui.textarea label="Catatan (wajib jika minta revisi)" name="catatan" :rows="2" placeholder="Contoh: materi tidak sesuai dengan yang diajarkan.">{{ old('catatan') }}</x-ui.textarea>
+            <x-ui.textarea label="Catatan perbaikan" name="catatan" :rows="2" placeholder="Tuliskan bagian yang perlu diperbaiki.">{{ old('catatan') }}</x-ui.textarea>
             {{-- flex gap-2 langsung (bukan flex-col sm:flex-row) -- sejajar
                  kanan-kiri di semua ukuran layar, samain sama pola tombol
                  berpasangan lain di app. --}}
@@ -96,9 +96,9 @@
                      masuk), sama istilahnya kayak alur Dispensasi (lihat
                      Jurnal::verifikasiAbsen()). --}}
                 <x-ui.button type="submit" name="keputusan" value="terima" variant="success" icon="check" class="flex-1">
-                    {{ $jurnal->verifikasiAbsen() ? 'Setujui' : 'Sesuai — Verifikasi' }}
+                    {{ $jurnal->verifikasiAbsen() ? 'Setujui' : 'Data Sudah Sesuai' }}
                 </x-ui.button>
-                <x-ui.button type="submit" name="keputusan" value="revisi" variant="danger" icon="edit" class="flex-1" data-tombol-minta-revisi>Minta Revisi</x-ui.button>
+                <x-ui.button type="submit" name="keputusan" value="revisi" variant="danger" icon="edit" class="flex-1" data-tombol-minta-revisi>Perlu Diperbaiki</x-ui.button>
             </div>
         </form>
 
@@ -115,7 +115,7 @@
                     const catatan = document.getElementById('catatan');
                     if (!catatan?.value.trim()) {
                         e.preventDefault();
-                        alert('Catatan wajib diisi jika Anda ingin meminta revisi.');
+                        alert('Tuliskan bagian yang perlu diperbaiki.');
                         catatan?.focus();
                     }
                 });

@@ -1,5 +1,5 @@
 @php
-    $tabs = ['' => 'Semua', 'pending' => "Perlu diperiksa ({$jumlahPending})", 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Diminta revisi'];
+    $tabs = ['' => 'Semua', 'pending' => "Perlu diperiksa ({$jumlahPending})", 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu diperbaiki'];
     $badge = ['pending' => 'pending', 'terverifikasi' => 'terverifikasi', 'revisi' => 'revisi'];
 @endphp
 
@@ -75,7 +75,7 @@
                                      beneran -- pengurus kelas cuma nyetujuin dia
                                      udah tahu gurunya nggak masuk, bukan meriksa
                                      konten (lihat Jurnal::verifikasiAbsen()). --}}
-                                {{ $statusTampilan === 'terverifikasi' && $j->verifikasiAbsen() ? 'Disetujui' : ['pending' => 'Perlu diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Diminta revisi'][$statusTampilan] }}
+                                {{ $statusTampilan === 'terverifikasi' && $j->verifikasiAbsen() ? 'Disetujui' : ['pending' => 'Perlu diperiksa', 'terverifikasi' => 'Terverifikasi', 'revisi' => 'Perlu diperbaiki'][$statusTampilan] }}
                             </x-ui.status-badge>
                             @if ($j->verifikasiAbsen())
                                 <x-ui.status-badge status="tugas">Tugas</x-ui.status-badge>

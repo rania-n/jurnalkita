@@ -15,10 +15,10 @@ use App\Notifications\JurnalPerluRevisi;
 use App\Support\PresensiDefault;
 use App\Support\Versi;
 use App\Support\Waktu;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -150,7 +150,7 @@ class JurnalController extends Controller
         // sekretaris/jurnal/_detail-fragment.blade.php & Jurnal::verifikasiAbsen()).
         $pesanSukses = $data['keputusan'] === 'terima'
             ? ($jurnal->verifikasiAbsen() ? 'Laporan tidak hadir disetujui.' : 'Jurnal diverifikasi.')
-            : 'Permintaan revisi dikirim ke guru.';
+            : 'Catatan perbaikan dikirim ke guru.';
 
         return redirect()->route('sekretaris.jurnal.index', ['lihat' => $jurnal->id])
             ->with('success', $pesanSukses);
