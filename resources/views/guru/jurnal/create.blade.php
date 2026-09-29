@@ -171,7 +171,7 @@
                          bawah yang nampilin/nyembunyiin & disable/enable-nya. --}}
                     <div id="blok-massal-kelas" class="flex flex-col gap-2" hidden>
                         <x-ui.label>Kelas yang Ditandai</x-ui.label>
-                        <p class="-mt-1 text-xs text-muted-2">Semua kelas tercentang otomatis — ketuk kartu untuk mencentang atau membatalkannya. Alasan dan Tugas untuk Siswa di bawah berlaku untuk semua kelas yang tercentang, kecuali diisi khusus.</p>
+                        <p class="-mt-1 text-xs text-muted-2">Pilih kelas tujuan. Isi tugas per kelas jika berbeda; tugas umum hanya dipakai oleh kelas tanpa tugas khusus.</p>
 
                         <div class="flex flex-col gap-2">
                             @foreach ($jadwals as $j)
@@ -183,7 +183,7 @@
                                      tetap nyaman. --}}
                                 <div class="flex flex-col gap-2 rounded-2xl border border-surface-alt bg-card p-3 transition-colors has-[[data-checkbox-jadwal-massal]:checked]:border-navy has-[[data-checkbox-jadwal-massal]:checked]:bg-surface-alt/60" data-baris-jadwal-massal>
                                     <label class="flex cursor-pointer items-center gap-2.5">
-                                        <input type="checkbox" name="jadwal_ids[]" value="{{ $j->id }}" checked
+                                        <input type="checkbox" name="jadwal_ids[]" value="{{ $j->id }}" @checked(in_array($j->id, old('jadwal_ids', $jadwals->pluck('id')->all())))
                                             class="h-4 w-4 shrink-0 rounded border-surface-alt text-navy focus:ring-navy" data-checkbox-jadwal-massal>
                                         <span class="min-w-0 flex-1">
                                             <span class="block truncate text-sm font-semibold text-ink">{{ $j->kelas->nama }} · {{ $j->mapel->nama }}</span>
@@ -201,10 +201,11 @@
                                     <div class="border-t border-surface-alt pt-2">
                                         <button type="button" data-toggle-khusus="{{ $j->id }}" class="flex items-center gap-1 text-xs font-semibold text-navy hover:underline">
                                             <x-icon name="add_circle" :size="14" />
-                                            Tugas khusus untuk kelas ini
+                                            Tugas kelas ini
                                         </button>
-                                        <div id="tugas-khusus-{{ $j->id }}" class="mt-2" hidden>
-                                            <x-ui.input name="tugas_khusus[{{ $j->id }}]" placeholder="Tugas khusus (kosongkan untuk memakai default di bawah)" />
+                                        <div id="tugas-khusus-{{ $j->id }}" class="mt-2" @if (!old("tugas_khusus.{$j->id}") && !$errors->has("tugas_khusus.{$j->id}")) hidden @endif>
+                                            <x-ui.input name="tugas_khusus[{{ $j->id }}]" :value="old('tugas_khusus.'.$j->id)" placeholder="Tugas khusus kelas ini" />
+                                            @error("tugas_khusus.{$j->id}") <p class="text-xs text-alpha">{{ $message }}</p> @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -452,7 +453,13 @@
                                 (fotoKamera?.files?.length > 0) ? 'Sudah dilampirkan' : 'Belum diambil';
                         } else {
                             const tugas = form.querySelector('[name="tugas_tambahan"]:not(:disabled)')?.value.trim();
-                            modalRingkasan.querySelector('[data-ringkasan="tugas"]').textContent = tugas || '(belum diisi)';
+                            const tugasPerKelas = Array.from(form.querySelectorAll('[data-checkbox-jadwal-massal]:not(:disabled):checked')).map((checkbox) => {
+                                const row = checkbox.closest('[data-baris-jadwal-massal]');
+                                const nama = row.querySelector('.text-ink').textContent.trim();
+                                const khusus = row.querySelector('[name^="tugas_khusus["]').value.trim();
+                                return `${nama}: ${khusus || tugas || 'Belum diisi'}`;
+                            });
+                            modalRingkasan.querySelector('[data-ringkasan="tugas"]').textContent = massal ? tugasPerKelas.join('\n') : (tugas || 'Belum diisi');
 
                             // Alasan bar (radio), bukan teks bebas -- ambil yang
                             // BENERAN kecentang, bukan cuma elemen pertama.
@@ -663,6 +670,19 @@
                     }));
                     syncStatusGuru();
 
+                    const tugasUmum = form.querySelector('[name="tugas_tambahan"]');
+                    function syncTugasUmum() {
+                        const massal = blokMassal && !blokMassal.hidden;
+                        const terpilih = Array.from(form.querySelectorAll('[data-checkbox-jadwal-massal]:checked:not(:disabled)'));
+                        const lengkap = terpilih.length > 0 && terpilih.every((checkbox) =>
+                            checkbox.closest('[data-baris-jadwal-massal]').querySelector('[name^="tugas_khusus["]').value.trim() !== '');
+                        tugasUmum.required = !tugasUmum.disabled && (!massal || !lengkap);
+                        const label = tugasUmum.closest('div.flex-col')?.querySelector('label');
+                        if (label) label.textContent = massal ? `Tugas umum${lengkap ? ' (opsional)' : ' *'}` : 'Tugas untuk Siswa *';
+                    }
+                    form.addEventListener('input', syncTugasUmum);
+                    form.addEventListener('change', syncTugasUmum);
+
                     // "Tidak Hadir 1 Hari Penuh?" -> pilih "Ya" munculin checklist
                     // kelas LANGSUNG di bawahnya (nggak pindah halaman), sekalian
                     // ganti tujuan form ke endpoint massal.
@@ -693,6 +713,7 @@
                             // Tidak Hadir dipilih, terlepas massal atau nggak).
                             if (blokPilihJadwal) blokPilihJadwal.hidden = massal;
                             if (jadwal) jadwal.disabled = massal;
+                            syncTugasUmum();
                         }
                         document.querySelectorAll('input[name="tidak_hadir_sehari_penuh"]').forEach((el) => el.addEventListener('change', syncMassal));
                         syncMassal();
@@ -712,7 +733,8 @@
                                     return;
                                 }
                                 const khusus = document.getElementById('tugas-khusus-' + cb.value);
-                                if (!cb.checked) khusus.querySelector('input').disabled = true;
+                                khusus.querySelector('input').disabled = !cb.checked;
+                                syncTugasUmum();
                             });
                         });
 
@@ -743,6 +765,7 @@
                     }
                     document.querySelectorAll('input[name="metode_pilihan"]').forEach((el) => el.addEventListener('change', syncMetode));
                     syncMetode();
+                    syncTugasUmum();
                 })();
             </script>
         @endpush

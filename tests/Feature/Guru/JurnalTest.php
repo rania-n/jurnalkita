@@ -564,4 +564,46 @@ class JurnalTest extends TestCase
         $versiBaru = $this->get('/guru/jurnal/versi')->assertOk()->json('versi');
         $this->assertNotSame($versiAwal, $versiBaru);
     }
+
+    public function test_massal_menerima_tugas_khusus_tanpa_tugas_umum(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28 09:00:00'));
+        $this->actingAs($this->user)->post(route('jurnal.massal.store'), [
+            'jadwal_ids' => [$this->jadwal->id],
+            'alasan' => 'izin',
+            'tugas_khusus' => [$this->jadwal->id => 'Latihan halaman 12'],
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->assertDatabaseHas('jurnals', ['jadwal_id' => $this->jadwal->id, 'tugas_tambahan' => 'Latihan halaman 12']);
+    }
+
+    public function test_massal_menolak_kelas_tanpa_tugas(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28 09:00:00'));
+        $this->actingAs($this->user)->post(route('jurnal.massal.store'), [
+            'jadwal_ids' => [$this->jadwal->id],
+            'alasan' => 'izin',
+            'tugas_khusus' => [$this->jadwal->id => '   '],
+        ])->assertSessionHasErrors(['tugas_khusus.'.$this->jadwal->id]);
+
+        $this->assertDatabaseCount('jurnals', 0);
+    }
+
+    public function test_massal_memakai_tugas_umum_hanya_untuk_kelas_tanpa_tugas_khusus(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-28 09:00:00'));
+        $kelas = Kelas::create(['nama' => 'X RPL 2', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+        $jadwalLain = $this->jadwal->replicate();
+        $jadwalLain->kelas_id = $kelas->id;
+        $jadwalLain->save();
+        $this->actingAs($this->user)->post(route('jurnal.massal.store'), [
+            'jadwal_ids' => [$this->jadwal->id, $jadwalLain->id],
+            'alasan' => 'izin',
+            'tugas_tambahan' => 'Latihan halaman 5',
+            'tugas_khusus' => [$this->jadwal->id => 'Latihan halaman 12'],
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->assertDatabaseHas('jurnals', ['jadwal_id' => $this->jadwal->id, 'tugas_tambahan' => 'Latihan halaman 12']);
+        $this->assertDatabaseHas('jurnals', ['jadwal_id' => $jadwalLain->id, 'tugas_tambahan' => 'Latihan halaman 5']);
+    }
 }

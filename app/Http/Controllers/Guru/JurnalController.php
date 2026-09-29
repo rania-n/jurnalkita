@@ -537,7 +537,7 @@ class JurnalController extends Controller
             'jadwal_ids' => ['required', 'array', 'min:1'],
             'jadwal_ids.*' => ['integer', 'exists:jadwals,id'],
             'alasan' => ['required', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
-            'tugas_tambahan' => ['required', 'string'],
+            'tugas_tambahan' => ['nullable', 'string'],
             'tugas_khusus' => ['nullable', 'array'],
             'tugas_khusus.*' => ['nullable', 'string'],
             // Opsional -- surat izin/sakit (kalau ada), BUKAN wajib jepret
@@ -570,6 +570,17 @@ class JurnalController extends Controller
         if ($jadwals->isEmpty()) {
             return $this->redirectRiwayat()
                 ->with('info', 'Kelas yang dipilih sudah ada jurnalnya semua (mungkin baru saja diisi dari tab lain).');
+        }
+
+        $tugasUmum = trim($data['tugas_tambahan'] ?? '');
+        $errors = [];
+        foreach ($jadwals as $jadwal) {
+            if ($tugasUmum === '' && trim($data['tugas_khusus'][$jadwal->id] ?? '') === '') {
+                $errors['tugas_khusus.'.$jadwal->id] = 'Isi tugas untuk '.$jadwal->kelas->nama.' atau isi tugas umum.';
+            }
+        }
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
         }
 
         $alasan = self::ALASAN_LABEL[$data['alasan']];
