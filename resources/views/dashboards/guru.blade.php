@@ -104,8 +104,13 @@
     // Pilihan awal cuma ditampilkan SEKALI per login (bukan tiap kali buka
     // dasbor) -- ditandai session (bukan localStorage) biar konsisten walau
     // guru buka dari perangkat/browser berbeda tiap login.
-    $tampilkanPilihanAwal = ! session('pilihan_awal_guru_tampil') && $hariKhusus?->jenis !== 'tanpa_kbm';
-    session(['pilihan_awal_guru_tampil' => true]);
+    $jpAktifAwal = \App\Support\Waktu::jpAktifSekarang();
+    $adaPelajaranBerlangsung = $jpAktifAwal !== null && ($piketHariIni ? $jadwalsHariIni : $jadwalHariIni)
+        ->contains(fn ($jadwal) => $jadwal->jam_ke_mulai <= $jpAktifAwal && $jadwal->jam_ke_selesai >= $jpAktifAwal);
+    $tampilkanPilihanAwal = ! session('pilihan_awal_guru_tampil') && $adaPelajaranBerlangsung;
+    if ($tampilkanPilihanAwal) {
+        session(['pilihan_awal_guru_tampil' => true]);
+    }
 @endphp
 
 <x-layouts.app title="Beranda Guru" width="wide">
