@@ -64,8 +64,8 @@
     @elseif ($jadwals->isEmpty())
         <x-ui.empty
             icon="event_busy"
-            :title="$jumlahSudahDiisi > 0 ? 'Semua jadwal sudah diisi' : 'Tidak ada jadwal kelas ini pada tanggal tersebut'"
-            :desc="$jumlahSudahDiisi > 0 ? 'Semua jadwal pada tanggal ini sudah diisi. Jika ada yang perlu diubah, buka dari Riwayat.' : null"
+            :title="$hariTanpaKbm ? $hariKhusus->nama : ($jumlahSudahDiisi > 0 ? 'Semua jadwal sudah diisi' : 'Tidak ada jadwal kelas ini pada tanggal tersebut')"
+            :desc="$hariTanpaKbm ? 'KBM dan piket ditiadakan pada tanggal ini.' : ($jumlahSudahDiisi > 0 ? 'Semua jadwal pada tanggal ini sudah diisi. Jika ada yang perlu diubah, buka dari Riwayat.' : null)"
         />
     @else
         <form method="POST" action="{{ route('sekretaris.jurnal.pengganti.store') }}">

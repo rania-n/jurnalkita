@@ -1,4 +1,4 @@
-{{-- Detail publik hari ini; jangan tampilkan presensi atau identitas siswa. --}}
+{{-- Detail publik hari ini; presensi siswa hanya tampil jika Admin mengaktifkan fitur. --}}
 @php
     $rentangJam = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp

@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\AuditLog;
+use App\Models\HariKhusus;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
 use App\Models\Kelas;
+use App\Models\PengaturanJurnal;
 use App\Models\PresensiPiket;
 use App\Models\Siswa;
 use App\Support\Versi;
+use App\Support\Waktu;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -126,33 +129,24 @@ class PiketController extends Controller
         ])->with('success', "Presensi {$siswa->nama} tersimpan dan disamakan ke jurnal kelas pada tanggal tersebut.");
     }
 
-    /**
-     * Popup "referensi" di halaman login -- TANPA login sama sekali, jadi
-     * SENGAJA dibatasi ketat & beda dari index() di atas:
-     * - Cuma HARI INI, cuma yang SUDAH diisi (jurnal cuma ada kalau sudah
-     *   diisi -- makanya query-nya nggak perlu nge-cross-reference ke Jadwal
-     *   buat nyari yang "belum diisi" kayak index()/barisRange()).
-     * - CUMA level guru/kelas/mapel/materi/status kehadiran GURU. TIDAK
-     *   menyertakan data siswa (nama, kehadiran per-siswa/absensi) sama
-     *   sekali -- itu tetap wajib login, biar data pribadi siswa (termasuk
-     *   yang masih di bawah umur) nggak kebuka ke siapa pun yang cuma
-     *   mampir ke halaman login.
-     * - TIDAK bisa diekspor/diunduh dari sini.
-     */
+    /** Popup jurnal hari ini di halaman login; akses publik dikendalikan Admin. */
     public function popupHariIni(): View
     {
+        abort_unless(PengaturanJurnal::tampilkanDiLogin(), 404);
+
         $jurnals = Jurnal::whereDate('tanggal', today())
             ->with('jadwal.kelas', 'jadwal.mapel', 'guru')
             ->get()
-            ->sortBy(fn (Jurnal $j) => $j->jam_ke_mulai)
+            ->sortBy(fn (Jurnal $jurnal) => $jurnal->jam_ke_mulai)
             ->values();
 
         return view('piket._popup-jurnal-hari-ini', compact('jurnals'));
     }
 
-    /** Detail referensi publik tetap dibatasi ke jurnal hari ini dan tanpa presensi siswa. */
+    /** Detail jurnal publik hanya aktif saat Admin menyalakan fitur login. */
     public function popupDetailHariIni(Jurnal $jurnal): View
     {
+        abort_unless(PengaturanJurnal::tampilkanDiLogin(), 404);
         abort_unless($jurnal->tanggal?->isToday(), 404);
 
         $jurnal->load('jadwal.kelas', 'jadwal.mapel', 'guru', 'absensis.siswa');
@@ -430,7 +424,14 @@ class PiketController extends Controller
             return collect(); // Sabtu/Minggu — tidak ada jadwal pelajaran.
         }
 
-        $jadwals = Jadwal::where('hari', $hari)->with('kelas', 'mapel', 'guru')->get();
+        if (HariKhusus::untukTanggal($tanggal)?->jenis === 'tanpa_kbm') {
+            return collect();
+        }
+
+        $jadwals = Jadwal::where('hari', $hari)
+            ->with('kelas', 'mapel', 'guru')
+            ->get()
+            ->reject(fn (Jadwal $jadwal) => Waktu::jadwalDitiadakan($jadwal, $tanggal));
 
         $jurnalQuery = Jurnal::whereIn('jadwal_id', $jadwals->pluck('id'))->whereDate('tanggal', $tanggal);
         if ($denganPresensi) {

@@ -34,6 +34,23 @@
             @endforeach
         </div>
 
+        <div class="mt-5 rounded-2xl border border-surface-alt bg-card p-4">
+            <input type="hidden" name="tampilkan_di_login" value="0">
+            <label class="flex cursor-pointer items-start gap-3">
+                <input
+                    type="checkbox"
+                    name="tampilkan_di_login"
+                    value="1"
+                    class="mt-1 h-4 w-4 shrink-0 accent-navy"
+                    @checked(old('tampilkan_di_login', $pengaturan->tampilkan_di_login))
+                >
+                <span>
+                    <span class="block text-sm font-bold text-ink">Tampilkan “Lihat Jurnal Hari Ini” di halaman login</span>
+                    <span class="mt-0.5 block text-xs text-muted">Pengunjung yang belum masuk dapat melihat jurnal hari ini, termasuk materi dan presensi siswa.</span>
+                </span>
+            </label>
+        </div>
+
         @error('mode')
             <p class="mt-2 text-xs font-medium text-alpha">{{ $message }}</p>
         @enderror

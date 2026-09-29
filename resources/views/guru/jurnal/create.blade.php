@@ -54,12 +54,12 @@
         </x-alert>
     @endif
 
-    @if ($jadwals->isEmpty())
-        <x-ui.empty
-            icon="event_busy"
-            :title="$jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi' : 'Belum ada jadwal mengajar'"
-            :desc="$jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi. Jika ada yang perlu diubah, buka dari Riwayat.' : 'Hubungi admin untuk menambahkan jadwal Anda.'"
-        />
+        @if ($jadwals->isEmpty())
+            <x-ui.empty
+                icon="event_busy"
+                :title="$hariTanpaKbm ? $hariKhusus->nama : ($jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi' : 'Belum ada jadwal mengajar')"
+                :desc="$hariTanpaKbm ? 'KBM dan piket ditiadakan pada tanggal ini.' : ($jumlahSudahDiisiHariIni > 0 ? 'Semua jadwal hari ini sudah diisi. Jika ada yang perlu diubah, buka dari Riwayat.' : 'Hubungi admin untuk menambahkan jadwal Anda.')"
+            />
     @elseif ($jurnalDiblokirIstirahat)
         {{-- Lagi istirahat/pergantian jam (masih dalam rentang jam sekolah,
              tapi nggak ada jadwal yang beneran lagi berlangsung buat guru

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Models\HariKhusus;
 use App\Models\JadwalWaka;
 use App\Support\HariSekolah;
 use Illuminate\Http\Request;
@@ -50,7 +51,8 @@ class JadwalController extends Controller
         }
 
         $hariIni = HariSekolah::hariIni();
+        $hariKhusus = HariKhusus::untukTanggal(today());
 
-        return view('guru.jadwal', compact('jadwalPerHari', 'piketPerHari', 'jadwalWakaPerHari', 'hari', 'hariIni', 'adaPiket'));
+        return view('guru.jadwal', compact('jadwalPerHari', 'piketPerHari', 'jadwalWakaPerHari', 'hari', 'hariIni', 'adaPiket', 'hariKhusus'));
     }
 }

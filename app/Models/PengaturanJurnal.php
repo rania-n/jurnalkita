@@ -11,7 +11,12 @@ use Illuminate\Database\Eloquent\Model;
  */
 class PengaturanJurnal extends Model
 {
-    protected $fillable = ['mode'];
+    protected $fillable = ['mode', 'tampilkan_di_login'];
+
+    protected function casts(): array
+    {
+        return ['tampilkan_di_login' => 'boolean'];
+    }
 
     public const MODE_LABEL = [
         'disiplin' => 'Disiplin (kunci jam pelajaran)',
@@ -34,5 +39,10 @@ class PengaturanJurnal extends Model
     public static function mode(): string
     {
         return static::ambil()->mode;
+    }
+
+    public static function tampilkanDiLogin(): bool
+    {
+        return static::ambil()->tampilkan_di_login;
     }
 }

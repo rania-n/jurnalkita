@@ -15,6 +15,12 @@
          piket. --}}
     <x-page-header title="Jadwal Mengajar" subtitle="Jadwal mengajar dan piket Anda selama seminggu" size="sm" />
 
+    @if ($hariKhusus)
+        <x-alert type="info" class="mb-4">
+            {{ $hariKhusus->nama }} — {{ $hariKhusus->jenis === 'tanpa_kbm' ? 'KBM dan piket ditiadakan hari ini.' : 'Kegiatan sekolah selesai pukul ' . $hariKhusus->jam_selesai->format('H:i') . '.' }}
+        </x-alert>
+    @endif
+
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabsHari as $key => $label)
             <a href="{{ route('guru.jadwal.index', $key === 'semua' ? [] : ['hari' => $key]) }}"

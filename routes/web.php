@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AkunController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\GuruController;
+use App\Http\Controllers\Admin\HariKhususController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\JadwalPiketController;
 use App\Http\Controllers\Admin\JadwalWakaController;
@@ -58,10 +59,6 @@ Route::post('/dispensasi/{dispensasi}/persetujuan', [SuratDispensasiController::
    (satpam.hasil-scan) udah dari awal pakai layout guest (tanpa sidebar). */
 Route::get('/satpam/scan', [SatpamController::class, 'scan'])->name('satpam.scan');
 
-/* Popup "referensi" di halaman login -- TANPA login juga. SENGAJA dibatasi
-   ketat (lihat PiketController::popupHariIni()): cuma hari ini, cuma yang
-   sudah diisi, dan CUMA level guru/kelas/mapel -- tidak ada data siswa sama
-   sekali, jadi aman dibuka tanpa login. */
 Route::get('/jurnal-hari-ini', [PiketController::class, 'popupHariIni'])->name('piket.popup-hari-ini');
 Route::get('/jurnal-hari-ini/{jurnal}', [PiketController::class, 'popupDetailHariIni'])->name('piket.popup-hari-ini.detail');
 
@@ -102,6 +99,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/backup/unduh', [BackupController::class, 'download'])->name('master.backup.download');
         Route::get('/admin/pengaturan-jurnal', [PengaturanJurnalController::class, 'index'])->name('master.pengaturan-jurnal.index');
         Route::post('/admin/pengaturan-jurnal', [PengaturanJurnalController::class, 'save'])->name('master.pengaturan-jurnal.save');
+        Route::get('/admin/hari-khusus', [HariKhususController::class, 'index'])->name('master.hari-khusus.index');
+        Route::post('/admin/hari-khusus', [HariKhususController::class, 'save'])->name('master.hari-khusus.save');
+        Route::delete('/admin/hari-khusus/{hariKhusus}', [HariKhususController::class, 'destroy'])->name('master.hari-khusus.destroy');
 
         /* Manajemen akun */
         Route::post('/admin/akun', [AkunController::class, 'save'])->name('master.akun.save');

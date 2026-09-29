@@ -93,6 +93,11 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
+        $hariKhusus = HariKhusus::untukTanggal(today());
+        if ($hariKhusus?->jenis === 'pulang_cepat' && now()->format('H:i:s') >= $hariKhusus->jam_selesai->format('H:i:s')) {
+            return false;
+        }
+
         // berlakuPada() -- piket sekarang per TANGGAL SPESIFIK (ulang tiap 2
         // minggu, bukan tiap minggu di hari yang sama); baris lama (tanggal
         // kosong) tetap dianggap berulang tiap minggu (lihat JadwalPiket).

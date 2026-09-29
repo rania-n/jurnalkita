@@ -1,6 +1,7 @@
 @php
     $guru = auth()->user()->guru;
     $hari = \App\Support\HariSekolah::hariIni();
+    $hariKhusus = \App\Models\HariKhusus::untukTanggal(today());
     $piketHariIni = auth()->user()->piketHariIni();
     $isWali = auth()->user()->isWali();
 
@@ -84,6 +85,7 @@
         $jadwalHariIni = $hari && $guru
             ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hari)->orderBy('jam_ke_mulai')->get()
             : collect();
+        $jadwalHariIni = $jadwalHariIni->reject(fn ($j) => \App\Support\Waktu::jadwalDitiadakan($j, today()))->values();
 
         // Jadwal yang jurnalnya sudah diisi hari ini
         $jurnalGuruHariIni = $guru
@@ -102,11 +104,16 @@
     // Pilihan awal cuma ditampilkan SEKALI per login (bukan tiap kali buka
     // dasbor) -- ditandai session (bukan localStorage) biar konsisten walau
     // guru buka dari perangkat/browser berbeda tiap login.
-    $tampilkanPilihanAwal = ! session('pilihan_awal_guru_tampil');
+    $tampilkanPilihanAwal = ! session('pilihan_awal_guru_tampil') && $hariKhusus?->jenis !== 'tanpa_kbm';
     session(['pilihan_awal_guru_tampil' => true]);
 @endphp
 
 <x-layouts.app title="Beranda Guru" width="wide">
+    @if ($hariKhusus?->jenis === 'tanpa_kbm')
+        <x-alert type="info" class="mb-4">{{ $hariKhusus->nama }} — KBM dan piket ditiadakan hari ini.</x-alert>
+    @elseif ($hariKhusus?->jenis === 'pulang_cepat')
+        <x-alert type="info" class="mb-4">{{ $hariKhusus->nama }} — kegiatan sekolah selesai pukul {{ $hariKhusus->jam_selesai->format('H:i') }}.</x-alert>
+    @endif
     {{-- Nama guru udah ada di header atas (avatar + nama), dan "Beranda"
          sendiri udah kelihatan dari menu yang lagi disorot di sidebar/navbar
          -- teks itu nggak nambah informasi apa pun, jadi nggak usah
@@ -411,8 +418,14 @@
         </div>
 
         @if ($jadwalHariIni->isEmpty())
-            <x-ui.empty icon="event_busy" title="Tidak ada jadwal hari ini" desc="Ingin mengisi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.">
-                <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
+            <x-ui.empty
+                icon="event_busy"
+                :title="$hariKhusus?->jenis === 'tanpa_kbm' ? $hariKhusus->nama : 'Tidak ada jadwal hari ini'"
+                :desc="$hariKhusus?->jenis === 'tanpa_kbm' ? 'KBM dan piket ditiadakan hari ini.' : 'Ingin mengisi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.'"
+            >
+                @unless ($hariKhusus?->jenis === 'tanpa_kbm')
+                    <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
+                @endunless
             </x-ui.empty>
         @else
             <x-ui.card-list class="grid-fill-last">

@@ -124,6 +124,7 @@ return [
 
         ['group' => 'Pengaturan', 'icon' => 'tune', 'items' => [
             ['label' => 'Isi Jurnal Guru', 'icon' => 'lock_clock', 'route' => 'master.pengaturan-jurnal.index'],
+            ['label' => 'Hari Khusus', 'icon' => 'event_busy', 'route' => 'master.hari-khusus.index'],
         ]],
 
         // Oversight kesiswaan — lihat saja, aksi (approve/tolak) tetap milik piket/waka.

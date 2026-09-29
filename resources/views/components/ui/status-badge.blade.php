@@ -25,6 +25,7 @@
         'berlangsung' => ['bg-hadir-soft text-hadir', 'Berlangsung'],
         'istirahat' => ['bg-sakit-soft text-sakit', 'Jeda Istirahat'],
         'belum' => ['bg-izin-soft text-izin', 'Belum Mulai'],
+        'ditiadakan' => ['bg-surface-alt text-muted', 'Ditiadakan'],
     ];
     [$cls, $label] = $map[$key] ?? ['bg-surface-alt text-muted', ucfirst($key)];
 @endphp

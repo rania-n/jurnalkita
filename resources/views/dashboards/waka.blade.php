@@ -23,10 +23,12 @@
     // dispensasi) -- kalau akunnya terhubung ke data Guru, tampilin jadwal hari
     // ini sama kayak dashboard guru biasa.
     $guruWaka = $user->guru;
+    $hariKhusus = \App\Models\HariKhusus::untukTanggal(today());
     $hariIniWaka = \App\Support\HariSekolah::hariIni();
     $jadwalHariIniWaka = $guruWaka && $hariIniWaka
         ? $guruWaka->jadwals()->with('kelas', 'mapel')->where('hari', $hariIniWaka)->orderBy('jam_ke_mulai')->get()
         : collect();
+    $jadwalHariIniWaka = $jadwalHariIniWaka->reject(fn ($j) => \App\Support\Waktu::jadwalDitiadakan($j, today()))->values();
     $sudahDiisiWaka = $guruWaka
         ? $guruWaka->jurnals()->whereDate('tanggal', today())->pluck('jadwal_id')->all()
         : [];
@@ -34,6 +36,12 @@
 
 <x-layouts.app title="Beranda Waka" width="wide">
     <x-page-header title="Beranda Waka Kesiswaan" subtitle="Persetujuan dispensasi tahap 2" size="sm" />
+
+    @if ($hariKhusus?->jenis === 'tanpa_kbm')
+        <x-alert type="info" class="mb-4">{{ $hariKhusus->nama }} — KBM dan piket ditiadakan hari ini.</x-alert>
+    @elseif ($hariKhusus?->jenis === 'pulang_cepat')
+        <x-alert type="info" class="mb-4">{{ $hariKhusus->nama }} — kegiatan sekolah selesai pukul {{ $hariKhusus->jam_selesai->format('H:i') }}.</x-alert>
+    @endif
 
 
     @if ($adaJadwalWaka)
@@ -90,8 +98,10 @@
         </div>
 
         @if ($jadwalHariIniWaka->isEmpty())
-            <x-ui.empty icon="event_busy" title="Tidak ada jadwal mengajar hari ini" desc="Ingin mengisi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.">
-                <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
+            <x-ui.empty icon="event_busy" :title="$hariKhusus?->jenis === 'tanpa_kbm' ? $hariKhusus->nama : 'Tidak ada jadwal mengajar hari ini'" :desc="$hariKhusus?->jenis === 'tanpa_kbm' ? 'KBM dan piket ditiadakan hari ini.' : 'Ingin mengisi jurnal untuk jadwal lain? Pilih dari daftar jadwal Anda.'">
+                @unless ($hariKhusus?->jenis === 'tanpa_kbm')
+                    <x-ui.button :href="route('jurnal.create')" icon="edit_note" class="mt-2">Isi Jurnal</x-ui.button>
+                @endunless
             </x-ui.empty>
         @else
             <x-ui.card-list class="grid-fill-last">

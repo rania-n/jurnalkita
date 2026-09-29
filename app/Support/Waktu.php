@@ -2,8 +2,11 @@
 
 namespace App\Support;
 
+use App\Models\HariKhusus;
+use App\Models\Jadwal;
 use App\Models\JamPelajaran;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class Waktu
@@ -64,9 +67,15 @@ class Waktu
             return null;
         }
 
+        $batasPulang = self::batasPulangCepat();
+        $sekarang = now()->format('H:i:s');
+        if ($batasPulang && $sekarang >= $batasPulang) {
+            return null;
+        }
+
         return JamPelajaran::where('kategori', self::kategori())
-            ->where('mulai', '<=', now()->format('H:i:s'))
-            ->where('selesai', '>=', now()->format('H:i:s'))
+            ->where('mulai', '<=', $sekarang)
+            ->where('selesai', '>=', $sekarang)
             ->value('jam_ke');
     }
 
@@ -95,6 +104,11 @@ class Waktu
             return false;
         }
 
+        $batasPulang = self::batasPulangCepat();
+        if ($batasPulang) {
+            $selesaiTerakhir = min($selesaiTerakhir, $batasPulang);
+        }
+
         $sekarang = now()->format('H:i:s');
 
         return $sekarang >= $mulaiPertama && $sekarang <= $selesaiTerakhir;
@@ -116,6 +130,10 @@ class Waktu
      */
     public static function statusJpHariIni(int $jamKeMulai, ?int $jamKeSelesai = null): ?string
     {
+        if (! HariSekolah::hariIni()) {
+            return 'ditiadakan';
+        }
+
         $jamKeSelesai ??= $jamKeMulai;
         $kategori = self::kategori();
         $awal = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jamKeMulai)->value('mulai');
@@ -123,6 +141,14 @@ class Waktu
 
         if (! $awal || ! $akhir) {
             return null;
+        }
+
+        $batasPulang = self::batasPulangCepat();
+        if ($batasPulang && $awal->format('H:i:s') >= $batasPulang) {
+            return 'ditiadakan';
+        }
+        if ($batasPulang && $akhir->format('H:i:s') > $batasPulang) {
+            $akhir = $akhir->copy()->setTimeFromTimeString($batasPulang);
         }
 
         // $awal/$akhir kecast 'datetime:H:i' oleh model (Carbon, bukan string) --
@@ -156,7 +182,7 @@ class Waktu
      * $jadwals harus sudah diurutkan ASCENDING berdasarkan jam_ke_mulai (semua
      * pemanggil sudah begitu -- query jadwal hari ini selalu orderBy jam_ke_mulai).
      */
-    public static function jadwalSorotan(\Illuminate\Support\Collection $jadwals): ?array
+    public static function jadwalSorotan(Collection $jadwals): ?array
     {
         foreach ($jadwals as $jadwal) {
             if (self::statusJpHariIni($jadwal->jam_ke_mulai, $jadwal->jam_ke_selesai) === 'belum') {
@@ -195,6 +221,33 @@ class Waktu
     public static function rentangJamUntukHari(string $hari, int $jamKeMulai, ?int $jamKeSelesai = null): ?string
     {
         return self::rentangJamDenganKategori(self::kategoriUntukHari($hari), $jamKeMulai, $jamKeSelesai);
+    }
+
+    /** true kalau jadwal ini gugur oleh kalender khusus pada tanggal target. */
+    public static function jadwalDitiadakan(Jadwal $jadwal, Carbon $tanggal): bool
+    {
+        $hariKhusus = HariKhusus::untukTanggal($tanggal);
+        if (! $hariKhusus) {
+            return false;
+        }
+        if ($hariKhusus->jenis === 'tanpa_kbm') {
+            return true;
+        }
+
+        $mulai = JamPelajaran::where('kategori', self::kategoriUntukHari($jadwal->hari))
+            ->where('jam_ke', $jadwal->jam_ke_mulai)
+            ->value('mulai');
+
+        return $mulai && $mulai->format('H:i:s') >= $hariKhusus->jam_selesai->format('H:i:s');
+    }
+
+    private static function batasPulangCepat(): ?string
+    {
+        $hariKhusus = HariKhusus::untukTanggal(today());
+
+        return $hariKhusus?->jenis === 'pulang_cepat'
+            ? $hariKhusus->jam_selesai?->format('H:i:s')
+            : null;
     }
 
     /** Jam mulai (format "H:i") satu JP tertentu pada hari tertentu. */

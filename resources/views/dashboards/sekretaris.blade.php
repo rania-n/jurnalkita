@@ -10,9 +10,13 @@
     // biar pengurus kelas langsung lihat pelajaran mana yang gurunya sudah
     // hadir/tidak hadir/belum diisi tanpa buka menu lain dulu.
     $hariIni = \App\Support\HariSekolah::hariIni();
+    $hariKhusus = \App\Models\HariKhusus::untukTanggal(today());
     $jadwalHariIni = $kelas && $hariIni
         ? $kelas->jadwals()->with('mapel', 'guru')->where('hari', $hariIni)->orderBy('jam_ke_mulai')->get()
         : collect();
+    if ($hariKhusus?->jenis === 'pulang_cepat') {
+        $jadwalHariIni = $jadwalHariIni->reject(fn ($jadwal) => \App\Support\Waktu::jadwalDitiadakan($jadwal, today()));
+    }
     $jurnalHariIni = $jadwalHariIni->isNotEmpty()
         ? \App\Models\Jurnal::whereIn('jadwal_id', $jadwalHariIni->pluck('id'))->whereDate('tanggal', today())->get()->keyBy('jadwal_id')
         : collect();
@@ -22,6 +26,12 @@
 
 <x-layouts.app title="Beranda Pengurus Kelas" width="wide">
     <x-page-header title="Beranda" size="sm" :subtitle="$kelas?->nama ?? 'Pengurus Kelas'" />
+
+    @if ($hariKhusus)
+        <x-alert type="info" class="mb-4">
+            {{ $hariKhusus->nama }} — {{ $hariKhusus->jenis === 'tanpa_kbm' ? 'KBM dan piket ditiadakan hari ini.' : 'Kegiatan sekolah selesai pukul ' . $hariKhusus->jam_selesai->format('H:i') . '.' }}
+        </x-alert>
+    @endif
 
     @if ($kelas)
     @endif

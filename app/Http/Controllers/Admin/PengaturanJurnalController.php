@@ -29,12 +29,16 @@ class PengaturanJurnalController extends Controller
     {
         $data = $request->validate([
             'mode' => ['required', 'in:'.implode(',', array_keys(PengaturanJurnal::MODE_LABEL))],
+            'tampilkan_di_login' => ['required', 'boolean'],
         ]);
 
         $pengaturan = PengaturanJurnal::ambil();
         $pengaturan->update($data);
 
-        AuditLog::catat('Ubah Pengaturan Isi Jurnal', 'Mode isi jurnal diubah ke: '.PengaturanJurnal::MODE_LABEL[$data['mode']]);
+        AuditLog::catat(
+            'Ubah Pengaturan Isi Jurnal',
+            'Mode: '.PengaturanJurnal::MODE_LABEL[$data['mode']].'; jurnal di halaman login: '.($data['tampilkan_di_login'] ? 'aktif' : 'nonaktif')
+        );
 
         return redirect()->route('master.pengaturan-jurnal.index')->with('success', 'Pengaturan disimpan.');
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\Guru;
+use App\Models\HariKhusus;
 use App\Models\Jadwal;
 use App\Models\Jurnal;
 use App\Models\Kelas;
@@ -79,6 +80,10 @@ class JurnalController extends Controller
      */
     private function jadwalBolehDiisi(Jadwal $jadwal, string $mode, Carbon $tanggal): bool
     {
+        if (Waktu::jadwalDitiadakan($jadwal, $tanggal)) {
+            return false;
+        }
+
         if ($mode !== 'disiplin' || ! $tanggal->isToday()) {
             return true;
         }
@@ -235,14 +240,20 @@ class JurnalController extends Controller
         }
 
         $pakaiKemarin = $tanggalAktif->isYesterday();
-        $hariAktif = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggalAktif->dayOfWeek - 1] ?? null;
+        $hariKhusus = HariKhusus::untukTanggal($tanggalAktif);
+        $hariTanpaKbm = $hariKhusus?->jenis === 'tanpa_kbm';
+        $hariAktif = $hariTanpaKbm ? null : (['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggalAktif->dayOfWeek - 1] ?? null);
 
         $jadwals = $hariAktif
             ? $guru->jadwals()->with('kelas', 'mapel')->where('hari', $hariAktif)->orderBy('jam_ke_mulai')->get()
             : collect();
 
         // Semua jadwal guru (fallback kalau tidak ada jadwal di hari aktif)
-        $semuaJadwal = $guru->jadwals()->with('kelas', 'mapel')->orderBy('hari')->orderBy('jam_ke_mulai')->get();
+        $semuaJadwal = $hariTanpaKbm
+            ? collect()
+            : $guru->jadwals()->with('kelas', 'mapel')->orderBy('hari')->orderBy('jam_ke_mulai')->get();
+        $jadwals = $jadwals->reject(fn ($jadwal) => Waktu::jadwalDitiadakan($jadwal, $tanggalAktif))->values();
+        $semuaJadwal = $semuaJadwal->reject(fn ($jadwal) => Waktu::jadwalDitiadakan($jadwal, $tanggalAktif))->values();
 
         // Jadwal yang di TANGGAL AKTIF udah ada jurnalnya nggak boleh dipilih
         // lagi dari sini -- backend (store()) juga nolak kalau dipaksa submit,
@@ -356,6 +367,8 @@ class JurnalController extends Controller
             'modeJurnal' => $mode,
             'pakaiKemarin' => $pakaiKemarin,
             'tanggalAktif' => $tanggalAktif,
+            'hariKhusus' => $hariKhusus,
+            'hariTanpaKbm' => $hariTanpaKbm,
             // Foto kamera "Hadir" cuma wajib buat tanggal HARI INI -- guru
             // isi jurnal susulan (tanggal lampau lewat mode bebas) nggak
             // mungkin jepret foto "sedang berlangsung" buat kejadian yang
@@ -433,6 +446,9 @@ class JurnalController extends Controller
         abort_unless($jadwal->guru_id === $guru->id, 403);
 
         $tanggal = $this->tanggalUntukJadwal($jadwal, $mode, $request);
+        if (Waktu::jadwalDitiadakan($jadwal, $tanggal)) {
+            return back()->with('error', 'Jurnal tidak dapat diisi karena kegiatan sekolah pada tanggal tersebut ditiadakan.');
+        }
         abort_unless($this->jadwalBolehDiisi($jadwal, $mode, $tanggal), 403, 'Belum waktunya mengisi jurnal untuk jadwal ini. Silakan coba lagi setelah jam pelajarannya berlangsung.');
 
         // Jam mulai & selesai SELALU ikut jadwal yang dipilih (bukan input klien) --
@@ -540,6 +556,14 @@ class JurnalController extends Controller
         $tanggal = (in_array($mode, ['bebas_selamanya', 'bebas_kemarin'], true) && $request->filled('tanggal'))
             ? Carbon::parse($request->input('tanggal'))->toDateString()
             : now()->toDateString();
+        $tanggalObjek = Carbon::parse($tanggal);
+        if (HariKhusus::untukTanggal($tanggalObjek)?->jenis === 'tanpa_kbm') {
+            return back()->with('error', 'Jurnal tidak dapat diisi karena KBM dan piket ditiadakan pada tanggal tersebut.');
+        }
+        $jadwals = $jadwals->reject(fn ($jadwal) => Waktu::jadwalDitiadakan($jadwal, $tanggalObjek))->values();
+        if ($jadwals->isEmpty()) {
+            return back()->with('error', 'Tidak ada jadwal yang berlangsung sebelum waktu pulang cepat pada tanggal tersebut.');
+        }
         $sudahAda = Jurnal::whereIn('jadwal_id', $jadwals->pluck('id'))->whereDate('tanggal', $tanggal)->pluck('jadwal_id');
         $jadwals = $jadwals->reject(fn ($j) => $sudahAda->contains($j->id))->values();
 

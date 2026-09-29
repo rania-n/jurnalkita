@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Sekretaris;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AuditLog;
+use App\Models\HariKhusus;
 use App\Models\Jadwal;
 use App\Models\JamPelajaran;
 use App\Models\Jurnal;
@@ -162,6 +163,10 @@ class JurnalController extends Controller
      */
     private function jadwalBolehDiisi(Jadwal $jadwal, string $mode, Carbon $tanggal): bool
     {
+        if (Waktu::jadwalDitiadakan($jadwal, $tanggal)) {
+            return false;
+        }
+
         if ($mode !== 'disiplin' || ! $tanggal->isToday()) {
             return true;
         }
@@ -192,12 +197,15 @@ class JurnalController extends Controller
         } else {
             $tanggalAktif = now();
         }
+        $hariKhusus = HariKhusus::untukTanggal($tanggalAktif);
+        $hariTanpaKbm = $hariKhusus?->jenis === 'tanpa_kbm';
 
-        $hariAktif = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggalAktif->dayOfWeek - 1] ?? null;
+        $hariAktif = $hariTanpaKbm ? null : (['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggalAktif->dayOfWeek - 1] ?? null);
 
         $jadwals = $hariAktif
             ? $kelas->jadwals()->with('mapel', 'guru')->where('hari', $hariAktif)->orderBy('jam_ke_mulai')->get()
             : collect();
+        $jadwals = $jadwals->reject(fn ($jadwal) => Waktu::jadwalDitiadakan($jadwal, $tanggalAktif))->values();
 
         // Jadwal yang di tanggal aktif itu udah ada jurnalnya nggak boleh
         // dipilih lagi dari sini -- sama alasannya kayak Isi Jurnal biasa
@@ -257,6 +265,8 @@ class JurnalController extends Controller
             'modeJurnal' => $mode,
             'bisaPilihTanggal' => $bisaPilihTanggal,
             'tanggalAktif' => $tanggalAktif,
+            'hariKhusus' => $hariKhusus,
+            'hariTanpaKbm' => $hariTanpaKbm,
             'jadwalTerkunci' => $jadwalTerkunci,
             'jadwalTunggalTerkunci' => $jadwalTerkunci ? $jadwalJpIni->first() : null,
             'jurnalDiblokirIstirahat' => $jurnalDiblokirIstirahat,
@@ -279,6 +289,9 @@ class JurnalController extends Controller
             : now();
         if ($tanggalAktif->isFuture()) {
             $tanggalAktif = now();
+        }
+        if (HariKhusus::untukTanggal($tanggalAktif)?->jenis === 'tanpa_kbm') {
+            return back()->with('error', 'Jurnal pengganti tidak dapat diisi karena KBM dan piket ditiadakan pada tanggal tersebut.');
         }
 
         $data = $request->validate([

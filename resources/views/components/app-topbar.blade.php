@@ -26,7 +26,12 @@
         $tanggalSingkat = $hariIndo[now()->dayOfWeek].', '.now()->day.' '.$bulanPendek[now()->month];
         $jpAktif = \App\Support\Waktu::jpAktifSekarang();
         $dalamJamSekolah = \App\Support\Waktu::dalamJamSekolah();
-        $statusWaktu = $jpAktif ? 'Sedang JP '.$jpAktif : ($dalamJamSekolah ? 'Waktu Istirahat' : 'Di luar jam pelajaran');
+        $hariKhusus = \App\Models\HariKhusus::untukTanggal(today());
+        $statusWaktu = $hariKhusus?->jenis === 'tanpa_kbm'
+            ? $hariKhusus->nama
+            : ($hariKhusus?->jenis === 'pulang_cepat' && now()->format('H:i:s') >= $hariKhusus->jam_selesai->format('H:i:s')
+                ? 'Kegiatan sekolah selesai'
+                : ($jpAktif ? 'Sedang JP '.$jpAktif : ($dalamJamSekolah ? 'Waktu Istirahat' : 'Di luar jam pelajaran')));
     }
 
     if ($isPiketHariIni) {
@@ -42,6 +47,12 @@
             ->filter()
             ->map(fn ($selesai) => $selesai->format('H.i'))
             ->max();
+
+        if ($hariKhusus?->jenis === 'pulang_cepat') {
+            $jamPulangCepat = $hariKhusus->jam_selesai->format('H.i');
+            $selesaiPiket = $selesaiPiket ? min($selesaiPiket, $jamPulangCepat) : $jamPulangCepat;
+            $shiftSeharian = false;
+        }
 
         $subHeader = 'Bertugas Piket'.(! $shiftSeharian && $selesaiPiket ? ' s/d '.$selesaiPiket : ' Hari Ini');
     } else {
