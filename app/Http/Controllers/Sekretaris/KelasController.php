@@ -7,7 +7,9 @@ use App\Models\Absensi;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\PresensiPiket;
+use App\Models\Siswa;
 use App\Support\HariSekolah;
+use App\Support\RekapKehadiran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -75,7 +77,7 @@ class KelasController extends Controller
         return view('sekretaris.jadwal', compact('kelas', 'jadwalPerHari', 'hari', 'hariIni', 'jurnalHariIni'));
     }
 
-    /** Rekap kehadiran kelas bulan berjalan, per siswa. */
+    /** Rekap kehadiran kelas, per siswa (bisa dilihat per hari atau per mapel). */
     public function rekap(Request $request): View
     {
         $kelas = $this->kelas();
@@ -85,17 +87,29 @@ class KelasController extends Controller
         // milik Wali Kelas & Rekap Kehadiran Siswa milik Waka.
         $dari = $request->filled('dari') ? Carbon::parse($request->date('dari')) : null;
         $sampai = $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : null;
+        $tipe = $request->query('tipe', 'hari');
 
         $siswas = $kelas->siswas()->orderBy('no_absen')->get();
 
-        $rekap = Absensi::whereIn('siswa_id', $siswas->pluck('id'))
-            ->whereHas('jurnal', fn ($q) => $q
-                ->when($dari, fn ($q2) => $q2->whereDate('tanggal', '>=', $dari))
-                ->when($sampai, fn ($q2) => $q2->whereDate('tanggal', '<=', $sampai)))
-            ->get()
-            ->groupBy('siswa_id')
-            ->map(fn ($rows) => $rows->countBy('status'));
+        $dataRekap = RekapKehadiran::untukKelas($kelas, $siswas, $dari, $sampai);
+        $rekapHari = $dataRekap['rekapHari'];
+        $rekapMapel = $dataRekap['rekapMapel'];
+        $rekap = $tipe === 'mapel' ? $rekapMapel : $rekapHari;
 
-        return view('sekretaris.rekap', compact('kelas', 'siswas', 'rekap', 'dari', 'sampai'));
+        return view('sekretaris.rekap', compact('kelas', 'siswas', 'rekap', 'rekapHari', 'rekapMapel', 'dari', 'sampai', 'tipe'));
+    }
+
+    /** Fragment modal rincian kehadiran satu siswa (mapel & riwayat pertemuan). */
+    public function rekapSiswaFragment(Siswa $siswa, Request $request): View
+    {
+        $kelas = $this->kelas();
+        abort_unless($siswa->kelas_id === $kelas->id, 403, 'Siswa bukan anggota kelas ini.');
+
+        $dari = $request->filled('dari') ? Carbon::parse($request->date('dari')) : null;
+        $sampai = $request->filled('sampai') ? Carbon::parse($request->date('sampai')) : null;
+
+        $detail = RekapKehadiran::detailSiswa($siswa, $dari, $sampai);
+
+        return view('rekap._detail-siswa', $detail);
     }
 }
