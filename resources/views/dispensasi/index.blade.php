@@ -95,7 +95,7 @@
          tiap Kelas/Tanggal diganti. Teks cari tetap dibawa lewat hidden
          input "cari" yang sudah ada. --}}
     <div class="mb-4 flex flex-col gap-2">
-        <form method="GET" action="{{ route('dispensasi.index') }}" class="flex w-full flex-col gap-2 sm:flex-row sm:items-end">
+        <form method="GET" action="{{ route('dispensasi.index') }}" class="flex w-full items-end gap-2">
             <input type="hidden" name="tab" value="{{ $tab }}">
             @if(request('cari')) <input type="hidden" name="cari" value="{{ request('cari') }}"> @endif
             @if(request('kelas_id')) <input type="hidden" name="kelas_id" value="{{ request('kelas_id') }}"> @endif
@@ -110,13 +110,13 @@
                     $sisaFilterTanggal = request()->except(['dari', 'sampai']);
                 @endphp
                 <a href="{{ url()->current() . ($sisaFilterTanggal ? '?' . http_build_query($sisaFilterTanggal) : '') }}"
-                   class="flex h-10 w-full shrink-0 items-center justify-center gap-1.5 rounded-lg border border-surface-alt bg-card px-3 text-sm font-semibold text-muted hover:border-alpha hover:text-alpha sm:w-auto">
+                   class="flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-surface-alt bg-card px-3 text-sm font-semibold text-muted hover:border-alpha hover:text-alpha">
                     <x-icon name="close" :size="16" /> Reset
                 </a>
             @endif
         </form>
 
-        <div class="flex w-full flex-col gap-2 sm:flex-row">
+        <div class="flex w-full gap-2">
             <div class="min-w-0 flex-1">
                 {{-- Label ditambah manual (x-ui.search-bar nggak punya prop
                      label) -- gaya disamain persis kayak label "Kelas"/"Dari
