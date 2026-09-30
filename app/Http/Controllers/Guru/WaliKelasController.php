@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
-use App\Models\Absensi;
 use App\Models\Jurnal;
 use App\Models\Kelas;
+use App\Models\Siswa;
+use App\Support\RekapKehadiran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -43,20 +44,32 @@ class WaliKelasController extends Controller
         // dibatasi bulan berjalan -- konsisten sama Rekap Kehadiran Siswa (Waka).
         $dari = request()->filled('dari') ? Carbon::parse(request()->date('dari')) : null;
         $sampai = request()->filled('sampai') ? Carbon::parse(request()->date('sampai')) : null;
+        $tipe = request()->query('tipe', 'hari');
 
         $siswas = $kelas->siswas()->orderBy('no_absen')->get();
 
-        $rekap = Absensi::whereIn('siswa_id', $siswas->pluck('id'))
-            ->whereHas('jurnal', fn ($q) => $q
-                ->when($dari, fn ($q2) => $q2->whereDate('tanggal', '>=', $dari))
-                ->when($sampai, fn ($q2) => $q2->whereDate('tanggal', '<=', $sampai)))
-            ->get()
-            ->groupBy('siswa_id')
-            ->map(fn ($rows) => $rows->countBy('status'));
+        $dataRekap = RekapKehadiran::untukKelas($kelas, $siswas, $dari, $sampai);
+        $rekapHari = $dataRekap['rekapHari'];
+        $rekapMapel = $dataRekap['rekapMapel'];
+        $rekap = $tipe === 'mapel' ? $rekapMapel : $rekapHari;
 
         $adaKelasLain = auth()->user()->kelasWaliList()->count() > 1;
 
-        return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'adaKelasLain', 'dari', 'sampai'));
+        return view('guru.wali-kelas.rekap', compact('kelas', 'siswas', 'rekap', 'rekapHari', 'rekapMapel', 'adaKelasLain', 'dari', 'sampai', 'tipe'));
+    }
+
+    /** Fragment modal rincian kehadiran satu siswa (mapel & riwayat pertemuan). */
+    public function rekapSiswaFragment(Kelas $kelas, Siswa $siswa): View
+    {
+        abort_unless($kelas->wali_id === auth()->user()->guru?->id, 403, 'Anda bukan wali kelas ini.');
+        abort_unless($siswa->kelas_id === $kelas->id, 403, 'Siswa bukan anggota kelas ini.');
+
+        $dari = request()->filled('dari') ? Carbon::parse(request()->date('dari')) : null;
+        $sampai = request()->filled('sampai') ? Carbon::parse(request()->date('sampai')) : null;
+
+        $detail = RekapKehadiran::detailSiswa($siswa, $dari, $sampai);
+
+        return view('rekap._detail-siswa', $detail);
     }
 
     /**
