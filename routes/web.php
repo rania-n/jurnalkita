@@ -143,6 +143,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/guru/wali-kelas', [WaliKelasController::class, 'index'])->name('guru.wali-kelas.index');
         Route::get('/guru/wali-kelas/jurnal/{jurnal}/fragment', [WaliKelasController::class, 'jurnalFragment'])->name('guru.wali-kelas.jurnal.fragment');
+        Route::get('/guru/wali-kelas/{kelas}/siswa/{siswa}/fragment', [WaliKelasController::class, 'siswaFragment'])->name('guru.wali-kelas.siswa.fragment');
         Route::get('/guru/wali-kelas/{kelas}', [WaliKelasController::class, 'rekap'])->name('guru.wali-kelas.rekap');
         Route::get('/guru/wali-kelas/{kelas}/siswa/{siswa}/fragment', [WaliKelasController::class, 'rekapSiswaFragment'])->name('guru.wali-kelas.rekap.siswa.fragment');
         Route::get('/guru/wali-kelas/{kelas}/jurnal', [WaliKelasController::class, 'jurnal'])->name('guru.wali-kelas.jurnal');
