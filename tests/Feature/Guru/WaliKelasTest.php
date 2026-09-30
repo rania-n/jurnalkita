@@ -186,4 +186,67 @@ class WaliKelasTest extends TestCase
 
         $this->actingAs($waliB)->get(route('guru.wali-kelas.jurnal.fragment', $jurnal))->assertForbidden();
     }
+
+    public function test_wali_kelas_bisa_rekap_per_hari_dan_per_mapel(): void
+    {
+        $wali = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $wali->id, 'nama' => 'Wali Kelas']);
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guru->id]);
+        $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L']);
+
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'ruang' => 'R1', 'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Aljabar',
+        ]);
+        Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id, 'status' => 'hadir']);
+
+        $responseHari = $this->actingAs($wali)->get(route('guru.wali-kelas.rekap', ['kelas' => $kelas->id, 'tipe' => 'hari']));
+        $responseHari->assertOk()->assertSee('Per Hari')->assertSee('Per Mapel')->assertSee('Budi');
+
+        $responseMapel = $this->actingAs($wali)->get(route('guru.wali-kelas.rekap', ['kelas' => $kelas->id, 'tipe' => 'mapel']));
+        $responseMapel->assertOk()->assertSee('Budi');
+    }
+
+    public function test_wali_kelas_bisa_akses_fragmen_detail_rekap_siswa(): void
+    {
+        $wali = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $wali->id, 'nama' => 'Wali Kelas']);
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guru->id]);
+        $siswa = Siswa::create(['kelas_id' => $kelas->id, 'nis' => '001', 'nama' => 'Budi', 'jenis_kelamin' => 'L']);
+
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'ruang' => 'R1', 'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Aljabar',
+        ]);
+        Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id, 'status' => 'sakit', 'catatan' => 'Sakit demam']);
+
+        $response = $this->actingAs($wali)->get(route('guru.wali-kelas.rekap.siswa.fragment', [$kelas, $siswa]));
+        $response->assertOk()
+            ->assertSee('Budi')
+            ->assertSee('Matematika')
+            ->assertSee('Sakit demam');
+    }
+
+    public function test_wali_kelas_tidak_bisa_akses_fragmen_detail_siswa_kelas_lain(): void
+    {
+        $wali = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $wali->id, 'nama' => 'Wali Kelas']);
+        $kelasA = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL', 'wali_id' => $guru->id]);
+
+        $kelasB = Kelas::create(['nama' => 'XI RPL 1', 'tingkat' => 'XI', 'jurusan' => 'RPL']);
+        $siswaB = Siswa::create(['kelas_id' => $kelasB->id, 'nis' => '002', 'nama' => 'Siswa Kelas Lain', 'jenis_kelamin' => 'L']);
+
+        $this->actingAs($wali)->get(route('guru.wali-kelas.rekap.siswa.fragment', [$kelasA, $siswaB]))
+            ->assertForbidden();
+    }
 }

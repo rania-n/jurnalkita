@@ -264,4 +264,78 @@ class KelasTest extends TestCase
         // biar kelihatan kelas siapa tanpa buka menu lain.
         $this->actingAs($this->sekretaris)->get('/sekretaris')->assertOk()->assertSee('Pengurus X RPL 1');
     }
+
+    public function test_rekap_membedakan_per_hari_dan_per_mapel(): void
+    {
+        $guru = Guru::create(['nama' => 'Pak Joko']);
+        $mapelA = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $mapelB = Mapel::create(['kode' => 'IPA', 'nama' => 'Ilmu Pengetahuan Alam']);
+
+        $jadwalA = Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapelA->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jadwalB = Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapelB->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 3, 'jam_ke_selesai' => 4,
+        ]);
+
+        $jurnalA = Jurnal::create([
+            'jadwal_id' => $jadwalA->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Aljabar',
+        ]);
+        $jurnalB = Jurnal::create([
+            'jadwal_id' => $jadwalB->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 3, 'jam_ke_selesai' => 4, 'status_guru' => 'hadir', 'materi' => 'Fisika',
+        ]);
+
+        $siswa = Siswa::where('nama', 'Ketua Kelas')->firstOrFail();
+        // Pada hari yang sama, hadir di Mapel A, sakit di Mapel B
+        Absensi::create(['jurnal_id' => $jurnalA->id, 'siswa_id' => $siswa->id, 'status' => 'hadir']);
+        Absensi::create(['jurnal_id' => $jurnalB->id, 'siswa_id' => $siswa->id, 'status' => 'sakit']);
+
+        // Default 'tipe=hari': hari ini dihitung sakit (prioritas sakit > hadir)
+        $responseHari = $this->actingAs($this->sekretaris)->get('/sekretaris/rekap?tipe=hari');
+        $responseHari->assertOk()->assertSee('Per Hari')->assertSee('Per Mapel');
+
+        // 'tipe=mapel': memuat data rekap per jam mapel
+        $responseMapel = $this->actingAs($this->sekretaris)->get('/sekretaris/rekap?tipe=mapel');
+        $responseMapel->assertOk();
+    }
+
+    public function test_sekretaris_bisa_akses_fragmen_detail_rekap_siswa(): void
+    {
+        $guru = Guru::create(['nama' => 'Pak Joko']);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $this->kelasSaya->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+        $jurnal = Jurnal::create([
+            'jadwal_id' => $jadwal->id, 'guru_id' => $guru->id, 'tanggal' => today(),
+            'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2, 'status_guru' => 'hadir', 'materi' => 'Aljabar',
+        ]);
+
+        $siswa = Siswa::where('nama', 'Ketua Kelas')->firstOrFail();
+        Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id, 'status' => 'hadir', 'catatan' => 'Siswa aktif']);
+
+        $response = $this->actingAs($this->sekretaris)
+            ->get(route('sekretaris.kelas.rekap.siswa.fragment', $siswa));
+
+        $response->assertOk()
+            ->assertSee('Matematika')
+            ->assertSee('Pak Joko')
+            ->assertSee('Ketua Kelas')
+            ->assertSee('Siswa aktif');
+    }
+
+    public function test_sekretaris_tidak_bisa_akses_fragmen_detail_siswa_kelas_lain(): void
+    {
+        $kelasLain = Kelas::create(['nama' => 'XI RPL 2', 'tingkat' => 'XI', 'jurusan' => 'RPL']);
+        $siswaLain = Siswa::create(['kelas_id' => $kelasLain->id, 'nis' => '999', 'nama' => 'Siswa Luar', 'jenis_kelamin' => 'L']);
+
+        $this->actingAs($this->sekretaris)
+            ->get(route('sekretaris.kelas.rekap.siswa.fragment', $siswaLain))
+            ->assertForbidden();
+    }
 }
