@@ -239,8 +239,7 @@ class KelasTest extends TestCase
         $response->assertOk()->assertSee('Ketua Kelas');
         // Difilter dari awal bulan ini -- alpha 2 bulan lalu nggak ikut kehitung.
         $response->assertSee('text-sakit">1</span>', false);
-        // Badge hanya dirender kalau count > 0, jadi alpha=0 berarti badge alpha tidak ada di HTML.
-        $response->assertDontSee('text-alpha">1</span>', false);
+        $response->assertDontSee('text-alpha">', false);
     }
 
     public function test_bukan_pengurus_kelas_tidak_bisa_akses(): void

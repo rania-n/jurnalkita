@@ -83,7 +83,7 @@ class NavigasiGuruPiketTest extends TestCase
         $g = Guru::create(['user_id' => $guru->id, 'nama' => 'Guru Pengajar']);
         JadwalPiket::create(['guru_id' => $g->id, 'hari' => 'senin']);
 
-        $this->actingAs($guru)->get('/guru')->assertOk()->assertSee('Bertugas Piket s/d 15.35');
+        $this->actingAs($guru)->get('/guru')->assertOk()->assertSee('Bertugas Piket Hari Ini');
 
         JadwalPiket::query()->update(['hari' => 'rabu']); // pindah, bukan hari ini lagi
         $this->actingAs($guru)->get('/guru')->assertOk()->assertDontSee('Bertugas Piket');

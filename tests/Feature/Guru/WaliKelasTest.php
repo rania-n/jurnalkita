@@ -10,7 +10,6 @@ use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\User;
-use App\Support\RekapKehadiran;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,18 +31,13 @@ class WaliKelasTest extends TestCase
             Absensi::create(['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id, 'status' => $status]);
         }
 
-        // Per-hari: sakit > hadir pada hari yang sama, jadi sakit=1 (bukan hadir=0).
-        // View Fitra render kedua mode (hari+mapel) sekaligus di HTML — satu hidden —
-        // sehingga assertDontSee badge tidak valid lagi. Cukup pastikan logika
-        // RekapKehadiran benar dan halaman dapat dimuat.
-        $rekap = RekapKehadiran::untukKelas($kelas, $kelas->siswas()->get());
-        $this->assertEquals(1, $rekap['rekapHari'][$siswa->id]['sakit'] ?? 0);
-        $this->assertEquals(0, $rekap['rekapHari'][$siswa->id]['hadir'] ?? 0);
-
         $this->actingAs($wali)->get(route('guru.wali-kelas.rekap', ['kelas' => $kelas, 'tipe' => 'hari']))
             ->assertOk()
             ->assertSee('Per Hari')
-            ->assertSee('text-sakit">1</span>', false);
+            ->assertSee('text-sakit">1</span>', false)
+            ->assertViewHas('rekapHari', function ($rekapHari) use ($siswa) {
+                return ($rekapHari[$siswa->id]['sakit'] ?? 0) === 1 && ($rekapHari[$siswa->id]['hadir'] ?? 0) === 0;
+            });
     }
 
     public function test_wali_bisa_melihat_rincian_mapel_dan_catatan_siswa(): void

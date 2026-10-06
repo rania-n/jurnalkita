@@ -143,7 +143,7 @@ class JurnalTest extends TestCase
 
         $response->assertSee('id="blok-presensi"', false);
         $this->assertMatchesRegularExpression('/id="blok-presensi"\s+hidden/', $response->getContent());
-        $response->assertSee('Simpan Jurnal');
+        $response->assertSee('Periksa Jurnal');
     }
 
     public function test_simpan_jurnal_tidak_hadir_tidak_memerlukan_presensi_manual(): void
@@ -461,7 +461,7 @@ class JurnalTest extends TestCase
         PengaturanJurnal::ambil()->update(['mode' => 'bebas_selamanya']);
 
         $this->actingAs($this->user)->get('/guru/jurnal/tambah?tanggal='.today()->subDays(5)->toDateString())
-            ->assertOk()->assertSee('Bebas Isi Jurnal (Tanggal Pilihan Sendiri)');
+            ->assertOk()->assertSee('Pilih Tanggal Jurnal');
     }
 
     public function test_form_isi_jurnal_kemarin_render_pas_mode_bebas_kemarin(): void

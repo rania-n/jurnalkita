@@ -11,6 +11,7 @@ use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class RekapSiswaTest extends TestCase
@@ -95,7 +96,7 @@ class RekapSiswaTest extends TestCase
                 'jenis_kelamin' => 'L', 'status' => 'aktif', 'created_at' => now(), 'updated_at' => now(),
             ];
         }
-        \Illuminate\Support\Facades\DB::table('siswas')->insert($baris);
+        DB::table('siswas')->insert($baris);
 
         $waka = User::factory()->role('waka')->create();
 

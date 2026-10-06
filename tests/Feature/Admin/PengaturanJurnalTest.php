@@ -32,7 +32,10 @@ class PengaturanJurnalTest extends TestCase
 
     public function test_admin_bisa_ubah_mode(): void
     {
-        $this->actingAs($this->admin)->post('/admin/pengaturan-jurnal', ['mode' => 'bebas_selamanya'])
+        $this->actingAs($this->admin)->post('/admin/pengaturan-jurnal', [
+            'mode' => 'bebas_selamanya',
+            'tampilkan_di_login' => true,
+        ])
             ->assertRedirect();
 
         $this->assertSame('bebas_selamanya', PengaturanJurnal::mode());

@@ -17,7 +17,7 @@
     // slot ini, jadi otomatis geser kiri & nggak ada yang numpuk.
     $itemFabRaw = $items->first(fn ($item) => $item['fab'] ?? false);
     $itemsMenu = $itemFabRaw ? $items->reject(fn ($item) => $item['fab'] ?? false)->values() : $items;
-    $itemFab = $itemFabRaw;
+    $itemFab = $itemFabRaw && !request()->routeIs($itemFabRaw['route']) ? $itemFabRaw : null;
 @endphp
 
 @if ($items->isNotEmpty())
