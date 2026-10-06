@@ -74,7 +74,7 @@ class NotifikasiTest extends TestCase
 
         $d = Dispensasi::create([
             'siswa_id' => $siswa->id, 'diajukan_oleh_id' => $piket->id, 'piket_id' => $piket->id,
-            'tanggal' => today(), 'alasan' => 'Lomba', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 
@@ -99,7 +99,7 @@ class NotifikasiTest extends TestCase
         Notification::fake();
 
         $this->actingAs($piket)->post('/dispensasi', [
-            'siswa_id' => $siswa->id, 'tanggal' => today()->toDateString(), 'alasan' => 'Lomba LKS',
+            'siswa_id' => $siswa->id, 'tanggal' => today()->toDateString(), 'jenis' => 'lainnya', 'alasan' => 'Lomba LKS',
         ])->assertRedirect();
 
         Notification::assertSentTo($waka, DispensasiBaru::class);
@@ -128,7 +128,7 @@ class NotifikasiTest extends TestCase
         $d = Dispensasi::create([
             'siswa_id' => $siswa->id, 'diajukan_oleh_id' => $piket->id, 'piket_id' => $piket->id,
             'tanggal' => today(), 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'alasan' => 'Lomba', 'status_piket' => 'approved',
+            'jenis' => 'lainnya', 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 

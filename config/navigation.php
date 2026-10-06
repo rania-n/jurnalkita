@@ -147,6 +147,11 @@ return [
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
+    'satpam' => [
+        ['label' => 'Beranda', 'icon' => 'home', 'route' => 'satpam.dashboard'],
+        ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
+    ],
+
     // fallback
     'default' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'dashboard'],

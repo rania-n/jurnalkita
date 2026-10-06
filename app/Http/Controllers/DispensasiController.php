@@ -227,8 +227,13 @@ class DispensasiController extends Controller
             'jam_ke_mulai' => ['nullable', 'required_with:jam_ke_selesai', 'integer', 'min:1', 'max:15'],
             'jam_ke_selesai' => ['nullable', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
             'alasan' => ['required', 'string'],
+            'jenis' => ['required', 'string'],
             'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
+
+        if (in_array($data['jenis'], ['sakit', 'izin_keluar', 'izin_terlambat']) && ! $request->hasFile('surat')) {
+            return back()->withInput()->withErrors(['surat' => 'Bukti surat wajib diunggah untuk jenis dispensasi ini.']);
+        }
 
         $suratPath = $request->file('surat')?->store('dispensasi-surat', 'public');
         $dataPengajuan = collect($data)->except(['siswa_ids', 'surat'])->all();
@@ -243,6 +248,7 @@ class DispensasiController extends Controller
                     'surat_path' => $suratPath,
                     'status_piket' => 'approved',
                     'piket_id' => auth()->id(),
+                    'status_waka' => $dataPengajuan['jenis'] === 'lomba' ? 'approved' : 'pending',
                 ]);
                 $dispensasi->segarkanStatusAkhir();
                 AuditLog::catat('Ajukan Dispensasi', "Ajukan dispensasi siswa #{$dispensasi->siswa_id}", $dispensasi);

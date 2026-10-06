@@ -15,6 +15,12 @@
                 <p class="mt-2 text-muted">{{ $dispensasi->labelJam() }} · {{ $dispensasi->labelTanggal() }}</p>
                 <p class="mt-1 text-muted">{{ $dispensasi->alasan }}</p>
             </div>
+            @if(auth()->check() && auth()->user()->role === 'satpam' && $dispensasi->jenis === 'izin_keluar' && !$dispensasi->waktu_kembali)
+                <form method="POST" action="{{ route('satpam.konfirmasi-kembali', $dispensasi) }}" class="w-full mt-4">
+                    @csrf
+                    <x-ui.button type="submit" block icon="how_to_reg">Konfirmasi Kembali ke Sekolah</x-ui.button>
+                </form>
+            @endif
         @else
             <span class="flex h-20 w-20 items-center justify-center rounded-full bg-alpha-soft text-alpha">
                 <x-icon name="cancel" :size="48" fill />

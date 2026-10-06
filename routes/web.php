@@ -196,6 +196,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     /* =============================== WAKA =============================== */
+    Route::middleware('role:satpam')->group(function () {
+        Route::get('/satpam', [SatpamController::class, 'dashboard'])->name('satpam.dashboard');
+        Route::post('/satpam/konfirmasi/{dispensasi}', [SatpamController::class, 'konfirmasiKembali'])->name('satpam.konfirmasi-kembali');
+    });
+
     Route::middleware('role:waka')->group(function () {
         Route::view('/waka', 'dashboards.waka')->name('waka.dashboard');
     });

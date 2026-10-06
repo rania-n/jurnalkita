@@ -189,7 +189,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function roleLabel(): string
     {
         return match ($this->role) {
+            'satpam' => 'satpam.dashboard',
             'admin' => 'Admin',
+            'satpam' => 'Satpam',
             'guru' => $this->piketHariIni() ? 'Guru Piket' : 'Guru',
             'siswa' => $this->kelasSekretaris() ? 'Pengurus '.$this->kelasSekretaris()->nama : 'Pengurus Kelas',
             'waka' => 'Waka Kesiswaan',
@@ -201,6 +203,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function homeRoute(): string
     {
         return match ($this->role) {
+            'satpam' => 'satpam.dashboard',
             'admin' => 'admin.dashboard',
             'waka' => 'waka.dashboard',
             'siswa' => 'sekretaris.dashboard',
