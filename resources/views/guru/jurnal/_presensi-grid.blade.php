@@ -80,6 +80,12 @@
                         'jurnal_lain' => 'Dari jurnal sebelumnya hari ini',
                         default => null,
                     };
+                    // Surat/bukti dari catatan piket -- ditampilkan sebagai link
+                    // kecil di kartu siswa biar guru bisa langsung lihat tanpa
+                    // keluar halaman. Hanya dari piket (bukan jurnal lain/dispensasi).
+                    $suratPiketPath = ($sumberAwal === 'piket' && ! empty($isiAwal['surat_path']))
+                        ? $isiAwal['surat_path']
+                        : null;
                     $catatanId = 'catatan-'.$s->id;
                 @endphp
                 <div
@@ -97,10 +103,17 @@
                                      dipukul rata satu warna -- biar Sakit/Izin/
                                      Alpha/Dispensasi tetap kebeda kayak di tombol
                                      pilihan di bawahnya. --}}
-                                <span class="flex items-center gap-1 text-[11px] font-semibold text-{{ $tones[$statusAwal] }}">
+                                <span class="flex items-center gap-1 text-[11px] font-semibold text-{{ $tones[$statusAwal] ?? 'muted' }}">
                                     <x-icon name="verified" :size="12" />
                                     {{ $labelSumber }}
                                 </span>
+                            @endif
+                            @if ($suratPiketPath)
+                                <a href="{{ Storage::url($suratPiketPath) }}" target="_blank" rel="noopener"
+                                   class="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-navy hover:underline">
+                                    <x-icon name="description" :size="12" />
+                                    Lihat surat
+                                </a>
                             @endif
                         </div>
                     </div>

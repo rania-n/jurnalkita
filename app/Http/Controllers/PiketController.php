@@ -89,27 +89,36 @@ class PiketController extends Controller
 
         $data = $request->validate([
             'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            // tanggal_selesai hanya relevan untuk sakit (surat dokter multi-hari).
+            // Izin biasa dan terlambat hanya 1 hari.
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal'],
             'siswa_id' => ['required', 'exists:siswas,id'],
-            'status' => ['required', 'in:sakit,izin,izin_keluar,izin_terlambat'],
+            'status' => ['required', 'in:sakit,izin,izin_terlambat'],
+            // Terlambat wajib isi JP mulai masuk.
+            'jam_masuk' => ['nullable', 'required_if:status,izin_terlambat', 'integer', 'min:1', 'max:15'],
             'catatan' => ['nullable', 'string', 'max:500'],
             'surat' => [$isUpdate ? 'nullable' : 'required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
 
         $siswa = Siswa::where('status', 'aktif')->findOrFail($data['siswa_id']);
         $suratPath = $request->file('surat')?->store('presensi-piket', 'public');
+        $jamMasuk = isset($data['jam_masuk']) ? (int) $data['jam_masuk'] : null;
 
+        // Terlambat hanya berlaku 1 hari; sakit bisa multi-hari jika ada surat dokter.
         $tanggalMulai = Carbon::parse($data['tanggal']);
-        $tanggalSelesai = ! empty($data['tanggal_selesai']) ? Carbon::parse($data['tanggal_selesai']) : $tanggalMulai;
+        $tanggalSelesai = ($data['status'] === 'sakit' && ! empty($data['tanggal_selesai']))
+            ? Carbon::parse($data['tanggal_selesai'])
+            : $tanggalMulai;
         $rentangTanggal = CarbonPeriod::create($tanggalMulai, $tanggalSelesai);
 
-        DB::transaction(function () use ($data, $rentangTanggal, $siswa, $suratPath) {
+        DB::transaction(function () use ($data, $rentangTanggal, $siswa, $suratPath, $jamMasuk) {
             foreach ($rentangTanggal as $tgl) {
                 $tglString = $tgl->toDateString();
                 $presensi = PresensiPiket::updateOrCreate(
                     ['siswa_id' => $siswa->id, 'tanggal' => $tglString],
                     [
                         'status' => $data['status'],
+                        'jam_masuk' => $data['status'] === 'izin_terlambat' ? $jamMasuk : null,
                         'catatan' => $data['catatan'] ?? null,
                         'surat_path' => $suratPath ?? PresensiPiket::where('siswa_id', $siswa->id)
                             ->whereDate('tanggal', $tglString)->value('surat_path'),
@@ -119,19 +128,32 @@ class PiketController extends Controller
 
                 $jurnalsHariIni = Jurnal::whereDate('tanggal', $tglString)
                     ->whereHas('jadwal', fn ($query) => $query->where('kelas_id', $siswa->kelas_id))
-                    ->with('absensis')
+                    ->with('absensis', 'jadwal')
                     ->get();
 
                 foreach ($jurnalsHariIni as $jurnal) {
+                    // Untuk terlambat: JP sebelum jam_masuk = izin_terlambat,
+                    // JP mulai jam_masuk ke atas = hadir.
+                    if ($data['status'] === 'izin_terlambat' && $jamMasuk !== null) {
+                        $statusAbsensi = $jurnal->jam_ke_selesai < $jamMasuk
+                            ? 'izin_terlambat'
+                            : 'hadir';
+                    } else {
+                        $statusAbsensi = $presensi->status;
+                    }
+
                     Absensi::updateOrCreate(
                         ['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id],
-                        ['status' => $presensi->status, 'catatan' => $presensi->catatan]
+                        ['status' => $statusAbsensi, 'catatan' => $presensi->catatan]
                     );
                 }
             }
         });
 
-        AuditLog::catat('Catat Presensi Siswa oleh Piket', "{$siswa->nama} dicatat {$data['status']} pada rentang {$data['tanggal']} sampai {$data['tanggal_selesai']}");
+        $keterangan = $data['status'] === 'izin_terlambat' && $jamMasuk
+            ? "terlambat (masuk mulai JP {$jamMasuk})"
+            : $data['status'];
+        AuditLog::catat('Catat Presensi Siswa oleh Piket', "{$siswa->nama} dicatat {$keterangan} pada {$data['tanggal']}");
 
         return redirect()->route('piket.presensi-siswa.index', [
             'tanggal' => $data['tanggal'],
