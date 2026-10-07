@@ -1,4 +1,5 @@
 <?php
+
 $file = 'app/Http/Controllers/Guru/JurnalController.php';
 $content = file_get_contents($file);
 

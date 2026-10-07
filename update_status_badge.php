@@ -1,4 +1,5 @@
 <?php
+
 $file = 'resources/views/components/ui/status-badge.blade.php';
 $content = file_get_contents($file);
 

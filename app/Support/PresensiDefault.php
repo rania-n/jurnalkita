@@ -72,9 +72,9 @@ class PresensiDefault
                 // JP sebelum jam_masuk = izin_terlambat, JP mulai jam_masuk = hadir.
                 if ($piket->status === 'izin_terlambat' && $piket->jam_masuk && $jamMulai !== null && $jamSelesai !== null) {
                     $statusEfektif = $jamSelesai < $piket->jam_masuk ? 'izin_terlambat' : 'hadir';
-                    
+
                     $catatanTambahan = "Datang terlambat (masuk JP ke-{$piket->jam_masuk})";
-                    $catatanBaru = $piket->catatan ? $catatanTambahan . ' — ' . $piket->catatan : $catatanTambahan;
+                    $catatanBaru = $piket->catatan ? $catatanTambahan.' — '.$piket->catatan : $catatanTambahan;
 
                     return [$s->id => ['status' => $statusEfektif, 'catatan' => $catatanBaru, 'sumber' => 'piket_terlambat', 'surat_path' => $piket->surat_path]];
                 }

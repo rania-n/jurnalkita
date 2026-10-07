@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Guru;
 use App\Models\HariKhusus;
 use App\Models\Jadwal;
+use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\Mapel;
@@ -473,9 +474,9 @@ class JurnalController extends Controller
         );
         $fotoPath = $request->file('foto_bukti')?->store('jurnal-bukti', 'public');
 
-        $kategori = \App\Support\Waktu::kategori($tanggal);
-        $jamSelesaiWaktu = \App\Models\JamPelajaran::where('kategori', $kategori)->where('jam_ke', $data['jam_ke_selesai'])->value('selesai');
-        
+        $kategori = Waktu::kategori($tanggal);
+        $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $data['jam_ke_selesai'])->value('selesai');
+
         $isTerlambat = false;
         if (now()->format('Y-m-d') > $tanggal->toDateString()) {
             $isTerlambat = true;
@@ -606,9 +607,9 @@ class JurnalController extends Controller
             return $jadwals->map(function ($jadwal) use ($data, $guru, $tanggal, $alasan, $suratPath) {
                 $tugasKhusus = trim($data['tugas_khusus'][$jadwal->id] ?? '');
 
-                $kategori = \App\Support\Waktu::kategori(\Illuminate\Support\Carbon::parse($tanggal));
-                $jamSelesaiWaktu = \App\Models\JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
-                
+                $kategori = Waktu::kategori(Carbon::parse($tanggal));
+                $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
+
                 $isTerlambat = false;
                 if (now()->format('Y-m-d') > $tanggal) {
                     $isTerlambat = true;

@@ -1,4 +1,5 @@
 <?php
+
 $file = 'resources/views/guru/jurnal/_presensi-grid.blade.php';
 $content = file_get_contents($file);
 

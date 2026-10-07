@@ -180,7 +180,6 @@ class JamPelajaranController extends Controller
             $mulai = $waktu->copy();
             $selesai = $mulai->copy()->addMinutes($data['durasi_jp']);
 
-
             $jedaSebelum = $jedaSetelah->get($jamKe - 1);
             $labelJeda = trim($jedaSebelum['label'] ?? '');
             $baris[] = [
