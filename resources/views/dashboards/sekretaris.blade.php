@@ -103,9 +103,14 @@
                     >
                         <x-slot:badge>
                             @if ($jr)
-                                <x-ui.status-badge :status="$toneStatusGuru[$jr->status_guru] ?? 'menunggu'">
-                                    {{ $labelStatusGuru[$jr->status_guru] ?? $jr->status_guru }}
-                                </x-ui.status-badge>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <x-ui.status-badge :status="$toneStatusGuru[$jr->status_guru] ?? 'menunggu'">
+                                        {{ $labelStatusGuru[$jr->status_guru] ?? $jr->status_guru }}
+                                    </x-ui.status-badge>
+                                    @if ($jr->terlambat)
+                                        <x-ui.status-badge status="alpha">Terlambat</x-ui.status-badge>
+                                    @endif
+                                </div>
                             @else
                                 <x-ui.status-badge status="menunggu">Belum Diisi</x-ui.status-badge>
                             @endif

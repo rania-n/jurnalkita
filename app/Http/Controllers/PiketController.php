@@ -268,8 +268,8 @@ class PiketController extends Controller
 
         $totalHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'hadir') && ! str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
         $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
-        $totalBelumDiisi = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'belum'))->count();
-        $totalTerlambat = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'terlambat'))->count();
+        $totalBelumDiisi = $baris->filter(fn ($b) => $b['status'] === 'belum_diisi')->count();
+        $totalTerlambat = $baris->filter(fn ($b) => $b['status'] === 'terlambat')->count();
 
         $rows = $baris
             ->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))
@@ -491,6 +491,10 @@ class PiketController extends Controller
                 $status = $jurnal->status_guru ?? 'belum_diisi';
                 $statusLabel = $jurnal ? (self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru) : 'Belum Diisi';
 
+                if ($jurnal && $jurnal->terlambat) {
+                    $statusLabel .= ' (Terlambat)';
+                }
+
                 if (! $jurnal) {
                     $kategori = Waktu::kategori($tanggal);
                     $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
@@ -502,7 +506,7 @@ class PiketController extends Controller
                     }
                     if ($isTerlambat) {
                         $status = 'terlambat';
-                        $statusLabel = 'Terlambat';
+                        $statusLabel = 'Belum Diisi (Terlambat)';
                     }
                 }
 
