@@ -616,19 +616,16 @@
                     function syncStatusGuru() {
                         const val = document.querySelector('input[name="status_guru"]:checked')?.value;
                         const hadir = val === 'hadir';
-                        blokHadir.hidden = !hadir;
-                        blokTidakHadir.hidden = hadir;
-
-                        // Disable SEMUA field (bukan cuma yang "required") di blok
-                        // yang lagi disembunyiin -- dua alasan: (1) atribut
-                        // "required" bawaan HTML tetap ngecek elemen yang
-                        // disembunyiin lewat ancestor "hidden", nggak otomatis
-                        // dikecualiin; (2) dua-duanya sama-sama punya field
-                        // name="foto_bukti" (beda id, kamera vs upload biasa) --
-                        // kalau yang disembunyiin nggak di-disable, dua-duanya
-                        // ikut kesubmit bareng & yang kepakai jadi nggak pasti.
-                        blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
-                        blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
+                        
+                        if (blokHadir) {
+                            blokHadir.hidden = !hadir;
+                            blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
+                        }
+                        
+                        if (blokTidakHadir) {
+                            blokTidakHadir.hidden = hadir;
+                            blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
+                        }
                         if (blokTugasTidakHadir) {
                             blokTugasTidakHadir.hidden = hadir;
                             blokTugasTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
