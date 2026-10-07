@@ -102,9 +102,15 @@ class Jurnal extends Model
                 default => ['status' => 'pending', 'label' => 'Belum diperiksa'],
             };
 
-        return $this->verifikasiAbsen()
-            ? [$status, ['status' => 'tugas', 'label' => 'Tugas']]
-            : [$status];
+        $badges = [$status];
+        if ($this->verifikasiAbsen()) {
+            $badges[] = ['status' => 'tugas', 'label' => 'Tugas'];
+        }
+        if ($this->terlambat) {
+            $badges[] = ['status' => 'alpha', 'label' => 'Terlambat'];
+        }
+
+        return $badges;
     }
 
     /**

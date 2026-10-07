@@ -473,13 +473,24 @@ class JurnalController extends Controller
         );
         $fotoPath = $request->file('foto_bukti')?->store('jurnal-bukti', 'public');
 
-        $jurnal = DB::transaction(function () use ($data, $guru, $presensiSubmit, $presensiFallback, $fotoPath, $tanggal, $siswasAktif) {
+        $kategori = \App\Support\Waktu::kategori($tanggal);
+        $jamSelesaiWaktu = \App\Models\JamPelajaran::where('kategori', $kategori)->where('jam_ke', $data['jam_ke_selesai'])->value('selesai');
+        
+        $isTerlambat = false;
+        if (now()->format('Y-m-d') > $tanggal->toDateString()) {
+            $isTerlambat = true;
+        } elseif ($jamSelesaiWaktu && now()->format('Y-m-d') === $tanggal->toDateString()) {
+            $isTerlambat = now()->format('H:i') > $jamSelesaiWaktu->format('H:i');
+        }
+
+        $jurnal = DB::transaction(function () use ($data, $guru, $presensiSubmit, $presensiFallback, $fotoPath, $tanggal, $siswasAktif, $isTerlambat) {
             $jurnal = Jurnal::create([
                 ...collect($data)->except(['presensi', 'foto_bukti', 'metode_pilihan', 'metode_custom'])->all(),
                 'guru_id' => $guru->id,
                 'tanggal' => $tanggal->toDateString(),
                 'foto_bukti' => $fotoPath,
                 'status_verifikasi' => $data['status_guru'] === 'tidak_hadir' ? 'terverifikasi' : 'pending',
+                'terlambat' => $isTerlambat,
             ]);
 
             // Presensi ikut isi jurnal sendiri, bukan langkah terpisah lagi. Kalau
@@ -595,6 +606,16 @@ class JurnalController extends Controller
             return $jadwals->map(function ($jadwal) use ($data, $guru, $tanggal, $alasan, $suratPath) {
                 $tugasKhusus = trim($data['tugas_khusus'][$jadwal->id] ?? '');
 
+                $kategori = \App\Support\Waktu::kategori(\Illuminate\Support\Carbon::parse($tanggal));
+                $jamSelesaiWaktu = \App\Models\JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
+                
+                $isTerlambat = false;
+                if (now()->format('Y-m-d') > $tanggal) {
+                    $isTerlambat = true;
+                } elseif ($jamSelesaiWaktu && now()->format('Y-m-d') === $tanggal) {
+                    $isTerlambat = now()->format('H:i') > $jamSelesaiWaktu->format('H:i');
+                }
+
                 $jurnal = Jurnal::create([
                     'jadwal_id' => $jadwal->id,
                     'guru_id' => $guru->id,
@@ -606,6 +627,7 @@ class JurnalController extends Controller
                     'tugas_tambahan' => $tugasKhusus !== '' ? $tugasKhusus : $data['tugas_tambahan'],
                     'alasan' => $alasan,
                     'foto_bukti' => $suratPath,
+                    'terlambat' => $isTerlambat,
                 ]);
 
                 // Guru nggak di kelas manapun buat nentuin presensi manual --

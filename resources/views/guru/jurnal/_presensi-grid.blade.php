@@ -77,13 +77,14 @@
                     $labelSumber = match ($sumberAwal) {
                         'dispensasi' => 'Dispensasi disetujui untuk jam ini',
                         'piket' => 'Dicatat guru piket hari ini',
+                        'piket_terlambat' => 'Terlambat (dicatat guru piket)',
                         'jurnal_lain' => 'Dari jurnal sebelumnya hari ini',
                         default => null,
                     };
                     // Surat/bukti dari catatan piket -- ditampilkan sebagai link
                     // kecil di kartu siswa biar guru bisa langsung lihat tanpa
                     // keluar halaman. Hanya dari piket (bukan jurnal lain/dispensasi).
-                    $suratPiketPath = ($sumberAwal === 'piket' && ! empty($isiAwal['surat_path']))
+                    $suratPiketPath = (in_array($sumberAwal, ['piket', 'piket_terlambat']) && ! empty($isiAwal['surat_path']))
                         ? $isiAwal['surat_path']
                         : null;
                     $catatanId = 'catatan-'.$s->id;
