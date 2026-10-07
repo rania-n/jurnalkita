@@ -8,8 +8,12 @@
       $presensiAwal : array [siswa_id => ['status' => ..., 'catatan' => ...]]
 --}}
 @php
-    $statuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'izin_keluar' => 'Izin Keluar', 'izin_terlambat' => 'Terlambat', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
-    $tones = ['hadir' => 'hadir', 'sakit' => 'sakit', 'izin' => 'izin', 'izin_keluar' => 'alpha', 'izin_terlambat' => 'alpha', 'alpha' => 'alpha', 'dispensasi' => 'dispen'];
+    // Default opsi untuk guru (ibu2/bapak2 biar nggak pusing kebanyakan tombol).
+    // Dispensasi dan Izin Keluar secara logis sama-sama 'izin resmi', jadi disembunyikan
+    // dari daftar bawaan. Tapi akan dimunculkan otomatis per-siswa kalau memang
+    // sistem/waka sudah memberikan status tersebut ke siswa yang bersangkutan.
+    $defaultStatuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'izin_terlambat' => 'Terlambat', 'alpha' => 'Alpha'];
+    $defaultTones = ['hadir' => 'hadir', 'sakit' => 'sakit', 'izin' => 'izin', 'izin_terlambat' => 'alpha', 'alpha' => 'alpha'];
 @endphp
 
 <div class="mt-6">
@@ -67,6 +71,18 @@
                     $isiAwal = $presensiAwal[$s->id] ?? ['status' => 'hadir', 'catatan' => null, 'sumber' => null];
                     $statusAwal = old("presensi.{$s->id}.status", $isiAwal['status']);
                     $catatanAwal = old("presensi.{$s->id}.catatan", $isiAwal['catatan']);
+                    
+                    $rowStatuses = $defaultStatuses;
+                    $rowTones = $defaultTones;
+                    
+                    if ($statusAwal === 'izin_keluar') {
+                        $rowStatuses['izin_keluar'] = 'Izin Keluar';
+                        $rowTones['izin_keluar'] = 'warning';
+                    } elseif ($statusAwal === 'dispensasi') {
+                        $rowStatuses['dispensasi'] = 'Dispensasi';
+                        $rowTones['dispensasi'] = 'info';
+                    }
+
                     // Badge "kenapa status ini udah keisi" cuma ditampilkan pas
                     // render AWAL (belum ada input guru sendiri lewat old()) --
                     // sumbernya diambil dari PresensiDefault (null | 'dispensasi' |
@@ -104,7 +120,7 @@
                                      dipukul rata satu warna -- biar Sakit/Izin/
                                      Alpha/Dispensasi tetap kebeda kayak di tombol
                                      pilihan di bawahnya. --}}
-                                <span class="flex items-center gap-1 text-[11px] font-semibold text-{{ $tones[$statusAwal] ?? 'muted' }}">
+                                <span class="flex items-center gap-1 text-[11px] font-semibold text-{{ $rowTones[$statusAwal] ?? 'muted' }}">
                                     <x-icon name="verified" :size="12" />
                                     {{ $labelSumber }}
                                 </span>
@@ -121,8 +137,8 @@
 
                     <x-ui.choice
                         :name="'presensi[' . $s->id . '][status]'"
-                        :options="$statuses"
-                        :tones="$tones"
+                        :options="$rowStatuses"
+                        :tones="$rowTones"
                         :value="$statusAwal"
                         size="sm"
                     />
