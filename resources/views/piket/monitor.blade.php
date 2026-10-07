@@ -3,6 +3,7 @@
         'hadir' => 'bg-hadir-soft text-hadir',
         'tidak_hadir' => 'bg-alpha-soft text-alpha',
         'belum_diisi' => 'bg-sakit-soft text-sakit',
+        'terlambat' => 'bg-alpha-soft text-alpha',
     ];
     $rentangBeda = ! $dari->isSameDay($sampai);
     $hariLabel = config('akademik.hari')[['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$dari->dayOfWeek - 1] ?? ''] ?? null;
@@ -46,10 +47,21 @@
          diganti (reload halaman), bukan balik ke "Semua" terus. Jumlah
          disembunyikan kalau 0 (nggak nambah info, cuma bikin rame). --}}
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
-        @foreach (['' => 'Semua', 'hadir' => 'Sudah Diisi', 'tidak_hadir' => 'Tidak Hadir', 'belum_diisi' => 'Belum Diisi'] as $key => $label)
-            @php $jumlah = $key === '' ? $rekapTotal->sum() : ($rekapTotal[$key] ?? 0); @endphp
+        @foreach (['' => 'Semua', 'sudah_diisi' => 'Sudah Diisi', 'belum_diisi' => 'Belum Diisi', 'terlambat' => 'Terlambat'] as $key => $label)
+            @php 
+                $jumlah = 0;
+                if ($key === '') {
+                    $jumlah = $rekapTotal->sum();
+                } elseif ($key === 'sudah_diisi') {
+                    $jumlah = ($rekapTotal['hadir'] ?? 0) + ($rekapTotal['tidak_hadir'] ?? 0);
+                } else {
+                    $jumlah = $rekapTotal[$key] ?? 0;
+                }
+                
+                $isActive = $statusAktif === $key || ($key === 'sudah_diisi' && in_array($statusAktif, ['hadir', 'tidak_hadir']));
+            @endphp
             <a href="{{ route('piket.monitor.index', array_merge(request()->except('status', 'page'), $key === '' ? [] : ['status' => $key])) }}"
-               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusAktif === $key, 'text-muted-2 hover:text-ink' => $statusAktif !== $key])>
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $isActive, 'text-muted-2 hover:text-ink' => !$isActive])>
                 {{ $label }}
                 @if ($jumlah > 0)
                     <span class="opacity-70">({{ $jumlah }})</span>
@@ -57,6 +69,28 @@
             </a>
         @endforeach
     </div>
+
+    @if (in_array($statusAktif, ['sudah_diisi', 'hadir', 'tidak_hadir']))
+        <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+            @foreach (['sudah_diisi' => 'Semua (Sudah Diisi)', 'hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'] as $subKey => $subLabel)
+                @php 
+                    $subJumlah = 0;
+                    if ($subKey === 'sudah_diisi') {
+                        $subJumlah = ($rekapTotal['hadir'] ?? 0) + ($rekapTotal['tidak_hadir'] ?? 0);
+                    } else {
+                        $subJumlah = $rekapTotal[$subKey] ?? 0;
+                    }
+                @endphp
+                <a href="{{ route('piket.monitor.index', array_merge(request()->except('status', 'page'), ['status' => $subKey])) }}"
+                   @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusAktif === $subKey, 'text-muted-2 hover:text-ink' => $statusAktif !== $subKey])>
+                    {{ $subLabel }}
+                    @if ($subJumlah > 0)
+                        <span class="opacity-70">({{ $subJumlah }})</span>
+                    @endif
+                </a>
+            @endforeach
+        </div>
+    @endif
 
     {{-- Bar pilih: kelompokkan per kelas atau per guru --}}
     <div class="mb-4 flex gap-1 rounded-lg border border-surface-alt bg-card p-1">

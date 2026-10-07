@@ -6,6 +6,7 @@ use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\HariKhusus;
 use App\Models\Jadwal;
+use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\PengaturanJurnal;
@@ -200,9 +201,17 @@ class PiketController extends Controller
         // Status filter sekarang lewat query string (?status=...), BUKAN
         // cuma JS di klien lagi -- biar nggak reset balik ke "Semua" tiap
         // ganti tanggal (reload halaman). Lihat statusAktif di view.
-        $statusAktif = in_array($request->query('status'), ['hadir', 'tidak_hadir', 'belum_diisi'], true)
+        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'belum_diisi', 'terlambat'], true)
             ? $request->query('status') : '';
-        $barisTampil = $statusAktif ? $baris->where('status', $statusAktif)->values() : $baris;
+
+        $barisTampil = $baris;
+        if ($statusAktif) {
+            if ($statusAktif === 'sudah_diisi') {
+                $barisTampil = $baris->whereIn('status', ['hadir', 'tidak_hadir'])->values();
+            } else {
+                $barisTampil = $baris->where('status', $statusAktif)->values();
+            }
+        }
 
         $grup = $barisTampil
             ->groupBy(fn ($b) => $mode === 'guru' ? $b['jadwal']->guru_id : $b['jadwal']->kelas_id)
@@ -260,6 +269,7 @@ class PiketController extends Controller
         $totalHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'hadir') && ! str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
         $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
         $totalBelumDiisi = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'belum'))->count();
+        $totalTerlambat = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'terlambat'))->count();
 
         $rows = $baris
             ->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))
@@ -283,6 +293,7 @@ class PiketController extends Controller
                 'baris' => $rows,
                 'totalHadir' => $totalHadir,
                 'totalTidakHadir' => $totalTidakHadir,
+                'totalTerlambat' => $totalTerlambat,
                 'totalBelumDiisi' => $totalBelumDiisi,
             ],
         ])->setPaper('a4', 'portrait');
@@ -477,12 +488,30 @@ class PiketController extends Controller
             ->map(function (Jadwal $jadwal) use ($jurnals, $tanggal) {
                 $jurnal = $jurnals->get($jadwal->id);
 
+                $status = $jurnal->status_guru ?? 'belum_diisi';
+                $statusLabel = $jurnal ? (self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru) : 'Belum Diisi';
+
+                if (! $jurnal) {
+                    $kategori = Waktu::kategori($tanggal);
+                    $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
+                    $isTerlambat = false;
+                    if (now()->format('Y-m-d') > $tanggal->toDateString()) {
+                        $isTerlambat = true;
+                    } elseif ($jamSelesaiWaktu && now()->format('Y-m-d') === $tanggal->toDateString()) {
+                        $isTerlambat = now()->format('H:i') > $jamSelesaiWaktu->format('H:i');
+                    }
+                    if ($isTerlambat) {
+                        $status = 'terlambat';
+                        $statusLabel = 'Terlambat';
+                    }
+                }
+
                 return [
                     'jadwal' => $jadwal,
                     'jurnal' => $jurnal,
                     'tanggal' => $tanggal->toDateString(),
-                    'status' => $jurnal->status_guru ?? 'belum_diisi',
-                    'statusLabel' => $jurnal ? (self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru) : 'Belum Diisi',
+                    'status' => $status,
+                    'statusLabel' => $statusLabel,
                 ];
             })
             ->values();
