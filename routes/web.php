@@ -122,6 +122,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/mapel', [MapelController::class, 'save'])->name('master.mapel.save');
         Route::delete('/admin/mapel/{mapel}', [MapelController::class, 'destroy'])->name('master.mapel.destroy');
         Route::post('/admin/jadwal-pelajaran', [JadwalController::class, 'save'])->name('master.jadwal-pelajaran.save');
+        Route::post('/admin/jadwal-pelajaran/import', [JadwalController::class, 'import'])->name('master.jadwal-pelajaran.import');
+        Route::get('/admin/jadwal-pelajaran/template-import', [JadwalController::class, 'templateImport'])->name('master.jadwal-pelajaran.template-import');
         Route::delete('/admin/jadwal-pelajaran/{jadwal}', [JadwalController::class, 'destroy'])->name('master.jadwal-pelajaran.destroy');
         Route::post('/admin/jadwal-piket', [JadwalPiketController::class, 'save'])->name('master.jadwal-piket.save');
         Route::delete('/admin/jadwal-piket/{jadwalPiket}', [JadwalPiketController::class, 'destroy'])->name('master.jadwal-piket.destroy');

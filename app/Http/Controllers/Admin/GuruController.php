@@ -27,7 +27,29 @@ class GuruController extends Controller
         $kelasWali = $guru->kelasWali()->orderedByHierarchy()->get(['id', 'nama', 'status']);
         $hariLabel = config('akademik.hari');
 
-        return view('admin.guru.show', compact('guru', 'jadwalPerHari', 'kelasWali', 'hariLabel'));
+        $totalJpSeminggu = 0;
+        $bebanPerKelas = [];
+        $bebanPerHari = [];
+
+        foreach ($jadwalPerHari as $hari => $jadwals) {
+            $jpSatuHari = 0;
+            foreach ($jadwals as $j) {
+                $jp = $j->jam_ke_selesai - $j->jam_ke_mulai + 1;
+                $jpSatuHari += $jp;
+                $totalJpSeminggu += $jp;
+
+                $kelasNama = $j->kelas ? $j->kelas->nama : 'Tanpa Kelas';
+                if (! isset($bebanPerKelas[$kelasNama])) {
+                    $bebanPerKelas[$kelasNama] = 0;
+                }
+                $bebanPerKelas[$kelasNama] += $jp;
+            }
+            $bebanPerHari[$hari] = $jpSatuHari;
+        }
+
+        arsort($bebanPerKelas);
+
+        return view('admin.guru.show', compact('guru', 'jadwalPerHari', 'kelasWali', 'hariLabel', 'totalJpSeminggu', 'bebanPerKelas', 'bebanPerHari'));
     }
 
     public function save(Request $request): RedirectResponse

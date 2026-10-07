@@ -4,6 +4,7 @@
         'tidak_hadir' => 'bg-alpha-soft text-alpha',
         'belum_diisi' => 'bg-sakit-soft text-sakit',
         'terlambat' => 'bg-alpha-soft text-alpha',
+        'tidak_diisi' => 'bg-alpha-soft text-alpha',
     ];
     $rentangBeda = ! $dari->isSameDay($sampai);
     $hariLabel = config('akademik.hari')[['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$dari->dayOfWeek - 1] ?? ''] ?? null;
@@ -47,7 +48,7 @@
          diganti (reload halaman), bukan balik ke "Semua" terus. Jumlah
          disembunyikan kalau 0 (nggak nambah info, cuma bikin rame). --}}
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
-        @foreach (['' => 'Semua', 'sudah_diisi' => 'Sudah Diisi', 'belum_diisi' => 'Belum Diisi', 'terlambat' => 'Terlambat'] as $key => $label)
+        @foreach (['' => 'Semua', 'sudah_diisi' => 'Sudah Diisi', 'belum_diisi' => 'Belum Diisi', 'terlambat' => 'Terlambat', 'tidak_diisi' => 'Tidak Diisi'] as $key => $label)
             @php 
                 $jumlah = 0;
                 if ($key === '') {

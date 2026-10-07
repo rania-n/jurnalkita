@@ -86,7 +86,10 @@
 <x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran" :subtitle="$rows->count() . ' jadwal'">
     <x-admin.page title="Jadwal Pelajaran" :subtitle="$rows->count() . ' jadwal'">
         <x-slot:action>
-            <x-ui.button type="button" icon="add" data-modal-open="modal-jadwal" data-modal-title="Tambah Jadwal">Tambah Jadwal</x-ui.button>
+            <div class="flex gap-2">
+                <x-ui.button type="button" icon="upload_file" data-modal-open="modal-import-jadwal" variant="secondary" class="hidden sm:inline-flex">Import</x-ui.button>
+                <x-ui.button type="button" icon="add" data-modal-open="modal-jadwal" data-modal-title="Tambah Jadwal">Tambah Jadwal</x-ui.button>
+            </div>
         </x-slot:action>
     </x-admin.page>
 
@@ -216,6 +219,31 @@
             data-modal-title="Tambah Jadwal"
         ></button>
     @endif
+
+    <x-admin.modal id="modal-import-jadwal" title="Import Jadwal">
+        <form method="POST" action="{{ route('master.jadwal-pelajaran.import') }}" enctype="multipart/form-data" class="flex flex-col gap-4">
+            @csrf
+            <div class="rounded-xl border border-info-soft bg-info-soft/30 p-4 text-sm text-info-dark">
+                <p class="font-bold mb-1">Format File CSV yang didukung:</p>
+                <ul class="list-disc pl-5 mb-2">
+                    <li>Gunakan kolom Header: <code>Hari, Jam Mulai, Jam Selesai, Kelas, Mapel, Guru, Ruang</code></li>
+                    <li>Pastikan nama Kelas, Mapel, dan Guru sama persis (case-insensitive) dengan data di sistem.</li>
+                    <li>File harus berformat .csv dipisahkan dengan koma (,) atau titik koma (;).</li>
+                </ul>
+                <a href="{{ route('master.jadwal-pelajaran.template-import') }}" class="text-info hover:underline font-semibold text-xs">Download Template CSV</a>
+            </div>
+            
+            <div>
+                <label class="mb-1 block text-sm font-semibold text-ink">File CSV</label>
+                <input type="file" name="file" accept=".csv" required class="block w-full rounded-md border border-surface-alt bg-card px-3 py-2 text-sm focus:border-navy focus:outline-none">
+            </div>
+
+            <div class="mt-1 flex gap-2">
+                <x-ui.button type="submit" icon="upload" class="flex-1">Mulai Import</x-ui.button>
+                <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
+            </div>
+        </form>
+    </x-admin.modal>
 
     @push('scripts')
         <script>

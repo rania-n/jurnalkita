@@ -112,7 +112,14 @@
                                     @endif
                                 </div>
                             @else
-                                <x-ui.status-badge status="menunggu">Belum Diisi</x-ui.status-badge>
+                                @php
+                                    $statusJamAsli = \App\Support\Waktu::statusJpHariIni($j->jam_ke_mulai, $j->jam_ke_selesai);
+                                @endphp
+                                @if ($statusJamAsli === 'lewat')
+                                    <x-ui.status-badge status="alpha">Belum Diisi (Terlambat)</x-ui.status-badge>
+                                @else
+                                    <x-ui.status-badge status="menunggu">Belum Diisi</x-ui.status-badge>
+                                @endif
                             @endif
                         </x-slot:badge>
                     </x-ui.list-card>

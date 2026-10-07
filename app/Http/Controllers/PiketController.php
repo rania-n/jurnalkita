@@ -201,7 +201,7 @@ class PiketController extends Controller
         // Status filter sekarang lewat query string (?status=...), BUKAN
         // cuma JS di klien lagi -- biar nggak reset balik ke "Semua" tiap
         // ganti tanggal (reload halaman). Lihat statusAktif di view.
-        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'belum_diisi', 'terlambat'], true)
+        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'belum_diisi', 'terlambat', 'tidak_diisi'], true)
             ? $request->query('status') : '';
 
         $barisTampil = $baris;
@@ -267,9 +267,10 @@ class PiketController extends Controller
         AuditLog::catat('Ekspor Ringkasan Piket', "Ekspor ringkas monitor piket {$dari->toDateString()} s/d {$sampai->toDateString()} ({$baris->count()} baris)");
 
         $totalHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'hadir') && ! str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
-        $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
+        $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak') && $b['status'] !== 'tidak_diisi')->count();
         $totalBelumDiisi = $baris->filter(fn ($b) => $b['status'] === 'belum_diisi')->count();
         $totalTerlambat = $baris->filter(fn ($b) => $b['status'] === 'terlambat')->count();
+        $totalTidakDiisi = $baris->filter(fn ($b) => $b['status'] === 'tidak_diisi')->count();
 
         $rows = $baris
             ->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))
@@ -295,6 +296,7 @@ class PiketController extends Controller
                 'totalTidakHadir' => $totalTidakHadir,
                 'totalTerlambat' => $totalTerlambat,
                 'totalBelumDiisi' => $totalBelumDiisi,
+                'totalTidakDiisi' => $totalTidakDiisi,
             ],
         ])->setPaper('a4', 'portrait');
 
@@ -499,12 +501,17 @@ class PiketController extends Controller
                     $kategori = Waktu::kategori($tanggal);
                     $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
                     $isTerlambat = false;
+                    $isTidakDiisi = false;
                     if (now()->format('Y-m-d') > $tanggal->toDateString()) {
-                        $isTerlambat = true;
+                        $isTidakDiisi = true;
                     } elseif ($jamSelesaiWaktu && now()->format('Y-m-d') === $tanggal->toDateString()) {
                         $isTerlambat = now()->format('H:i') > $jamSelesaiWaktu->format('H:i');
                     }
-                    if ($isTerlambat) {
+
+                    if ($isTidakDiisi) {
+                        $status = 'tidak_diisi';
+                        $statusLabel = 'Tidak Diisi';
+                    } elseif ($isTerlambat) {
                         $status = 'terlambat';
                         $statusLabel = 'Belum Diisi (Terlambat)';
                     }
