@@ -34,19 +34,21 @@
                     />
 
                     <x-ui.choice
-                        label="Status Kehadiran"
+                        label="Status Kehadiran *"
                         name="status"
-                        :options="['sakit' => 'Sakit', 'izin' => 'Izin']"
-                        :tones="['sakit' => 'sakit', 'izin' => 'izin']"
+                        :options="['sakit' => 'Sakit', 'izin' => 'Izin', 'izin_keluar' => 'Izin Keluar', 'izin_terlambat' => 'Terlambat']"
+                        :tones="['sakit' => 'sakit', 'izin' => 'izin', 'izin_keluar' => 'alpha', 'izin_terlambat' => 'alpha']"
                         :value="old('status', $presensiTerpilih?->status)"
                         required
                     />
+                    
+                    <x-admin.f-date name="tanggal_selesai" label="Sampai Tanggal (Masa Berlaku)" :value="old('tanggal_selesai', request('tanggal'))" :min="request('tanggal')" />
 
                     <x-ui.textarea label="Catatan" name="catatan" :rows="2" class="sm:col-span-2" placeholder="Contoh: izin keluarga / demam">{{ old('catatan', $presensiTerpilih?->catatan) }}</x-ui.textarea>
 
                     <div class="flex flex-col gap-1.5 sm:col-span-2">
-                        <x-ui.label for="surat">Surat izin atau bukti (opsional)</x-ui.label>
-                        <input id="surat" name="surat" type="file" accept=".jpg,.jpeg,.png,.pdf" class="block w-full rounded-xl border border-surface-alt bg-card px-3 py-3 text-sm text-ink file:mr-3 file:rounded-lg file:border-0 file:bg-surface-alt file:px-3 file:py-2 file:font-semibold">
+                        <x-ui.label for="surat">Surat izin atau bukti *</x-ui.label>
+                        <input id="surat" name="surat" type="file" accept=".jpg,.jpeg,.png,.pdf" class="block w-full rounded-xl border border-surface-alt bg-card px-3 py-3 text-sm text-ink file:mr-3 file:rounded-lg file:border-0 file:bg-surface-alt file:px-3 file:py-2 file:font-semibold" {{ $presensiTerpilih?->surat_path ? '' : 'required' }}>
                         @error('surat')<p class="text-xs font-medium text-alpha">{{ $message }}</p>@enderror
                         <p class="text-xs text-muted-2">JPG, PNG, atau PDF maksimal 4 MB.</p>
                         @if ($presensiTerpilih?->surat_path)

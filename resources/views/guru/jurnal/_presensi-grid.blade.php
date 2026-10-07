@@ -8,8 +8,8 @@
       $presensiAwal : array [siswa_id => ['status' => ..., 'catatan' => ...]]
 --}}
 @php
-    $statuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
-    $tones = ['hadir' => 'hadir', 'sakit' => 'sakit', 'izin' => 'izin', 'alpha' => 'alpha', 'dispensasi' => 'dispen'];
+    $statuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'izin_keluar' => 'Izin Keluar', 'izin_terlambat' => 'Terlambat', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
+    $tones = ['hadir' => 'hadir', 'sakit' => 'sakit', 'izin' => 'izin', 'izin_keluar' => 'alpha', 'izin_terlambat' => 'alpha', 'alpha' => 'alpha', 'dispensasi' => 'dispen'];
 @endphp
 
 <div class="mt-6">

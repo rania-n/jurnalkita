@@ -422,7 +422,7 @@ class JurnalController extends Controller
             'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
             'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
             'presensi' => ['nullable', 'array'],
-            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
+            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,izin_keluar,izin_terlambat,alpha,dispensasi'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
             // Wajib cuma kalau Hadir DAN tanggalnya hari ini (bukti "beneran
             // di kelas", lewat kamera langsung) -- jurnal susulan (tanggal
@@ -731,7 +731,7 @@ class JurnalController extends Controller
                 'tugas_tambahan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'string'],
                 'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
                 'presensi' => ['nullable', 'array'],
-                'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
+                'presensi.*.status' => ['required', 'in:hadir,sakit,izin,izin_keluar,izin_terlambat,alpha,dispensasi'],
                 'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
                 // Foto wajib cuma kalau status_guru Hadir, belum ada foto dari
                 // sebelumnya (guru cuma ubah data lain nggak wajib upload ulang),
