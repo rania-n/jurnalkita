@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\User;
+use App\Notifications\PasswordDiubah;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -48,6 +51,11 @@ class NewPasswordController extends Controller
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
                 ])->save();
+
+                AuditLog::catat('Reset Password', "Pengguna {$user->email} mereset password secara mandiri", $user);
+
+                $adminUsers = User::where('role', 'admin')->get();
+                Notification::send($adminUsers, new PasswordDiubah($user, clone $user));
 
                 event(new PasswordReset($user));
             }

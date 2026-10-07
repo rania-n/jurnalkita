@@ -105,16 +105,26 @@ class User extends Authenticatable implements MustVerifyEmail
         // shift-nya satu-satu di PHP (mulai/selesai cuma nyimpen JAM, jadi
         // dibandingkan sebagai string H:i:s, sama pola kayak Waktu::jpAktifSekarang()).
         $sekarang = now()->format('H:i:s');
+        $jamSelesaiAcara = $hariKhusus?->jenis === 'pulang_cepat' ? $hariKhusus->jam_selesai->format('H:i:s') : '23:59:59';
 
         return $this->guru->jadwalPikets()->berlakuPada(today())->get()
-            ->contains(function (JadwalPiket $p) use ($sekarang) {
+            ->contains(function (JadwalPiket $p) use ($sekarang, $jamSelesaiAcara) {
                 // mulai/selesai kosong = piket SEHARI PENUH tanpa jam spesifik --
-                // tetap dianggap bertugas kapan pun sepanjang hari itu.
+                // tetap dianggap bertugas kapan pun sepanjang hari itu, tapi dipotong
+                // event khusus (pulang cepat).
                 if (! $p->mulai || ! $p->selesai) {
-                    return true;
+                    return $sekarang <= $jamSelesaiAcara;
                 }
 
-                return $sekarang >= $p->mulai->format('H:i:s') && $sekarang <= $p->selesai->format('H:i:s');
+                // Shift piket siang (misal 12:00 - 15:00) kalau sekolah pulang cepat 11:00,
+                // berarti shiftnya hangus/tidak aktif, jangan dianggap aktif.
+                if ($p->mulai->format('H:i:s') >= $jamSelesaiAcara) {
+                    return false;
+                }
+
+                $selesaiEfektif = min($p->selesai->format('H:i:s'), $jamSelesaiAcara);
+
+                return $sekarang >= $p->mulai->format('H:i:s') && $sekarang <= $selesaiEfektif;
             });
     }
 
