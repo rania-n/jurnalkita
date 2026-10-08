@@ -110,6 +110,7 @@
                     <span style="color: #15803d; font-weight: bold;">Hadir: {{ $rekap['totalHadir'] ?? 0 }}</span> &nbsp;|&nbsp;
                     <span style="color: #b91c1c; font-weight: bold;">Tidak Hadir: {{ $rekap['totalTidakHadir'] ?? 0 }}</span> &nbsp;|&nbsp;
                     <span style="color: #ca8a04; font-weight: bold;">Terlambat: {{ $rekap['totalTerlambat'] ?? 0 }}</span><br>
+                    <span style="color: #64748b;">Belum Diisi: {{ $rekap['totalBelumDiisi'] ?? 0 }}</span> &nbsp;|&nbsp;
                     <span style="color: #64748b;">Tidak Diisi: {{ $rekap['totalTidakDiisi'] ?? 0 }}</span>
                 </td>
             </tr>

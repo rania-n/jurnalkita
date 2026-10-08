@@ -6,7 +6,6 @@ use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\HariKhusus;
 use App\Models\Jadwal;
-use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\PengaturanJurnal;
@@ -201,7 +200,7 @@ class PiketController extends Controller
         // Status filter sekarang lewat query string (?status=...), BUKAN
         // cuma JS di klien lagi -- biar nggak reset balik ke "Semua" tiap
         // ganti tanggal (reload halaman). Lihat statusAktif di view.
-        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'terlambat', 'tidak_diisi'], true)
+        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'terlambat', 'tidak_diisi', 'belum_diisi'], true)
             ? $request->query('status') : '';
 
         $barisTampil = $baris;
@@ -270,6 +269,7 @@ class PiketController extends Controller
         $totalTidakHadir = $baris->filter(fn ($b) => $b['status'] === 'tidak_hadir')->count();
         $totalTerlambat = $baris->filter(fn ($b) => $b['status'] === 'terlambat')->count();
         $totalTidakDiisi = $baris->filter(fn ($b) => $b['status'] === 'tidak_diisi')->count();
+        $totalBelumDiisi = $baris->filter(fn ($b) => $b['status'] === 'belum_diisi')->count();
 
         $rows = $baris
             ->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))
@@ -295,6 +295,7 @@ class PiketController extends Controller
                 'totalTidakHadir' => $totalTidakHadir,
                 'totalTerlambat' => $totalTerlambat,
                 'totalTidakDiisi' => $totalTidakDiisi,
+                'totalBelumDiisi' => $totalBelumDiisi,
             ],
         ])->setPaper('a4', 'portrait');
 
@@ -498,8 +499,18 @@ class PiketController extends Controller
                         $statusLabel = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
                     }
                 } else {
-                    $status = 'tidak_diisi';
-                    $statusLabel = 'Tidak Diisi';
+                    $isLewat = $tanggal->isPast() && ! $tanggal->isToday();
+                    if (! $isLewat) {
+                        $isLewat = Waktu::jamKeSelesai($jadwal->jam_ke_selesai, $tanggal)->isPast();
+                    }
+
+                    if ($isLewat) {
+                        $status = 'tidak_diisi';
+                        $statusLabel = 'Tidak Diisi';
+                    } else {
+                        $status = 'belum_diisi';
+                        $statusLabel = 'Belum Diisi';
+                    }
                 }
 
                 return [

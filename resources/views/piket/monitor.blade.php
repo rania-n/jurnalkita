@@ -2,7 +2,7 @@
     $tone = [
         'hadir' => 'bg-hadir-soft text-hadir',
         'tidak_hadir' => 'bg-alpha-soft text-alpha',
-        'tidak_diisi' => 'bg-sakit-soft text-sakit',
+        'belum_diisi' => 'bg-sakit-soft text-sakit',
         'terlambat' => 'bg-alpha-soft text-alpha',
         'tidak_diisi' => 'bg-alpha-soft text-alpha',
     ];
@@ -48,7 +48,7 @@
          diganti (reload halaman), bukan balik ke "Semua" terus. Jumlah
          disembunyikan kalau 0 (nggak nambah info, cuma bikin rame). --}}
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
-        @foreach (['' => 'Semua', 'sudah_diisi' => 'Sudah Diisi', 'tidak_diisi' => 'Tidak Diisi'] as $key => $label)
+        @foreach (['' => 'Semua', 'sudah_diisi' => 'Sudah Diisi', 'belum_diisi' => 'Belum Diisi', 'tidak_diisi' => 'Tidak Diisi'] as $key => $label)
             @php 
                 $jumlah = 0;
                 if ($key === '') {
@@ -142,8 +142,8 @@
                                 <p class="text-[13px] sm:text-sm font-bold text-ink leading-tight truncate">{{ $g['label'] }}</p>
                                 <p class="text-[11px] sm:text-xs text-muted leading-snug mt-0.5" data-grup-count>
                                     {{ $g['rows']->count() }} jam pelajaran
-                                    @if ($g['rekap']['tidak_diisi'] ?? 0)
-                                        <span class="inline-block">· <span class="font-semibold text-sakit">{{ $g['rekap']['tidak_diisi'] }} tidak diisi</span></span>
+                                    @if (($g['rekap']['tidak_diisi'] ?? 0) || ($g['rekap']['belum_diisi'] ?? 0))
+                                        <span class="inline-block">· <span class="font-semibold text-sakit">{{ ($g['rekap']['tidak_diisi'] ?? 0) + ($g['rekap']['belum_diisi'] ?? 0) }} kosong</span></span>
                                     @endif
                                 </p>
                             </div>
@@ -186,7 +186,7 @@
                                         data-status="{{ $b['status'] }}"
                                         data-cari="{{ $cariBaris }}"
                                         @class([
-                                            'bg-sakit-soft/30' => $b['status'] === 'tidak_diisi',
+                                            'bg-sakit-soft/30' => in_array($b['status'], ['tidak_diisi', 'belum_diisi']),
                                             'cursor-pointer hover:bg-surface/60' => $bisaDiklik,
                                         ])
                                         @if ($bisaDiklik)
