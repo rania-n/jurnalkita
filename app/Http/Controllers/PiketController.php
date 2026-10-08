@@ -6,6 +6,7 @@ use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\HariKhusus;
 use App\Models\Jadwal;
+use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\PengaturanJurnal;
@@ -499,12 +500,18 @@ class PiketController extends Controller
                         $statusLabel = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
                     }
                 } else {
-                    $isLewat = $tanggal->isPast() && ! $tanggal->isToday();
-                    if (! $isLewat) {
-                        $isLewat = Waktu::jamKeSelesai($jadwal->jam_ke_selesai, $tanggal)->isPast();
+                    $kategori = Waktu::kategori($tanggal);
+                    $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
+                    $isTidakDiisi = false;
+                    $isLewat = false;
+                    
+                    if (now()->format('Y-m-d') > $tanggal->toDateString()) {
+                        $isTidakDiisi = true;
+                    } elseif ($jamSelesaiWaktu && now()->format('Y-m-d') === $tanggal->toDateString()) {
+                        $isLewat = now()->format('H:i') > $jamSelesaiWaktu->format('H:i');
                     }
 
-                    if ($isLewat) {
+                    if ($isTidakDiisi || $isLewat) {
                         $status = 'tidak_diisi';
                         $statusLabel = 'Tidak Diisi';
                     } else {
