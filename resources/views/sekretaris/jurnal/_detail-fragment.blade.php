@@ -49,7 +49,12 @@
         <x-ui.field-static label="Jam Pelajaran" class="sm:col-span-2">
             Jam ke-{{ $jurnal->jam_ke_mulai }}{{ $jurnal->jam_ke_selesai !== $jurnal->jam_ke_mulai ? ' sampai ke-'.$jurnal->jam_ke_selesai : '' }}{{ $jamJurnal ? ' ('.str_replace(':', '.', $jamJurnal).')' : '' }}
         </x-ui.field-static>
-        <x-ui.field-static label="Status Kehadiran Guru" class="sm:col-span-2">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
+        <x-ui.field-static label="Status Kehadiran Guru" class="sm:col-span-2">
+            {{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}
+            @if ($jurnal->terlambat)
+                <span class="ml-1 text-sakit font-semibold">(Terlambat)</span>
+            @endif
+        </x-ui.field-static>
 
         {{-- Sinkron sama popup Lihat punya guru sendiri -- Tidak Hadir nggak
              ada Materi/Metode (nggak beneran mengajar), jangan ditampilin

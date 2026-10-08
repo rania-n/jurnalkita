@@ -26,6 +26,37 @@
         </div>
     @endif
 
+    {{-- ── Beban Mengajar ───────────────────────────────────────── --}}
+    @if ($totalJpSeminggu > 0)
+        <h2 class="mb-2 text-sm font-bold text-ink">Beban Mengajar ({{ $totalJpSeminggu }} JP / Minggu)</h2>
+        <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div class="rounded-xl border border-surface-alt bg-card p-4">
+                <p class="mb-2 text-xs font-semibold text-muted-2 uppercase tracking-wide">Alokasi Per Kelas</p>
+                <div class="flex flex-col gap-1.5">
+                    @foreach ($bebanPerKelas as $namaKelas => $jp)
+                        <div class="flex justify-between text-sm">
+                            <span class="font-medium text-ink">{{ $namaKelas }}</span>
+                            <span class="font-semibold text-navy">{{ $jp }} JP</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="rounded-xl border border-surface-alt bg-card p-4">
+                <p class="mb-2 text-xs font-semibold text-muted-2 uppercase tracking-wide">Distribusi Per Hari</p>
+                <div class="flex flex-col gap-1.5">
+                    @foreach ($hariLabel as $key => $label)
+                        @if (isset($bebanPerHari[$key]))
+                            <div class="flex justify-between text-sm">
+                                <span class="font-medium text-ink">{{ $label }}</span>
+                                <span class="font-semibold text-navy">{{ $bebanPerHari[$key] }} JP</span>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- ── Jadwal Mengajar ─────────────────────────────────────── --}}
     <h2 class="mb-4 text-sm font-bold text-ink">Jadwal Mengajar Seminggu</h2>
 

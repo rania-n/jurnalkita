@@ -6,6 +6,7 @@ use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\HariKhusus;
 use App\Models\Jadwal;
+use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\PengaturanJurnal;
@@ -84,43 +85,76 @@ class PiketController extends Controller
     {
         $this->pastikanBolehInputPresensi();
 
+        $isUpdate = PresensiPiket::where('siswa_id', $request->input('siswa_id'))
+            ->whereDate('tanggal', $request->input('tanggal'))->exists();
+
         $data = $request->validate([
             'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            // tanggal_selesai hanya relevan untuk sakit (surat dokter multi-hari).
+            // Izin biasa dan terlambat hanya 1 hari.
+            'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal'],
             'siswa_id' => ['required', 'exists:siswas,id'],
-            'status' => ['required', 'in:sakit,izin'],
+            'status' => ['required', 'in:sakit,izin,izin_terlambat'],
+            // Terlambat wajib isi JP mulai masuk.
+            'jam_masuk' => ['nullable', 'required_if:status,izin_terlambat', 'integer', 'min:1', 'max:15'],
             'catatan' => ['nullable', 'string', 'max:500'],
-            'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+            'surat' => [$isUpdate ? 'nullable' : 'required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
 
         $siswa = Siswa::where('status', 'aktif')->findOrFail($data['siswa_id']);
         $suratPath = $request->file('surat')?->store('presensi-piket', 'public');
+        $jamMasuk = isset($data['jam_masuk']) ? (int) $data['jam_masuk'] : null;
 
-        DB::transaction(function () use ($data, $siswa, $suratPath) {
-            $presensi = PresensiPiket::updateOrCreate(
-                ['siswa_id' => $siswa->id, 'tanggal' => $data['tanggal']],
-                [
-                    'status' => $data['status'],
-                    'catatan' => $data['catatan'] ?? null,
-                    'surat_path' => $suratPath ?? PresensiPiket::where('siswa_id', $siswa->id)
-                        ->whereDate('tanggal', $data['tanggal'])->value('surat_path'),
-                    'dicatat_oleh_id' => auth()->id(),
-                ]
-            );
+        // Terlambat hanya berlaku 1 hari; sakit bisa multi-hari jika ada surat dokter.
+        $tanggalMulai = Carbon::parse($data['tanggal']);
+        $tanggalSelesai = ($data['status'] === 'sakit' && ! empty($data['tanggal_selesai']))
+            ? Carbon::parse($data['tanggal_selesai'])
+            : $tanggalMulai;
+        $rentangTanggal = CarbonPeriod::create($tanggalMulai, $tanggalSelesai);
 
-            $jurnalsHariIni = Jurnal::whereDate('tanggal', $data['tanggal'])
-                ->whereHas('jadwal', fn ($query) => $query->where('kelas_id', $siswa->kelas_id))
-                ->with('absensis')
-                ->get();
-
-            foreach ($jurnalsHariIni as $jurnal) {
-                Absensi::updateOrCreate(
-                    ['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id],
-                    ['status' => $presensi->status, 'catatan' => $presensi->catatan]
+        DB::transaction(function () use ($data, $rentangTanggal, $siswa, $suratPath, $jamMasuk) {
+            foreach ($rentangTanggal as $tgl) {
+                $tglString = $tgl->toDateString();
+                $presensi = PresensiPiket::updateOrCreate(
+                    ['siswa_id' => $siswa->id, 'tanggal' => $tglString],
+                    [
+                        'status' => $data['status'],
+                        'jam_masuk' => $data['status'] === 'izin_terlambat' ? $jamMasuk : null,
+                        'catatan' => $data['catatan'] ?? null,
+                        'surat_path' => $suratPath ?? PresensiPiket::where('siswa_id', $siswa->id)
+                            ->whereDate('tanggal', $tglString)->value('surat_path'),
+                        'dicatat_oleh_id' => auth()->id(),
+                    ]
                 );
+
+                $jurnalsHariIni = Jurnal::whereDate('tanggal', $tglString)
+                    ->whereHas('jadwal', fn ($query) => $query->where('kelas_id', $siswa->kelas_id))
+                    ->with('absensis', 'jadwal')
+                    ->get();
+
+                foreach ($jurnalsHariIni as $jurnal) {
+                    // Untuk terlambat: JP sebelum jam_masuk = izin_terlambat,
+                    // JP mulai jam_masuk ke atas = hadir.
+                    if ($data['status'] === 'izin_terlambat' && $jamMasuk !== null) {
+                        $statusAbsensi = $jurnal->jam_ke_selesai < $jamMasuk
+                            ? 'izin_terlambat'
+                            : 'hadir';
+                    } else {
+                        $statusAbsensi = $presensi->status;
+                    }
+
+                    Absensi::updateOrCreate(
+                        ['jurnal_id' => $jurnal->id, 'siswa_id' => $siswa->id],
+                        ['status' => $statusAbsensi, 'catatan' => $presensi->catatan]
+                    );
+                }
             }
         });
 
-        AuditLog::catat('Catat Presensi Siswa oleh Piket', "{$siswa->nama} dicatat {$data['status']} pada {$data['tanggal']}");
+        $keterangan = $data['status'] === 'izin_terlambat' && $jamMasuk
+            ? "terlambat (masuk mulai JP {$jamMasuk})"
+            : $data['status'];
+        AuditLog::catat('Catat Presensi Siswa oleh Piket', "{$siswa->nama} dicatat {$keterangan} pada {$data['tanggal']}");
 
         return redirect()->route('piket.presensi-siswa.index', [
             'tanggal' => $data['tanggal'],
@@ -167,9 +201,17 @@ class PiketController extends Controller
         // Status filter sekarang lewat query string (?status=...), BUKAN
         // cuma JS di klien lagi -- biar nggak reset balik ke "Semua" tiap
         // ganti tanggal (reload halaman). Lihat statusAktif di view.
-        $statusAktif = in_array($request->query('status'), ['hadir', 'tidak_hadir', 'belum_diisi'], true)
+        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'terlambat', 'tidak_diisi', 'belum_diisi'], true)
             ? $request->query('status') : '';
-        $barisTampil = $statusAktif ? $baris->where('status', $statusAktif)->values() : $baris;
+
+        $barisTampil = $baris;
+        if ($statusAktif) {
+            if ($statusAktif === 'sudah_diisi') {
+                $barisTampil = $baris->whereIn('status', ['hadir', 'tidak_hadir', 'terlambat'])->values();
+            } else {
+                $barisTampil = $baris->where('status', $statusAktif)->values();
+            }
+        }
 
         $grup = $barisTampil
             ->groupBy(fn ($b) => $mode === 'guru' ? $b['jadwal']->guru_id : $b['jadwal']->kelas_id)
@@ -224,9 +266,11 @@ class PiketController extends Controller
 
         AuditLog::catat('Ekspor Ringkasan Piket', "Ekspor ringkas monitor piket {$dari->toDateString()} s/d {$sampai->toDateString()} ({$baris->count()} baris)");
 
-        $totalHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'hadir') && ! str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
-        $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
-        $totalBelumDiisi = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'belum'))->count();
+        $totalHadir = $baris->filter(fn ($b) => $b['status'] === 'hadir')->count();
+        $totalTidakHadir = $baris->filter(fn ($b) => $b['status'] === 'tidak_hadir')->count();
+        $totalTerlambat = $baris->filter(fn ($b) => $b['status'] === 'terlambat')->count();
+        $totalTidakDiisi = $baris->filter(fn ($b) => $b['status'] === 'tidak_diisi')->count();
+        $totalBelumDiisi = $baris->filter(fn ($b) => $b['status'] === 'belum_diisi')->count();
 
         $rows = $baris
             ->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))
@@ -250,6 +294,8 @@ class PiketController extends Controller
                 'baris' => $rows,
                 'totalHadir' => $totalHadir,
                 'totalTidakHadir' => $totalTidakHadir,
+                'totalTerlambat' => $totalTerlambat,
+                'totalTidakDiisi' => $totalTidakDiisi,
                 'totalBelumDiisi' => $totalBelumDiisi,
             ],
         ])->setPaper('a4', 'portrait');
@@ -444,12 +490,42 @@ class PiketController extends Controller
             ->map(function (Jadwal $jadwal) use ($jurnals, $tanggal) {
                 $jurnal = $jurnals->get($jadwal->id);
 
+                if ($jurnal) {
+                    if ($jurnal->terlambat) {
+                        $status = 'terlambat';
+                        $labelHadir = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
+                        $statusLabel = "Terlambat ($labelHadir)";
+                    } else {
+                        $status = $jurnal->status_guru;
+                        $statusLabel = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
+                    }
+                } else {
+                    $kategori = Waktu::kategori($tanggal);
+                    $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
+                    $isTidakDiisi = false;
+                    $isLewat = false;
+                    
+                    if (now()->format('Y-m-d') > $tanggal->toDateString()) {
+                        $isTidakDiisi = true;
+                    } elseif ($jamSelesaiWaktu && now()->format('Y-m-d') === $tanggal->toDateString()) {
+                        $isLewat = now()->format('H:i') > $jamSelesaiWaktu->format('H:i');
+                    }
+
+                    if ($isTidakDiisi || $isLewat) {
+                        $status = 'tidak_diisi';
+                        $statusLabel = 'Tidak Diisi';
+                    } else {
+                        $status = 'belum_diisi';
+                        $statusLabel = 'Belum Diisi';
+                    }
+                }
+
                 return [
                     'jadwal' => $jadwal,
                     'jurnal' => $jurnal,
                     'tanggal' => $tanggal->toDateString(),
-                    'status' => $jurnal->status_guru ?? 'belum_diisi',
-                    'statusLabel' => $jurnal ? (self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru) : 'Belum Diisi',
+                    'status' => $status,
+                    'statusLabel' => $statusLabel,
                 ];
             })
             ->values();

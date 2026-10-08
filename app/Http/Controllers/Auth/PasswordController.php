@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
+use App\Models\User;
+use App\Notifications\PasswordDiubah;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password as PasswordBroker;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +28,11 @@ class PasswordController extends Controller
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        AuditLog::catat('Ganti Password', "Pengguna {$request->user()->email} mengganti password secara mandiri", $request->user());
+
+        $adminUsers = User::where('role', 'admin')->get();
+        Notification::send($adminUsers, new PasswordDiubah($request->user(), $request->user()));
 
         return back()->with('status', 'password-updated');
     }

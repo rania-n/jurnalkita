@@ -179,9 +179,6 @@ class JamPelajaranController extends Controller
         for ($jamKe = 1; $jamKe <= $data['jumlah_jp']; $jamKe++) {
             $mulai = $waktu->copy();
             $selesai = $mulai->copy()->addMinutes($data['durasi_jp']);
-            if ($selesai->format('Y-m-d') !== $mulai->format('Y-m-d')) {
-                return back()->withErrors(['mulai' => 'Rentang jam pelajaran melewati tengah malam. Kurangi jumlah JP atau durasi jeda.'], 'jp')->withInput();
-            }
 
             $jedaSebelum = $jedaSetelah->get($jamKe - 1);
             $labelJeda = trim($jedaSebelum['label'] ?? '');

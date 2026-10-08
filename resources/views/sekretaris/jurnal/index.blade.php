@@ -80,6 +80,9 @@
                             @if ($j->verifikasiAbsen())
                                 <x-ui.status-badge status="tugas">Tugas</x-ui.status-badge>
                             @endif
+                            @if ($j->terlambat)
+                                <x-ui.status-badge status="alpha">Terlambat</x-ui.status-badge>
+                            @endif
                         </div>
                     </x-slot:badge>
                     <x-slot:actions>

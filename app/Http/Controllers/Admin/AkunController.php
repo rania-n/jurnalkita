@@ -7,10 +7,12 @@ use App\Models\AuditLog;
 use App\Models\Guru;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Notifications\PasswordDiubah;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -142,12 +144,18 @@ class AkunController extends Controller
 
         $user = User::findOrFail($data['id']);
 
+        if (filled($data['password'] ?? null)) {
+            $user->update(['password' => Hash::make($data['password'])]);
+            AuditLog::catat('Ganti Password', 'Admin '.auth()->user()->name." mengganti password akun {$user->email}", $user);
+            $adminUsers = User::where('role', 'admin')->get();
+            Notification::send($adminUsers, new PasswordDiubah($user, auth()->user()));
+        }
+
         $user->update([
             'name' => $data['nama'],
             'email' => $data['email'],
             'no_hp' => $data['no_hp'] ?? null,
             'nip' => $user->role === 'waka' ? ($data['nip'] ?? null) : $user->nip,
-            ...(filled($data['password'] ?? null) ? ['password' => Hash::make($data['password'])] : []),
         ]);
 
         AuditLog::catat('Ubah Akun', "Ubah akun: {$user->email}", $user);

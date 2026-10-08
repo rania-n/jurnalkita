@@ -257,67 +257,67 @@
                 @endif
             </div>
 
-            <div class="mt-4">
+            @if ($jadwalTerpilih)
+                <div class="mt-4">
 
-            {{-- Rentang jam SELALU mengikuti jadwal (statis, tidak bisa diedit
-                 manual) -- guru nggak perlu (dan nggak boleh) ngarang jam sendiri,
-                 itu sudah ditentukan jadwalnya. Pas jadwal diganti lewat dropdown,
-                 rentangnya ikut tersinkron otomatis (lihat sync() di bawah).
-                 Hanya ditampilkan saat status "Hadir" -- di saat tidak hadir,
-                 info jam pelajaran tidak relevan untuk ditampilkan. --}}
-            <div id="tampilan-jam-wrap">
-                <x-ui.field-static label="Jam Pelajaran" icon="schedule" tone="muted">
-                    <span id="tampilan-jam">
-                        {{ $mulaiAwal === $selesaiAwal ? "Jam ke-{$mulaiAwal}" : "Jam ke-{$mulaiAwal} sampai ke-{$selesaiAwal}" }}
-                        @if ($jamAwal) ({{ str_replace(':', '.', $jamAwal) }}) @endif
-                    </span>
-                </x-ui.field-static>
-                <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
-                <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">
-            </div>
-
-            {{-- Acuan dari jurnal TERAKHIR di jadwal yang sama (bisa minggu lalu,
-                 bisa lebih lama kalau libur) -- biar guru/pengurus kelas yang isi
-                 nggak lupa nyambungin dari mana terakhir kali, tanpa harus buka
-                 Riwayat Jurnal dulu di tab lain. --}}
-            @if ($jurnalSebelumnya)
-                <div class="mt-4 rounded-xl bg-surface-alt/60 px-3.5 py-2.5 text-xs text-muted">
-                    <span class="font-semibold text-ink">
-                        Terakhir diisi ({{ $jurnalSebelumnya->tanggal->translatedFormat('d M Y') }}{{ $jurnalSebelumnya->status_guru === 'tidak_hadir' ? ', gurunya tidak hadir' : '' }}):
-                    </span>
-                    {{ ($jurnalSebelumnya->status_guru === 'hadir' ? $jurnalSebelumnya->materi : $jurnalSebelumnya->tugas_tambahan) ?: '—' }}
+                {{-- Rentang jam SELALU mengikuti jadwal (statis, tidak bisa diedit
+                     manual) -- guru nggak perlu (dan nggak boleh) ngarang jam sendiri,
+                     itu sudah ditentukan jadwalnya. Pas jadwal diganti lewat dropdown,
+                     rentangnya ikut tersinkron otomatis (lihat sync() di bawah).
+                     Hanya ditampilkan saat status "Hadir" -- di saat tidak hadir,
+                     info jam pelajaran tidak relevan untuk ditampilkan. --}}
+                <div id="tampilan-jam-wrap">
+                    <x-ui.field-static label="Jam Pelajaran" icon="schedule" tone="muted">
+                        <span id="tampilan-jam">
+                            {{ $mulaiAwal === $selesaiAwal ? "Jam ke-{$mulaiAwal}" : "Jam ke-{$mulaiAwal} sampai ke-{$selesaiAwal}" }}
+                            @if ($jamAwal) ({{ str_replace(':', '.', $jamAwal) }}) @endif
+                        </span>
+                    </x-ui.field-static>
+                    <input type="hidden" name="jam_ke_mulai" id="jam_ke_mulai" value="{{ $mulaiAwal }}">
+                    <input type="hidden" name="jam_ke_selesai" id="jam_ke_selesai" value="{{ $selesaiAwal }}">
                 </div>
-            @endif
 
-            </div>
-
-            {{-- Tugas untuk Siswa -- dipisah dari blok-tidak-hadir di atas
-                 (biar Kelas & Mata Pelajaran bisa nyempil di antara keduanya),
-                 tapi tetap ikut disembunyikan/dinonaktifkan bareng lewat
-                 syncStatusGuru() di script bawah. --}}
-            <div id="blok-tugas-tidak-hadir" class="mt-4" @if($statusGuruAwal === 'hadir') hidden @endif>
-                <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
-            </div>
-
-            {{-- Semua field di sini full-width (sm:col-span-2), jadi nggak perlu ikut
-                 grid 2-kolom di atas -- aman langsung disembunyikan/ditampilkan. --}}
-            <div id="blok-hadir" class="mt-4 flex flex-col gap-4" @if($statusGuruAwal !== 'hadir') hidden @endif>
-                <x-ui.textarea label="Materi" name="materi" :rows="3" placeholder="Materi yang diajarkan..." required>{{ old('materi') }}</x-ui.textarea>
-
-                <div class="flex flex-col gap-1.5">
-                    <x-ui.choice
-                        label="Metode Pembelajaran"
-                        name="metode_pilihan"
-                        :options="$metodeLabel"
-                        :value="$metodeTerpilih"
-                        required
-                    />
-                    <div id="metode_custom_wrap" hidden>
-                        <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" required />
+                {{-- Acuan dari jurnal TERAKHIR di jadwal yang sama (bisa minggu lalu,
+                     bisa lebih lama kalau libur) -- biar guru/pengurus kelas yang isi
+                     nggak lupa nyambungin dari mana terakhir kali, tanpa harus buka
+                     Riwayat Jurnal dulu di tab lain. --}}
+                @if ($jurnalSebelumnya)
+                    <div class="mt-4 rounded-xl bg-surface-alt/60 px-3.5 py-2.5 text-xs text-muted">
+                        <span class="font-semibold text-ink">
+                            Terakhir diisi ({{ $jurnalSebelumnya->tanggal->translatedFormat('d M Y') }}{{ $jurnalSebelumnya->status_guru === 'tidak_hadir' ? ', gurunya tidak hadir' : '' }}):
+                        </span>
+                        {{ ($jurnalSebelumnya->status_guru === 'hadir' ? $jurnalSebelumnya->materi : $jurnalSebelumnya->tugas_tambahan) ?: '—' }}
                     </div>
+                @endif
+
                 </div>
 
-                @if ($jadwalTerpilih)
+                {{-- Tugas untuk Siswa -- dipisah dari blok-tidak-hadir di atas
+                     (biar Kelas & Mata Pelajaran bisa nyempil di antara keduanya),
+                     tapi tetap ikut disembunyikan/dinonaktifkan bareng lewat
+                     syncStatusGuru() di script bawah. --}}
+                <div id="blok-tugas-tidak-hadir" class="mt-4" @if($statusGuruAwal === 'hadir') hidden @endif>
+                    <x-ui.textarea label="Tugas untuk Siswa" name="tugas_tambahan" :rows="2" placeholder="Kerjakan LKS halaman..." required>{{ old('tugas_tambahan') }}</x-ui.textarea>
+                </div>
+
+                {{-- Semua field di sini full-width (sm:col-span-2), jadi nggak perlu ikut
+                     grid 2-kolom di atas -- aman langsung disembunyikan/ditampilkan. --}}
+                <div id="blok-hadir" class="mt-4 flex flex-col gap-4" @if($statusGuruAwal !== 'hadir') hidden @endif>
+                    <x-ui.textarea label="Materi" name="materi" :rows="3" placeholder="Materi yang diajarkan..." required>{{ old('materi') }}</x-ui.textarea>
+
+                    <div class="flex flex-col gap-1.5">
+                        <x-ui.choice
+                            label="Metode Pembelajaran"
+                            name="metode_pilihan"
+                            :options="$metodeLabel"
+                            :value="$metodeTerpilih"
+                            required
+                        />
+                        <div id="metode_custom_wrap" hidden>
+                            <x-ui.input name="metode_custom" placeholder="Tulis metode lainnya..." value="{{ $metodeCustom }}" required />
+                        </div>
+                    </div>
+
                     {{-- Wajib jepret langsung dari kamera (nggak boleh unggah dari
                          galeri) -- biar beneran bukti sedang di kelas, bukan foto
                          lama. Jalan di HP maupun PC/laptop (lihat komponennya).
@@ -331,10 +331,8 @@
                         :hint="$isHariIni ? 'Ambil foto saat pembelajaran berlangsung.' : 'Opsional untuk tanggal sebelumnya.'"
                         :required="$isHariIni"
                     />
-                @endif
-            </div>
+                </div>
 
-            @if ($jadwalTerpilih)
                 {{-- Disembunyikan pas mode massal aktif ATAU status guru tidak hadir -- presensi
                      nggak relevan kalau guru tidak hadir di kelas (presensi siswa otomatis
                      mengikuti default/verifikasi pengurus). --}}
@@ -347,11 +345,13 @@
                 </div>
             @endif
 
-            <x-ui.sticky-bar>
-                <x-ui.button type="submit" block icon="fact_check">
-                    <span id="teks-tombol-submit">Periksa Jurnal</span>
-                </x-ui.button>
-            </x-ui.sticky-bar>
+            <div id="blok-submit" @if(!$jadwalTerpilih) hidden @endif>
+                <x-ui.sticky-bar>
+                    <x-ui.button type="submit" block icon="fact_check">
+                        <span id="teks-tombol-submit">Periksa Jurnal</span>
+                    </x-ui.button>
+                </x-ui.sticky-bar>
+            </div>
         </form>
 
         {{-- Ringkasan sebelum beneran terkirim -- guru sempat cek dulu semua
@@ -614,19 +614,16 @@
                     function syncStatusGuru() {
                         const val = document.querySelector('input[name="status_guru"]:checked')?.value;
                         const hadir = val === 'hadir';
-                        blokHadir.hidden = !hadir;
-                        blokTidakHadir.hidden = hadir;
-
-                        // Disable SEMUA field (bukan cuma yang "required") di blok
-                        // yang lagi disembunyiin -- dua alasan: (1) atribut
-                        // "required" bawaan HTML tetap ngecek elemen yang
-                        // disembunyiin lewat ancestor "hidden", nggak otomatis
-                        // dikecualiin; (2) dua-duanya sama-sama punya field
-                        // name="foto_bukti" (beda id, kamera vs upload biasa) --
-                        // kalau yang disembunyiin nggak di-disable, dua-duanya
-                        // ikut kesubmit bareng & yang kepakai jadi nggak pasti.
-                        blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
-                        blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
+                        
+                        if (blokHadir) {
+                            blokHadir.hidden = !hadir;
+                            blokHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = !hadir; });
+                        }
+                        
+                        if (blokTidakHadir) {
+                            blokTidakHadir.hidden = hadir;
+                            blokTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
+                        }
                         if (blokTugasTidakHadir) {
                             blokTugasTidakHadir.hidden = hadir;
                             blokTugasTidakHadir.querySelectorAll('input, textarea, select').forEach((el) => { el.disabled = hadir; });
@@ -701,6 +698,12 @@
                             // Tidak Hadir dipilih, terlepas massal atau nggak).
                             if (blokPilihJadwal) blokPilihJadwal.hidden = massal;
                             if (jadwal) jadwal.disabled = massal;
+                            
+                            const blokSubmit = document.getElementById('blok-submit');
+                            if (blokSubmit) {
+                                blokSubmit.hidden = !massal && !{{ $jadwalTerpilih ? 'true' : 'false' }};
+                            }
+                            
                             syncTugasUmum();
                         }
                         document.querySelectorAll('input[name="tidak_hadir_sehari_penuh"]').forEach((el) => el.addEventListener('change', syncMassal));

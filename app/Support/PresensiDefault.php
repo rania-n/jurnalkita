@@ -68,7 +68,18 @@ class PresensiDefault
             if ($presensiPiket->has($s->id)) {
                 $piket = $presensiPiket[$s->id];
 
-                return [$s->id => ['status' => $piket->status, 'catatan' => $piket->catatan, 'sumber' => 'piket']];
+                // Terlambat → status bergantung pada JP jurnal yang sedang diisi:
+                // JP sebelum jam_masuk = izin_terlambat, JP mulai jam_masuk = hadir.
+                if ($piket->status === 'izin_terlambat' && $piket->jam_masuk && $jamMulai !== null && $jamSelesai !== null) {
+                    $statusEfektif = $jamSelesai < $piket->jam_masuk ? 'izin_terlambat' : 'hadir';
+
+                    $catatanTambahan = "Datang terlambat (masuk JP ke-{$piket->jam_masuk})";
+                    $catatanBaru = $piket->catatan ? $catatanTambahan.' — '.$piket->catatan : $catatanTambahan;
+
+                    return [$s->id => ['status' => $statusEfektif, 'catatan' => $catatanBaru, 'sumber' => 'piket_terlambat', 'surat_path' => $piket->surat_path]];
+                }
+
+                return [$s->id => ['status' => $piket->status, 'catatan' => $piket->catatan, 'sumber' => 'piket', 'surat_path' => $piket->surat_path]];
             }
 
             $sebelumnya = $presensiSebelumnya[$s->id] ?? null;
@@ -94,7 +105,7 @@ class PresensiDefault
     {
         return PresensiPiket::whereDate('tanggal', $tanggal)
             ->whereHas('siswa', fn ($q) => $q->where('kelas_id', $kelasId))
-            ->get(['siswa_id', 'status', 'catatan'])
+            ->get(['siswa_id', 'status', 'jam_masuk', 'catatan', 'surat_path'])
             ->keyBy('siswa_id');
     }
 

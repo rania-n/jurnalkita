@@ -306,7 +306,7 @@ class JurnalController extends Controller
             'tugas_tambahan' => ['required', 'string'],
             'alasan' => ['required', 'string'],
             'presensi' => ['required', 'array'],
-            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,alpha,dispensasi'],
+            'presensi.*.status' => ['required', 'in:hadir,sakit,izin,izin_keluar,izin_terlambat,alpha,dispensasi'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
         ]);
         $data['status_guru'] = 'tidak_hadir';

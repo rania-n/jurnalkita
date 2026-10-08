@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\JadwalPiket;
 use App\Models\JamPelajaran;
+use App\Models\Kelas;
+use App\Models\Mapel;
 use App\Support\Waktu;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class JadwalController extends Controller
@@ -48,6 +52,11 @@ class JadwalController extends Controller
         // cegah 2 jadwal numpuk buat KELAS yang sama di jam yang sama (dulu
         // nggak dicek sama sekali -- cuma bentrok guru yang divalidasi).
         if ($pesan = $this->konflikJadwalKelas($data)) {
+            return back()->with('error', $pesan)->withInput();
+        }
+
+        // Ruang kelas fisik cuma bisa dipakai 1 kelas dalam satu waktu
+        if ($pesan = $this->konflikJadwalRuang($data)) {
             return back()->with('error', $pesan)->withInput();
         }
 
@@ -106,6 +115,28 @@ class JadwalController extends Controller
         return "Kelas ini sudah memiliki jadwal lain pada jam yang sama hari {$data['hari']}: {$bentrok->mapel->nama} — {$bentrok->guru->nama} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Satu kelas tidak dapat memiliki 2 mata pelajaran sekaligus — ubah jamnya atau hapus/ubah jadwal yang lama terlebih dahulu.";
     }
 
+    /** Cek apakah jam jadwal ini numpuk dengan jadwal lain yang menggunakan RUANG yang sama, hari yang sama. */
+    private function konflikJadwalRuang(array $data): ?string
+    {
+        if (empty($data['ruang']) || $data['ruang'] === '-') {
+            return null;
+        }
+
+        $bentrok = Jadwal::with('kelas')
+            ->where('ruang', $data['ruang'])
+            ->where('hari', $data['hari'])
+            ->when($data['id'] ?? null, fn ($q, $id) => $q->whereKeyNot($id))
+            ->where('jam_ke_mulai', '<=', $data['jam_ke_selesai'])
+            ->where('jam_ke_selesai', '>=', $data['jam_ke_mulai'])
+            ->first();
+
+        if (! $bentrok) {
+            return null;
+        }
+
+        return "Ruang {$data['ruang']} sudah digunakan oleh kelas {$bentrok->kelas->nama} pada jam yang sama hari {$data['hari']} (JP {$bentrok->jam_ke_mulai}–{$bentrok->jam_ke_selesai}). Pilih ruang lain atau ubah jamnya.";
+    }
+
     /** Cek apakah jam jadwal (jam ke-) bentrok dengan shift piket guru di hari yang sama. */
     private function konflikPiket(int $guruId, string $hari, int $jamMulai, int $jamSelesai): ?string
     {
@@ -138,5 +169,122 @@ class JadwalController extends Controller
         $jamPiket = $bentrok->mulai ? "jam {$bentrok->mulai->format('H:i')}–{$bentrok->selesai->format('H:i')}" : 'sehari penuh';
 
         return "Guru ini piket hari {$hari} ({$jamPiket}) — sesuai ketentuan, guru piket tidak mengajar saat bertugas. Pilih guru lain atau ganti jamnya.";
+    }
+
+    public function templateImport()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_jadwal_pelajaran.csv"',
+        ];
+
+        $callback = function () {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Hari', 'Jam Mulai', 'Jam Selesai', 'Kelas', 'Mapel', 'Guru', 'Ruang']);
+            fputcsv($file, ['Senin', '1', '2', 'X AK 1', 'Matematika', 'Budi Santoso', 'R1']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ]);
+
+        $file = $request->file('file');
+        $handle = fopen($file->path(), 'r');
+        $header = fgetcsv($handle);
+
+        $sukses = 0;
+        $gagal = 0;
+        $baris = 1;
+
+        $gurus = Guru::pluck('id', 'nama')->mapWithKeys(fn ($id, $nama) => [strtolower($nama) => $id])->toArray();
+        $kelas = Kelas::pluck('id', 'nama')->mapWithKeys(fn ($id, $nama) => [strtolower($nama) => $id])->toArray();
+        $mapels = Mapel::pluck('id', 'nama')->mapWithKeys(fn ($id, $nama) => [strtolower($nama) => $id])->toArray();
+
+        $ruangTersedia = collect(config('akademik.ruangan'))->mapWithKeys(fn ($r) => [strtolower($r) => $r])->toArray();
+
+        DB::beginTransaction();
+
+        try {
+            while (($row = fgetcsv($handle)) !== false) {
+                $baris++;
+                if (count($row) < 6) {
+                    $gagal++;
+
+                    continue;
+                }
+
+                $hariInput = strtolower(trim($row[0]));
+                $jamMulai = (int) trim($row[1]);
+                $jamSelesai = (int) trim($row[2]);
+                $namaKelas = strtolower(trim($row[3]));
+                $namaMapel = strtolower(trim($row[4]));
+                $namaGuru = strtolower(trim($row[5]));
+                $namaRuang = isset($row[6]) ? strtolower(trim($row[6])) : '';
+
+                if (! in_array($hariInput, ['senin', 'selasa', 'rabu', 'kamis', 'jumat']) || $jamMulai < 1 || $jamSelesai < 1 || $jamMulai > $jamSelesai) {
+                    $gagal++;
+
+                    continue;
+                }
+
+                if (! isset($gurus[$namaGuru]) || ! isset($kelas[$namaKelas]) || ! isset($mapels[$namaMapel])) {
+                    $gagal++;
+
+                    continue;
+                }
+
+                $ruang = '-';
+                if ($namaRuang) {
+                    $ruangNorm = preg_replace('/^r\s*(\d+)$/i', 'R$1', $namaRuang);
+                    if (isset($ruangTersedia[strtolower($ruangNorm)])) {
+                        $ruang = $ruangTersedia[strtolower($ruangNorm)];
+                    }
+                }
+
+                $data = [
+                    'kelas_id' => $kelas[$namaKelas],
+                    'mapel_id' => $mapels[$namaMapel],
+                    'guru_id' => $gurus[$namaGuru],
+                    'hari' => $hariInput,
+                    'jam_ke_mulai' => $jamMulai,
+                    'jam_ke_selesai' => $jamSelesai,
+                    'ruang' => $ruang,
+                ];
+
+                if ($this->konflikPiket($data['guru_id'], $data['hari'], $data['jam_ke_mulai'], $data['jam_ke_selesai']) ||
+                    $this->konflikJadwalGuru($data) ||
+                    $this->konflikJadwalKelas($data) ||
+                    $this->konflikJadwalRuang($data)) {
+                    $gagal++;
+
+                    continue;
+                }
+
+                Jadwal::create($data);
+                $sukses++;
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->with('error', 'Terjadi kesalahan saat memproses file CSV: '.$e->getMessage());
+        }
+
+        fclose($handle);
+
+        AuditLog::catat('Import Jadwal', "Import jadwal pelajaran: {$sukses} berhasil, {$gagal} gagal/bentrok");
+
+        $pesan = "Import selesai! {$sukses} jadwal berhasil ditambahkan.";
+        if ($gagal > 0) {
+            $pesan .= " {$gagal} baris dilewati karena format salah, data master tidak ditemukan, atau jadwal bentrok.";
+        }
+
+        return back()->with($gagal > 0 ? 'warning' : 'success', $pesan);
     }
 }
