@@ -201,16 +201,12 @@ class PiketController extends Controller
         // Status filter sekarang lewat query string (?status=...), BUKAN
         // cuma JS di klien lagi -- biar nggak reset balik ke "Semua" tiap
         // ganti tanggal (reload halaman). Lihat statusAktif di view.
-        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'belum_diisi', 'terlambat', 'tidak_diisi'], true)
+        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'terlambat', 'tidak_diisi'], true)
             ? $request->query('status') : '';
 
         $barisTampil = $baris;
         if ($statusAktif) {
-            if ($statusAktif === 'sudah_diisi') {
-                $barisTampil = $baris->whereIn('status', ['hadir', 'tidak_hadir'])->values();
-            } else {
-                $barisTampil = $baris->where('status', $statusAktif)->values();
-            }
+            $barisTampil = $baris->where('status', $statusAktif)->values();
         }
 
         $grup = $barisTampil
@@ -268,7 +264,6 @@ class PiketController extends Controller
 
         $totalHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'hadir') && ! str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
         $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak') && $b['status'] !== 'tidak_diisi')->count();
-        $totalBelumDiisi = $baris->filter(fn ($b) => $b['status'] === 'belum_diisi')->count();
         $totalTerlambat = $baris->filter(fn ($b) => $b['status'] === 'terlambat')->count();
         $totalTidakDiisi = $baris->filter(fn ($b) => $b['status'] === 'tidak_diisi')->count();
 
@@ -295,7 +290,6 @@ class PiketController extends Controller
                 'totalHadir' => $totalHadir,
                 'totalTidakHadir' => $totalTidakHadir,
                 'totalTerlambat' => $totalTerlambat,
-                'totalBelumDiisi' => $totalBelumDiisi,
                 'totalTidakDiisi' => $totalTidakDiisi,
             ],
         ])->setPaper('a4', 'portrait');
@@ -490,31 +484,14 @@ class PiketController extends Controller
             ->map(function (Jadwal $jadwal) use ($jurnals, $tanggal) {
                 $jurnal = $jurnals->get($jadwal->id);
 
-                $status = $jurnal->status_guru ?? 'belum_diisi';
-                $statusLabel = $jurnal ? (self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru) : 'Belum Diisi';
-
-                if ($jurnal && $jurnal->terlambat) {
-                    $statusLabel .= ' (Terlambat)';
-                }
-
-                if (! $jurnal) {
-                    $kategori = Waktu::kategori($tanggal);
-                    $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
-                    $isTerlambat = false;
-                    $isTidakDiisi = false;
-                    if (now()->format('Y-m-d') > $tanggal->toDateString()) {
-                        $isTidakDiisi = true;
-                    } elseif ($jamSelesaiWaktu && now()->format('Y-m-d') === $tanggal->toDateString()) {
-                        $isTerlambat = now()->format('H:i') > $jamSelesaiWaktu->format('H:i');
-                    }
-
-                    if ($isTidakDiisi) {
-                        $status = 'tidak_diisi';
-                        $statusLabel = 'Tidak Diisi';
-                    } elseif ($isTerlambat) {
-                        $status = 'terlambat';
-                        $statusLabel = 'Belum Diisi (Terlambat)';
-                    }
+                if ($jurnal) {
+                    $status = $jurnal->terlambat ? 'terlambat' : 'sudah_diisi';
+                    
+                    $labelHadir = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
+                    $statusLabel = $jurnal->terlambat ? "Terlambat ($labelHadir)" : "Sudah Diisi ($labelHadir)";
+                } else {
+                    $status = 'tidak_diisi';
+                    $statusLabel = 'Tidak Diisi';
                 }
 
                 return [
