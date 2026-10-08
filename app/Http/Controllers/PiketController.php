@@ -201,12 +201,16 @@ class PiketController extends Controller
         // Status filter sekarang lewat query string (?status=...), BUKAN
         // cuma JS di klien lagi -- biar nggak reset balik ke "Semua" tiap
         // ganti tanggal (reload halaman). Lihat statusAktif di view.
-        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'terlambat', 'tidak_diisi'], true)
+        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'terlambat', 'tidak_diisi'], true)
             ? $request->query('status') : '';
 
         $barisTampil = $baris;
         if ($statusAktif) {
-            $barisTampil = $baris->where('status', $statusAktif)->values();
+            if ($statusAktif === 'sudah_diisi') {
+                $barisTampil = $baris->whereIn('status', ['hadir', 'tidak_hadir', 'terlambat'])->values();
+            } else {
+                $barisTampil = $baris->where('status', $statusAktif)->values();
+            }
         }
 
         $grup = $barisTampil
@@ -262,8 +266,8 @@ class PiketController extends Controller
 
         AuditLog::catat('Ekspor Ringkasan Piket', "Ekspor ringkas monitor piket {$dari->toDateString()} s/d {$sampai->toDateString()} ({$baris->count()} baris)");
 
-        $totalHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'hadir') && ! str_contains(strtolower($b['statusLabel']), 'tidak'))->count();
-        $totalTidakHadir = $baris->filter(fn ($b) => str_contains(strtolower($b['statusLabel']), 'tidak') && $b['status'] !== 'tidak_diisi')->count();
+        $totalHadir = $baris->filter(fn ($b) => $b['status'] === 'hadir')->count();
+        $totalTidakHadir = $baris->filter(fn ($b) => $b['status'] === 'tidak_hadir')->count();
         $totalTerlambat = $baris->filter(fn ($b) => $b['status'] === 'terlambat')->count();
         $totalTidakDiisi = $baris->filter(fn ($b) => $b['status'] === 'tidak_diisi')->count();
 
@@ -485,10 +489,14 @@ class PiketController extends Controller
                 $jurnal = $jurnals->get($jadwal->id);
 
                 if ($jurnal) {
-                    $status = $jurnal->terlambat ? 'terlambat' : 'sudah_diisi';
-                    
-                    $labelHadir = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
-                    $statusLabel = $jurnal->terlambat ? "Terlambat ($labelHadir)" : "Sudah Diisi ($labelHadir)";
+                    if ($jurnal->terlambat) {
+                        $status = 'terlambat';
+                        $labelHadir = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
+                        $statusLabel = "Terlambat ($labelHadir)";
+                    } else {
+                        $status = $jurnal->status_guru;
+                        $statusLabel = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
+                    }
                 } else {
                     $status = 'tidak_diisi';
                     $statusLabel = 'Tidak Diisi';
