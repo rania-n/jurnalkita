@@ -257,8 +257,6 @@
                 @endif
             </div>
 
-            </div>
-
             @if ($jadwalTerpilih)
                 <div class="mt-4">
 
