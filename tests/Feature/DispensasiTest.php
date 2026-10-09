@@ -61,7 +61,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'Lomba', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 
@@ -75,7 +75,7 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->piket)->post('/dispensasi', [
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
-            'jenis' => 'lainnya', 'alasan' => 'Lomba LKS tingkat kabupaten',
+            'jenis' => 'izin_keluar', 'alasan' => 'Lomba LKS tingkat kabupaten',
         ])->assertRedirect();
 
         $d = Dispensasi::first();
@@ -97,12 +97,12 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->piket)->post('/dispensasi', [
             'siswa_ids' => [$this->siswa->id, $siswaKedua->id],
             'tanggal' => today()->toDateString(),
-            'jenis' => 'lainnya', 'alasan' => 'Turnamen futsal',
+            'jenis' => 'izin_keluar', 'alasan' => 'Turnamen futsal',
         ])->assertRedirect();
 
         $this->assertDatabaseCount('dispensasis', 2);
-        $this->assertDatabaseHas('dispensasis', ['siswa_id' => $this->siswa->id, 'jenis' => 'lainnya', 'alasan' => 'Turnamen futsal']);
-        $this->assertDatabaseHas('dispensasis', ['siswa_id' => $siswaKedua->id, 'jenis' => 'lainnya', 'alasan' => 'Turnamen futsal']);
+        $this->assertDatabaseHas('dispensasis', ['siswa_id' => $this->siswa->id, 'jenis' => 'izin_keluar', 'alasan' => 'Turnamen futsal']);
+        $this->assertDatabaseHas('dispensasis', ['siswa_id' => $siswaKedua->id, 'jenis' => 'izin_keluar', 'alasan' => 'Turnamen futsal']);
 
         $dispensasi = Dispensasi::orderBy('id')->firstOrFail();
         $this->assertNotNull($dispensasi->kelompok_id);
@@ -153,7 +153,7 @@ class DispensasiTest extends TestCase
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
             'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
-            'jenis' => 'lainnya', 'alasan' => 'Lomba',
+            'jenis' => 'izin_keluar', 'alasan' => 'Lomba',
         ]);
         $d = Dispensasi::first();
 
@@ -172,7 +172,7 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->piket)->post('/dispensasi', [
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
-            'jenis' => 'lainnya', 'alasan' => 'Lomba',
+            'jenis' => 'izin_keluar', 'alasan' => 'Lomba',
         ]);
         $d = Dispensasi::first();
 
@@ -199,7 +199,7 @@ class DispensasiTest extends TestCase
         JadwalPiket::create(['guru_id' => $guruLain->id, 'hari' => 'selasa']);
         $milikOrang = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $piketLain->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'X', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'X', 'status_piket' => 'approved',
         ]);
 
         $this->actingAs($this->piket)->get("/dispensasi/{$milikOrang->id}/fragment")->assertOk();
@@ -210,7 +210,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'X', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'X', 'status_piket' => 'approved',
         ]);
 
         $guruBukanPiket = User::factory()->role('guru')->create();
@@ -223,7 +223,7 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->piket)->post('/dispensasi', [
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
-            'jenis' => 'lainnya', 'alasan' => 'Lomba',
+            'jenis' => 'izin_keluar', 'alasan' => 'Lomba',
         ]);
         $d = Dispensasi::first();
 
@@ -239,7 +239,7 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->piket)->post('/dispensasi', [
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
-            'jenis' => 'lainnya', 'alasan' => 'salah pilih siswa', 'jenis' => 'lainnya',
+            'jenis' => 'izin_keluar', 'alasan' => 'salah pilih siswa', 'jenis' => 'izin_keluar',
         ]);
         $d = Dispensasi::firstOrFail();
 
@@ -254,7 +254,7 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->piket)->post('/dispensasi', [
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
-            'jenis' => 'lainnya', 'alasan' => 'Lomba',
+            'jenis' => 'izin_keluar', 'alasan' => 'Lomba',
         ]);
         $d = Dispensasi::firstOrFail();
 
@@ -269,7 +269,7 @@ class DispensasiTest extends TestCase
         $this->actingAs($this->piket)->post('/dispensasi', [
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
-            'jenis' => 'lainnya', 'alasan' => 'Lomba',
+            'jenis' => 'izin_keluar', 'alasan' => 'Lomba',
         ]);
         $d = Dispensasi::firstOrFail();
 
@@ -288,7 +288,7 @@ class DispensasiTest extends TestCase
         $response = $this->actingAs($this->piket)->post('/dispensasi', [
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
-            'jenis' => 'lainnya', 'alasan' => 'Lomba',
+            'jenis' => 'izin_keluar', 'alasan' => 'Lomba',
         ]);
         $d = Dispensasi::firstOrFail();
         $response->assertRedirect("/dispensasi?kirim_wa={$d->id}&lihat={$d->id}");
@@ -308,7 +308,7 @@ class DispensasiTest extends TestCase
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
             'jam_ke_mulai' => 4,
-            'jenis' => 'lainnya', 'alasan' => 'Ambil rapor lomba', 'jenis' => 'lainnya',
+            'jenis' => 'izin_keluar', 'alasan' => 'Ambil rapor lomba', 'jenis' => 'izin_keluar',
         ])->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('dispensasis', ['jam_ke_mulai' => 4, 'jam_ke_selesai' => null]);
@@ -320,7 +320,7 @@ class DispensasiTest extends TestCase
             'siswa_id' => $this->siswa->id,
             'tanggal' => today()->toDateString(),
             'jam_ke_selesai' => 4,
-            'jenis' => 'lainnya', 'alasan' => 'x', 'jenis' => 'lainnya',
+            'jenis' => 'izin_keluar', 'alasan' => 'x', 'jenis' => 'izin_keluar',
         ])->assertSessionHasErrors('jam_ke_mulai');
     }
 
@@ -349,7 +349,7 @@ class DispensasiTest extends TestCase
 
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jam_ke_mulai' => 4, 'jenis' => 'lainnya', 'alasan' => 'Pulang lebih awal', 'jenis' => 'lainnya',
+            'tanggal' => today(), 'jam_ke_mulai' => 4, 'jenis' => 'izin_keluar', 'alasan' => 'Pulang lebih awal', 'jenis' => 'izin_keluar',
             'status_piket' => 'approved',
         ]);
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
@@ -381,7 +381,7 @@ class DispensasiTest extends TestCase
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
             'tanggal' => today(), 'tanggal_selesai' => today()->addDays(2),
-            'jenis' => 'lainnya', 'alasan' => 'Sakit 3 hari', 'status_piket' => 'approved',
+            'jenis' => 'izin_keluar', 'alasan' => 'Sakit 3 hari', 'status_piket' => 'approved',
         ]);
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
 
@@ -392,11 +392,11 @@ class DispensasiTest extends TestCase
     {
         $aktif = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'Lomba', 'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba', 'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
         ]);
         $lewat = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today()->subDays(3), 'jenis' => 'lainnya', 'alasan' => 'Sakit minggu lalu',
+            'tanggal' => today()->subDays(3), 'jenis' => 'izin_keluar', 'alasan' => 'Sakit minggu lalu',
             'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
         ]);
 
@@ -415,7 +415,7 @@ class DispensasiTest extends TestCase
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
             'tanggal' => today()->subDay(), 'tanggal_selesai' => today()->addDay(),
-            'jenis' => 'lainnya', 'alasan' => 'Sakit 3 hari', 'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
+            'jenis' => 'izin_keluar', 'alasan' => 'Sakit 3 hari', 'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
         ]);
 
         $this->assertFalse($d->sudahKadaluarsa());
@@ -430,7 +430,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today()->subDay(), 'jenis' => 'lainnya', 'alasan' => 'Lomba', 'status_piket' => 'approved',
+            'tanggal' => today()->subDay(), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
         $d->refresh(); // status_waka default 'pending' dari DB, belum kebawa ke object in-memory abis create()
@@ -454,7 +454,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'Izin mendadak', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Izin mendadak', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 
@@ -469,7 +469,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today()->addDay(), 'jenis' => 'lainnya', 'alasan' => 'Lomba besok', 'status_piket' => 'approved',
+            'tanggal' => today()->addDay(), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba besok', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 
@@ -515,7 +515,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today()->subDays(2), 'jenis' => 'lainnya', 'alasan' => 'Lomba kemarin lusa', 'status_piket' => 'approved',
+            'tanggal' => today()->subDays(2), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba kemarin lusa', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 
@@ -528,7 +528,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today()->subDay(), 'jenis' => 'lainnya', 'alasan' => 'Telat diproses', 'status_piket' => 'approved',
+            'tanggal' => today()->subDay(), 'jenis' => 'izin_keluar', 'alasan' => 'Telat diproses', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 
@@ -542,7 +542,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today()->subDay(), 'jenis' => 'lainnya', 'alasan' => 'Telat diproses', 'status_piket' => 'approved',
+            'tanggal' => today()->subDay(), 'jenis' => 'izin_keluar', 'alasan' => 'Telat diproses', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 
@@ -557,7 +557,7 @@ class DispensasiTest extends TestCase
 
         Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'Baru', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Baru', 'status_piket' => 'approved',
         ]);
 
         $versiBaru = $this->get('/dispensasi/versi')->assertOk()->json('versi');
@@ -568,7 +568,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'Lomba', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
@@ -591,7 +591,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'Lomba', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
@@ -608,7 +608,7 @@ class DispensasiTest extends TestCase
             'siswa_id' => $this->siswa->id,
             'diajukan_oleh_id' => $this->piket->id,
             'tanggal' => today(),
-            'jenis' => 'lainnya', 'alasan' => 'Lomba',
+            'jenis' => 'izin_keluar', 'alasan' => 'Lomba',
             'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
@@ -627,7 +627,7 @@ class DispensasiTest extends TestCase
     {
         $d = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'lainnya', 'alasan' => 'Lomba', 'status_piket' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba', 'status_piket' => 'approved',
         ]);
         $d->segarkanStatusAkhir();
 

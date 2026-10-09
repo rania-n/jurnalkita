@@ -36,7 +36,7 @@
             <form method="POST" action="{{ route('dispensasi.no-hp.update', $dispensasi) }}" class="flex flex-col gap-2 rounded-xl border border-surface-alt bg-surface p-3 sm:col-span-2">
                 @csrf
                 <p class="text-sm font-bold text-ink">Kirim bukti melalui WhatsApp</p>
-                <p class="text-xs leading-relaxed text-muted-2">Masukkan nomor siswa, orang tua, atau wali yang akan menerima surat dispensasi.</p>
+                <p class="text-xs leading-relaxed text-muted-2">Masukkan nomor siswa, orang tua, atau wali yang akan menerima surat izin ini.</p>
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
                     <x-ui.input
                         label="Nomor WhatsApp penerima"
@@ -61,7 +61,7 @@
                     </a>
                 @else
                     <a href="{{ $suratUrl }}" target="_blank" rel="noopener">
-                        <img src="{{ $suratUrl }}" alt="Surat / bukti dispensasi"
+                        <img src="{{ $suratUrl }}" alt="Surat / bukti izin"
                              class="max-h-72 w-full rounded-xl border border-surface-alt object-cover">
                     </a>
                 @endif
@@ -69,20 +69,35 @@
         @endif
     </div>
 
-    {{-- Keputusan Waka --}}
-    <div class="flex items-start gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
-        <x-icon :name="$waIcon" :size="22" class="{{ $waColor }}" />
-        <div>
-            <p class="text-sm font-bold text-ink">
-                Waka: {{ $waText }}
-                @if ($dispensasi->sudahKadaluarsa())
-                    <x-ui.status-badge status="kadaluarsa" class="ml-1 align-middle">Kedaluwarsa</x-ui.status-badge>
-                @endif
-            </p>
-            @if ($dispensasi->waka)<p class="text-xs text-muted">Oleh {{ $dispensasi->waka->name }}</p>@endif
-            @if ($dispensasi->catatan_waka)<p class="mt-0.5 text-xs text-muted">"{{ $dispensasi->catatan_waka }}"</p>@endif
+    @if ($dispensasi->jenis === 'lomba')
+        <div class="flex items-start gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+            <x-icon name="check_circle" :size="22" class="text-hadir" />
+            <div>
+                <p class="text-sm font-bold text-ink">
+                    Otomatis Disetujui
+                    @if ($dispensasi->sudahKadaluarsa())
+                        <x-ui.status-badge status="kadaluarsa" class="ml-1 align-middle">Kedaluwarsa</x-ui.status-badge>
+                    @endif
+                </p>
+                <p class="mt-0.5 text-xs text-muted">Pengajuan lomba/dinas tidak memerlukan persetujuan Waka.</p>
+            </div>
         </div>
-    </div>
+    @else
+        {{-- Keputusan Waka --}}
+        <div class="flex items-start gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
+            <x-icon :name="$waIcon" :size="22" class="{{ $waColor }}" />
+            <div>
+                <p class="text-sm font-bold text-ink">
+                    Waka: {{ $waText }}
+                    @if ($dispensasi->sudahKadaluarsa())
+                        <x-ui.status-badge status="kadaluarsa" class="ml-1 align-middle">Kedaluwarsa</x-ui.status-badge>
+                    @endif
+                </p>
+                @if ($dispensasi->waka)<p class="text-xs text-muted">Oleh {{ $dispensasi->waka->name }}</p>@endif
+                @if ($dispensasi->catatan_waka)<p class="mt-0.5 text-xs text-muted">"{{ $dispensasi->catatan_waka }}"</p>@endif
+            </div>
+        </div>
+    @endif
 
     {{-- Link WhatsApp — versi hemat biaya, tinggal tekan kirim --}}
     <div class="flex flex-col gap-2">
@@ -101,7 +116,7 @@
         @if ($dispensasi->status_akhir === 'approved')
             <button type="button"
                 data-modal-open="modal-surat-dispensasi"
-                data-modal-title="Surat Dispensasi"
+                data-modal-title="Surat {{ $dispensasi->jenis === 'lomba' ? 'Lomba' : 'Izin Keluar' }}"
                 data-ajax-url="{{ route('dispensasi.surat.fragment', $dispensasi) }}"
                 class="press flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-surface-alt bg-card text-sm font-bold text-ink">
                 <x-icon name="qr_code_2" :size="18" /> Lihat Surat + QR

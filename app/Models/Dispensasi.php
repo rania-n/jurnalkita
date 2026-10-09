@@ -17,7 +17,7 @@ class Dispensasi extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'kelompok_id', 'siswa_id', 'diajukan_oleh_id', 'tanggal', 'tanggal_selesai', 'jam_ke_mulai', 'jam_ke_selesai',
+        'jenis', 'kelompok_id', 'siswa_id', 'diajukan_oleh_id', 'tanggal', 'tanggal_selesai', 'jam_ke_mulai', 'jam_ke_selesai',
         'alasan', 'surat_path', 'no_hp',
         'status_piket', 'piket_id', 'catatan_piket',
         'status_waka', 'waka_id', 'catatan_waka',

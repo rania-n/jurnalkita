@@ -177,7 +177,7 @@
                             label="Detail"
                             icon="badge"
                             data-modal-open="modal-dispensasi-detail"
-                            data-modal-title="{{ $anggota->count() > 1 ? 'Izin Keluar '.$anggota->count().' Siswa' : $d->siswa->nama }}"
+                            data-modal-title="{{ ($d->jenis === 'lomba' ? 'Lomba ' : 'Izin Keluar ') . ($anggota->count() > 1 ? $anggota->count().' Siswa' : $d->siswa->nama) }}"
                             data-ajax-url="{{ route('dispensasi.show.fragment', $d) }}"
                         />
                     </x-slot:actions>
@@ -208,7 +208,7 @@
                 hidden
                 data-auto-open-dispensasi
                 data-modal-open="modal-dispensasi-detail"
-                data-modal-title="{{ $lihatDispensasi->jumlahAnggota() > 1 ? 'Izin Keluar '.$lihatDispensasi->jumlahAnggota().' Siswa' : $lihatDispensasi->siswa->nama }}"
+                data-modal-title="{{ ($lihatDispensasi->jenis === 'lomba' ? 'Lomba ' : 'Izin Keluar ') . ($lihatDispensasi->jumlahAnggota() > 1 ? $lihatDispensasi->jumlahAnggota().' Siswa' : $lihatDispensasi->siswa->nama) }}"
                 data-ajax-url="{{ route('dispensasi.show.fragment', $lihatDispensasi) }}"
             ></button>
             @push('scripts')

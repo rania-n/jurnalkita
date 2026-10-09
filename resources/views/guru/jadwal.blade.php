@@ -99,7 +99,7 @@
 
     @if ($adaPiket)
         <x-alert type="info" class="mt-6">
-            Saat bertugas piket, Anda dapat mengajukan dispensasi siswa melalui menu <strong>Dispensasi</strong>.
+            Saat bertugas piket, Anda dapat mengajukan izin keluar atau lomba siswa melalui menu <strong>Izin Keluar</strong>.
             Pengajuan akan diteruskan ke Waka untuk disetujui.
         </x-alert>
     @endif

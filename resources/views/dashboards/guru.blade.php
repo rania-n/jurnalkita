@@ -181,7 +181,7 @@
                     <x-icon name="add_circle" :size="24" />
                 </span>
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-ink">Ajukan Dispensasi</p>
+                    <p class="text-sm font-bold text-ink">Ajukan Izin Keluar</p>
                     <p class="truncate text-xs text-muted">Izin keluar siswa / lomba</p>
                 </div>
                 <x-icon name="chevron_right" :size="20" class="shrink-0 text-muted" />

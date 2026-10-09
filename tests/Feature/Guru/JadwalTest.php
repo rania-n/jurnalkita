@@ -95,7 +95,7 @@ class JadwalTest extends TestCase
         $this->actingAs($piket)->get('/guru')
             ->assertOk()
             ->assertSee('Monitor Piket')
-            ->assertSee('Ajukan Dispensasi');
+            ->assertSee('Ajukan Izin Keluar');
 
         $bukanPiket = User::factory()->role('guru')->create();
         Guru::create(['user_id' => $bukanPiket->id, 'nama' => 'Guru Biasa']);
@@ -117,7 +117,7 @@ class JadwalTest extends TestCase
         JadwalPiket::create(['guru_id' => $guru->id, 'hari' => 'senin']);
 
         $this->actingAs($user)->get('/guru/jadwal')
-            ->assertOk()->assertDontSee('Monitor Piket')->assertSee('mengajukan dispensasi siswa', false);
+            ->assertOk()->assertDontSee('Monitor Piket')->assertSee('mengajukan izin keluar atau lomba siswa', false);
     }
 
     public function test_info_dispensasi_tidak_muncul_kalau_guru_tidak_ada_jadwal_piket(): void
@@ -126,7 +126,7 @@ class JadwalTest extends TestCase
         Guru::create(['user_id' => $user->id, 'nama' => 'Guru Biasa']);
 
         $this->actingAs($user)->get('/guru/jadwal')
-            ->assertOk()->assertDontSee('mengajukan dispensasi siswa', false);
+            ->assertOk()->assertDontSee('mengajukan izin keluar atau lomba siswa', false);
     }
 
     /**
@@ -142,7 +142,7 @@ class JadwalTest extends TestCase
         JadwalPiket::create(['guru_id' => $guru->id, 'hari' => 'rabu']);
 
         $this->actingAs($user)->get('/guru/jadwal?hari=senin')
-            ->assertOk()->assertSee('mengajukan dispensasi siswa', false);
+            ->assertOk()->assertSee('mengajukan izin keluar atau lomba siswa', false);
     }
 
     public function test_route_halaman_piket_lama_sudah_tidak_ada(): void

@@ -235,7 +235,7 @@ class DispensasiController extends Controller
             'jam_ke_mulai' => ['nullable', 'required_with:jam_ke_selesai', 'integer', 'min:1', 'max:20'],
             'jam_ke_selesai' => ['nullable', 'integer', 'min:1', 'max:20', 'gte:jam_ke_mulai'],
             'alasan' => ['required', 'string'],
-            'jenis' => ['nullable', 'string'],
+            'jenis' => ['nullable', 'string', 'in:izin_keluar,lomba'],
             'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
 
@@ -269,8 +269,11 @@ class DispensasiController extends Controller
         });
 
         $dispensasi = $dispensasis->firstOrFail();
-        foreach (User::where('role', 'waka')->get() as $waka) {
-            $waka->notify(new DispensasiBaru($dispensasi));
+
+        if ($jenis !== 'lomba') {
+            foreach (User::where('role', 'waka')->get() as $waka) {
+                $waka->notify(new DispensasiBaru($dispensasi));
+            }
         }
 
         // Balik ke Riwayat (bukan halaman detail) -- link WA-nya dibukakan
@@ -280,8 +283,14 @@ class DispensasiController extends Controller
         // ikut dikirim juga biar popup detailnya langsung kebuka otomatis di
         // atas Riwayat (pola yang sama kayak abis Waka mutusin), jadi piket
         // langsung lihat ringkasannya tanpa harus tap "Lihat" manual lagi.
-        return redirect()->route('dispensasi.index', ['kirim_wa' => $dispensasi->id, 'lihat' => $dispensasi->id])
-            ->with('success', $dispensasis->count().' siswa diajukan untuk izin keluar. Menunggu persetujuan Waka.');
+        $pesan = $jenis === 'lomba'
+            ? $dispensasis->count().' siswa dicatat untuk kegiatan Lomba/Dinas. Pengajuan otomatis disetujui tanpa perlu Waka.'
+            : $dispensasis->count().' siswa diajukan untuk izin keluar. Menunggu persetujuan Waka.';
+
+        return redirect()->route('dispensasi.index', [
+            'kirim_wa' => $jenis !== 'lomba' ? $dispensasi->id : null,
+            'lihat' => $dispensasi->id,
+        ])->with('success', $pesan);
     }
 
     /** Link WA ke Waka yang bertugas hari ini buat minta persetujuan dispensasi ini. */

@@ -16,7 +16,7 @@
     <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-navy text-card">
         <x-icon name="fact_check" :size="24" fill />
     </span>
-    <h1 class="mt-2 text-lg font-bold text-ink">Surat Dispensasi</h1>
+    <h1 class="mt-2 text-lg font-bold text-ink">Surat {{ $dispensasi->jenis === 'lomba' ? 'Lomba / Dinas' : 'Izin Keluar' }}</h1>
 </div>
 
 <x-alert :type="$dispensasi->status_akhir === 'approved' ? 'success' : ($dispensasi->status_akhir === 'rejected' ? 'error' : 'warning')" class="mb-4">
@@ -46,7 +46,9 @@
     @if ($dispensasi->status_akhir === 'approved')
         <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
             <span class="shrink-0 text-muted">Disetujui oleh Waka</span>
-            <span class="min-w-0 break-words text-right font-semibold text-ink">{{ $dispensasi->waka?->name ?? 'Nama Waka belum tercatat' }}</span>
+            <span class="min-w-0 break-words text-right font-semibold text-ink">
+                {{ $dispensasi->jenis === 'lomba' ? 'Otomatis (Lomba)' : ($dispensasi->waka?->name ?? 'Nama Waka belum tercatat') }}
+            </span>
         </div>
     @endif
     <div class="border-b border-surface-alt pb-2">
@@ -68,7 +70,7 @@
             </a>
         @else
             <a href="{{ $buktiUrl }}" target="_blank" rel="noopener">
-                <img src="{{ $buktiUrl }}" alt="Surat / bukti pengajuan dispensasi" class="max-h-64 w-full rounded-lg border border-surface-alt object-contain">
+                <img src="{{ $buktiUrl }}" alt="Surat / bukti pengajuan izin" class="max-h-64 w-full rounded-lg border border-surface-alt object-contain">
             </a>
         @endif
     @else
@@ -80,7 +82,7 @@
     <div class="mt-5 flex flex-col items-center gap-2 rounded-xl border border-surface-alt bg-surface p-4">
         {{-- h-auto + max-w-full (bukan width/height attribute mentah) biar
              nggak overflow di layar yang lebih sempit dari 200px. --}}
-        <img src="{{ $qrUrl }}" alt="QR dispensasi" class="h-auto w-[200px] max-w-full rounded-lg">
+        <img src="{{ $qrUrl }}" alt="QR izin keluar" class="h-auto w-[200px] max-w-full rounded-lg">
         <p class="text-center text-xs text-muted-2">
             Tunjukkan QR ini ke satpam saat keluar sekolah.<br>
             Kode berganti setiap 10 detik. Jika tidak terbaca, tunggu sebentar lalu coba lagi.
@@ -91,5 +93,5 @@
 @elseif ($dispensasi->status_akhir === 'rejected')
     <x-alert type="error" class="mt-5">Pengajuan ini ditolak, tidak berlaku buat keluar sekolah.</x-alert>
 @elseif ($sudahLewat)
-    <x-alert type="warning" class="mt-5">Masa berlaku dispensasi ini sudah lewat, QR tidak ditampilkan lagi.</x-alert>
+    <x-alert type="warning" class="mt-5">Masa berlaku surat ini sudah lewat, QR tidak ditampilkan lagi.</x-alert>
 @endif
