@@ -15,10 +15,10 @@
 <x-layouts.app title="Jadwal Pelajaran Kelas" width="wide">
     <x-page-header title="Jadwal Pelajaran" :subtitle="$kelas->nama . ' · seminggu'" size="sm" />
 
-    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex flex-wrap gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabsHari as $key => $label)
             <a href="{{ route('sekretaris.kelas.jadwal', $key === 'semua' ? [] : ['hari' => $key]) }}"
-               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $hari === $key, 'text-muted-2 hover:text-ink' => $hari !== $key])>
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $hari === $key, 'bg-surface text-muted-2 hover:bg-surface-alt hover:text-ink' => $hari !== $key])>
                 {{ $label }}
             </a>
         @endforeach

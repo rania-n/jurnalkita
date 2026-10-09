@@ -8,7 +8,7 @@
 ])
 
 @php
-    $base = 'press inline-flex h-12 items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60';
+    $base = 'press inline-flex h-12 items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer';
     $variants = [
         'primary' => 'bg-navy text-card hover:bg-navy-hover',
         'secondary' => 'bg-surface-alt text-ink hover:bg-[#cbd5e1]',

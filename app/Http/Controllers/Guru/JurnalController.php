@@ -415,7 +415,7 @@ class JurnalController extends Controller
 
         $data = $request->validate([
             'jadwal_id' => ['required', 'exists:jadwals,id'],
-            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15'],
+            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:20'],
             'status_guru' => ['required', 'in:hadir,tidak_hadir'],
             'materi' => ['required_if:status_guru,hadir', 'nullable', 'string'],
             'metode_pilihan' => ['required_if:status_guru,hadir', 'nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
@@ -424,6 +424,7 @@ class JurnalController extends Controller
             'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
             'presensi' => ['nullable', 'array'],
             'presensi.*.status' => ['required', 'in:hadir,sakit,izin,izin_keluar,izin_terlambat,alpha,dispensasi'],
+            'presensi.*.jam_masuk' => ['nullable', 'integer', 'min:1', 'max:18'],
             'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
             // Wajib cuma kalau Hadir DAN tanggalnya hari ini (bukti "beneran
             // di kelas", lewat kamera langsung) -- jurnal susulan (tanggal
@@ -505,11 +506,20 @@ class JurnalController extends Controller
                     $isi = $presensiFallback[$siswa->id] ?? ['status' => 'hadir', 'catatan' => null];
                 }
 
+                $catatan = $isi['catatan'] ?? null;
+                if ($isi['status'] === 'izin_terlambat' && !empty($isi['jam_masuk'])) {
+                    $jamMasukText = "Terlambat masuk di JP ke-{$isi['jam_masuk']}";
+                    // Prevent duplicate suffix if it's somehow already there
+                    if (!$catatan || !str_contains($catatan, 'Terlambat masuk di JP ke-')) {
+                        $catatan = $catatan ? "{$catatan} ({$jamMasukText})" : $jamMasukText;
+                    }
+                }
+
                 Absensi::create([
                     'jurnal_id' => $jurnal->id,
                     'siswa_id' => $siswa->id,
                     'status' => $isi['status'],
-                    'catatan' => $isi['catatan'] ?? null,
+                    'catatan' => $catatan,
                 ]);
             }
 
@@ -520,6 +530,13 @@ class JurnalController extends Controller
 
         if (! $jurnal->verifikasiAbsen()) {
             $jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal));
+        }
+
+        if ($data['status_guru'] === 'tidak_hadir') {
+            $wakas = \App\Models\User::where('role', 'waka')->get();
+            foreach ($wakas as $waka) {
+                $waka->notify(new \App\Notifications\GuruTidakHadir($jurnal));
+            }
         }
 
         $pesanSukses = $data['status_guru'] === 'tidak_hadir'
@@ -653,8 +670,14 @@ class JurnalController extends Controller
             });
         });
 
+        $wakas = \App\Models\User::where('role', 'waka')->get();
+
         foreach ($dibuat as $jurnal) {
             AuditLog::catat('Tambah Jurnal (massal)', "Jurnal {$jurnal->jadwal->mapel->nama} — {$jurnal->jadwal->kelas->nama}", $jurnal);
+            
+            foreach ($wakas as $waka) {
+                $waka->notify(new \App\Notifications\GuruTidakHadir($jurnal));
+            }
         }
 
         return $this->redirectRiwayat()
@@ -684,9 +707,21 @@ class JurnalController extends Controller
         // badge "ikut jurnal lain"/"dicatat piket" di _presensi-grid TIDAK
         // perlu (dan salah) ditampilkan buat baris yang nggak di-overwrite
         // piket di bawah.
-        $presensiAwal = $jurnal->absensis->mapWithKeys(fn ($a) => [
-            $a->siswa_id => ['status' => $a->status, 'catatan' => $a->catatan, 'sumber' => null],
-        ])->all();
+        $presensiAwal = $jurnal->absensis->mapWithKeys(function ($a) {
+            $catatan = $a->catatan;
+            $jamMasuk = null;
+            if ($a->status === 'izin_terlambat' && $catatan && preg_match('/Terlambat masuk di JP ke-(\d+)/', $catatan, $matches)) {
+                $jamMasuk = (int) $matches[1];
+                // Strip the appended text for editing to prevent infinite nesting
+                $catatan = trim(str_replace("(Terlambat masuk di JP ke-$jamMasuk)", '', $catatan));
+                if ($catatan === "Terlambat masuk di JP ke-$jamMasuk") {
+                    $catatan = null;
+                }
+            }
+            return [
+                $a->siswa_id => ['status' => $a->status, 'catatan' => $catatan, 'sumber' => null, 'jam_masuk' => $jamMasuk],
+            ];
+        })->all();
         foreach (PresensiDefault::presensiPiket($jurnal->jadwal->kelas_id, $jurnal->tanggal->toDateString()) as $siswaId => $presensiPiket) {
             $presensiAwal[$siswaId] = ['status' => $presensiPiket->status, 'catatan' => $presensiPiket->catatan, 'sumber' => 'piket'];
         }
@@ -746,7 +781,7 @@ class JurnalController extends Controller
         // resources/views/guru/jurnal/index.blade.php buat auto-buka-nya.
         try {
             $data = $request->validate([
-                'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
+                'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:20', 'gte:jam_ke_mulai'],
                 'status_guru' => ['required', 'in:hadir,tidak_hadir'],
                 'materi' => ['required_if:status_guru,hadir', 'nullable', 'string'],
                 'metode_pilihan' => ['required_if:status_guru,hadir', 'nullable', 'in:'.implode(',', array_keys(self::METODE_LABEL))],
@@ -755,6 +790,7 @@ class JurnalController extends Controller
                 'alasan' => ['required_if:status_guru,tidak_hadir', 'nullable', 'in:'.implode(',', array_keys(self::ALASAN_LABEL))],
                 'presensi' => ['nullable', 'array'],
                 'presensi.*.status' => ['required', 'in:hadir,sakit,izin,izin_keluar,izin_terlambat,alpha,dispensasi'],
+                'presensi.*.jam_masuk' => ['nullable', 'integer', 'min:1', 'max:18'],
                 'presensi.*.catatan' => ['nullable', 'string', 'max:255'],
                 // Foto wajib cuma kalau status_guru Hadir, belum ada foto dari
                 // sebelumnya (guru cuma ubah data lain nggak wajib upload ulang),
@@ -783,6 +819,8 @@ class JurnalController extends Controller
             $data['alasan'] = self::ALASAN_LABEL[$data['alasan']] ?? $data['alasan'];
         }
 
+        $statusSebelumnya = $jurnal->status_guru;
+
         DB::transaction(function () use ($jurnal, $data, $request) {
             $jurnal->update(collect($data)->except(['presensi', 'foto_bukti', 'jam_ke_mulai', 'metode_pilihan', 'metode_custom'])->all());
 
@@ -799,7 +837,15 @@ class JurnalController extends Controller
             foreach ($jurnal->absensis as $absensi) {
                 $isi = $data['presensi'][$absensi->siswa_id]
                     ?? ['status' => $absensi->status, 'catatan' => $absensi->catatan];
-                $absensi->update(['status' => $isi['status'], 'catatan' => $isi['catatan'] ?? null]);
+                $catatan = $isi['catatan'] ?? null;
+                if ($isi['status'] === 'izin_terlambat' && !empty($isi['jam_masuk'])) {
+                    $jamMasukText = "Terlambat masuk di JP ke-{$isi['jam_masuk']}";
+                    if (!$catatan || !str_contains($catatan, 'Terlambat masuk di JP ke-')) {
+                        $catatan = $catatan ? "{$catatan} ({$jamMasukText})" : $jamMasukText;
+                    }
+                }
+
+                $absensi->update(['status' => $isi['status'], 'catatan' => $catatan]);
             }
 
             foreach (PresensiDefault::presensiPiket($jurnal->jadwal->kelas_id, $jurnal->tanggal->toDateString()) as $siswaId => $presensiPiket) {
@@ -822,6 +868,13 @@ class JurnalController extends Controller
 
         if ($sudahRevisi) {
             $jurnal->jadwal->kelas->pengurusUser()?->notify(new JurnalPerluDiperiksa($jurnal, hasilRevisi: true));
+        }
+
+        if ($statusSebelumnya !== 'tidak_hadir' && $data['status_guru'] === 'tidak_hadir') {
+            $wakas = \App\Models\User::where('role', 'waka')->get();
+            foreach ($wakas as $waka) {
+                $waka->notify(new \App\Notifications\GuruTidakHadir($jurnal));
+            }
         }
 
         return $this->redirectRiwayat(['lihat' => $jurnal->id])->with('success', 'Jurnal & presensi diperbarui.');

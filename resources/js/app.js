@@ -295,8 +295,16 @@ function initModals() {
         }
     });
 
-    // Klik di area backdrop (di luar isi) -> tutup.
+    // Pas dialog ditutup atau klik di area backdrop -> tutup dialog & bersihkan param ?lihat dari URL
+    // biar pas refresh halaman nggak ngebuka lagi popup-nya.
     document.querySelectorAll('dialog').forEach((dlg) => {
+        dlg.addEventListener('close', () => {
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('lihat')) {
+                url.searchParams.delete('lihat');
+                window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
+            }
+        });
         dlg.addEventListener('click', (e) => {
             if (e.target === dlg) dlg.close();
         });

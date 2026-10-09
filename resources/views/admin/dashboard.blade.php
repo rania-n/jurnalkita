@@ -27,6 +27,7 @@
 
 <x-layouts.admin title="Beranda" heading="Beranda">
     <div class="flex flex-col gap-6">
+        <x-ui.auto-refresh :url="route('admin.dashboard.versi')" />
 
         {{-- ── 1. Perlu Perhatian (Tindakan Tertunda) ───────────────────────── --}}
         @if ($totalTindakan > 0)

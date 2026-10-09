@@ -72,7 +72,7 @@
 
         $wakaBertugas = \App\Models\User::wakaUntukHariIni();
         $waLinkWaka = $wakaBertugas?->no_hp
-            ? \App\Support\WaLink::url($wakaBertugas->no_hp, "Halo Bapak/Ibu {$wakaBertugas->name} (Waka Kesiswaan), saya ".auth()->user()->name.' (Guru Piket hari ini), ingin koordinasi terkait dispensasi siswa.')
+            ? \App\Support\WaLink::url($wakaBertugas->no_hp, "Halo Bapak/Ibu {$wakaBertugas->name} (Waka), saya ".auth()->user()->name.' (Guru Piket hari ini), ingin koordinasi terkait dispensasi siswa.')
             : null;
     } else {
         // Dasbor Guru Piket dan dasbor Guru Biasa SENGAJA dipisah total --
@@ -313,7 +313,7 @@
                                 </div>
                             @endif
 
-                            <p class="mt-2 text-[11px] font-bold tracking-wide text-muted-2 uppercase">Waka Kesiswaan Siap Dihubungi</p>
+                            <p class="mt-2 text-[11px] font-bold tracking-wide text-muted-2 uppercase">Waka Siap Dihubungi</p>
                             @if ($wakaBertugas)
                                 <div class="flex items-center justify-between gap-2 rounded-xl border border-surface-alt/50 bg-surface/50 p-2.5">
                                     <div class="min-w-0">
@@ -327,7 +327,7 @@
                                     @endif
                                 </div>
                             @else
-                                <p class="text-xs text-muted">Belum ada Waka Kesiswaan yang terdaftar.</p>
+                                <p class="text-xs text-muted">Belum ada Waka yang terdaftar.</p>
                             @endif
                         </div>
                     </div>

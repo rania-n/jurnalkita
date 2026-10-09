@@ -41,14 +41,8 @@ class PresensiDefault
         return $siswas->mapWithKeys(function ($s) use ($siswaDispensasi, $presensiPiket, $presensiSebelumnya, $jamMulai, $jamSelesai) {
             if ($siswaDispensasi->has($s->id)) {
                 $d = $siswaDispensasi[$s->id];
-                $catatan = $d->alasan ?: 'Dispensasi (otomatis dari sistem)';
+                $catatan = $d->alasan ? "keluar({$d->alasan})" : 'keluar';
 
-                // Dispensasinya kepilih karena ADA tumpang tindih jam sama jurnal
-                // ini (nggak harus nutup penuh) -- kalau ternyata cuma nutup
-                // SEBAGIAN (mulai belakangan atau selesai duluan dari jurnalnya),
-                // kasih tau sampai/dari jam berapa di catatan, biar guru inget
-                // buat ngecek manual sisa jamnya (siswa mungkin udah balik/belum
-                // dateng di luar rentang itu).
                 $labelJamDispen = match (true) {
                     $d->jam_ke_mulai === null => null, // sepanjang hari, gak ada batas buat dicatetin
                     $d->jam_ke_selesai === null => "JP {$d->jam_ke_mulai} sampai selesai",
@@ -59,10 +53,10 @@ class PresensiDefault
                     || ($jamSelesai !== null && $d->jam_ke_selesai !== null && $d->jam_ke_selesai < $jamSelesai)
                 );
                 if ($cumaSebagian) {
-                    $catatan .= " (dispensasi {$labelJamDispen} -- cek manual buat jam di luar itu)";
+                    $catatan .= " ({$labelJamDispen} -- cek manual buat jam di luar itu)";
                 }
 
-                return [$s->id => ['status' => 'dispensasi', 'catatan' => $catatan, 'sumber' => 'dispensasi']];
+                return [$s->id => ['status' => 'izin', 'catatan' => $catatan, 'sumber' => 'dispensasi', 'alasan_izin_keluar' => $d->alasan]];
             }
 
             if ($presensiPiket->has($s->id)) {

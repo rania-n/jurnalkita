@@ -23,7 +23,7 @@
          border lebih kentara. Ikon per jenis notifikasi (bukan cuma titik
          polos) biar langsung kelihatan itu notifikasi soal apa (Jurnal,
          Dispensasi, dst), bukan sekadar tanda "ada sesuatu". --}}
-    <div class="flex flex-col gap-1.5">
+    <div class="flex flex-col gap-1.5 pb-16">
         @foreach ($notifikasiTerbaru as $n)
             <a href="{{ route('notifikasi.buka', $n->id) }}" @class([
                 'flex items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-colors hover:border-navy/30',
@@ -55,7 +55,7 @@
      tumpang tindih & link-nya yang kepencet, bukan tombolnya) karena
      dua-duanya nggak eksplisit punya urutan tumpukan (stacking order). --}}
 @if ($jumlahBelumDibaca > 0)
-    <div class="sticky bottom-0 z-10 -mx-5 -mb-5 border-t border-surface-alt bg-card px-5 py-3">
+    <div class="sticky -bottom-5 z-10 mt-4 -mx-5 -mb-5 border-t border-surface-alt bg-card px-5 py-3">
         <form method="POST" action="{{ route('notifikasi.tandai-semua-dibaca') }}">
             @csrf
             <x-ui.button type="submit" variant="secondary" icon="done_all" class="w-full !h-10 !text-sm">Tandai Semua Dibaca</x-ui.button>

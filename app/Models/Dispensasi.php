@@ -131,7 +131,7 @@ class Dispensasi extends Model
         foreach ($this->anggotaKelompok() as $item) {
             $item->update([
                 'status_waka' => 'rejected',
-                'catatan_waka' => 'Otomatis dibatalkan sistem — melewati tanggal berlaku tanpa keputusan Waka Kesiswaan.',
+                'catatan_waka' => 'Otomatis dibatalkan sistem — melewati tanggal berlaku tanpa keputusan Waka.',
             ]);
             $item->segarkanStatusAkhir();
         }

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Jadwal shift Waka Kesiswaan -- bukan cuma guru piket yang gantian, Waka juga
+     * Jadwal shift Waka -- bukan cuma guru piket yang gantian, Waka juga
      * gantian per hari. Dipakai buat nentuin Waka mana yang dikirimi link WA
      * persetujuan dispensasi (yang bertugas hari itu, bukan asal Waka pertama).
      */

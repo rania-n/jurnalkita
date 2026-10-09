@@ -39,7 +39,7 @@ class DispensasiController extends Controller
         abort_unless(
             in_array($user->role, ['waka', 'admin'], true) || $user->isPiket(),
             403,
-            'Hanya guru piket, Waka Kesiswaan, dan admin yang bisa melihat dispensasi.'
+            'Hanya guru piket, Waka, dan admin yang bisa melihat dispensasi.'
         );
     }
 
@@ -224,19 +224,22 @@ class DispensasiController extends Controller
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal'],
             // jam_ke_mulai wajib ADA kalau jam_ke_selesai diisi, tapi mulai boleh sendirian
             // (artinya "dari jam segini sampai selesai hari itu").
-            'jam_ke_mulai' => ['nullable', 'required_with:jam_ke_selesai', 'integer', 'min:1', 'max:15'],
-            'jam_ke_selesai' => ['nullable', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
+            'jam_ke_mulai' => ['nullable', 'required_with:jam_ke_selesai', 'integer', 'min:1', 'max:20'],
+            'jam_ke_selesai' => ['nullable', 'integer', 'min:1', 'max:20', 'gte:jam_ke_mulai'],
             'alasan' => ['required', 'string'],
-            'jenis' => ['required', 'string'],
+            'jenis' => ['nullable', 'string'],
             'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
 
-        if (in_array($data['jenis'], ['sakit', 'izin_keluar', 'izin_terlambat']) && ! $request->hasFile('surat')) {
+        $jenis = $data['jenis'] ?? 'izin_keluar'; // Default to izin_keluar since this is the Izin Keluar form now
+
+        if (in_array($jenis, ['sakit', 'izin_terlambat']) && ! $request->hasFile('surat')) {
             return back()->withInput()->withErrors(['surat' => 'Bukti surat wajib diunggah untuk jenis dispensasi ini.']);
         }
 
         $suratPath = $request->file('surat')?->store('dispensasi-surat', 'public');
         $dataPengajuan = collect($data)->except(['siswa_ids', 'surat'])->all();
+        $dataPengajuan['jenis'] = $jenis;
         $kelompokId = count($data['siswa_ids']) > 1 ? (string) Str::uuid() : null;
         $dispensasis = DB::transaction(function () use ($data, $dataPengajuan, $suratPath, $kelompokId) {
             return collect($data['siswa_ids'])->map(function ($siswaId) use ($dataPengajuan, $suratPath, $kelompokId) {
@@ -270,7 +273,7 @@ class DispensasiController extends Controller
         // atas Riwayat (pola yang sama kayak abis Waka mutusin), jadi piket
         // langsung lihat ringkasannya tanpa harus tap "Lihat" manual lagi.
         return redirect()->route('dispensasi.index', ['kirim_wa' => $dispensasi->id, 'lihat' => $dispensasi->id])
-            ->with('success', $dispensasis->count().' siswa diajukan untuk dispensasi. Menunggu persetujuan Waka Kesiswaan.');
+            ->with('success', $dispensasis->count().' siswa diajukan untuk izin keluar. Menunggu persetujuan Waka.');
     }
 
     /** Link WA ke Waka yang bertugas hari ini buat minta persetujuan dispensasi ini. */
@@ -343,7 +346,7 @@ class DispensasiController extends Controller
     public function updateNoHp(Dispensasi $dispensasi, Request $request): RedirectResponse
     {
         $user = auth()->user();
-        abort_unless($user->role === 'waka' || $user->isPiket(), 403, 'Hanya guru piket dan Waka Kesiswaan yang bisa mengisi ini.');
+        abort_unless($user->role === 'waka' || $user->isPiket(), 403, 'Hanya guru piket dan Waka yang bisa mengisi ini.');
         abort_unless($dispensasi->status_akhir === 'approved', 403, 'Nomor WhatsApp dapat diisi setelah dispensasi disetujui.');
 
         $data = $request->validate([
@@ -372,7 +375,7 @@ class DispensasiController extends Controller
         abort_unless(
             $dispensasi->status_waka === 'pending',
             403,
-            'Sudah diputuskan Waka Kesiswaan, tidak bisa dibatalkan.'
+            'Sudah diputuskan Waka, tidak bisa dibatalkan.'
         );
 
         $anggota = $dispensasi->anggotaKelompok();

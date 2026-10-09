@@ -47,7 +47,7 @@
          tab Riwayat Jurnal -- biar TETAP di tab yang sama begitu tanggal/mode
          diganti (reload halaman), bukan balik ke "Semua" terus. Jumlah
          disembunyikan kalau 0 (nggak nambah info, cuma bikin rame). --}}
-    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex flex-wrap gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach (['' => 'Semua', 'sudah_diisi' => 'Sudah Diisi', 'belum_diisi' => 'Belum Diisi', 'tidak_diisi' => 'Tidak Diisi'] as $key => $label)
             @php 
                 $jumlah = 0;
@@ -62,7 +62,7 @@
                 $isActive = $statusAktif === $key || ($key === 'sudah_diisi' && in_array($statusAktif, ['hadir', 'tidak_hadir', 'terlambat']));
             @endphp
             <a href="{{ route('piket.monitor.index', array_merge(request()->except('status', 'page'), $key === '' ? [] : ['status' => $key])) }}"
-               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $isActive, 'text-muted-2 hover:text-ink' => !$isActive])>
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $isActive, 'bg-surface text-muted-2 hover:bg-surface-alt hover:text-ink' => !$isActive])>
                 {{ $label }}
                 @if ($jumlah > 0)
                     <span class="opacity-70">({{ $jumlah }})</span>
@@ -72,7 +72,7 @@
     </div>
 
     @if (in_array($statusAktif, ['sudah_diisi', 'hadir', 'tidak_hadir', 'terlambat']))
-        <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+        <div class="mb-4 flex flex-wrap gap-1 rounded-lg border border-surface-alt bg-card p-1">
             @foreach (['sudah_diisi' => 'Semua (Sudah Diisi)', 'hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir', 'terlambat' => 'Terlambat'] as $subKey => $subLabel)
                 @php 
                     $subJumlah = 0;
@@ -83,7 +83,7 @@
                     }
                 @endphp
                 <a href="{{ route('piket.monitor.index', array_merge(request()->except('status', 'page'), ['status' => $subKey])) }}"
-                   @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusAktif === $subKey, 'text-muted-2 hover:text-ink' => $statusAktif !== $subKey])>
+                   @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusAktif === $subKey, 'bg-surface text-muted-2 hover:bg-surface-alt hover:text-ink' => $statusAktif !== $subKey])>
                     {{ $subLabel }}
                     @if ($subJumlah > 0)
                         <span class="opacity-70">({{ $subJumlah }})</span>
@@ -208,9 +208,18 @@
                                         <td class="px-3 py-2 text-ink">{{ $b['jadwal']->mapel->nama }}</td>
                                         <td class="px-3 py-2 text-muted">{{ $lawan }}</td>
                                         <td class="px-3 py-2">
-                                            <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold {{ $tone[$b['status']] }}">
-                                                {{ $b['statusLabel'] }}
-                                            </span>
+                                            @if ($b['status'] === 'terlambat')
+                                                @php
+                                                    $isHadir = str_starts_with($b['statusLabel'], 'Hadir');
+                                                @endphp
+                                                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold {{ $isHadir ? 'bg-hadir-soft text-hadir' : 'bg-alpha-soft text-alpha' }}">
+                                                    {{ Str::before($b['statusLabel'], ' (Terlambat)') }} <span class="text-alpha ml-1">(Terlambat)</span>
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold {{ $tone[$b['status']] }}">
+                                                    {{ $b['statusLabel'] }}
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="px-3 py-2 text-muted">
                                             {{ $b['jurnal']->materi ?? ($b['jurnal']->tugas_tambahan ?? '—') }}
@@ -237,9 +246,38 @@
         <div data-modal-ajax-target></div>
     </x-ui.modal>
 
+    @if ($lihatJurnal)
+        {{-- Dibuka lewat ?lihat=<id> (habis dari notifikasi) -- tombol tersembunyi ini di-klik
+             otomatis lewat script di bawah. ID modal sama kayak di loop tabel atas, isinya
+             difetch AJAX. --}}
+        @php
+            $lawan = $mode === 'guru' ? $lihatJurnal->jadwal->kelas->nama : $lihatJurnal->guru->nama;
+            $judulLihat = 'Detail Jurnal — ' . $lawan;
+        @endphp
+        <button type="button" class="hidden" id="btn-auto-lihat"
+            data-modal-open="modal-jurnal-detail"
+            data-modal-title="{{ $judulLihat }}"
+            data-ajax-url="{{ route('piket.monitor.jurnal', $lihatJurnal) }}">
+        </button>
+    @endif
+
     @push('scripts')
         <script>
             (function () {
+                const btnLihat = document.getElementById('btn-auto-lihat');
+                if (btnLihat) {
+                    window.addEventListener('load', () => {
+                        btnLihat.click();
+                        // Hapus ?lihat dari URL biar kalau direfresh manual (F5) nggak
+                        // terus-terusan auto-buka pop up (perbaikan bug sebelumnya).
+                        const url = new URL(window.location);
+                        if (url.searchParams.has('lihat')) {
+                            url.searchParams.delete('lihat');
+                            window.history.replaceState({}, '', url);
+                        }
+                    });
+                }
+
                 // Filter status sekarang server-side (?status=..., lihat
                 // PiketController@index) -- JS di sini cuma ngurus pencarian
                 // teks di atas baris yang SUDAH difilter status dari server.

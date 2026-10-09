@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PresensiPiket extends Model
 {
-    protected $fillable = ['siswa_id', 'tanggal', 'status', 'catatan', 'surat_path', 'dicatat_oleh_id'];
+    protected $fillable = ['siswa_id', 'tanggal', 'tanggal_selesai', 'status', 'jam_masuk', 'jam_ke_mulai', 'jam_ke_selesai', 'catatan', 'surat_path', 'dicatat_oleh_id'];
 
     protected function casts(): array
     {

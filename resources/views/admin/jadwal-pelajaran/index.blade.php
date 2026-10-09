@@ -59,14 +59,20 @@
     $hariPenuh = $kelasDipilih ? \App\Models\Jadwal::hariPenuhUntukKelas((int) $kelasDipilih) : [];
     $hariOptions = collect($hariLabel)->map(fn ($l, $v) => in_array($v, $hariPenuh, true) ? "{$l} (Penuh)" : $l)->all();
 
-    // Hitung hari penuh untuk semua kelas sekaligus secara cepat (2 query) untuk update instan di browser tanpa reload
-    $jpSeninKamis = \App\Models\JamPelajaran::where('kategori', 'senin_kamis')->pluck('jam_ke')->all();
-    $jpJumat = \App\Models\JamPelajaran::where('kategori', 'jumat')->pluck('jam_ke')->all();
+    // Hitung hari penuh untuk semua kelas sekaligus secara cepat untuk update instan di browser tanpa reload
+    $jpPerKategori = \App\Models\JamPelajaran::all()->groupBy('kategori')->map->pluck('jam_ke')->map->all()->all();
+    $hariKategori = \Illuminate\Support\Facades\DB::table('jam_pelajaran_hari')->pluck('kategori', 'hari')->all();
+    
+    $jpPerHari = collect(['senin', 'selasa', 'rabu', 'kamis', 'jumat'])->mapWithKeys(function ($h) use ($hariKategori, $jpPerKategori) {
+        $kategori = $hariKategori[$h] ?? null;
+        return [$h => $kategori ? ($jpPerKategori[$kategori] ?? []) : []];
+    })->all();
+
     $jadwalsGrouped = \App\Models\Jadwal::all(['kelas_id', 'hari', 'jam_ke_mulai', 'jam_ke_selesai'])->groupBy(['kelas_id', 'hari']);
     $hariPenuhSemuaKelas = [];
     foreach ($jadwalsGrouped as $kId => $hariGroup) {
         foreach ($hariGroup as $h => $jList) {
-            $jpTersedia = ($h === 'jumat') ? $jpJumat : $jpSeninKamis;
+            $jpTersedia = $jpPerHari[$h] ?? [];
             if (empty($jpTersedia)) {
                 continue;
             }
@@ -81,6 +87,13 @@
             }
         }
     }
+
+    $maxJpPerHari = array_map(fn($jps) => empty($jps) ? 13 : max($jps), $jpPerHari);
+    $absoluteMaxJp = empty($maxJpPerHari) ? 13 : max($maxJpPerHari);
+    $absoluteMaxJp = max($absoluteMaxJp, 13);
+    
+    // override jpList with dynamic max
+    $jpList = collect(range(1, $absoluteMaxJp))->map(fn ($i) => ['id' => $i, 'nama' => "JP {$i}", 'keterangan' => "Jam ke-{$i}"]);
 @endphp
 
 <x-layouts.admin title="Jadwal Pelajaran" heading="Jadwal Pelajaran" :subtitle="$rows->count() . ' jadwal'">
@@ -112,6 +125,8 @@
         <x-ui.cari-pilihan name="ruang" label="Ruang" :options="$ruangList" all="Semua Ruang" />
         <x-ui.cari-pilihan name="jp" label="JP" :options="$jpList" all="Semua JP" />
     </x-admin.filters>
+
+    <x-ui.auto-refresh :url="route('master.jadwal-pelajaran.versi')" />
 
     @if ($rows->isEmpty())
         <x-ui.empty title="Tidak ada jadwal yang cocok" />
@@ -189,11 +204,11 @@
             <div class="flex gap-3">
                 <x-ui.select label="Jam ke- (mulai)" name="jam_ke_mulai" class="flex-1" required>
                     <option value="" disabled selected hidden>Pilih</option>
-                    @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
+                    @for ($i = 1; $i <= $absoluteMaxJp; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
                 </x-ui.select>
                 <x-ui.select label="Jam ke- (selesai)" name="jam_ke_selesai" class="flex-1" required>
                     <option value="" disabled selected hidden>Pilih</option>
-                    @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
+                    @for ($i = 1; $i <= $absoluteMaxJp; $i++)<option value="{{ $i }}">Jam ke-{{ $i }}</option>@endfor
                 </x-ui.select>
             </div>
             <x-ui.cari-pilihan
@@ -220,7 +235,7 @@
         ></button>
     @endif
 
-    <x-admin.modal id="modal-import-jadwal" title="Import Jadwal">
+    <x-admin.modal id="modal-import-jadwal" title="Import Jadwal" error-bag="import_jadwal">
         <form method="POST" action="{{ route('master.jadwal-pelajaran.import') }}" enctype="multipart/form-data" class="flex flex-col gap-4">
             @csrf
             <div class="rounded-xl border border-info-soft bg-info-soft/30 p-4 text-sm text-info-dark">
@@ -236,6 +251,9 @@
             <div>
                 <label class="mb-1 block text-sm font-semibold text-ink">File CSV</label>
                 <input type="file" name="file" accept=".csv" required class="block w-full rounded-md border border-surface-alt bg-card px-3 py-2 text-sm focus:border-navy focus:outline-none">
+                @error('file', 'import_jadwal')
+                    <p class="mt-1 text-xs font-medium text-alpha">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="mt-1 flex gap-2">
@@ -345,6 +363,38 @@
                     }
                 }
 
+                const jpPerHari = @json($jpPerHari);
+                const selectMulai = modal?.querySelector('select[name="jam_ke_mulai"]');
+                const selectSelesai = modal?.querySelector('select[name="jam_ke_selesai"]');
+
+                function updateJpDropdowns(hari) {
+                    if (!selectMulai || !selectSelesai) return;
+                    
+                    const jps = jpPerHari[hari] || [];
+                    const maxJp = jps.length > 0 ? Math.max(...jps) : 13;
+                    const defaultMax = Math.max(13, maxJp);
+                    
+                    const currentMulai = selectMulai.value;
+                    const currentSelesai = selectSelesai.value;
+                    
+                    let optionsHtml = '<option value="" disabled selected hidden>Pilih</option>';
+                    for (let i = 1; i <= defaultMax; i++) {
+                        optionsHtml += `<option value="${i}">Jam ke-${i}</option>`;
+                    }
+                    
+                    selectMulai.innerHTML = optionsHtml;
+                    selectSelesai.innerHTML = optionsHtml;
+                    
+                    if (currentMulai && currentMulai <= defaultMax) selectMulai.value = currentMulai;
+                    if (currentSelesai && currentSelesai <= defaultMax) selectSelesai.value = currentSelesai;
+                }
+
+                modal?.querySelectorAll('input[name="hari"]').forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        if (this.checked) updateJpDropdowns(this.value);
+                    });
+                });
+
                 kelasInput?.addEventListener('change', function () {
                     updateHariPenuh(this.value);
                 });
@@ -368,6 +418,9 @@
                         filterMapelByGuru(hiddenGuru.value, true);
                     }
                     updateHariPenuh(kelasInput?.value || '');
+                    
+                    const selectedHari = modal.querySelector('input[name="hari"]:checked')?.value;
+                    if (selectedHari) updateJpDropdowns(selectedHari);
                 });
             })();
         </script>

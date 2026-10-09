@@ -53,12 +53,9 @@
                     $statusAwal = old("presensi.{$s->id}.status", $isiAwal['status']);
                     $catatanAwal = old("presensi.{$s->id}.catatan", $isiAwal['catatan']);
                     $catatanId = 'catatan-pengganti-'.$s->id;
-                    // Badge "kenapa status ini udah keisi" cuma pas render AWAL,
-                    // sumbernya dari PresensiDefault -- JANGAN disamaratakan
-                    // "dari guru piket", 'jurnal_lain' bisa dari guru mana pun.
                     $sumberAwal = old("presensi.{$s->id}.status") === null ? ($isiAwal['sumber'] ?? null) : null;
                     $keteranganAwal = match ($sumberAwal) {
-                        'dispensasi' => 'Dispensasi disetujui untuk jam ini',
+                        'dispensasi' => 'Izin keluar disetujui untuk jam ini',
                         'piket' => 'Dicatat guru piket hari ini',
                         'jurnal_lain' => 'Mengikuti jurnal kelas ini jam lain hari ini',
                         default => null,
@@ -84,11 +81,16 @@
                         </div>
                     </div>
 
+                    @php
+                        $dikunciPiket = in_array($sumberAwal, ['piket', 'dispensasi']);
+                    @endphp
+
                     <x-ui.choice
                         :name="'presensi[' . $s->id . '][status]'"
                         :options="$statuses"
                         :tones="$tones"
                         :value="$statusAwal"
+                        :disabled="$dikunciPiket ? array_keys($statuses) : []"
                         size="sm"
                     />
 
@@ -97,22 +99,40 @@
                             type="button"
                             data-toggle-catatan="{{ $catatanId }}"
                             class="flex items-center gap-1 text-xs font-semibold text-navy hover:underline"
-                            @if ($catatanAwal) hidden @endif
+                            @if ($catatanAwal || $dikunciPiket) hidden @endif
                         >
                             <x-icon name="add_circle" :size="14" />
                             Tambah catatan
                         </button>
 
                         <div id="{{ $catatanId }}" @unless($catatanAwal) hidden @endunless>
-                            <x-ui.input
-                                :name="'presensi[' . $s->id . '][catatan]'"
-                                placeholder="Catatan (opsional)"
-                                :value="$catatanAwal"
-                            >
-                                <button type="button" data-close-catatan="{{ $catatanId }}" class="flex shrink-0 items-center text-muted-2 hover:text-ink" tabindex="-1" aria-label="Tutup catatan">
-                                    <x-icon name="close" :size="18" />
-                                </button>
-                            </x-ui.input>
+                            @if ($dikunciPiket)
+                                <div class="flex h-[52px] items-center rounded-xl border border-surface-alt bg-surface-alt px-4 text-[15px] cursor-not-allowed">
+                                    @if ($sumberAwal === 'dispensasi')
+                                        <div class="truncate">
+                                            @php
+                                                $htmlCatatan = preg_replace('/^keluar\((.*?)\)(.*)$/', '<span class="text-izin font-semibold">keluar</span><span class="text-muted-2">($1)$2</span>', $catatanAwal);
+                                                if ($htmlCatatan === $catatanAwal && str_starts_with($catatanAwal, 'keluar')) {
+                                                    $htmlCatatan = '<span class="text-izin font-semibold">keluar</span>' . substr($catatanAwal, 6);
+                                                }
+                                            @endphp
+                                            {!! $htmlCatatan !!}
+                                        </div>
+                                    @else
+                                        <span class="text-muted-2 truncate">{{ $catatanAwal ?: '-' }}</span>
+                                    @endif
+                                </div>
+                            @else
+                                <x-ui.input
+                                    :name="'presensi[' . $s->id . '][catatan]'"
+                                    placeholder="Catatan (opsional)"
+                                    :value="$catatanAwal"
+                                >
+                                    <button type="button" data-close-catatan="{{ $catatanId }}" class="flex shrink-0 items-center text-muted-2 hover:text-ink" tabindex="-1" aria-label="Tutup catatan">
+                                        <x-icon name="close" :size="18" />
+                                    </button>
+                                </x-ui.input>
+                            @endif
                         </div>
                     </div>
                 </div>

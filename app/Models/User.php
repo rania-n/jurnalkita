@@ -43,7 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Siswa::class);
     }
 
-    /** Jadwal shift Waka Kesiswaan (kalau role-nya waka). */
+    /** Jadwal shift Waka (kalau role-nya waka). */
     public function jadwalWakas(): HasMany
     {
         return $this->hasMany(JadwalWaka::class);
@@ -194,7 +194,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Label peran buat ditampilin (header, profil, dll) -- SATU sumber kebenaran,
      * dulu ada 4 versi beda-beda nyebar di beberapa view (nggak sinkron: "Waka"
-     * vs "Waka Kesiswaan", "Admin" vs "Administrator", dst).
+     * vs "Waka", "Admin" vs "Administrator", dst).
      */
     public function roleLabel(): string
     {
@@ -204,7 +204,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'satpam' => 'Satpam',
             'guru' => $this->piketHariIni() ? 'Guru Piket' : 'Guru',
             'siswa' => $this->kelasSekretaris() ? 'Pengurus '.$this->kelasSekretaris()->nama : 'Pengurus Kelas',
-            'waka' => 'Waka Kesiswaan',
+            'waka' => 'Waka',
             default => 'Pengguna',
         };
     }

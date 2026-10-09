@@ -29,6 +29,8 @@
         <x-admin.f-date name="sampai" label="Sampai" />
     </x-admin.filters>
 
+    <x-ui.auto-refresh :url="route('master.audit-log.versi')" />
+
     @if ($rows->isEmpty())
         <x-ui.empty title="Tidak ada log yang cocok" />
     @else

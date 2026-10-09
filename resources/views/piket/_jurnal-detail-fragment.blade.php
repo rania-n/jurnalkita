@@ -21,7 +21,10 @@
 
     <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         <x-ui.field-static label="Guru" icon="badge">{{ $jurnal->guru->nama ?? '—' }}</x-ui.field-static>
-        <x-ui.field-static label="Status Kehadiran" icon="how_to_reg">{{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}</x-ui.field-static>
+        <x-ui.field-static label="Status Kehadiran" icon="how_to_reg">
+            {{ $statusGuru[$jurnal->status_guru] ?? $jurnal->status_guru }}
+            @if ($jurnal->terlambat) <span class="text-alpha ml-1">(Terlambat)</span> @endif
+        </x-ui.field-static>
 
         @if ($jurnal->status_guru === 'hadir')
             <x-ui.field-static label="Materi" icon="menu_book" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>

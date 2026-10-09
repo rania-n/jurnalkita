@@ -6,7 +6,7 @@
     $admin = auth()->user()->role === 'admin';
 @endphp
 
-<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Dispensasi" heading="Dispensasi Siswa" width="wide">
+<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Izin Keluar" heading="Izin Meninggalkan Sekolah" width="wide">
     @php $urlEkspor = route('dispensasi.ekspor', request()->query()); @endphp
 
     @if ($waLinkAutoKirim)
@@ -18,7 +18,7 @@
              -- biar kalau kirim WA-nya dibatalkan, baliknya ke daftar (netral),
              bukan nyangkut di halaman form/detail. --}}
         <x-alert type="info" class="mb-4">
-            Pengajuan dispensasi berhasil disimpan.
+            Pengajuan izin keluar berhasil disimpan.
             <a href="{{ $waLinkAutoKirim }}" id="link-wa-auto-kirim" target="_blank" rel="noopener" class="font-bold underline">
                 Buka WhatsApp untuk mengirim tautan persetujuan
             </a>
@@ -30,7 +30,7 @@
     @endif
 
     @if ($admin)
-        <x-admin.page title="Dispensasi Siswa" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
+        <x-admin.page title="Izin Keluar" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
             <x-slot:action>
                 {{-- Desain tombol kecil dari Fitra dipertahankan -- ditambah
                      w-full sm:w-auto biar tetap stretch penuh di HP, sama kayak
@@ -46,7 +46,7 @@
                     <a href="{{ route('dispensasi.create') }}"
                        class="press inline-flex h-7 w-full shrink-0 items-center justify-center gap-1 rounded-md bg-navy px-2.5 text-xs font-semibold text-card hover:bg-navy-hover sm:w-auto">
                         <x-icon name="add" :size="13" class="shrink-0" />
-                        Ajukan Dispensasi
+                        Ajukan Izin Keluar
                     </a>
                 @endif
             </x-slot:action>
@@ -56,12 +56,12 @@
              -- !h-10 dkk override h-12 bawaan komponen (pola yang sama kayak
              notifikasi/index.blade.php), biar nggak sebesar tombol form biasa
              tapi tetap lebih jelas dari desain kecil kustom sebelumnya. --}}
-        <x-page-header title="Dispensasi Siswa" subtitle="Pengajuan dan persetujuan dispensasi siswa" size="sm">
+        <x-page-header title="Izin Keluar" subtitle="Pengajuan dan persetujuan izin keluar siswa" size="sm">
             @if ($bolehEkspor)
                 <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Unduh Ringkasan</x-ui.button>
             @endif
             @if ($bolehAjukan)
-                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ajukan Dispensasi</x-ui.button>
+                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ajukan Izin Keluar</x-ui.button>
             @endif
         </x-page-header>
     @endif
@@ -71,11 +71,11 @@
     {{-- Filter status -- paling atas, gaya tab disamakan dengan Riwayat
          Jurnal/Monitor Piket (bg-navy pas aktif), bukan warna per-status
          kayak sebelumnya. Jumlah disembunyikan kalau 0. --}}
-    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex flex-wrap gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
             @php $jumlah = $jumlahTab[$key] ?? 0; @endphp
             <a href="{{ route('dispensasi.index', array_merge(request()->except('tab', 'page'), ['tab' => $key])) }}"
-               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $tab === $key, 'text-muted-2 hover:text-ink' => $tab !== $key])>
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $tab === $key, 'bg-surface text-muted-2 hover:bg-surface-alt hover:text-ink' => $tab !== $key])>
                 {{ $label }}
                 @if ($jumlah > 0)
                     <span class="opacity-70">({{ $jumlah }})</span>
@@ -138,7 +138,7 @@
     </div>
 
     @if ($items->isEmpty())
-        <x-ui.empty icon="fact_check" title="Belum ada dispensasi" desc="Coba ubah filter jika Anda sedang mencari data tertentu." />
+        <x-ui.empty icon="fact_check" title="Belum ada izin keluar" desc="Coba ubah filter jika Anda sedang mencari data tertentu." />
     @else
         <x-ui.card-list class="grid-fill-last">
             @foreach ($items as $d)
@@ -177,7 +177,7 @@
                             label="Detail"
                             icon="badge"
                             data-modal-open="modal-dispensasi-detail"
-                            data-modal-title="{{ $anggota->count() > 1 ? 'Dispensasi '.$anggota->count().' Siswa' : $d->siswa->nama }}"
+                            data-modal-title="{{ $anggota->count() > 1 ? 'Izin Keluar '.$anggota->count().' Siswa' : $d->siswa->nama }}"
                             data-ajax-url="{{ route('dispensasi.show.fragment', $d) }}"
                         />
                     </x-slot:actions>
@@ -187,14 +187,14 @@
 
         {{-- Popup detail -- isinya di-fetch AJAX per baris, lihat initModals()
              di app.js. Satu modal dipakai bareng semua tombol "Detail". --}}
-        <x-ui.modal id="modal-dispensasi-detail" title="Detail Dispensasi" size="lg">
+        <x-ui.modal id="modal-dispensasi-detail" title="Detail Izin Keluar" size="lg">
             <div data-modal-ajax-target></div>
         </x-ui.modal>
 
         {{-- Popup Surat + QR -- dipicu dari TOMBOL DI DALAM popup Detail di
              atas (tombol "Lihat Surat + QR" ada di fragment yang di-inject ke
              situ), tapi modalnya sendiri harus ada di sini (bukan ikut fragment). --}}
-        <x-ui.modal id="modal-surat-dispensasi" title="Surat Dispensasi">
+        <x-ui.modal id="modal-surat-dispensasi" title="Surat Izin Keluar">
             <div data-modal-ajax-target></div>
         </x-ui.modal>
 
@@ -208,7 +208,7 @@
                 hidden
                 data-auto-open-dispensasi
                 data-modal-open="modal-dispensasi-detail"
-                data-modal-title="{{ $lihatDispensasi->jumlahAnggota() > 1 ? 'Dispensasi '.$lihatDispensasi->jumlahAnggota().' Siswa' : $lihatDispensasi->siswa->nama }}"
+                data-modal-title="{{ $lihatDispensasi->jumlahAnggota() > 1 ? 'Izin Keluar '.$lihatDispensasi->jumlahAnggota().' Siswa' : $lihatDispensasi->siswa->nama }}"
                 data-ajax-url="{{ route('dispensasi.show.fragment', $lihatDispensasi) }}"
             ></button>
             @push('scripts')
@@ -218,13 +218,20 @@
                     // dari app.js (dimuat sebagai module, ke-defer ke belakang), jadi
                     // klik yang ditembak lebih awal dari itu nggak kena tangkap sama
                     // sekali (modal-nya nggak kebuka).
-                    window.addEventListener('load', () => document.querySelector('[data-auto-open-dispensasi]')?.click());
+                    window.addEventListener('load', () => {
+                        document.querySelector('[data-auto-open-dispensasi]')?.click();
+                        const url = new URL(window.location.href);
+                        if (url.searchParams.has('lihat')) {
+                            url.searchParams.delete('lihat');
+                            window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
+                        }
+                    });
                 </script>
             @endpush
         @endif
 
         <p id="dispen-kosong" hidden class="rounded-xl border border-dashed border-surface-alt bg-card p-6 text-center text-sm text-muted-2">
-            Tidak ada dispensasi yang cocok dengan pencarian.
+            Tidak ada pengajuan izin keluar yang cocok dengan pencarian.
         </p>
         <div class="mt-4">{{ $items->links() }}</div>
     @endif

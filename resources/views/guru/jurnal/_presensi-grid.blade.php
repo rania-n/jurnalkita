@@ -71,6 +71,8 @@
                     $isiAwal = $presensiAwal[$s->id] ?? ['status' => 'hadir', 'catatan' => null, 'sumber' => null];
                     $statusAwal = old("presensi.{$s->id}.status", $isiAwal['status']);
                     $catatanAwal = old("presensi.{$s->id}.catatan", $isiAwal['catatan']);
+                    $jamMasukAwal = old("presensi.{$s->id}.jam_masuk", $isiAwal['jam_masuk'] ?? null);
+                    $alasanIzinKeluar = $isiAwal['alasan_izin_keluar'] ?? null;
                     
                     $rowStatuses = $defaultStatuses;
                     $rowTones = $defaultTones;
@@ -80,7 +82,7 @@
                         $rowTones['izin_keluar'] = 'warning';
                     } elseif ($statusAwal === 'dispensasi') {
                         $rowStatuses['dispensasi'] = 'Dispensasi';
-                        $rowTones['dispensasi'] = 'info';
+                        $rowTones['dispensasi'] = 'dispen';
                     }
 
                     // Badge "kenapa status ini udah keisi" cuma ditampilkan pas
@@ -91,7 +93,7 @@
                     // isi jurnal kelas ini hari ini, bukan cuma piket.
                     $sumberAwal = old("presensi.{$s->id}.status") === null ? ($isiAwal['sumber'] ?? null) : null;
                     $labelSumber = match ($sumberAwal) {
-                        'dispensasi' => 'Dispensasi disetujui untuk jam ini',
+                        'dispensasi' => 'Izin keluar disetujui untuk jam ini',
                         'piket' => 'Dicatat guru piket hari ini',
                         'piket_terlambat' => 'Terlambat (dicatat guru piket)',
                         'jurnal_lain' => 'Dari jurnal sebelumnya hari ini',
@@ -135,35 +137,71 @@
                         </div>
                     </div>
 
+                    @php
+                        $dikunciPiket = in_array($sumberAwal, ['piket', 'piket_terlambat', 'dispensasi']);
+                    @endphp
+
                     <x-ui.choice
                         :name="'presensi[' . $s->id . '][status]'"
                         :options="$rowStatuses"
                         :tones="$rowTones"
                         :value="$statusAwal"
+                        :disabled="$dikunciPiket ? array_keys($rowStatuses) : []"
                         size="sm"
                     />
 
                     <div class="border-t border-surface-alt pt-2.5">
+                        <div id="jam-masuk-wrap-{{ $s->id }}" @if ($statusAwal !== 'izin_terlambat') hidden @endif class="mb-3">
+                            <label class="block text-sm font-semibold text-ink mb-1.5">Mulai masuk kelas di JP ke-</label>
+                            <x-ui.select name="presensi[{{ $s->id }}][jam_masuk]" :disabled="$dikunciPiket">
+                                <option value="">Pilih JP</option>
+                                @for ($i = 1; $i <= 18; $i++)
+                                    <option value="{{ $i }}" @selected($jamMasukAwal == $i)>
+                                        JP {{ $i }}
+                                    </option>
+                                @endfor
+                            </x-ui.select>
+                            <p class="mt-1 text-xs text-muted-2">JP sebelum ini akan dicatat terlambat, JP mulai ini ke atas akan dihitung hadir.</p>
+                        </div>
+
                         <button
                             type="button"
                             data-toggle-catatan="{{ $catatanId }}"
                             class="flex items-center gap-1 text-xs font-semibold text-navy hover:underline"
-                            @if ($catatanAwal) hidden @endif
+                            @if ($catatanAwal || $dikunciPiket) hidden @endif
                         >
                             <x-icon name="add_circle" :size="14" />
                             Tambah catatan
                         </button>
 
                         <div id="{{ $catatanId }}" @unless($catatanAwal) hidden @endunless>
-                            <x-ui.input
-                                :name="'presensi[' . $s->id . '][catatan]'"
-                                placeholder="Catatan (opsional)"
-                                :value="$catatanAwal"
-                            >
-                                <button type="button" data-close-catatan="{{ $catatanId }}" class="flex shrink-0 items-center text-muted-2 hover:text-ink" tabindex="-1" aria-label="Tutup catatan">
-                                    <x-icon name="close" :size="18" />
-                                </button>
-                            </x-ui.input>
+                            @if ($dikunciPiket)
+                                <div class="flex h-[52px] items-center rounded-xl border border-surface-alt bg-surface-alt px-4 text-[15px] cursor-not-allowed">
+                                    @if ($sumberAwal === 'dispensasi')
+                                        <div class="truncate">
+                                            @php
+                                                $htmlCatatan = preg_replace('/^keluar\((.*?)\)(.*)$/', '<span class="text-izin font-semibold">keluar</span><span class="text-muted-2">($1)$2</span>', $catatanAwal);
+                                                if ($htmlCatatan === $catatanAwal && str_starts_with($catatanAwal, 'keluar')) {
+                                                    $htmlCatatan = '<span class="text-izin font-semibold">keluar</span>' . substr($catatanAwal, 6);
+                                                }
+                                            @endphp
+                                            {!! $htmlCatatan !!}
+                                        </div>
+                                    @else
+                                        <span class="text-muted-2 truncate">{{ $catatanAwal ?: '-' }}</span>
+                                    @endif
+                                </div>
+                            @else
+                                <x-ui.input
+                                    :name="'presensi[' . $s->id . '][catatan]'"
+                                    placeholder="Catatan (opsional)"
+                                    :value="$catatanAwal"
+                                >
+                                    <button type="button" data-close-catatan="{{ $catatanId }}" class="flex shrink-0 items-center text-muted-2 hover:text-ink" tabindex="-1" aria-label="Tutup catatan">
+                                        <x-icon name="close" :size="18" />
+                                    </button>
+                                </x-ui.input>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -276,14 +314,27 @@
             });
             tampilkanTidakHadirSaja?.addEventListener('change', refresh);
             rows.forEach((row) => {
+                const jamMasukWrap = row.querySelector('[id^="jam-masuk-wrap-"]');
+                const jamMasukSelect = jamMasukWrap?.querySelector('select');
+                
                 row.querySelectorAll('input[type="radio"]').forEach((r) => r.addEventListener('change', () => {
-                    // Statusnya balik/tetap Hadir -> lepas dari daftar "kartu
-                    // yang lagi dibuka manual", biar refresh() nyembunyiin
-                    // lagi kayak kartu Hadir lainnya (bukan nyangkut nampil
-                    // selamanya cuma gara-gara pernah dicari & dibuka).
-                    if (statusRow(row) === 'hadir') dipilihManual.delete(row);
+                    const status = statusRow(row);
+                    
+                    if (jamMasukWrap && jamMasukSelect) {
+                        const isTerlambat = status === 'izin_terlambat';
+                        jamMasukWrap.hidden = !isTerlambat;
+                        jamMasukSelect.required = isTerlambat;
+                        if (!isTerlambat) jamMasukSelect.value = '';
+                    }
+
+                    if (status === 'hadir') dipilihManual.delete(row);
                     refresh();
                 }));
+                
+                // Set initial required state
+                if (jamMasukWrap && jamMasukSelect) {
+                    jamMasukSelect.required = statusRow(row) === 'izin_terlambat';
+                }
             });
 
             refresh();

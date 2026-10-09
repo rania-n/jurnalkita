@@ -33,7 +33,7 @@ class JadwalController extends Controller
         // lagi filter ke hari yang kebetulan bukan jadwal piketnya).
         $adaPiket = $piketPerHari->isNotEmpty();
 
-        // Giliran piket Waka Kesiswaan -- tabel BEDA dari jadwal piket guru
+        // Giliran piket Waka -- tabel BEDA dari jadwal piket guru
         // biasa (JadwalWaka, bukan JadwalPiket; nggak ada jam, sepanjang hari),
         // jadi harus diambil terpisah. Cuma relevan buat akun role waka.
         $jadwalWakaPerHari = $user->role === 'waka'

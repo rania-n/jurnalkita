@@ -2,6 +2,7 @@
     'label' => null,
     'name',      // dipasang "[]" sendiri di tiap checkbox -- kirim tanpa "[]", mis. "mapel_tambahan"
     'options' => [],   // Collection/array of ['id' => ..., 'nama' => ...]
+    'value' => [],     // array of selected IDs
     'hint' => null,
     'required' => false,
 ])
@@ -9,7 +10,7 @@
 @php
     $id = $attributes->get('id', $name.'-cari');
     $daftar = collect($options)->values();
-    $nilaiLama = array_map('strval', old($name, []));
+    $nilaiLama = array_map('strval', old($name, $value));
 @endphp
 
 {{--

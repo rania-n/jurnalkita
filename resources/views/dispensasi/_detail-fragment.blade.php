@@ -69,12 +69,12 @@
         @endif
     </div>
 
-    {{-- Keputusan Waka Kesiswaan --}}
+    {{-- Keputusan Waka --}}
     <div class="flex items-start gap-3 rounded-2xl bg-card p-4 shadow-[var(--shadow-soft)]">
         <x-icon :name="$waIcon" :size="22" class="{{ $waColor }}" />
         <div>
             <p class="text-sm font-bold text-ink">
-                Waka Kesiswaan: {{ $waText }}
+                Waka: {{ $waText }}
                 @if ($dispensasi->sudahKadaluarsa())
                     <x-ui.status-badge status="kadaluarsa" class="ml-1 align-middle">Kedaluwarsa</x-ui.status-badge>
                 @endif

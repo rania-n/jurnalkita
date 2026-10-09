@@ -45,7 +45,7 @@
     </div>
     @if ($dispensasi->status_akhir === 'approved')
         <div class="flex justify-between gap-3 border-b border-surface-alt pb-2">
-            <span class="shrink-0 text-muted">Disetujui oleh Waka Kesiswaan</span>
+            <span class="shrink-0 text-muted">Disetujui oleh Waka</span>
             <span class="min-w-0 break-words text-right font-semibold text-ink">{{ $dispensasi->waka?->name ?? 'Nama Waka belum tercatat' }}</span>
         </div>
     @endif
@@ -87,7 +87,7 @@
         </p>
     </div>
 @elseif ($dispensasi->status_akhir === 'pending')
-    <x-alert type="info" class="mt-5">Belum bisa dipakai keluar — masih menunggu persetujuan Waka Kesiswaan.</x-alert>
+    <x-alert type="info" class="mt-5">Belum bisa dipakai keluar — masih menunggu persetujuan Waka.</x-alert>
 @elseif ($dispensasi->status_akhir === 'rejected')
     <x-alert type="error" class="mt-5">Pengajuan ini ditolak, tidak berlaku buat keluar sekolah.</x-alert>
 @elseif ($sudahLewat)

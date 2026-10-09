@@ -4,7 +4,7 @@
         ->orderBy('name')
         ->get();
 
-    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan'];
+    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka'];
 @endphp
 
 <x-layouts.admin title="Persetujuan Akun" heading="Persetujuan Akun" :subtitle="$users->count() . ' pendaftaran menunggu diputuskan'">
@@ -12,6 +12,8 @@
         title="Persetujuan Akun"
         :subtitle="$users->count() . ' pendaftaran menunggu diputuskan'"
     />
+
+    <x-ui.auto-refresh :url="route('master.akun.persetujuan.versi')" />
 
     @if ($users->isEmpty())
         <x-ui.empty icon="how_to_reg" title="Tidak ada pendaftaran yang menunggu" desc="Semua pendaftaran sudah diputuskan." />

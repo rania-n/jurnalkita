@@ -427,6 +427,8 @@ class JamPelajaranController extends Controller
         }
 
         JamPelajaran::where('kategori', $kategori)->delete();
+        DB::table('jam_pelajaran_hari')->where('kategori', $kategori)->delete();
+        DB::table('jam_pelajaran_snapshots')->where('kategori', $kategori)->delete();
 
         AuditLog::catat('Hapus Kategori Jam Pelajaran', "Hapus kategori {$kategori}");
 

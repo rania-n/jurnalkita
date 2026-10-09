@@ -6,9 +6,9 @@
         size="sm"
     />
 
-    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex flex-wrap gap-1 rounded-lg border border-surface-alt bg-card p-1">
         <a href="{{ route('guru.wali-kelas.rekap', $kelas) }}"
-           class="flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap text-muted-2 hover:text-ink">
+           class="flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap bg-surface text-muted-2 hover:bg-surface-alt hover:text-ink">
             Rekap Kehadiran
         </a>
         <a href="{{ route('guru.wali-kelas.jurnal', $kelas) }}"
@@ -20,10 +20,10 @@
     {{-- Filter status kehadiran guru -- pola sama kayak tab Riwayat Jurnal
          (server-side lewat query string, tetap di tab yang sama begitu
          tanggal diganti), jumlah disembunyikan kalau 0. --}}
-    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex flex-wrap gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach (['' => 'Semua', 'hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'] as $key => $label)
             <a href="{{ route('guru.wali-kelas.jurnal', array_merge(['kelas' => $kelas], request()->except('status_guru', 'page'), $key === '' ? [] : ['status_guru' => $key])) }}"
-               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusGuru === $key, 'text-muted-2 hover:text-ink' => $statusGuru !== $key])>
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $statusGuru === $key, 'bg-surface text-muted-2 hover:bg-surface-alt hover:text-ink' => $statusGuru !== $key])>
                 {{ $label }}
                 @if (($jumlahTab[$key === '' ? 'semua' : $key] ?? 0) > 0)
                     <span class="opacity-70">({{ $jumlahTab[$key === '' ? 'semua' : $key] }})</span>

@@ -75,6 +75,15 @@
                 data-modal-open="modal-jp" data-modal-title="Jam Pelajaran — {{ $labelSet }}" class="w-full sm:w-auto">
                 Edit {{ $labelSet }}
             </x-ui.button>
+            @if ($bisaHapusKategori)
+                <form method="POST" action="{{ route('master.jam-pelajaran.destroy-kategori', $set) }}"
+                    data-confirm="Hapus kategori {{ $labelSet }} beserta semua jamnya?" class="inline">
+                    @csrf @method('DELETE')
+                    <x-ui.button type="submit" variant="danger" icon="delete" class="w-full sm:w-auto">
+                        Hapus Kategori
+                    </x-ui.button>
+                </form>
+            @endif
         </x-slot:action>
     </x-admin.page>
 
@@ -205,13 +214,6 @@
         </x-admin.table>
     @endif
 
-    @if ($bisaHapusKategori)
-        <form method="POST" action="{{ route('master.jam-pelajaran.destroy-kategori', $set) }}" class="mt-3">
-            @csrf @method('DELETE')
-            <x-ui.button type="submit" variant="danger" icon="delete" data-confirm="Hapus kategori &quot;{{ $labelSet }}&quot; beserta semua jamnya?">Hapus Kategori Ini</x-ui.button>
-        </form>
-    @endif
-
     {{-- SATU modal buat isi jam pelajaran -- dulu 3 modal kepisah (Edit,
          Kategori Baru, Buat Otomatis) yang sebagian besar isinya sama, cuma
          beda dikit. Sekarang 1 modal, dipilih Otomatis/Manual lewat bar,
@@ -300,7 +302,7 @@
             </div>
 
             <div class="flex gap-2">
-                <x-ui.button type="submit" icon="auto_awesome" class="flex-1" data-buat-jadwal>Buat Jadwal</x-ui.button>
+                <x-ui.button type="submit" icon="save" class="flex-1" data-buat-jadwal>Simpan Perubahan</x-ui.button>
                 <x-ui.button type="button" variant="secondary" data-modal-close class="flex-1">Batal</x-ui.button>
             </div>
         </form>

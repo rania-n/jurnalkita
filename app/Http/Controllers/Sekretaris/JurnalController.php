@@ -296,8 +296,8 @@ class JurnalController extends Controller
 
         $data = $request->validate([
             'jadwal_id' => ['required', 'exists:jadwals,id'],
-            'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:15'],
-            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
+            'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:20'],
+            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:20', 'gte:jam_ke_mulai'],
             // Sama kayak Guru\JurnalController: yang wajib Tugas Tambahan +
             // Alasan (bukan Materi -- itu khusus status hadir, nggak relevan
             // di sini). status_guru sendiri nggak lagi dipilih dari form --

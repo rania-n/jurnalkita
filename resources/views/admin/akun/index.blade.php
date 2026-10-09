@@ -2,7 +2,7 @@
     // Manajemen Akun = akun yang SUDAH ada (approved/rejected) doang -- pendaftaran
     // yang masih menunggu diputuskan ada di halaman terpisah "Persetujuan Akun"
     // (master.akun.persetujuan), biar nggak campur aksi "putuskan" sama "kelola".
-    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan'];
+    $roleLabel = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka'];
 
     $users = \App\Models\User::with('guru', 'siswa.kelas')
         ->where('status', '!=', 'pending')
@@ -121,7 +121,7 @@
             <x-ui.choice
                 label="Jenis Akun"
                 name="role"
-                :options="['guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka Kesiswaan']"
+                :options="['guru' => 'Guru', 'siswa' => 'Pengurus Kelas', 'waka' => 'Waka']"
                 value="guru"
             />
 

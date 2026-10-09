@@ -21,7 +21,7 @@ class JadwalController extends Controller
     public function save(Request $request): RedirectResponse
     {
         if ($request->filled('ruang')) {
-            $request->merge(['ruang' => preg_replace('/^r\s*(\d+)$/i', 'R$1', trim($request->input('ruang')))]);
+            $request->merge(['ruang' => preg_replace('/^r\s*(\d+)$/i', 'R $1', trim($request->input('ruang')))]);
         }
 
         $data = $request->validate([
@@ -30,8 +30,8 @@ class JadwalController extends Controller
             'mapel_id' => ['required', 'exists:mapels,id'],
             'guru_id' => ['required', 'exists:gurus,id'],
             'hari' => ['required', 'in:senin,selasa,rabu,kamis,jumat'],
-            'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:15'],
-            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:15', 'gte:jam_ke_mulai'],
+            'jam_ke_mulai' => ['required', 'integer', 'min:1', 'max:20'],
+            'jam_ke_selesai' => ['required', 'integer', 'min:1', 'max:20', 'gte:jam_ke_mulai'],
             'ruang' => ['required', 'string', 'max:50', Rule::in(config('akademik.ruangan'))],
         ]);
 
@@ -122,8 +122,14 @@ class JadwalController extends Controller
             return null;
         }
 
+        $ruangVarian = [$data['ruang']];
+        if (preg_match('/^R\s*(\d+)$/', $data['ruang'], $matches)) {
+            $ruangVarian[] = 'R' . $matches[1];
+            $ruangVarian[] = 'R ' . $matches[1];
+        }
+
         $bentrok = Jadwal::with('kelas')
-            ->where('ruang', $data['ruang'])
+            ->whereIn('ruang', $ruangVarian)
             ->where('hari', $data['hari'])
             ->when($data['id'] ?? null, fn ($q, $id) => $q->whereKeyNot($id))
             ->where('jam_ke_mulai', '<=', $data['jam_ke_selesai'])
@@ -190,7 +196,7 @@ class JadwalController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
+        $request->validateWithBag('import_jadwal', [
             'file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
         ]);
 

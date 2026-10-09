@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
+use App\Models\User;
+use App\Notifications\PasswordDiubah;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
@@ -78,6 +82,11 @@ class ProfilController extends Controller
 
         if ($gantiSandi) {
             $user->update(['password' => Hash::make($data['password'])]);
+            
+            AuditLog::catat('Ganti Password', "Pengguna {$user->email} mengganti password secara mandiri", $user);
+            
+            $adminUsers = User::where('role', 'admin')->get();
+            Notification::send($adminUsers, new PasswordDiubah($user, clone $user));
         }
 
         return back()->with('success', 'Profil berhasil diperbarui.');

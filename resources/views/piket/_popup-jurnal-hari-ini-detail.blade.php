@@ -15,6 +15,7 @@
     </x-ui.field-static>
     <x-ui.field-static label="Status Kehadiran Guru" class="sm:col-span-2">
         {{ $jurnal->status_guru === 'hadir' ? 'Hadir' : 'Tidak Hadir' }}
+        @if ($jurnal->terlambat) <span class="text-alpha ml-1">(Terlambat)</span> @endif
     </x-ui.field-static>
     @if ($jurnal->status_guru === 'hadir')
         <x-ui.field-static label="Materi" class="sm:col-span-2">{{ $jurnal->materi ?: '—' }}</x-ui.field-static>

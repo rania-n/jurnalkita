@@ -237,7 +237,7 @@ class DatabaseSeeder extends Seeder
 
         // ------------------------------------------------------- Contoh dispensasi
         // Dispensasi selalu diajukan guru piket (tahap piket otomatis lolos),
-        // lalu menunggu keputusan Waka Kesiswaan.
+        // lalu menunggu keputusan Waka.
         $piketUser = $gurus->firstWhere(fn (Guru $g) => $g->user_id && $g->jadwalPikets()->exists())?->user_id ?? $admin->id;
         $siswaList = Siswa::inRandomOrder()->take(4)->get();
         $wakaStates = ['pending', 'approved', 'rejected', 'pending'];

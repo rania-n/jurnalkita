@@ -10,10 +10,10 @@
 
     <x-ui.auto-refresh :url="route('sekretaris.jurnal.versi')" />
 
-    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex flex-wrap gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
             <a href="{{ route('sekretaris.jurnal.index', array_merge(request()->except('status', 'page'), array_filter(['status' => $key]))) }}"
-               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap', 'bg-navy text-card' => $status === ($key ?: null), 'text-muted-2 hover:text-ink' => $status !== ($key ?: null)])>
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $status === ($key ?: null), 'bg-surface text-muted-2 hover:bg-surface-alt hover:text-ink' => $status !== ($key ?: null)])>
                 {{ $label }}
             </a>
         @endforeach
@@ -138,7 +138,14 @@
                 // dari app.js (dimuat sebagai module, ke-defer ke belakang), jadi
                 // klik yang ditembak lebih awal dari itu nggak kena tangkap sama
                 // sekali (modal-nya nggak kebuka).
-                window.addEventListener('load', () => document.querySelector('[data-auto-open-jurnal-sekretaris]')?.click());
+                window.addEventListener('load', () => {
+                    document.querySelector('[data-auto-open-jurnal-sekretaris]')?.click();
+                    const url = new URL(window.location.href);
+                    if (url.searchParams.has('lihat')) {
+                        url.searchParams.delete('lihat');
+                        window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
+                    }
+                });
             </script>
         @endpush
     @endif

@@ -10,6 +10,8 @@
         <x-admin.f-date name="tanggal" label="Tanggal presensi" :value="$tanggal->toDateString()" :max="today()->toDateString()" onchange="this.form.submit()" />
     </form>
 
+    <x-ui.auto-refresh :url="route('piket.presensi-siswa.versi')" />
+
     @if ($kelas)
         <form method="POST" action="{{ route('piket.presensi-siswa.store') }}" enctype="multipart/form-data"
               class="mb-6 flex flex-col gap-4 rounded-2xl border border-surface-alt bg-card p-4 sm:p-5"
@@ -26,20 +28,20 @@
                 @endif
 
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <x-ui.cari-pilihan
-                        name="siswa_id"
+                    <x-ui.cari-checkbox
+                        name="siswa_ids"
                         label="Siswa"
                         :options="$siswas"
-                        :value="request('siswa_id', $presensiTerpilih?->siswa_id)"
-                        placeholder="Ketik nama siswa untuk mencari..."
+                        :value="$presensiTerpilih ? [$presensiTerpilih->siswa_id] : []"
+                        hint="Pilih satu atau lebih siswa"
                         required
                     />
 
                     <x-ui.choice
                         label="Status Kehadiran"
                         name="status"
-                        :options="['sakit' => 'Sakit', 'izin' => 'Izin', 'izin_terlambat' => 'Terlambat']"
-                        :tones="['sakit' => 'sakit', 'izin' => 'izin', 'izin_terlambat' => 'alpha']"
+                        :options="['sakit' => 'Sakit', 'izin' => 'Izin', 'izin_terlambat' => 'Terlambat', 'dispensasi' => 'Dispen']"
+                        :tones="['sakit' => 'sakit', 'izin' => 'izin', 'izin_terlambat' => 'alpha', 'dispensasi' => 'dispen']"
                         :value="old('status', $presensiTerpilih?->status)"
                         required
                     />
@@ -57,6 +59,19 @@
                         <p class="mt-1 text-xs text-muted-2">JP sebelum ini akan dicatat terlambat, JP mulai ini ke atas akan dihitung hadir.</p>
                     </div>
 
+                    {{-- Dispensasi parsial: pilih rentang JP dispen --}}
+                    <div id="blok-dispen-jp" class="grid grid-cols-1 gap-3 sm:col-span-2 sm:grid-cols-2" hidden>
+                        <x-ui.select label="Dispen dari JP ke- (mulai)" name="jam_ke_mulai" id="jam_ke_mulai">
+                            <option value="">Sehari penuh</option>
+                            @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_mulai', $presensiTerpilih?->jam_ke_mulai) == $i)>JP {{ $i }}</option>@endfor
+                        </x-ui.select>
+                        <x-ui.select label="Sampai JP ke- (selesai)" name="jam_ke_selesai" id="jam_ke_selesai">
+                            <option value="">Sampai selesai hari itu</option>
+                            @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_selesai', $presensiTerpilih?->jam_ke_selesai) == $i)>JP {{ $i }}</option>@endfor
+                        </x-ui.select>
+                        <p class="-mt-1 text-xs text-muted-2 sm:col-span-2">Kosongkan jika dispensasi berlaku sehari penuh.</p>
+                    </div>
+
                     {{-- Tanggal selesai: hanya untuk Sakit (surat dokter bisa multi-hari) --}}
                     <div id="blok-tanggal-selesai" class="sm:col-span-2" hidden>
                         <x-admin.f-date
@@ -68,18 +83,72 @@
                         <p class="mt-1 text-xs text-muted-2">Surat dokter bisa berlaku beberapa hari. Izin biasa hanya 1 hari (kosongkan ini).</p>
                     </div>
 
-                    <x-ui.textarea label="Catatan" name="catatan" :rows="2" class="sm:col-span-2" placeholder="Contoh: izin keluarga / demam">{{ old('catatan', $presensiTerpilih?->catatan) }}</x-ui.textarea>
+                    <x-ui.textarea label="Catatan" name="catatan" :rows="2" class="sm:col-span-2" placeholder="Contoh: mewakili lomba / izin keluarga / demam">{{ old('catatan', $presensiTerpilih?->catatan) }}</x-ui.textarea>
 
-                    <div class="flex flex-col gap-1.5 sm:col-span-2">
-                        <x-ui.label for="surat" :required="! $presensiTerpilih?->surat_path">Surat izin atau bukti</x-ui.label>
-                        <input id="surat" name="surat" type="file" accept=".jpg,.jpeg,.png,.pdf"
-                               class="block w-full rounded-xl border border-surface-alt bg-card px-3 py-3 text-sm text-ink file:mr-3 file:rounded-lg file:border-0 file:bg-surface-alt file:px-3 file:py-2 file:font-semibold"
-                               {{ $presensiTerpilih?->surat_path ? '' : 'required' }}>
+                    <div class="flex flex-col gap-1.5 sm:col-span-2" data-kamera-wrap>
+                        <x-ui.label for="surat" id="label-surat-ui">Bukti Terlambat</x-ui.label>
+                        <input id="surat" name="surat" type="file" accept=".jpg,.jpeg,.png,.pdf" class="sr-only" data-kamera-input>
+                        
+                        <div class="flex min-h-40 w-full flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#B8C4D9] bg-card px-5 py-6 text-center">
+                            
+                            <img data-kamera-img hidden alt="Pratinjau Bukti" class="max-h-56 w-full rounded-lg object-cover">
+                            
+                            <div id="file-info-preview" hidden class="flex flex-col items-center gap-2">
+                                <x-icon name="insert_drive_file" :size="32" class="text-navy" />
+                                <span class="text-sm font-semibold text-ink" id="file-name-preview"></span>
+                            </div>
+
+                            <div data-kamera-placeholder class="flex flex-col items-center gap-1.5">
+                                <x-icon name="add_photo_alternate" :size="28" class="text-navy" />
+                                <span class="text-xs font-semibold text-navy">Pilih File atau Buka Kamera</span>
+                                <span class="text-[11px] text-muted-2">JPG, PNG, atau PDF maksimal 4 MB.</span>
+                                
+                                <div class="mt-2 flex gap-2">
+                                    <button type="button" onclick="document.getElementById('surat').click()" class="press inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-3.5 py-2 text-xs font-bold text-ink">
+                                        <x-icon name="folder_open" :size="15" /> Pilih File
+                                    </button>
+                                    <button type="button" data-modal-open="modal-kamera-surat" data-kamera-buka class="press inline-flex items-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-bold text-card">
+                                        <x-icon name="photo_camera" :size="15" /> Kamera
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div data-kamera-ulang hidden class="mt-2 flex gap-2">
+                                <button type="button" onclick="document.getElementById('surat').click()" class="press inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-3.5 py-2 text-xs font-bold text-ink">
+                                    <x-icon name="folder_open" :size="15" /> Ganti File
+                                </button>
+                                <button type="button" data-modal-open="modal-kamera-surat" data-kamera-buka class="press inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-3.5 py-2 text-xs font-bold text-ink">
+                                    <x-icon name="refresh" :size="15" /> Buka Kamera
+                                </button>
+                            </div>
+                        </div>
+
                         @error('surat')<p class="text-xs font-medium text-alpha">{{ $message }}</p>@enderror
-                        <p class="text-xs text-muted-2">JPG, PNG, atau PDF maksimal 4 MB.</p>
+
                         @if ($presensiTerpilih?->surat_path)
-                            <a class="text-sm font-semibold text-navy underline" href="{{ Storage::url($presensiTerpilih->surat_path) }}" target="_blank" rel="noopener">Lihat surat yang tersimpan</a>
+                            <a class="text-sm font-semibold text-navy underline mt-1" href="{{ Storage::url($presensiTerpilih->surat_path) }}" target="_blank" rel="noopener">Lihat surat yang tersimpan</a>
                         @endif
+                        
+                        <x-ui.modal id="modal-kamera-surat" title="Ambil Foto Bukti">
+                            <div class="flex flex-col gap-3">
+                                <div data-kamera-box class="relative flex max-h-[50vh] items-center justify-center overflow-hidden rounded-xl bg-ink transition-[max-height]">
+                                    <video data-kamera-video hidden autoplay playsinline muted class="max-h-[50vh] w-full object-contain"></video>
+                                    <canvas data-kamera-canvas hidden></canvas>
+                                    <p data-kamera-error hidden class="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 px-6 text-center text-sm font-semibold text-card">
+                                        Nggak bisa buka kamera. Pastikan izin kamera diaktifkan buat browser ini, lalu coba lagi.
+                                    </p>
+                                    <button type="button" data-kamera-ganti hidden class="press absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full bg-ink/60 text-card">
+                                        <x-icon name="cameraswitch" :size="18" />
+                                    </button>
+                                    <button type="button" data-kamera-perbesar hidden class="press absolute right-2.5 bottom-2.5 flex h-9 w-9 items-center justify-center rounded-full bg-ink/60 text-card">
+                                        <x-icon name="fullscreen" :size="18" />
+                                    </button>
+                                </div>
+                                <button type="button" data-kamera-jepret class="press flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-navy text-sm font-bold text-card">
+                                    <x-icon name="photo_camera" :size="18" /> Jepret
+                                </button>
+                            </div>
+                        </x-ui.modal>
                     </div>
                 </div>
 
@@ -93,18 +162,75 @@
             (function () {
                 const radios = document.querySelectorAll('#form-presensi-piket input[name="status"]');
                 const blokJamMasuk = document.getElementById('blok-jam-masuk');
+                const blokDispenJp = document.getElementById('blok-dispen-jp');
                 const blokTanggalSelesai = document.getElementById('blok-tanggal-selesai');
                 const inputJamMasuk = document.getElementById('jam_masuk');
+                const labelSurat = document.getElementById('label-surat-ui');
+                const inputSurat = document.getElementById('surat');
+                const imgPreview = document.querySelector('[data-kamera-img]');
+                const placeholder = document.querySelector('[data-kamera-placeholder]');
+                const divUlang = document.querySelector('[data-kamera-ulang]');
+                const fileInfoPreview = document.getElementById('file-info-preview');
+                const fileNamePreview = document.getElementById('file-name-preview');
+
+                if (inputSurat) {
+                    inputSurat.addEventListener('change', () => {
+                        if (inputSurat.files && inputSurat.files[0]) {
+                            const file = inputSurat.files[0];
+                            placeholder.hidden = true;
+                            if (divUlang) divUlang.hidden = false;
+                            
+                            if (file.type.startsWith('image/')) {
+                                imgPreview.src = URL.createObjectURL(file);
+                                imgPreview.hidden = false;
+                                fileInfoPreview.hidden = true;
+                            } else {
+                                imgPreview.hidden = true;
+                                fileNamePreview.textContent = file.name;
+                                fileInfoPreview.hidden = false;
+                            }
+                        } else {
+                            placeholder.hidden = false;
+                            if (divUlang) divUlang.hidden = true;
+                            imgPreview.hidden = true;
+                            fileInfoPreview.hidden = true;
+                        }
+                    });
+                }
 
                 function sync() {
                     const val = document.querySelector('#form-presensi-piket input[name="status"]:checked')?.value;
                     const terlambat = val === 'izin_terlambat';
                     const sakit = val === 'sakit';
+                    const dispen = val === 'dispensasi';
 
                     blokJamMasuk.hidden = !terlambat;
                     if (inputJamMasuk) inputJamMasuk.required = terlambat;
 
+                    if (blokDispenJp) blokDispenJp.hidden = !dispen;
+                    
+                    // Surat dokter (tanggal_selesai) hanya untuk Sakit
                     blokTanggalSelesai.hidden = !sakit;
+                    
+                    const textareaCatatan = document.querySelector('textarea[name="catatan"]');
+                    if (labelSurat) {
+                        if (val === 'izin_terlambat') {
+                            labelSurat.textContent = 'Bukti Terlambat';
+                            if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: ban bocor / macet';
+                        } else if (val === 'sakit') {
+                            labelSurat.textContent = 'Bukti Sakit';
+                            if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: demam / pusing';
+                        } else if (val === 'izin') {
+                            labelSurat.textContent = 'Bukti Izin';
+                            if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: acara keluarga';
+                        } else if (val === 'dispensasi') {
+                            labelSurat.textContent = 'Surat Dispensasi / Bukti Pendukung';
+                            if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: mewakili lomba';
+                        } else {
+                            labelSurat.textContent = 'Bukti';
+                            if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: mewakili lomba / izin keluarga / demam';
+                        }
+                    }
                 }
 
                 radios.forEach((r) => r.addEventListener('change', sync));

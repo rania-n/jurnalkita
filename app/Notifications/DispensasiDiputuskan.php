@@ -32,7 +32,7 @@ class DispensasiDiputuskan extends Notification
             'icon' => $disetujui ? 'check_circle' : 'cancel',
             'title' => $disetujui ? 'Dispensasi disetujui' : 'Dispensasi ditolak',
             'body' => 'Dispensasi '.($anggota->count() > 1 ? $anggota->count().' siswa' : ($this->dispensasi->siswa->nama ?? 'siswa'))
-                .' '.($disetujui ? 'disetujui' : 'ditolak').' oleh Waka Kesiswaan.',
+                .' '.($disetujui ? 'disetujui' : 'ditolak').' oleh Waka.',
             'url' => route('dispensasi.index', ['lihat' => $this->dispensasi->id]),
         ];
     }

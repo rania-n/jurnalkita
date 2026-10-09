@@ -7,10 +7,10 @@
 
     <x-ui.auto-refresh :url="route('jurnal.versi')" />
 
-    <div class="mb-4 flex gap-1 overflow-x-auto rounded-lg border border-surface-alt bg-card p-1">
+    <div class="mb-4 flex flex-wrap gap-1 rounded-lg border border-surface-alt bg-card p-1">
         @foreach ($tabs as $key => $label)
             <a href="{{ route('jurnal.index', array_merge(request()->except('status', 'page'), $key === 'semua' ? [] : ['status' => $key])) }}"
-               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $status === $key, 'text-muted-2 hover:text-ink' => $status !== $key])>
+               @class(['flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-colors', 'bg-navy text-card' => $status === $key, 'bg-surface text-muted-2 hover:bg-surface-alt hover:text-ink' => $status !== $key])>
                 {{ $label }}
                 @if ($jumlahTab[$key] > 0)
                     <span class="opacity-70">({{ $jumlahTab[$key] }})</span>
@@ -113,7 +113,14 @@
                 // dari app.js (dimuat sebagai module, ke-defer ke belakang), jadi
                 // klik yang ditembak lebih awal dari itu nggak kena tangkap sama
                 // sekali (modal-nya nggak kebuka).
-                window.addEventListener('load', () => document.querySelector('[data-auto-open-jurnal]')?.click());
+                window.addEventListener('load', () => {
+                    document.querySelector('[data-auto-open-jurnal]')?.click();
+                    const url = new URL(window.location.href);
+                    if (url.searchParams.has('lihat')) {
+                        url.searchParams.delete('lihat');
+                        window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
+                    }
+                });
             </script>
         @endpush
     @endif

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\Waktu;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,6 +47,13 @@ class Jadwal extends Model
     public function jurnals(): HasMany
     {
         return $this->hasMany(Jurnal::class);
+    }
+
+    protected function ruang(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value ? preg_replace('/^R\s*(\d+)$/i', 'R $1', $value) : $value,
+        );
     }
 
     /**

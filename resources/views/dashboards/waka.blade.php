@@ -35,7 +35,7 @@
 @endphp
 
 <x-layouts.app title="Beranda Waka" width="wide">
-    <x-page-header title="Beranda Waka Kesiswaan" subtitle="Persetujuan dispensasi tahap 2" size="sm" />
+    <x-page-header title="Beranda Waka" subtitle="Persetujuan dispensasi tahap 2" size="sm" />
 
     @if ($hariKhusus?->jenis === 'tanpa_kbm')
         <x-alert type="info" class="mb-4">{{ $hariKhusus->nama }} — KBM dan piket ditiadakan hari ini.</x-alert>

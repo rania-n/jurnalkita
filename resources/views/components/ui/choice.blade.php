@@ -25,6 +25,8 @@
         'izin' => 'peer-checked:border-izin peer-checked:bg-izin-soft peer-checked:text-izin',
         'alpha' => 'peer-checked:border-alpha peer-checked:bg-alpha-soft peer-checked:text-alpha',
         'dispen' => 'peer-checked:border-dispen peer-checked:bg-dispen-soft peer-checked:text-dispen',
+        'info' => 'peer-checked:border-info peer-checked:bg-info/10 peer-checked:text-info',
+        'warning' => 'peer-checked:border-warning peer-checked:bg-warning/10 peer-checked:text-warning',
     ];
     $pad = $size === 'sm' ? 'px-2.5 py-1.5 text-xs' : 'px-3.5 py-2.5 text-[13px]';
 
@@ -47,7 +49,7 @@
     <div class="flex flex-wrap gap-1.5" role="radiogroup" @if ($label) aria-label="{{ $label }}" @endif>
         @foreach ($options as $optValue => $optLabel)
             @php $matiin = in_array($optValue, $disabled, true); @endphp
-            <label @class(['grow basis-20 select-none', 'cursor-pointer' => ! $matiin, 'cursor-not-allowed opacity-40' => $matiin])>
+            <label @class(['grow basis-20 select-none', 'cursor-pointer' => ! $matiin, 'cursor-not-allowed opacity-40 pointer-events-none' => $matiin])>
                 <input
                     type="radio"
                     name="{{ $name }}"
