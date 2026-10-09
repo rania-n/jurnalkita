@@ -4,19 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Dispensasi;
-use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\User;
 use App\Notifications\DispensasiBaru;
 use App\Notifications\DispensasiDiputuskan;
-use App\Notifications\SiswaDispensasiDiKelasAnda;
+use App\Support\NotifikasiDispensasi;
 use App\Support\Versi;
 use App\Support\WaLink;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -270,10 +268,15 @@ class DispensasiController extends Controller
 
         $dispensasi = $dispensasis->firstOrFail();
 
-        if ($jenis !== 'lomba') {
+        if ($jenis === 'lomba') {
+            // Lomba auto-approve: guru pengajar, piket, & pengurus kelas tetap
+            // dapat notifikasi in-app walau nggak lewat persetujuan Waka.
+            NotifikasiDispensasi::saatDisetujui($dispensasi);
+        } else {
             foreach (User::where('role', 'waka')->get() as $waka) {
                 $waka->notify(new DispensasiBaru($dispensasi));
             }
+            NotifikasiDispensasi::saatDiajukan($dispensasi);
         }
 
         // Balik ke Riwayat (bukan halaman detail) -- link WA-nya dibukakan
@@ -437,11 +440,9 @@ class DispensasiController extends Controller
         $dispensasi->pengaju?->notify(new DispensasiDiputuskan($dispensasi));
 
         if ($dispensasi->status_akhir === 'approved') {
-            foreach ($anggota as $item) {
-                foreach ($this->guruMapelTerkait($item) as $guruUser) {
-                    $guruUser->notify(new SiswaDispensasiDiKelasAnda($item));
-                }
-            }
+            // Guru pengajar (SiswaDispensasiDiKelasAnda) + piket + pengurus
+            // kelas -- lihat App\Support\NotifikasiDispensasi.
+            NotifikasiDispensasi::saatDisetujui($dispensasi);
         }
 
         return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])->with(
@@ -450,34 +451,5 @@ class DispensasiController extends Controller
                 ? "Dispensasi {$anggota->count()} siswa disetujui. Presensi otomatis diperbarui."
                 : 'Keputusan Waka disimpan.'
         );
-    }
-
-    /**
-     * Guru yang jadwalnya bentrok sama rentang tanggal+jam dispensasi ini --
-     * mereka yang "kena dampak" (siswanya nggak masuk pelajaran mereka),
-     * sesuai spec.md §G "Guru mapel terkait".
-     */
-    private function guruMapelTerkait(Dispensasi $dispensasi): Collection
-    {
-        $hariSet = collect($dispensasi->rentangTanggal())
-            ->map(fn ($tanggal) => ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? null)
-            ->filter()
-            ->unique();
-
-        if ($hariSet->isEmpty()) {
-            return collect();
-        }
-
-        return Jadwal::where('kelas_id', $dispensasi->siswa->kelas_id)
-            ->whereIn('hari', $hariSet)
-            ->when($dispensasi->jam_ke_mulai, function ($q) use ($dispensasi) {
-                $selesai = $dispensasi->jam_ke_selesai ?? 15;
-                $q->where('jam_ke_mulai', '<=', $selesai)->where('jam_ke_selesai', '>=', $dispensasi->jam_ke_mulai);
-            })
-            ->with('guru.user')
-            ->get()
-            ->pluck('guru.user')
-            ->filter()
-            ->unique('id');
     }
 }

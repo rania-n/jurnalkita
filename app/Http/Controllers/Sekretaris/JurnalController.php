@@ -12,6 +12,7 @@ use App\Models\Jurnal;
 use App\Models\Mapel;
 use App\Models\PengaturanJurnal;
 use App\Notifications\JurnalPerluRevisi;
+use App\Support\NotifikasiJurnal;
 use App\Support\PresensiDefault;
 use App\Support\Versi;
 use App\Support\Waktu;
@@ -360,6 +361,10 @@ class JurnalController extends Controller
         });
 
         AuditLog::catat('Jurnal Pengganti', "Pengurus kelas mengisi jurnal pengganti #{$jurnal->id}", $jurnal);
+
+        // Jurnal pengganti = guru mapel nggak masuk. Waka + wali kelas diberi
+        // tahu; pengurus yang barusan ngisi dilewati (dia udah tahu).
+        NotifikasiJurnal::guruTidakHadir($jurnal, kecualiUserId: auth()->id());
 
         return redirect()->route('sekretaris.jurnal.index', ['lihat' => $jurnal->id])
             ->with('success', 'Jurnal pengganti tersimpan. Guru akan melihatnya di riwayat.');

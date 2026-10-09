@@ -14,6 +14,7 @@ use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\PengaturanJurnal;
 use App\Notifications\JurnalPerluDiperiksa;
+use App\Support\NotifikasiJurnal;
 use App\Support\PresensiDefault;
 use App\Support\Versi;
 use App\Support\Waktu;
@@ -507,10 +508,10 @@ class JurnalController extends Controller
                 }
 
                 $catatan = $isi['catatan'] ?? null;
-                if ($isi['status'] === 'izin_terlambat' && !empty($isi['jam_masuk'])) {
+                if ($isi['status'] === 'izin_terlambat' && ! empty($isi['jam_masuk'])) {
                     $jamMasukText = "Terlambat masuk di JP ke-{$isi['jam_masuk']}";
                     // Prevent duplicate suffix if it's somehow already there
-                    if (!$catatan || !str_contains($catatan, 'Terlambat masuk di JP ke-')) {
+                    if (! $catatan || ! str_contains($catatan, 'Terlambat masuk di JP ke-')) {
                         $catatan = $catatan ? "{$catatan} ({$jamMasukText})" : $jamMasukText;
                     }
                 }
@@ -533,10 +534,8 @@ class JurnalController extends Controller
         }
 
         if ($data['status_guru'] === 'tidak_hadir') {
-            $wakas = \App\Models\User::where('role', 'waka')->get();
-            foreach ($wakas as $waka) {
-                $waka->notify(new \App\Notifications\GuruTidakHadir($jurnal));
-            }
+            // Waka + pengurus kelas + wali kelas -- lihat App\Support\NotifikasiJurnal.
+            NotifikasiJurnal::guruTidakHadir($jurnal);
         }
 
         $pesanSukses = $data['status_guru'] === 'tidak_hadir'
@@ -670,15 +669,11 @@ class JurnalController extends Controller
             });
         });
 
-        $wakas = \App\Models\User::where('role', 'waka')->get();
-
-        foreach ($dibuat as $jurnal) {
+        $dibuat->each(function (Jurnal $jurnal) {
             AuditLog::catat('Tambah Jurnal (massal)', "Jurnal {$jurnal->jadwal->mapel->nama} — {$jurnal->jadwal->kelas->nama}", $jurnal);
-            
-            foreach ($wakas as $waka) {
-                $waka->notify(new \App\Notifications\GuruTidakHadir($jurnal));
-            }
-        }
+            // Waka + pengurus kelas + wali kelas.
+            NotifikasiJurnal::guruTidakHadir($jurnal);
+        });
 
         return $this->redirectRiwayat()
             ->with('success', $dibuat->count().' jurnal berhasil dibuat sekaligus.');
@@ -718,6 +713,7 @@ class JurnalController extends Controller
                     $catatan = null;
                 }
             }
+
             return [
                 $a->siswa_id => ['status' => $a->status, 'catatan' => $catatan, 'sumber' => null, 'jam_masuk' => $jamMasuk],
             ];
@@ -838,9 +834,9 @@ class JurnalController extends Controller
                 $isi = $data['presensi'][$absensi->siswa_id]
                     ?? ['status' => $absensi->status, 'catatan' => $absensi->catatan];
                 $catatan = $isi['catatan'] ?? null;
-                if ($isi['status'] === 'izin_terlambat' && !empty($isi['jam_masuk'])) {
+                if ($isi['status'] === 'izin_terlambat' && ! empty($isi['jam_masuk'])) {
                     $jamMasukText = "Terlambat masuk di JP ke-{$isi['jam_masuk']}";
-                    if (!$catatan || !str_contains($catatan, 'Terlambat masuk di JP ke-')) {
+                    if (! $catatan || ! str_contains($catatan, 'Terlambat masuk di JP ke-')) {
                         $catatan = $catatan ? "{$catatan} ({$jamMasukText})" : $jamMasukText;
                     }
                 }
@@ -871,10 +867,8 @@ class JurnalController extends Controller
         }
 
         if ($statusSebelumnya !== 'tidak_hadir' && $data['status_guru'] === 'tidak_hadir') {
-            $wakas = \App\Models\User::where('role', 'waka')->get();
-            foreach ($wakas as $waka) {
-                $waka->notify(new \App\Notifications\GuruTidakHadir($jurnal));
-            }
+            // Waka + pengurus kelas + wali kelas.
+            NotifikasiJurnal::guruTidakHadir($jurnal);
         }
 
         return $this->redirectRiwayat(['lihat' => $jurnal->id])->with('success', 'Jurnal & presensi diperbarui.');

@@ -12,6 +12,7 @@ use App\Models\PresensiPiket;
 use App\Models\Siswa;
 use App\Models\User;
 use App\Notifications\DispensasiBaru;
+use App\Support\NotifikasiDispensasi;
 use App\Support\Versi;
 use App\Support\Waktu;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -212,16 +213,22 @@ class PiketController extends Controller
             : ($data['status'] === 'dispensasi' && $jamKeMulai ? "dispensasi (mulai JP {$jamKeMulai})" : $data['status']);
         AuditLog::catat('Catat Presensi Siswa oleh Piket', "{$siswas->count()} siswa dicatat {$keterangan} pada {$data['tanggal']}");
 
-        if ($data['status'] === 'dispensasi' && ($data['jenis'] ?? 'izin_keluar') !== 'lomba') {
-            // Beritahu waka kalau ini Izin Keluar biasa (bukan lomba) -- sama
-            // kayak alur dari form Izin Keluar.
-            $wakas = User::where('role', 'waka')->get();
+        if ($data['status'] === 'dispensasi') {
             $contohDispen = \App\Models\Dispensasi::where('siswa_id', $siswas->first()->id)
                 ->whereDate('tanggal', $tanggalMulai->toDateString())
                 ->latest('id')->first();
+
             if ($contohDispen) {
-                foreach ($wakas as $waka) {
-                    $waka->notify(new DispensasiBaru($contohDispen));
+                if (($data['jenis'] ?? 'izin_keluar') === 'lomba') {
+                    // Lomba auto-approve: guru pengajar, piket, & pengurus kelas
+                    // tetap dapat notifikasi in-app walau tanpa Waka.
+                    NotifikasiDispensasi::saatDisetujui($contohDispen);
+                } else {
+                    // Izin keluar biasa: Waka + pengurus & piket diberi tahu.
+                    foreach (User::where('role', 'waka')->get() as $waka) {
+                        $waka->notify(new DispensasiBaru($contohDispen));
+                    }
+                    NotifikasiDispensasi::saatDiajukan($contohDispen);
                 }
             }
         }

@@ -13,6 +13,9 @@ use App\Models\Siswa;
 use App\Models\User;
 use App\Notifications\DispensasiBaru;
 use App\Notifications\DispensasiDiputuskan;
+use App\Notifications\DispensasiKelas;
+use App\Notifications\GuruTidakHadir;
+use App\Notifications\GuruTidakHadirDiKelasAnda;
 use App\Notifications\JurnalPerluDiperiksa;
 use App\Notifications\JurnalPerluRevisi;
 use App\Notifications\SiswaDispensasiDiKelasAnda;
@@ -240,6 +243,90 @@ class NotifikasiTest extends TestCase
         $this->actingAs($guruUser)->get("/notifikasi/{$id}/buka")
             ->assertRedirect(route('guru.dashboard'))
             ->assertSessionHas('info', 'Informasi dispensasi sudah tercatat untuk pelajaran Anda.');
+    }
+
+    public function test_lomba_auto_approve_mengirim_notifikasi_ke_piket_pengurus_dan_guru_pengajar(): void
+    {
+        $this->travelTo(Carbon::parse('next monday 07:00'));
+
+        // Piket yang bertugas hari itu.
+        $piket = User::factory()->role('guru')->create();
+        $guruPiket = Guru::create(['user_id' => $piket->id, 'nama' => 'Guru Piket']);
+        JadwalPiket::create(['guru_id' => $guruPiket->id, 'hari' => 'senin']);
+
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+
+        // Pengurus kelas.
+        $pengurus = User::factory()->role('siswa')->create();
+        $siswa = Siswa::create([
+            'user_id' => $pengurus->id, 'kelas_id' => $kelas->id, 'nis' => '001',
+            'nama' => 'Budi', 'jenis_kelamin' => 'L', 'no_absen' => 1, 'jabatan' => 'pengurus',
+        ]);
+
+        // Guru yang mengajar kelas itu pada jam 1-2 (kena dampak lomba).
+        $guruPengajarUser = User::factory()->role('guru')->create();
+        $guruPengajar = Guru::create(['user_id' => $guruPengajarUser->id, 'nama' => 'Bu Sarah']);
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guruPengajar->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+
+        Notification::fake();
+
+        $this->actingAs($piket)->post('/dispensasi', [
+            'siswa_ids' => [$siswa->id],
+            'tanggal' => today()->toDateString(),
+            'jenis' => 'lomba',
+            'alasan' => 'Lomba LKS',
+            'jam_ke_mulai' => 1,
+            'jam_ke_selesai' => 2,
+        ])->assertRedirect();
+
+        Notification::assertSentTo($piket, DispensasiKelas::class);
+        Notification::assertSentTo($pengurus, DispensasiKelas::class);
+        Notification::assertSentTo($guruPengajarUser, SiswaDispensasiDiKelasAnda::class);
+    }
+
+    public function test_guru_tidak_hadir_mengirim_notifikasi_ke_waka_pengurus_dan_wali(): void
+    {
+        $guruUser = User::factory()->role('guru')->create();
+        $guru = Guru::create(['user_id' => $guruUser->id, 'nama' => 'Pak Guru']);
+
+        $waka = User::factory()->role('waka')->create();
+
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+
+        $pengurus = User::factory()->role('siswa')->create();
+        Siswa::create([
+            'user_id' => $pengurus->id, 'kelas_id' => $kelas->id, 'nis' => '001',
+            'nama' => 'Budi', 'jenis_kelamin' => 'L', 'no_absen' => 1, 'jabatan' => 'pengurus',
+        ]);
+
+        $waliUser = User::factory()->role('guru')->create();
+        $wali = Guru::create(['user_id' => $waliUser->id, 'nama' => 'Bu Wali']);
+        $kelas->update(['wali_id' => $wali->id]);
+
+        $mapel = Mapel::create(['kode' => 'MTK', 'nama' => 'Matematika']);
+        $jadwal = Jadwal::create([
+            'kelas_id' => $kelas->id, 'mapel_id' => $mapel->id, 'guru_id' => $guru->id,
+            'hari' => 'senin', 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 2,
+        ]);
+
+        Notification::fake();
+
+        $this->actingAs($guruUser)->post('/guru/jurnal', [
+            'jadwal_id' => $jadwal->id,
+            'jam_ke_mulai' => 1,
+            'jam_ke_selesai' => 2,
+            'status_guru' => 'tidak_hadir',
+            'alasan' => 'sakit',
+            'tugas_tambahan' => 'Kerjakan LKS',
+        ])->assertRedirect();
+
+        Notification::assertSentTo($waka, GuruTidakHadir::class);
+        Notification::assertSentTo($pengurus, GuruTidakHadirDiKelasAnda::class);
+        Notification::assertSentTo($waliUser, GuruTidakHadirDiKelasAnda::class);
     }
 
     public function test_halaman_notifikasi_tampil_dan_bisa_ditandai_dibaca(): void

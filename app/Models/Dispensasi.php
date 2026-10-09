@@ -294,4 +294,56 @@ class Dispensasi extends Model
                 ->update(['status' => 'izin_keluar', 'catatan' => $this->alasan ? "keluar({$this->alasan})" : 'keluar']);
         }
     }
+
+    /**
+     * Guru-guru yang mengajar kelas siswa ini pada jam yang TUMPANG TINDIH
+     * dengan dispensasi -- yaitu "guru yang sedang mengajar" kelas anak
+     * tersebut. Mereka yang paling perlu tahu siswanya keluar, muka mereka
+     * yang bakal langsung lihat bangkunya kosong.
+     *
+     * @return Collection<int, User>
+     */
+    public function guruMapelTerkait(): Collection
+    {
+        $hariSet = collect($this->rentangTanggal())
+            ->map(fn ($tanggal) => ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? null)
+            ->filter()
+            ->unique();
+
+        $kelasId = $this->siswa->kelas_id;
+        if ($hariSet->isEmpty() || ! $kelasId) {
+            return collect();
+        }
+
+        return Jadwal::where('kelas_id', $kelasId)
+            ->whereIn('hari', $hariSet)
+            ->when($this->jam_ke_mulai, function ($q) {
+                $selesai = $this->jam_ke_selesai ?? 15;
+                $q->where('jam_ke_mulai', '<=', $selesai)->where('jam_ke_selesai', '>=', $this->jam_ke_mulai);
+            })
+            ->with('guru.user')
+            ->get()
+            ->pluck('guru.user')
+            ->filter()
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * Akun guru yang sedang bertugas piket pada tanggal dispensasi ini --
+     * "staff piket" yang perlu tahu ada siswa izin keluar/lomba di sekolahnya.
+     *
+     * @return Collection<int, User>
+     */
+    public function piketBertugas(): Collection
+    {
+        return JadwalPiket::query()
+            ->berlakuPada($this->tanggal)
+            ->with('guru.user')
+            ->get()
+            ->pluck('guru.user')
+            ->filter()
+            ->unique('id')
+            ->values();
+    }
 }
