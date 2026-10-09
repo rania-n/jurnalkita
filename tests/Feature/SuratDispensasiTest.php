@@ -110,7 +110,7 @@ class SuratDispensasiTest extends TestCase
         $this->get($tautan)->assertOk()->assertSee('Setujui');
 
         $this->post($tautan, ['keputusan' => 'approved'])
-            ->assertOk()->assertSee('Dispensasi Disetujui');
+            ->assertOk()->assertSee('Izin Keluar Disetujui');
 
         $this->menunggu->refresh();
         $this->assertSame('approved', $this->menunggu->status_akhir);

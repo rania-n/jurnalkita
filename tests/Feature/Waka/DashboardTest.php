@@ -77,7 +77,7 @@ class DashboardTest extends TestCase
         $this->dispensasi();
 
         $this->actingAs($this->waka)->get('/waka')
-            ->assertOk()->assertSee('Dispensasi Terbaru')->assertSee('Budi');
+            ->assertOk()->assertSee('Izin Keluar Terbaru')->assertSee('Budi');
     }
 
     public function test_dasbor_kosong_menampilkan_empty_state(): void

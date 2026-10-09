@@ -1,4 +1,4 @@
-<x-layouts.guest title="Surat Dispensasi" :center="false">
+<x-layouts.guest title="Surat Izin Keluar" :center="false">
     @if ($qrUrl)
         <meta http-equiv="refresh" content="{{ $detikSisa }}">
     @endif

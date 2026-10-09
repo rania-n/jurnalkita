@@ -1,10 +1,10 @@
-<x-layouts.guest title="Persetujuan Dispensasi">
+<x-layouts.guest title="Persetujuan Izin Keluar">
     @php $anggota = $dispensasi->anggotaKelompok(); @endphp
     <div class="mb-4 text-center">
         <span class="flex h-12 w-12 items-center justify-center mx-auto rounded-xl bg-navy text-card">
             <x-icon name="approval" :size="24" fill />
         </span>
-        <h1 class="mt-2 text-lg font-bold text-ink">Persetujuan Dispensasi</h1>
+        <h1 class="mt-2 text-lg font-bold text-ink">Persetujuan Izin Keluar</h1>
         <p class="text-xs text-muted-2">Diajukan oleh {{ $dispensasi->pengaju->name }}</p>
     </div>
 

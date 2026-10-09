@@ -62,15 +62,24 @@ class AkunTest extends TestCase
         $this->assertTrue(\Hash::check('rahasia-kuat-123', $user->password));
     }
 
-    /** Peran satpam sudah dihapus dari sistem -- role ini tidak boleh bisa dibuat lagi. */
-    public function test_buat_akun_dengan_role_satpam_ditolak(): void
+    /**
+     * Peran satpam sempat dihapus, lalu dihidupkan lagi bersama Portal
+     * Gerbang (scan QR izin keluar & konfirmasi siswa kembali) -- jadi admin
+     * harus bisa membuatkan akunnya.
+     */
+    public function test_buat_akun_satpam_langsung_diarahkan_ke_portal_gerbang(): void
     {
         $this->actingAs($this->admin())->post('/admin/akun', $this->akunPayload([
             'role' => 'satpam', 'sumber' => 'baru', 'nama' => 'Pak Satpam',
             'email' => 'satpam@sekolah.test', 'no_hp' => '081234567890',
-        ]))->assertSessionHasErrorsIn('buatAkun', ['role']);
+        ]))->assertSessionHasNoErrors();
 
-        $this->assertDatabaseMissing('users', ['email' => 'satpam@sekolah.test']);
+        $satpam = User::where('email', 'satpam@sekolah.test')->firstOrFail();
+        $this->assertSame('satpam', $satpam->role);
+        $this->assertSame('approved', $satpam->status);
+
+        $this->actingAs($satpam)->get('/dashboard')->assertRedirect(route('satpam.dashboard'));
+        $this->actingAs($satpam)->get('/satpam')->assertOk()->assertSee('Portal Gerbang Satpam');
     }
 
     public function test_buat_akun_waka_dengan_nip(): void

@@ -27,7 +27,7 @@ class NavigasiGuruPiketTest extends TestCase
         // Hari piket: cuma piket & dispensasi, jurnal/jadwal mengajar sengaja disembunyikan
         // (baik di nav maupun di badan halaman Beranda) -- hari itu dia nggak ngajar.
         $this->actingAs($guru)->get('/guru')->assertOk()
-            ->assertSee('Piket')->assertSee('Dispensasi')
+            ->assertSee('Piket')->assertSee('Izin Keluar')
             ->assertDontSee('Jadwal Mengajar Hari Ini')->assertDontSee('Riwayat Jurnal');
     }
 

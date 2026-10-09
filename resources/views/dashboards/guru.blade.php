@@ -214,7 +214,7 @@
                     </span>
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <h3 class="text-sm font-bold text-ink">Dispensasi Siswa Hari Ini</h3>
+                            <h3 class="text-sm font-bold text-ink">Izin Keluar Siswa Hari Ini</h3>
                             @if ($dispensasiPendingCount > 0)
                                 <span class="rounded-full bg-sakit-soft px-2 py-0.5 text-[10px] font-bold text-sakit">{{ $dispensasiPendingCount }} Menunggu</span>
                             @endif
@@ -318,7 +318,7 @@
                                 <div class="flex items-center justify-between gap-2 rounded-xl border border-surface-alt/50 bg-surface/50 p-2.5">
                                     <div class="min-w-0">
                                         <p class="truncate text-xs font-bold text-ink">{{ $wakaBertugas->name }}</p>
-                                        <p class="text-[11px] text-muted">Persetujuan Dispensasi Tahap 2</p>
+                                        <p class="text-[11px] text-muted">Persetujuan Izin Keluar Tahap 2</p>
                                     </div>
                                     @if ($waLinkWaka)
                                         <a href="{{ $waLinkWaka }}" target="_blank" rel="noopener" class="flex shrink-0 items-center gap-1 rounded-lg bg-navy/10 px-2.5 py-1 text-[11px] font-bold text-navy transition-colors hover:bg-navy/20">

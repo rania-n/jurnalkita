@@ -31,7 +31,7 @@
         <x-ui.stat label="Sakit" tone="sakit" :value="$rekap['sakit'] ?? 0" />
         <x-ui.stat label="Izin" tone="izin" :value="$rekap['izin'] ?? 0" />
         <x-ui.stat label="Alpha" tone="alpha" :value="$rekap['alpha'] ?? 0" />
-        <x-ui.stat label="Dispensasi" tone="dispen" :value="$rekap['dispensasi'] ?? 0" />
+        <x-ui.stat label="Izin Keluar" tone="dispen" :value="($rekap['izin_keluar'] ?? 0) + ($rekap['dispensasi'] ?? 0)" />
     </div>
 
     {{-- "Hadir" udah kehitung di ringkasan stat di atas -- di daftar detail

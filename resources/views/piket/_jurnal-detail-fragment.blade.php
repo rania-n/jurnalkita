@@ -1,7 +1,8 @@
 @php
     $statusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
-    $statusAbsen = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
-    $rekap = $jurnal->absensis->countBy('status');
+    // Sama persis kayak popup detail jurnal guru & pengurus -- 'dispensasi'
+    // (status lama) sudah digabung ke 'izin_keluar' (lihat RekapKehadiran).
+    $rekap = \App\Support\RekapKehadiran::hitungStatus($jurnal->absensis->pluck('status'));
     $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
 @endphp
 
@@ -11,11 +12,11 @@
         <span class="text-xs text-muted-2">· {{ $jurnal->jadwal->kelas->nama }} · JP {{ $jurnal->jam_ke_mulai }}–{{ $jurnal->jam_ke_selesai }}{{ $jamJurnal ? " · {$jamJurnal}" : '' }}</span>
     </div>
 
-    {{-- Ringkasan Hadir/Sakit/Izin/Alpha/Dispensasi ditaruh paling atas --
+    {{-- Ringkasan Hadir/Sakit/Izin/Alpha/Izin Keluar ditaruh paling atas --
          yang paling sering dicek duluan pas piket buka detail. --}}
     <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
-        @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
-            <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
+        @foreach (\App\Support\RekapKehadiran::ringkasan() as $s => [$label, $nada])
+            <x-ui.stat :label="$label" :tone="$nada" :value="$rekap[$s] ?? 0" />
         @endforeach
     </div>
 

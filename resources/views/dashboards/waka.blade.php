@@ -62,7 +62,7 @@
                 <x-icon name="approval" :size="24" />
             </span>
             <div class="flex-1">
-                <p class="text-sm font-bold text-ink">Antrean Dispensasi</p>
+                <p class="text-sm font-bold text-ink">Antrean Izin Keluar</p>
                 <p class="text-xs text-muted">{{ $perluApproval }} pengajuan menunggu persetujuan Anda</p>
             </div>
             <x-icon name="chevron_right" :size="20" class="text-muted" />
@@ -131,7 +131,7 @@
     </div>
 
     <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-bold text-ink">Dispensasi Terbaru</h2>
+        <h2 class="text-sm font-bold text-ink">Izin Keluar Terbaru</h2>
         <a href="{{ route('dispensasi.index') }}" class="text-sm font-semibold text-navy">Lihat Semua →</a>
     </div>
 

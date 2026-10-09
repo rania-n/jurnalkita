@@ -26,7 +26,7 @@
         </div>
 
         <div class="rounded-xl border border-surface-alt bg-card p-4">
-            <h2 class="font-bold text-ink">Scan Surat Dispensasi</h2>
+            <h2 class="font-bold text-ink">Scan Surat Izin Keluar</h2>
             <p class="text-sm text-muted-2">Gunakan kamera bawaan HP untuk memindai QR Code pada surat dispensasi siswa.</p>
         </div>
     </div>

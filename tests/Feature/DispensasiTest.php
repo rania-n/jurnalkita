@@ -67,7 +67,7 @@ class DispensasiTest extends TestCase
 
         $this->actingAs($this->waka)->get('/dispensasi')->assertOk()->assertSee('Budi');
         $this->actingAs($this->waka)->get("/dispensasi/{$d->id}/fragment")->assertOk()->assertSee('Setujui');
-        $this->actingAs($this->waka)->get('/waka')->assertOk()->assertSee('Antrean Dispensasi');
+        $this->actingAs($this->waka)->get('/waka')->assertOk()->assertSee('Antrean Izin Keluar');
     }
 
     public function test_ajukan_langsung_lolos_tahap_piket(): void

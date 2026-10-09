@@ -45,7 +45,7 @@ class AkunController extends Controller
         // modal Ubah Akun (DAN modal notifikasi di header) ikut kebuka juga
         // -- lihat catatan di x-admin.modal.
         $data = $request->validateWithBag('buatAkun', [
-            'role' => ['required', 'in:guru,siswa,waka'],
+            'role' => ['required', 'in:guru,siswa,waka,satpam'],
             'sumber' => ['nullable', 'string'],
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'lowercase', Rule::unique('users', 'email')->withoutTrashed()],

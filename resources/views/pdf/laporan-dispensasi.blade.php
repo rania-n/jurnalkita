@@ -95,7 +95,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Laporan Dispensasi Siswa</h1>
+        <h1>Laporan Izin Keluar Siswa</h1>
         <p>Aplikasi Presensi & Jurnal Mengajar — jurnalkita</p>
     </div>
 
@@ -121,7 +121,7 @@
                 <th style="width: 120px;">Nama Siswa</th>
                 <th style="width: 65px;">Kelas</th>
                 <th style="width: 80px;">Waktu</th>
-                <th>Alasan Dispensasi</th>
+                <th>Alasan</th>
                 <th style="width: 90px;">Diajukan Oleh</th>
                 <th style="width: 65px;" class="text-center">Status</th>
                 <th style="width: 100px;">Catatan Waka</th>

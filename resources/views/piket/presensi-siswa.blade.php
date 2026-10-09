@@ -237,7 +237,7 @@
                             labelSurat.textContent = 'Bukti Izin';
                             if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: acara keluarga';
                         } else if (val === 'dispensasi') {
-                            labelSurat.textContent = 'Surat Dispensasi / Bukti Pendukung';
+                            labelSurat.textContent = 'Surat Izin / Bukti Pendukung';
                             if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: mewakili lomba';
                         } else {
                             labelSurat.textContent = 'Bukti';
