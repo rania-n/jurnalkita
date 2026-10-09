@@ -143,7 +143,7 @@
         <form method="POST" action="{{ route('dispensasi.destroy', $dispensasi) }}"
               data-confirm="Batalkan pengajuan dispensasi ini?">
             @csrf @method('DELETE')
-            <x-ui.button type="submit" variant="danger" icon="delete">Batalkan Pengajuan</x-ui.button>
+            <x-ui.button type="submit" variant="danger" icon="delete" block>Batalkan Pengajuan</x-ui.button>
         </form>
     @endif
 </div>

@@ -19,15 +19,24 @@ function initPasswordToggles() {
     });
 }
 
-/* Pratinjau gambar setelah pilih file di <x-ui.upload>. */
+/* Pratinjau setelah pilih file di <x-ui.upload>: gambar tampil sebagai
+ * thumbnail, PDF tampil sebagai nama file (kecil, dipotong bila panjang). */
 function initUploadPreview() {
     document.querySelectorAll('[data-upload-input]').forEach((input) => {
         input.addEventListener('change', () => {
             const file = input.files && input.files[0];
             const box = input.closest('label');
             if (!file || !box) return;
-            const name = box.querySelector('span');
-            if (name) name.textContent = file.name;
+            const judul = box.querySelector('[data-upload-judul]');
+            const ikon = box.querySelector('[data-upload-ikon]');
+            const pratinjau = box.querySelector('[data-upload-pratinjau]');
+            if (judul) judul.textContent = file.name;
+            if (pratinjau) {
+                const gambar = file.type.startsWith('image/');
+                if (gambar) pratinjau.src = URL.createObjectURL(file);
+                pratinjau.hidden = !gambar;
+                if (ikon) ikon.hidden = gambar;
+            }
             box.classList.add('border-navy');
         });
     });

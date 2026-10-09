@@ -25,10 +25,11 @@
             '!border-alpha' => $errors->has($name, $errorBag),
         ])
     >
-        <x-icon :name="$icon" :size="28" class="text-navy" />
-        <span class="text-xs font-semibold text-navy">{{ $title }}</span>
+        <img data-upload-pratinjau hidden alt="Pratinjau lampiran" class="max-h-48 w-full rounded-lg object-cover">
+        <span data-upload-ikon><x-icon :name="$icon" :size="28" class="text-navy" /></span>
+        <span data-upload-judul class="max-w-full break-all text-xs font-semibold text-navy">{{ $title }}</span>
         @if ($hint)
-            <span class="text-[11px] text-muted-2">{{ $hint }}</span>
+            <span data-upload-hint class="text-[11px] text-muted-2">{{ $hint }}</span>
         @endif
         {{-- sr-only (BUKAN hidden/display:none) -- biar tetap ikut validasi
              wajib-isi bawaan browser. Klik label tetap buka file-picker
