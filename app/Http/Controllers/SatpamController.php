@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\Dispensasi;
 use App\Support\QrDispensasi;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -16,19 +17,31 @@ class SatpamController extends Controller
      */
     public function dashboard(Request $request): View
     {
-        $dispensasiKeluar = Dispensasi::with('siswa.kelas')
-            ->where('status_akhir', 'approved')
-            ->where('jenis', 'izin_keluar')
-            ->whereDate('tanggal', today())
-            ->whereNull('waktu_kembali')
+        $berlakuHariIni = Dispensasi::with('siswa.kelas')
+            ->berlakuHariIni()
+            ->whereIn('jenis', ['izin_keluar', 'lomba'])
+            ->orderBy('id')
             ->get();
 
-        return view('dashboards.satpam', compact('dispensasiKeluar'));
+        $dispensasiKeluar = $berlakuHariIni
+            ->where('jenis', 'izin_keluar')
+            ->whereNull('waktu_kembali')
+            ->values();
+
+        return view('dashboards.satpam', compact('dispensasiKeluar', 'berlakuHariIni'));
     }
 
-    public function konfirmasiKembali(Dispensasi $dispensasi, Request $request)
+    public function konfirmasiKembali(Dispensasi $dispensasi, Request $request): RedirectResponse
     {
-        $dispensasi->update(['waktu_kembali' => now()]);
+        abort_unless(
+            $dispensasi->status_akhir === 'approved' && $dispensasi->jenis === 'izin_keluar',
+            404
+        );
+
+        if (! $dispensasi->waktu_kembali) {
+            $dispensasi->update(['waktu_kembali' => now()]);
+            AuditLog::catat('Konfirmasi Siswa Kembali', "Siswa {$dispensasi->siswa->nama} dikonfirmasi kembali ke sekolah", $dispensasi);
+        }
 
         return redirect()->route('satpam.dashboard')->with('success', 'Siswa berhasil dikonfirmasi kembali ke sekolah.');
     }

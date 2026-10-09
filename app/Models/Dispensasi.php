@@ -22,12 +22,12 @@ class Dispensasi extends Model
         'alasan', 'surat_path', 'no_hp',
         'status_piket', 'piket_id', 'catatan_piket',
         'status_waka', 'waka_id', 'catatan_waka',
-        'status_akhir',
+        'status_akhir', 'waktu_kembali',
     ];
 
     protected function casts(): array
     {
-        return ['tanggal' => 'date', 'tanggal_selesai' => 'date'];
+        return ['tanggal' => 'date', 'tanggal_selesai' => 'date', 'waktu_kembali' => 'datetime'];
     }
 
     /** Satu baris wakil untuk setiap pengajuan, termasuk pengajuan rombongan. */
@@ -94,6 +94,14 @@ class Dispensasi extends Model
     {
         return $query->where('status_akhir', 'approved')
             ->whereRaw('coalesce(tanggal_selesai, tanggal) < ?', [today()->toDateString()]);
+    }
+
+    /** Scope: dispensasi approved yang rentang tanggalnya mencakup hari ini -- daftar di Portal Satpam. */
+    public function scopeBerlakuHariIni(Builder $query): Builder
+    {
+        return $query->where('status_akhir', 'approved')
+            ->whereDate('tanggal', '<=', today())
+            ->whereRaw('coalesce(tanggal_selesai, tanggal) >= ?', [today()->toDateString()]);
     }
 
     /** Scope: dispensasi approved yang masih berlaku hari ini/akan datang -- tab "Disetujui". */

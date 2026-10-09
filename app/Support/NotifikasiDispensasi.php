@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Dispensasi;
+use App\Models\User;
 use App\Notifications\DispensasiDiputuskan;
 use App\Notifications\DispensasiKelas;
 use App\Notifications\SiswaDispensasiDiKelasAnda;
@@ -30,6 +31,11 @@ class NotifikasiDispensasi
         }
 
         self::kePiketDanPengurus($dispensasi, DispensasiKelas::DISETUJUI, $kecualiUserId);
+
+        // Satpam hanya perlu tahu yang sudah disetujui (itu yang bisa lewat gerbang).
+        foreach (User::where('role', 'satpam')->where('status', 'approved')->get() as $satpam) {
+            $satpam->notify(new DispensasiKelas($dispensasi, DispensasiKelas::DISETUJUI));
+        }
     }
 
     /** Dispensasi ditolak Waka, atau dibatalkan otomatis karena lewat batas. */

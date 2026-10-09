@@ -49,6 +49,11 @@ class DispensasiKelas extends Notification
             default => ['fact_check', "Pengajuan $jenis baru"],
         };
 
+        // Satpam: yang relevan hanya "ada siswa baru yang boleh keluar".
+        if (($notifiable->role ?? null) === 'satpam' && $this->status === self::DISETUJUI) {
+            $title = "$jenis baru: siswa diizinkan keluar sekolah";
+        }
+
         // Halaman Izin Keluar cuma kebuka buat piket/waka/admin -- pengurus
         // kelas kalau diklik malah 403, jadi diarahkan ke beranda kelasnya.
         $bolehLihat = in_array($notifiable->role ?? null, ['waka', 'admin'], true)
