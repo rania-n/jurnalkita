@@ -199,7 +199,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function roleLabel(): string
     {
         return match ($this->role) {
-            'satpam' => 'satpam.dashboard',
             'admin' => 'Admin',
             'satpam' => 'Satpam',
             'guru' => $this->piketHariIni() ? 'Guru Piket' : 'Guru',
