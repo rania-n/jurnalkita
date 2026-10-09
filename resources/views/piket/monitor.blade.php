@@ -1,11 +1,4 @@
 @php
-    $tone = [
-        'hadir' => 'bg-hadir-soft text-hadir',
-        'tidak_hadir' => 'bg-alpha-soft text-alpha',
-        'belum_diisi' => 'bg-sakit-soft text-sakit',
-        'terlambat' => 'bg-alpha-soft text-alpha',
-        'tidak_diisi' => 'bg-alpha-soft text-alpha',
-    ];
     $rentangBeda = ! $dari->isSameDay($sampai);
     $hariLabel = config('akademik.hari')[['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$dari->dayOfWeek - 1] ?? ''] ?? null;
     $admin = auth()->user()->role === 'admin';
@@ -129,10 +122,7 @@
     @else
         <div class="flex flex-col gap-4" id="grup-monitor">
             @foreach ($grup as $g)
-                @php
-                    $cariGrup = str($g['label'])->lower();
-                @endphp
-                <div class="rounded-xl border border-surface-alt bg-card overflow-hidden" data-grup-card data-cari="{{ $cariGrup }}">
+                <div class="rounded-xl border border-surface-alt bg-card overflow-hidden" data-grup-card data-cari="{{ $g['cari_meta'] ?? str($g['label'])->lower() }}">
                     <div class="flex flex-nowrap items-start justify-between gap-2 p-2 sm:p-3">
                         <div class="flex items-start gap-1 sm:gap-2 min-w-0">
                             <button type="button" class="btn-toggle-tabel shrink-0 p-0.5 sm:p-1 mt-0.5 text-muted-2 hover:text-ink hover:bg-surface-alt rounded-md transition-colors" title="Sembunyikan/Tampilkan Tabel">
@@ -141,7 +131,7 @@
                             <div class="min-w-0">
                                 <p class="text-[13px] sm:text-sm font-bold text-ink leading-tight truncate">{{ $g['label'] }}</p>
                                 <p class="text-[11px] sm:text-xs text-muted leading-snug mt-0.5" data-grup-count>
-                                    {{ $g['rows']->count() }} jam pelajaran
+                                    {{ $g['jumlah_baris'] }} jam pelajaran
                                     @if (($g['rekap']['tidak_diisi'] ?? 0) || ($g['rekap']['belum_diisi'] ?? 0))
                                         <span class="inline-block">· <span class="font-semibold text-sakit">{{ ($g['rekap']['tidak_diisi'] ?? 0) + ($g['rekap']['belum_diisi'] ?? 0) }} kosong</span></span>
                                     @endif
@@ -158,7 +148,7 @@
                         @endif
                     </div>
 
-                    <div class="overflow-x-auto tabel-container border-t border-surface-alt" hidden>
+                    <div class="overflow-x-auto tabel-container border-t border-surface-alt" hidden data-grup-url="{{ route('piket.monitor.grup', ['tipe' => $mode, 'id' => $g['id'], 'dari' => $dari->toDateString(), 'sampai' => $sampai->toDateString(), 'status' => request('status')]) }}" data-grup-sudah="0">
                         <table class="responsive-table responsive-table--inline w-full text-left text-sm">
                             <thead>
                                 <tr class="border-b border-surface-alt">
@@ -172,65 +162,15 @@
                                     <th class="px-3 py-2 text-xs font-bold uppercase tracking-wide text-muted-2">Materi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-surface-alt">
-                                @foreach ($g['rows'] as $b)
-                                    @php
-                                        $lawan = $mode === 'kelas' ? $b['jadwal']->guru->nama : $b['jadwal']->kelas->nama;
-                                        $cariBaris = str($g['label'].' '.$lawan.' '.$b['jadwal']->mapel->nama)->lower();
-                                        $bisaDiklik = $b['jurnal'] !== null;
-                                        $tanggalBaris = \Illuminate\Support\Carbon::parse($b['tanggal']);
-                                        $jamBaris = \App\Support\Waktu::rentangJam($b['jadwal']->jam_ke_mulai, $b['jadwal']->jam_ke_selesai, $tanggalBaris);
-                                    @endphp
-                                    <tr
-                                        data-baris-monitor
-                                        data-status="{{ $b['status'] }}"
-                                        data-cari="{{ $cariBaris }}"
-                                        @class([
-                                            'bg-sakit-soft/30' => in_array($b['status'], ['tidak_diisi', 'belum_diisi']),
-                                            'cursor-pointer hover:bg-surface/60' => $bisaDiklik,
-                                        ])
-                                        @if ($bisaDiklik)
-                                            data-modal-open="modal-jurnal-detail"
-                                            data-modal-title="Detail Jurnal — {{ $lawan }}"
-                                            data-ajax-url="{{ route('piket.monitor.jurnal', $b['jurnal']) }}"
-                                            tabindex="0"
-                                        @endif
-                                    >
-                                        @if ($rentangBeda)
-                                            <td class="px-3 py-2 text-muted whitespace-nowrap">{{ $tanggalBaris->translatedFormat('d M Y') }}</td>
-                                        @endif
-                                        <td class="px-3 py-2 text-muted">
-                                            JP {{ $b['jadwal']->jam_ke_mulai }}–{{ $b['jadwal']->jam_ke_selesai }}
-                                            @if ($jamBaris)
-                                                <span class="block text-[11px] text-muted-2 sm:inline sm:text-inherit">{{ $jamBaris }}</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-3 py-2 text-ink">{{ $b['jadwal']->mapel->nama }}</td>
-                                        <td class="px-3 py-2 text-muted">{{ $lawan }}</td>
-                                        <td class="px-3 py-2">
-                                            @if ($b['status'] === 'terlambat')
-                                                @php
-                                                    $isHadir = str_starts_with($b['statusLabel'], 'Hadir');
-                                                @endphp
-                                                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold {{ $isHadir ? 'bg-hadir-soft text-hadir' : 'bg-alpha-soft text-alpha' }}">
-                                                    {{ Str::before($b['statusLabel'], ' (Terlambat)') }} <span class="text-alpha ml-1">(Terlambat)</span>
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold {{ $tone[$b['status']] }}">
-                                                    {{ $b['statusLabel'] }}
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="px-3 py-2 text-muted">
-                                            {{ $b['jurnal']->materi ?? ($b['jurnal']->tugas_tambahan ?? '—') }}
-                                            @if ($bisaDiklik)
-                                                <x-icon name="chevron_right" :size="16" class="ml-1 inline text-muted-2 align-middle" />
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
+                            <tbody class="divide-y divide-surface-alt" data-tabel-isi>
+                                <tr><td colspan="6" class="p-4 text-center text-xs text-muted-2">Memuat data...</td></tr>
                             </tbody>
                         </table>
+                        <noscript>
+                            <div class="p-4 text-center text-xs text-muted-2">
+                                Detail jadwal per kelas dimuat otomatis saat dibuka. Aktifkan JavaScript untuk melihatnya, atau buka <a href="{{ route('piket.monitor.ekspor.detail', ['tipe' => $mode, 'id' => $g['id'], 'dari' => $dari->toDateString(), 'sampai' => $sampai->toDateString()]) }}" class="font-semibold text-navy underline">ekspor lengkapnya</a>.
+                            </div>
+                        </noscript>
                     </div>
                 </div>
             @endforeach
@@ -308,12 +248,13 @@
 
                 cari?.addEventListener('input', terapkan);
 
-                // Toggle Accordion untuk Tabel
+                // Toggle Accordion untuk Tabel + Lazy Load AJAX
                 const toggleBtns = document.querySelectorAll('.btn-toggle-tabel');
                 toggleBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
                         const card = btn.closest('[data-grup-card]');
                         const tabelContainer = card.querySelector('.tabel-container');
+                        const tbody = card.querySelector('[data-tabel-isi]');
                         const icon = btn.querySelector('.icon-chevron');
                         
                         tabelContainer.hidden = !tabelContainer.hidden;
@@ -321,6 +262,25 @@
                             icon.classList.remove('rotate-180');
                         } else {
                             icon.classList.add('rotate-180');
+                            
+                            // Load data baris jika belum pernah diload
+                            if (tabelContainer.dataset.grupSudah === '0') {
+                                tabelContainer.dataset.grupSudah = '1';
+                                fetch(tabelContainer.dataset.grupUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                                    .then(r => r.ok ? r.text() : Promise.reject())
+                                    .then(html => {
+                                        tbody.innerHTML = html;
+                                        // Wire ulang klik jurnal detail karena HTML baru disuntikkan
+                                        // (fungsi initModals di app.js menggunakan event delegation di document, 
+                                        // jadi modal-open langsung jalan tanpa butuh wiring ulang!).
+                                        // Panggil ulang pencarian jika ada filter aktif.
+                                        if (cari && cari.value.trim() !== '') terapkan();
+                                    })
+                                    .catch(() => {
+                                        tabelContainer.dataset.grupSudah = '0';
+                                        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-alpha">Gagal memuat baris. Tutup dan buka kembali untuk mencoba ulang.</td></tr>';
+                                    });
+                            }
                         }
                     });
                 });

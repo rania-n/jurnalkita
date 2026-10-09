@@ -77,18 +77,35 @@ class PiketMonitorTest extends TestCase
 
     public function test_monitor_menampilkan_status_sudah_dan_belum_diisi(): void
     {
-        $response = $this->actingAs($this->piket)->get('/piket/monitor');
+        // Daftar grup (kelas) tampil langsung; isi barisnya baru diambil AJAX
+        // per-accordion (lihat fragmentGrup()), jadi nggak ada di HTML awal.
+        $this->actingAs($this->piket)->get('/piket/monitor')
+            ->assertOk()
+            ->assertSee('X RPL 1')->assertSee('X TKJ 1');
 
-        $response->assertOk()
-            ->assertSee('X RPL 1')->assertSee('Hadir')->assertSee('Aljabar dasar')
-            ->assertSee('X TKJ 1')->assertSee('Belum Diisi');
+        $this->actingAs($this->piket)->get("/piket/monitor/grup/kelas/{$this->kelasA->id}")
+            ->assertOk()->assertSee('Hadir')->assertSee('Aljabar dasar');
+
+        $this->actingAs($this->piket)->get("/piket/monitor/grup/kelas/{$this->kelasB->id}")
+            ->assertOk()->assertSee('Belum Diisi');
+    }
+
+    public function test_fragment_grup_mode_tidak_dikenal_404(): void
+    {
+        $this->actingAs($this->waka)->get('/piket/monitor/grup/ngawur/1')->assertNotFound();
     }
 
     public function test_mode_per_kelas_memisahkan_grup_per_kelas(): void
     {
         $this->actingAs($this->waka)
             ->get('/piket/monitor?mode=kelas')
-            ->assertOk()->assertSeeInOrder(['X RPL 1', 'JP 1–2', 'X TKJ 1', 'JP 3–4']);
+            ->assertOk()->assertSeeInOrder(['X RPL 1', 'X TKJ 1']);
+
+        // Tiap kelas punya tabel barisnya sendiri (di-fetch pas accordion dibuka).
+        $this->actingAs($this->waka)->get("/piket/monitor/grup/kelas/{$this->kelasA->id}")
+            ->assertOk()->assertSee('JP 1–2');
+        $this->actingAs($this->waka)->get("/piket/monitor/grup/kelas/{$this->kelasB->id}")
+            ->assertOk()->assertSee('JP 3–4');
     }
 
     public function test_mode_per_guru_memisahkan_grup_per_guru(): void
@@ -104,12 +121,15 @@ class PiketMonitorTest extends TestCase
         $dari = now()->subDay()->toDateString(); // Minggu -- kemarin dari Senin yang di-pin setUp()
         $sampai = now()->toDateString(); // Senin -- ada jadwal & jurnalnya (lihat setUp())
 
-        $response = $this->actingAs($this->waka)->get("/piket/monitor?dari={$dari}&sampai={$sampai}");
+        $this->actingAs($this->waka)->get("/piket/monitor?dari={$dari}&sampai={$sampai}")
+            ->assertOk()
+            ->assertSee('X RPL 1')->assertSee('X TKJ 1');
 
-        $response->assertOk()
-            ->assertSee('X RPL 1')->assertSee('Aljabar dasar')
-            ->assertSee('X TKJ 1')->assertSee('Belum Diisi')
-            ->assertSee(now()->translatedFormat('d M Y')); // kolom Tanggal per-baris cuma muncul kalau rentangnya >1 hari
+        // Kolom Tanggal per-baris cuma muncul kalau rentangnya >1 hari.
+        $this->actingAs($this->waka)->get("/piket/monitor/grup/kelas/{$this->kelasA->id}?dari={$dari}&sampai={$sampai}")
+            ->assertOk()
+            ->assertSee('Aljabar dasar')
+            ->assertSee(now()->translatedFormat('d M Y'));
     }
 
     /** Sampai tanggal nggak boleh melewati hari ini -- diklem balik, bukan error. */

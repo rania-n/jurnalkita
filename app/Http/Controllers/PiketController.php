@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\AuditLog;
-use App\Models\HariKhusus;
 use App\Models\Jadwal;
-use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\PengaturanJurnal;
@@ -295,14 +293,20 @@ class PiketController extends Controller
             ->groupBy(fn ($b) => $mode === 'guru' ? $b['jadwal']->guru_id : $b['jadwal']->kelas_id)
             ->map(function (Collection $rows, $id) use ($mode) {
                 $contoh = $rows->first()['jadwal'];
+                $label = $mode === 'guru' ? $contoh->guru->nama : $contoh->kelas->nama;
+                $cariAll = $rows->map(fn ($b) => ($mode === 'kelas' ? $b['jadwal']->guru->nama : $b['jadwal']->kelas->nama).' '.$b['jadwal']->mapel->nama)->join(' ');
 
                 return [
                     'id' => $id,
-                    'label' => $mode === 'guru' ? $contoh->guru->nama : $contoh->kelas->nama,
+                    'label' => $label,
+                    'cari_meta' => strtolower($label.' '.$cariAll),
                     // Diurutkan tanggal dulu baru jam -- rentang lebih dari 1
                     // hari bisa punya jadwal yang SAMA (JP-nya) di tanggal
                     // beda-beda, jangan sampai keurut cuma dari jam-nya doang.
-                    'rows' => $rows->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))->values(),
+                    // (Hanya disiapkan array kosong di awal untuk meringankan
+                    // beban DOM awal, isi aslinya diambil via AJAX pas diklik).
+                    'rows' => collect(),
+                    'jumlah_baris' => $rows->count(),
                     'rekap' => $rows->countBy('status'),
                 ];
             })
@@ -319,6 +323,37 @@ class PiketController extends Controller
             'rekapTotal' => $rekapTotal,
             'statusAktif' => $statusAktif,
             'lihatJurnal' => $lihatJurnal,
+        ]);
+    }
+
+    /**
+     * Fragment HTML untuk mengisi baris-baris tabel (diklik per-kelas/guru)
+     * secara dinamis, biar HP nggak ngehang render ribuan TR di satu halaman.
+     */
+    public function fragmentGrup(Request $request, string $mode, int $id): View
+    {
+        abort_unless(in_array($mode, ['guru', 'kelas'], true), 404);
+
+        [$dari, $sampai] = $this->rentangTanggal($request);
+
+        $filterJadwal = fn ($q) => $q->where($mode.'_id', $id);
+        $baris = $this->barisRange($dari, $sampai, false, $filterJadwal);
+
+        $statusAktif = in_array($request->query('status'), ['sudah_diisi', 'hadir', 'tidak_hadir', 'terlambat', 'tidak_diisi', 'belum_diisi'], true)
+            ? $request->query('status') : '';
+
+        if ($statusAktif) {
+            $baris = $statusAktif === 'sudah_diisi'
+                ? $baris->whereIn('status', ['hadir', 'tidak_hadir', 'terlambat'])
+                : $baris->where('status', $statusAktif);
+        }
+
+        $rows = $baris->sortBy(fn ($b) => $b['tanggal'].sprintf('%02d', $b['jadwal']->jam_ke_mulai))->values();
+
+        return view('piket._wadah_jadwal', [
+            'mode' => $mode,
+            'rows' => $rows,
+            'rentangBeda' => ! $dari->isSameDay($sampai),
         ]);
     }
 
@@ -529,11 +564,11 @@ class PiketController extends Controller
     }
 
     /** Gabungan baris() buat tiap tanggal dalam rentang $dari..$sampai (inklusif). */
-    private function barisRange(Carbon $dari, Carbon $sampai, bool $denganPresensi = false): Collection
+    private function barisRange(Carbon $dari, Carbon $sampai, bool $denganPresensi = false, ?callable $filterJadwal = null): Collection
     {
         $hasil = collect();
         for ($d = $dari->copy(); $d->lte($sampai); $d->addDay()) {
-            $hasil = $hasil->merge($this->baris($d->copy(), $denganPresensi));
+            $hasil = $hasil->merge($this->baris($d->copy(), $denganPresensi, $filterJadwal));
         }
 
         return $hasil->values();
@@ -543,7 +578,7 @@ class PiketController extends Controller
      * Satu baris per jadwal (kelas+jam) pada hari yang sama dengan tanggal $tanggal,
      * digabung dengan jurnal (kalau sudah diisi) pada tanggal itu persis.
      */
-    private function baris(Carbon $tanggal, bool $denganPresensi = false): Collection
+    private function baris(Carbon $tanggal, bool $denganPresensi = false, ?callable $filterJadwal = null): Collection
     {
         $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'][$tanggal->dayOfWeek - 1] ?? null;
 
@@ -551,14 +586,15 @@ class PiketController extends Controller
             return collect(); // Sabtu/Minggu — tidak ada jadwal pelajaran.
         }
 
-        if (HariKhusus::untukTanggal($tanggal)?->jenis === 'tanpa_kbm') {
+        if (Waktu::tanpaKbm($tanggal)) {
             return collect();
         }
 
-        $jadwals = Jadwal::where('hari', $hari)
-            ->with('kelas', 'mapel', 'guru')
-            ->get()
-            ->reject(fn (Jadwal $jadwal) => Waktu::jadwalDitiadakan($jadwal, $tanggal));
+        $jadwalsQuery = Jadwal::where('hari', $hari)->with('kelas', 'mapel', 'guru');
+        if ($filterJadwal) {
+            $filterJadwal($jadwalsQuery);
+        }
+        $jadwals = $jadwalsQuery->get()->reject(fn (Jadwal $jadwal) => Waktu::jadwalDitiadakan($jadwal, $tanggal));
 
         $jurnalQuery = Jurnal::whereIn('jadwal_id', $jadwals->pluck('id'))->whereDate('tanggal', $tanggal);
         if ($denganPresensi) {
@@ -566,9 +602,15 @@ class PiketController extends Controller
         }
         $jurnals = $jurnalQuery->get()->keyBy('jadwal_id');
 
+        // Dihitung SEKALI per tanggal (dulu di dalam map, kepanggil ribuan kali
+        // buat rentang tanggal panjang).
+        $hariIniStr = now()->format('Y-m-d');
+        $jamSekarangStr = now()->format('H:i');
+        $tanggalStr = $tanggal->toDateString();
+
         return $jadwals
             ->sortBy([['kelas.nama', 'asc'], ['jam_ke_mulai', 'asc']])
-            ->map(function (Jadwal $jadwal) use ($jurnals, $tanggal) {
+            ->map(function (Jadwal $jadwal) use ($jurnals, $tanggalStr, $hariIniStr, $jamSekarangStr) {
                 $jurnal = $jurnals->get($jadwal->id);
 
                 if ($jurnal) {
@@ -581,15 +623,15 @@ class PiketController extends Controller
                         $statusLabel = self::LABEL_STATUS[$jurnal->status_guru] ?? $jurnal->status_guru;
                     }
                 } else {
-                    $kategori = Waktu::kategori($tanggal);
-                    $jamSelesaiWaktu = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jadwal->jam_ke_selesai)->value('selesai');
+                    // Jam selesai via jalur cache Waktu (nggak nembak DB per baris).
+                    $jamSelesaiWaktu = Waktu::jamSelesaiUntukHari($jadwal->hari, $jadwal->jam_ke_selesai);
                     $isTidakDiisi = false;
                     $isLewat = false;
 
-                    if (now()->format('Y-m-d') > $tanggal->toDateString()) {
+                    if ($hariIniStr > $tanggalStr) {
                         $isTidakDiisi = true;
-                    } elseif ($jamSelesaiWaktu && now()->format('Y-m-d') === $tanggal->toDateString()) {
-                        $isLewat = now()->format('H:i') > $jamSelesaiWaktu->format('H:i');
+                    } elseif ($jamSelesaiWaktu && $hariIniStr === $tanggalStr) {
+                        $isLewat = $jamSekarangStr > $jamSelesaiWaktu;
                     }
 
                     if ($isTidakDiisi || $isLewat) {
@@ -604,7 +646,7 @@ class PiketController extends Controller
                 return [
                     'jadwal' => $jadwal,
                     'jurnal' => $jurnal,
-                    'tanggal' => $tanggal->toDateString(),
+                    'tanggal' => $tanggalStr,
                     'status' => $status,
                     'statusLabel' => $statusLabel,
                 ];

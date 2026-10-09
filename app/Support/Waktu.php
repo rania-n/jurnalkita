@@ -23,9 +23,9 @@ class Waktu
     public static function kategoriUntukHari(string $hari): string
     {
         $hari = strtolower($hari);
-        $default = $hari === 'jumat' ? 'jumat' : 'senin_kamis';
 
-        return DB::table('jam_pelajaran_hari')->where('hari', $hari)->value('kategori') ?? $default;
+        return self::$cacheKategoriHari[$hari] ??= (DB::table('jam_pelajaran_hari')
+            ->where('hari', $hari)->value('kategori') ?? ($hari === 'jumat' ? 'jumat' : 'senin_kamis'));
     }
 
     /**
@@ -193,12 +193,38 @@ class Waktu
         return null;
     }
 
+    /**
+     * Cache JamPelajaran per kategori + kategori-per-hari + HariKhusus.
+     * Monitor Piket bisa nge-loop ribuan baris dalam satu request (rentang
+     * tanggal panjang); tanpa cache ini tiap baris nembak beberapa query
+     * JamPelajaran/HariKhusus yang isinya sama terus, dan itu yang bikin
+     * halaman nge-hang. Di-cache per-request aja (static), aman karena
+     * request PHP dibuang tiap selesai.
+     *
+     * @var array<string, Collection<int, JamPelajaran>>
+     */
+    private static array $cacheJamKategori = [];
+
+    /** @var array<string, string> */
+    private static array $cacheKategoriHari = [];
+
+    /** @var array<string, ?HariKhusus> */
+    private static array $cacheHariKhusus = [];
+
+    /** Semua JamPelajaran satu kategori, keyed by jam_ke (sekali query per kategori). */
+    private static function jamKategori(string $kategori): Collection
+    {
+        return self::$cacheJamKategori[$kategori] ??= JamPelajaran::where('kategori', $kategori)
+            ->get(['jam_ke', 'mulai', 'selesai'])
+            ->keyBy('jam_ke');
+    }
+
     /** Jam mulai (hari ini, sebagai Carbon lengkap) buat JP tertentu. Null kalau JP-nya tidak ada. */
     public static function mulaiJpHariIni(int $jamKe): ?Carbon
     {
-        $mulai = JamPelajaran::where('kategori', self::kategori())->where('jam_ke', $jamKe)->value('mulai');
+        $mulai = self::jamKategori(self::kategori())->get($jamKe)?->mulai;
 
-        return $mulai ? now()->copy()->setTimeFromTimeString($mulai) : null;
+        return $mulai ? now()->copy()->setTimeFromTimeString($mulai->format('H:i:s')) : null;
     }
 
     /**
@@ -223,10 +249,16 @@ class Waktu
         return self::rentangJamDenganKategori(self::kategoriUntukHari($hari), $jamKeMulai, $jamKeSelesai);
     }
 
+    /** true kalau tanggal itu termasuk hari khusus "tanpa_kbm" (cache per-request). */
+    public static function tanpaKbm(Carbon $tanggal): bool
+    {
+        return self::hariKhusus($tanggal)?->jenis === 'tanpa_kbm';
+    }
+
     /** true kalau jadwal ini gugur oleh kalender khusus pada tanggal target. */
     public static function jadwalDitiadakan(Jadwal $jadwal, Carbon $tanggal): bool
     {
-        $hariKhusus = HariKhusus::untukTanggal($tanggal);
+        $hariKhusus = self::hariKhusus($tanggal);
         if (! $hariKhusus) {
             return false;
         }
@@ -234,16 +266,30 @@ class Waktu
             return true;
         }
 
-        $mulai = JamPelajaran::where('kategori', self::kategoriUntukHari($jadwal->hari))
-            ->where('jam_ke', $jadwal->jam_ke_mulai)
-            ->value('mulai');
+        $mulai = self::jamKategori(self::kategoriUntukHari($jadwal->hari))->get($jadwal->jam_ke_mulai)?->mulai;
 
         return $mulai && $mulai->format('H:i:s') >= $hariKhusus->jam_selesai->format('H:i:s');
     }
 
+    /** HariKhusus satu tanggal, di-cache per-request (lihat catatan cache di atas). */
+    private static function hariKhusus(Carbon|string|null $tanggal = null): ?HariKhusus
+    {
+        $kunci = ($tanggal instanceof Carbon ? $tanggal->toDateString() : ($tanggal ?? today()->toDateString()));
+
+        // array_key_exists, BUKAN ??: kebanyakan hari MEMANG nggak punya
+        // HariKhusus (hasilnya null), dan ??= nggak nyimpen null -- kalau
+        // dibiarin, tiap baris malah nembak query ulang terus (dulu kayak
+        // gitu sampai ribuan query cuma buat tanggal yang sama).
+        if (! array_key_exists($kunci, self::$cacheHariKhusus)) {
+            self::$cacheHariKhusus[$kunci] = HariKhusus::untukTanggal($tanggal);
+        }
+
+        return self::$cacheHariKhusus[$kunci];
+    }
+
     private static function batasPulangCepat(): ?string
     {
-        $hariKhusus = HariKhusus::untukTanggal(today());
+        $hariKhusus = self::hariKhusus(today());
 
         return $hariKhusus?->jenis === 'pulang_cepat'
             ? $hariKhusus->jam_selesai?->format('H:i:s')
@@ -253,25 +299,20 @@ class Waktu
     /** Jam mulai (format "H:i") satu JP tertentu pada hari tertentu. */
     public static function jamMulaiUntukHari(string $hari, int $jamKe): ?string
     {
-        $mulai = JamPelajaran::where('kategori', self::kategoriUntukHari($hari))->where('jam_ke', $jamKe)->value('mulai');
-
-        return $mulai?->format('H:i');
+        return self::jamKategori(self::kategoriUntukHari($hari))->get($jamKe)?->mulai?->format('H:i');
     }
 
     /** Jam selesai (format "H:i") satu JP tertentu pada hari tertentu. */
     public static function jamSelesaiUntukHari(string $hari, int $jamKe): ?string
     {
-        $selesai = JamPelajaran::where('kategori', self::kategoriUntukHari($hari))->where('jam_ke', $jamKe)->value('selesai');
-
-        return $selesai?->format('H:i');
+        return self::jamKategori(self::kategoriUntukHari($hari))->get($jamKe)?->selesai?->format('H:i');
     }
 
     private static function rentangJamDenganKategori(string $kategori, int $jamKeMulai, ?int $jamKeSelesai = null): ?string
     {
-        $awal = JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jamKeMulai)->first();
-        $akhir = $jamKeSelesai && $jamKeSelesai !== $jamKeMulai
-            ? JamPelajaran::where('kategori', $kategori)->where('jam_ke', $jamKeSelesai)->first()
-            : $awal;
+        $jam = self::jamKategori($kategori);
+        $awal = $jam->get($jamKeMulai);
+        $akhir = $jamKeSelesai && $jamKeSelesai !== $jamKeMulai ? $jam->get($jamKeSelesai) : $awal;
 
         if (! $awal || ! $akhir) {
             return null;

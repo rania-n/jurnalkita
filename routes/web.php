@@ -252,6 +252,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/versi', [PiketController::class, 'versi'])->name('versi');
         Route::get('/ekspor', [PiketController::class, 'ekspor'])->name('ekspor');
         Route::get('/ekspor/{tipe}/{id}', [PiketController::class, 'eksporDetail'])->name('ekspor.detail');
+        Route::get('/grup/{tipe}/{id}', [PiketController::class, 'fragmentGrup'])->name('grup');
         Route::get('/jurnal/{jurnal}', [PiketController::class, 'jurnalDetail'])->name('jurnal');
     });
 
