@@ -6,7 +6,7 @@
     $admin = auth()->user()->role === 'admin';
 @endphp
 
-<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Izin Keluar" heading="Izin Meninggalkan Sekolah" width="wide">
+<x-dynamic-component :component="$admin ? 'layouts.admin' : 'layouts.app'" title="Lomba / Izin" heading="Lomba / Izin Siswa" width="wide">
     @php $urlEkspor = route('dispensasi.ekspor', request()->query()); @endphp
 
     @if ($waLinkAutoKirim)
@@ -30,7 +30,7 @@
     @endif
 
     @if ($admin)
-        <x-admin.page title="Izin Keluar" subtitle="Persetujuan izin keluar / tidak mengikuti pelajaran">
+        <x-admin.page title="Lomba / Izin" subtitle="Persetujuan izin keluar dan pencatatan lomba / dinas siswa">
             <x-slot:action>
                 {{-- Desain tombol kecil dari Fitra dipertahankan -- ditambah
                      w-full sm:w-auto biar tetap stretch penuh di HP, sama kayak
@@ -46,7 +46,7 @@
                     <a href="{{ route('dispensasi.create') }}"
                        class="press inline-flex h-7 w-full shrink-0 items-center justify-center gap-1 rounded-md bg-navy px-2.5 text-xs font-semibold text-card hover:bg-navy-hover sm:w-auto">
                         <x-icon name="add" :size="13" class="shrink-0" />
-                        Ajukan Izin Keluar
+                        Ajukan Lomba / Izin
                     </a>
                 @endif
             </x-slot:action>
@@ -56,12 +56,12 @@
              -- !h-10 dkk override h-12 bawaan komponen (pola yang sama kayak
              notifikasi/index.blade.php), biar nggak sebesar tombol form biasa
              tapi tetap lebih jelas dari desain kecil kustom sebelumnya. --}}
-        <x-page-header title="Izin Keluar" subtitle="Pengajuan dan persetujuan izin keluar siswa" size="sm">
+        <x-page-header title="Lomba / Izin" subtitle="Pengajuan lomba / dinas dan izin keluar siswa" size="sm">
             @if ($bolehEkspor)
                 <x-ui.button :href="$urlEkspor" variant="secondary" icon="download" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Unduh Ringkasan</x-ui.button>
             @endif
             @if ($bolehAjukan)
-                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ajukan Izin Keluar</x-ui.button>
+                <x-ui.button :href="route('dispensasi.create')" icon="add" class="w-full !h-10 !px-4 !text-sm sm:w-auto">Ajukan Lomba / Izin</x-ui.button>
             @endif
         </x-page-header>
     @endif

@@ -10,9 +10,6 @@ use App\Models\Kelas;
 use App\Models\PengaturanJurnal;
 use App\Models\PresensiPiket;
 use App\Models\Siswa;
-use App\Models\User;
-use App\Notifications\DispensasiBaru;
-use App\Support\NotifikasiDispensasi;
 use App\Support\Versi;
 use App\Support\Waktu;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -94,11 +91,8 @@ class PiketController extends Controller
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal'],
             'siswa_ids' => ['required', 'array', 'min:1'],
             'siswa_ids.*' => ['exists:siswas,id'],
-            'status' => ['required', 'in:sakit,izin,izin_terlambat,dispensasi'],
+            'status' => ['required', 'in:sakit,izin,izin_terlambat'],
             'jam_masuk' => ['nullable', 'required_if:status,izin_terlambat', 'integer', 'min:1', 'max:18'],
-            'jam_ke_mulai' => ['nullable', 'integer', 'min:1', 'max:20'],
-            'jam_ke_selesai' => ['nullable', 'integer', 'min:1', 'max:20'],
-            'jenis' => ['nullable', 'required_if:status,dispensasi', 'in:izin_keluar,lomba'],
             'catatan' => ['nullable', 'string', 'max:500'],
             'surat' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ]);
@@ -106,43 +100,16 @@ class PiketController extends Controller
         $siswas = Siswa::where('status', 'aktif')->whereIn('id', $data['siswa_ids'])->get();
         $suratPath = $request->file('surat')?->store('presensi-piket', 'public');
         $jamMasuk = isset($data['jam_masuk']) ? (int) $data['jam_masuk'] : null;
-        $jamKeMulai = isset($data['jam_ke_mulai']) ? (int) $data['jam_ke_mulai'] : null;
-        $jamKeSelesai = isset($data['jam_ke_selesai']) ? (int) $data['jam_ke_selesai'] : null;
 
-        // Terlambat & izin biasa hanya berlaku 1 hari; sakit & dispensasi bisa multi-hari.
+        // Terlambat & izin biasa hanya berlaku 1 hari; sakit bisa multi-hari (surat dokter).
         $tanggalMulai = Carbon::parse($data['tanggal']);
-        $tanggalSelesai = (in_array($data['status'], ['sakit', 'dispensasi']) && ! empty($data['tanggal_selesai']))
+        $tanggalSelesai = ($data['status'] === 'sakit' && ! empty($data['tanggal_selesai']))
             ? Carbon::parse($data['tanggal_selesai'])
             : $tanggalMulai;
         $rentangTanggal = CarbonPeriod::create($tanggalMulai, $tanggalSelesai);
 
-        DB::transaction(function () use ($data, $rentangTanggal, $siswas, $suratPath, $jamMasuk, $jamKeMulai, $jamKeSelesai, $tanggalMulai, $tanggalSelesai) {
-            $kelompokId = $siswas->count() > 1 ? (string) Str::uuid() : null;
-
+        DB::transaction(function () use ($data, $rentangTanggal, $siswas, $suratPath, $jamMasuk) {
             foreach ($siswas as $siswa) {
-                if ($data['status'] === 'dispensasi') {
-                    // Dispensasi lomba/izin keluar dibuatkan record Dispensasi agar
-                    // terhubung ke fitur Izin Keluar (cetak surat, pantau waka, dll).
-                    // Dibatasi 1 baris per pengajuan, bukan di-loop per hari rentang,
-                    // karena model Dispensasi emang dirancang nampung multi-hari.
-                    $dispensasi = Dispensasi::create([
-                        'kelompok_id' => $kelompokId,
-                        'siswa_id' => $siswa->id,
-                        'diajukan_oleh_id' => auth()->id(),
-                        'tanggal' => $tanggalMulai->toDateString(),
-                        'tanggal_selesai' => $tanggalSelesai->isSameDay($tanggalMulai) ? null : $tanggalSelesai->toDateString(),
-                        'jam_ke_mulai' => $jamKeMulai,
-                        'jam_ke_selesai' => $jamKeSelesai,
-                        'alasan' => $data['catatan'] ?: 'Izin dari piket',
-                        'jenis' => $data['jenis'] ?? 'izin_keluar',
-                        'surat_path' => $suratPath,
-                        'status_piket' => 'approved',
-                        'piket_id' => auth()->id(),
-                        'status_waka' => ($data['jenis'] ?? 'izin_keluar') === 'lomba' ? 'approved' : 'pending',
-                    ]);
-                    $dispensasi->segarkanStatusAkhir();
-                }
-
                 foreach ($rentangTanggal as $tgl) {
                     $tglString = $tgl->toDateString();
                     $presensi = PresensiPiket::updateOrCreate(
@@ -150,8 +117,8 @@ class PiketController extends Controller
                         [
                             'status' => $data['status'],
                             'jam_masuk' => $data['status'] === 'izin_terlambat' ? $jamMasuk : null,
-                            'jam_ke_mulai' => $data['status'] === 'dispensasi' ? $jamKeMulai : null,
-                            'jam_ke_selesai' => $data['status'] === 'dispensasi' ? $jamKeSelesai : null,
+                            'jam_ke_mulai' => null,
+                            'jam_ke_selesai' => null,
                             'catatan' => $data['catatan'] ?? null,
                             'surat_path' => $suratPath ?? PresensiPiket::where('siswa_id', $siswa->id)
                                 ->whereDate('tanggal', $tglString)->value('surat_path'),
@@ -176,24 +143,6 @@ class PiketController extends Controller
                                 $jamMasukText = "Terlambat masuk di JP ke-{$jamMasuk}";
                                 $catatanAbsensi = $catatanAbsensi ? "{$catatanAbsensi} ({$jamMasukText})" : $jamMasukText;
                             }
-                        } elseif ($data['status'] === 'dispensasi') {
-                            // Dispensasi parsial: cuma timpa jurnal yang jamnya TUMPANG TINDIH
-                            // sama jam dispensasi. Di luar jam itu, biarkan status aslinya
-                            // (hadir/alpha/sakit), JANGAN dipaksa 'hadir' (bug timpa alpha).
-                            $isOverlap = true;
-                            if ($jamKeMulai !== null && $jurnal->jam_ke_selesai < $jamKeMulai) {
-                                $isOverlap = false; // Jurnal selesai duluan
-                            }
-                            if ($jamKeSelesai !== null && $jurnal->jam_ke_mulai > $jamKeSelesai) {
-                                $isOverlap = false; // Jurnal mulai belakangan
-                            }
-
-                            if (! $isOverlap) {
-                                continue;
-                            }
-
-                            $statusAbsensi = 'izin_keluar';
-                            $catatanAbsensi = $data['catatan'] ? "keluar({$data['catatan']})" : 'keluar';
                         } else {
                             // Sakit / Izin (seharian) -> timpa semua jurnal hari itu.
                             $statusAbsensi = $presensi->status;
@@ -210,35 +159,10 @@ class PiketController extends Controller
 
         $keterangan = $data['status'] === 'izin_terlambat' && $jamMasuk
             ? "terlambat (masuk mulai JP {$jamMasuk})"
-            : ($data['status'] === 'dispensasi' && $jamKeMulai ? "dispensasi (mulai JP {$jamKeMulai})" : $data['status']);
+            : $data['status'];
         AuditLog::catat('Catat Presensi Siswa oleh Piket', "{$siswas->count()} siswa dicatat {$keterangan} pada {$data['tanggal']}");
 
-        if ($data['status'] === 'dispensasi') {
-            $contohDispen = \App\Models\Dispensasi::where('siswa_id', $siswas->first()->id)
-                ->whereDate('tanggal', $tanggalMulai->toDateString())
-                ->latest('id')->first();
-
-            if ($contohDispen) {
-                if (($data['jenis'] ?? 'izin_keluar') === 'lomba') {
-                    // Lomba auto-approve: guru pengajar, piket, & pengurus kelas
-                    // tetap dapat notifikasi in-app walau tanpa Waka.
-                    NotifikasiDispensasi::saatDisetujui($contohDispen);
-                } else {
-                    // Izin keluar biasa: Waka + pengurus & piket diberi tahu.
-                    foreach (User::where('role', 'waka')->get() as $waka) {
-                        $waka->notify(new DispensasiBaru($contohDispen));
-                    }
-                    NotifikasiDispensasi::saatDiajukan($contohDispen);
-                }
-            }
-        }
-
         $pesanSukses = "Presensi {$siswas->count()} siswa tersimpan dan disamakan ke jurnal kelas pada tanggal tersebut.";
-        if ($data['status'] === 'dispensasi') {
-            $pesanSukses .= ($data['jenis'] ?? 'izin_keluar') === 'lomba'
-                ? ' Lomba otomatis disetujui tanpa perlu Waka.'
-                : ' Izin keluar menunggu persetujuan Waka.';
-        }
 
         return redirect()->route('piket.presensi-siswa.index', [
             'tanggal' => $data['tanggal'],

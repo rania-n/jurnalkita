@@ -392,7 +392,7 @@ class DispensasiTest extends TestCase
     {
         $aktif = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
-            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Lomba', 'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Turnamen futsal', 'status_piket' => 'approved', 'status_waka' => 'approved', 'status_akhir' => 'approved',
         ]);
         $lewat = Dispensasi::create([
             'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
@@ -404,10 +404,10 @@ class DispensasiTest extends TestCase
         $this->assertTrue($lewat->sudahKadaluarsa());
 
         $this->actingAs($this->waka)->get('/dispensasi?tab=disetujui')
-            ->assertOk()->assertSee('Lomba')->assertDontSee('Sakit minggu lalu');
+            ->assertOk()->assertSee('Turnamen futsal')->assertDontSee('Sakit minggu lalu');
 
         $this->actingAs($this->waka)->get('/dispensasi?tab=kadaluarsa')
-            ->assertOk()->assertSee('Sakit minggu lalu')->assertDontSee('Lomba');
+            ->assertOk()->assertSee('Sakit minggu lalu')->assertDontSee('Turnamen futsal');
     }
 
     public function test_dispensasi_multihari_baru_kadaluarsa_setelah_tanggal_selesai_lewat(): void

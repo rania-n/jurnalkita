@@ -55,7 +55,7 @@ return [
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
         ['label' => 'Monitor', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
         ['label' => 'Presensi Siswa', 'icon' => 'how_to_reg', 'route' => 'piket.presensi-siswa.index', 'match' => 'piket.presensi-siswa.*'],
-        ['label' => 'Izin Keluar', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
+        ['label' => 'Lomba / Izin', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 
@@ -77,7 +77,7 @@ return [
     // nolak dengan pesan jelas (lihat JurnalController::guru()), bukan error.
     'waka' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'waka.dashboard'],
-        ['label' => 'Izin Keluar', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
+        ['label' => 'Lomba / Izin', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Riwayat', 'icon' => 'menu_book', 'route' => 'jurnal.index', 'match' => ['jurnal.index', 'jurnal.show']],
         ['label' => 'Isi Jurnal', 'icon' => 'edit_note', 'route' => 'jurnal.create', 'fab' => true],
         ['label' => 'Jadwal', 'icon' => 'calendar_month', 'route' => 'guru.jadwal.index'],
@@ -129,7 +129,7 @@ return [
 
         // Oversight kesiswaan — lihat saja, aksi (approve/tolak) tetap milik piket/waka.
         ['group' => 'Kesiswaan', 'icon' => 'fact_check', 'items' => [
-            ['label' => 'Izin Keluar', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
+            ['label' => 'Lomba / Izin', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
             ['label' => 'Monitor Piket', 'icon' => 'monitoring', 'route' => 'piket.monitor.index', 'match' => 'piket.monitor.*'],
             ['label' => 'Rekap Siswa', 'icon' => 'bar_chart', 'route' => 'rekap.siswa.index', 'match' => 'rekap.*'],
         ]],
@@ -143,7 +143,7 @@ return [
     'admin-mobile' => [
         ['label' => 'Beranda', 'icon' => 'home', 'route' => 'admin.dashboard'],
         ['label' => 'Akun', 'icon' => 'manage_accounts', 'route' => 'master.akun.index'],
-        ['label' => 'Izin Keluar', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
+        ['label' => 'Lomba / Izin', 'icon' => 'fact_check', 'route' => 'dispensasi.index', 'match' => 'dispensasi.*'],
         ['label' => 'Profil', 'icon' => 'person', 'route' => 'profil'],
     ],
 

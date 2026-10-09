@@ -1,6 +1,6 @@
-<x-layouts.app title="Ajukan Izin Keluar">
+<x-layouts.app title="Ajukan Lomba / Izin">
     <x-page-header
-        title="Form Pengajuan Izin Keluar"
+        title="Form Pengajuan Lomba / Izin"
         subtitle="Izin meninggalkan sekolah yang harus disetujui Waka"
         :back="route('dispensasi.index')"
     />

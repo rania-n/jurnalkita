@@ -40,8 +40,8 @@
                     <x-ui.choice
                         label="Status Kehadiran"
                         name="status"
-                        :options="['sakit' => 'Sakit', 'izin' => 'Izin', 'izin_terlambat' => 'Terlambat', 'dispensasi' => 'Dispen']"
-                        :tones="['sakit' => 'sakit', 'izin' => 'izin', 'izin_terlambat' => 'alpha', 'dispensasi' => 'dispen']"
+                        :options="['sakit' => 'Sakit', 'izin' => 'Izin', 'izin_terlambat' => 'Terlambat']"
+                        :tones="['sakit' => 'sakit', 'izin' => 'izin', 'izin_terlambat' => 'alpha']"
                         :value="old('status', $presensiTerpilih?->status)"
                         required
                     />
@@ -59,30 +59,6 @@
                         <p class="mt-1 text-xs text-muted-2">JP sebelum ini akan dicatat terlambat, JP mulai ini ke atas akan dihitung hadir.</p>
                     </div>
 
-                    {{-- Dispensasi parsial: pilih rentang JP dispen --}}
-                    <div id="blok-dispen-jp" class="grid grid-cols-1 gap-3 sm:col-span-2 sm:grid-cols-2" hidden>
-                        <x-ui.select label="Dispen dari JP ke- (mulai)" name="jam_ke_mulai" id="jam_ke_mulai">
-                            <option value="">Sehari penuh</option>
-                            @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_mulai', $presensiTerpilih?->jam_ke_mulai) == $i)>JP {{ $i }}</option>@endfor
-                        </x-ui.select>
-                        <x-ui.select label="Sampai JP ke- (selesai)" name="jam_ke_selesai" id="jam_ke_selesai">
-                            <option value="">Sampai selesai hari itu</option>
-                            @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_selesai', $presensiTerpilih?->jam_ke_selesai) == $i)>JP {{ $i }}</option>@endfor
-                        </x-ui.select>
-                        <p class="-mt-1 text-xs text-muted-2 sm:col-span-2">Kosongkan jika izin berlaku sehari penuh.</p>
-                    </div>
-
-                    <div id="blok-dispen-jenis" class="sm:col-span-2" hidden>
-                        <x-ui.choice
-                            label="Jenis Izin (Khusus Dispen)"
-                            name="jenis"
-                            :options="['izin_keluar' => 'Izin Keluar', 'lomba' => 'Lomba / Dinas']"
-                            :tones="['izin_keluar' => 'izin', 'lomba' => 'hadir']"
-                            :value="old('jenis', 'izin_keluar')"
-                            size="sm"
-                        />
-                    </div>
-
                     {{-- Tanggal selesai: hanya untuk Sakit (surat dokter bisa multi-hari) --}}
                     <div id="blok-tanggal-selesai" class="sm:col-span-2" hidden>
                         <x-admin.f-date
@@ -91,10 +67,10 @@
                             :value="old('tanggal_selesai', $presensiTerpilih?->tanggal_selesai?->toDateString() ?? $tanggal->toDateString())"
                             :min="$tanggal->toDateString()"
                         />
-                        <p class="mt-1 text-xs text-muted-2">Surat dokter bisa berlaku beberapa hari. Izin biasa hanya 1 hari (kosongkan ini).</p>
+                        <p class="mt-1 text-xs text-muted-2">Surat dokter bisa berlaku beberapa hari.</p>
                     </div>
 
-                    <x-ui.textarea label="Catatan" name="catatan" :rows="2" class="sm:col-span-2" placeholder="Contoh: mewakili lomba / izin keluarga / demam">{{ old('catatan', $presensiTerpilih?->catatan) }}</x-ui.textarea>
+                    <x-ui.textarea label="Catatan" name="catatan" :rows="2" class="sm:col-span-2" placeholder="Contoh: izin keluarga / demam">{{ old('catatan', $presensiTerpilih?->catatan) }}</x-ui.textarea>
 
                     <div class="flex flex-col gap-1.5 sm:col-span-2" data-kamera-wrap>
                         <x-ui.label for="surat" id="label-surat-ui">Bukti Terlambat</x-ui.label>
@@ -173,8 +149,6 @@
             (function () {
                 const radios = document.querySelectorAll('#form-presensi-piket input[name="status"]');
                 const blokJamMasuk = document.getElementById('blok-jam-masuk');
-                const blokDispenJp = document.getElementById('blok-dispen-jp');
-                const blokDispenJenis = document.getElementById('blok-dispen-jenis');
                 const blokTanggalSelesai = document.getElementById('blok-tanggal-selesai');
                 const inputJamMasuk = document.getElementById('jam_masuk');
                 const labelSurat = document.getElementById('label-surat-ui');
@@ -214,14 +188,10 @@
                     const val = document.querySelector('#form-presensi-piket input[name="status"]:checked')?.value;
                     const terlambat = val === 'izin_terlambat';
                     const sakit = val === 'sakit';
-                    const dispen = val === 'dispensasi';
 
                     blokJamMasuk.hidden = !terlambat;
                     if (inputJamMasuk) inputJamMasuk.required = terlambat;
 
-                    if (blokDispenJp) blokDispenJp.hidden = !dispen;
-                    if (blokDispenJenis) blokDispenJenis.hidden = !dispen;
-                    
                     // Surat dokter (tanggal_selesai) hanya untuk Sakit
                     blokTanggalSelesai.hidden = !sakit;
                     
@@ -236,12 +206,9 @@
                         } else if (val === 'izin') {
                             labelSurat.textContent = 'Bukti Izin';
                             if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: acara keluarga';
-                        } else if (val === 'dispensasi') {
-                            labelSurat.textContent = 'Surat Izin / Bukti Pendukung';
-                            if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: mewakili lomba';
                         } else {
                             labelSurat.textContent = 'Bukti';
-                            if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: mewakili lomba / izin keluarga / demam';
+                            if (textareaCatatan) textareaCatatan.placeholder = 'Contoh: izin keluarga / demam';
                         }
                     }
                 }
@@ -274,11 +241,13 @@
                                 <x-ui.status-badge :status="$catatan->status" />
                             </x-slot:badge>
                             <x-slot:actions>
-                                <x-ui.action-button
-                                    label="Ubah"
-                                    icon="edit"
-                                    :href="route('piket.presensi-siswa.index', ['tanggal' => $tanggal->toDateString(), 'kelas_id' => $catatan->siswa->kelas_id, 'siswa_id' => $catatan->siswa_id])"
-                                />
+                                @if ($catatan->status !== 'dispensasi')
+                                    <x-ui.action-button
+                                        label="Ubah"
+                                        icon="edit"
+                                        :href="route('piket.presensi-siswa.index', ['tanggal' => $tanggal->toDateString(), 'kelas_id' => $catatan->siswa->kelas_id, 'siswa_id' => $catatan->siswa_id])"
+                                    />
+                                @endif
                                 @if ($catatan->surat_path)
                                     <x-ui.action-button label="Lihat Surat" icon="description" :href="Storage::url($catatan->surat_path)" target="_blank" />
                                 @endif

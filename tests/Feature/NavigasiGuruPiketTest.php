@@ -27,7 +27,7 @@ class NavigasiGuruPiketTest extends TestCase
         // Hari piket: cuma piket & dispensasi, jurnal/jadwal mengajar sengaja disembunyikan
         // (baik di nav maupun di badan halaman Beranda) -- hari itu dia nggak ngajar.
         $this->actingAs($guru)->get('/guru')->assertOk()
-            ->assertSee('Piket')->assertSee('Izin Keluar')
+            ->assertSee('Piket')->assertSee('Lomba / Izin')
             ->assertDontSee('Jadwal Mengajar Hari Ini')->assertDontSee('Riwayat Jurnal');
     }
 
@@ -62,7 +62,7 @@ class NavigasiGuruPiketTest extends TestCase
         $this->assertTrue($labels->contains('Jadwal'));
         // Menu izin keluar sekarang berlabel "Izin Keluar" (bukan "Dispensasi")
         // -- sama kayak seluruh UI, istilah "dispensasi" cuma tersisa di backend.
-        $this->assertTrue($labels->contains('Izin Keluar'));
+        $this->assertTrue($labels->contains('Lomba / Izin'));
     }
 
     public function test_guru_tanpa_piket_sama_sekali_tidak_pernah_lihat_menu_piket(): void
@@ -121,7 +121,7 @@ class NavigasiGuruPiketTest extends TestCase
         $this->travelTo(Carbon::parse('next monday 08:00'));
         $this->assertTrue($guru->piketHariIni());
         $this->actingAs($guru)->get('/guru')->assertOk()
-            ->assertSee('Ajukan Izin Keluar')
+            ->assertSee('Ajukan Lomba / Izin')
             ->assertDontSee('Jadwal Mengajar Hari Ini');
 
         $this->travelTo(Carbon::parse('next monday 12:00')); // shift 07.00-11.00 sudah lewat
@@ -135,7 +135,7 @@ class NavigasiGuruPiketTest extends TestCase
      * Ringkasan "Pantauan Jurnal Hari Ini" (progress bar) & tombol "Buat
      * Pengajuan Dispensasi" di dalam kartu Dispensasi SENGAJA dihapus dari
      * Beranda -- yang pertama sudah ada di halaman Monitor Piket, yang kedua
-     * dobel sama kartu "Ajukan Izin Keluar" di menu aksi cepat. Lihat juga
+     * dobel sama kartu "Ajukan Lomba / Izin" di menu aksi cepat. Lihat juga
      * komentar di guru.blade.php.
      */
     public function test_beranda_piket_tidak_mengulang_info_yang_sudah_ada_di_menu_lain(): void
@@ -149,7 +149,7 @@ class NavigasiGuruPiketTest extends TestCase
         $this->actingAs($guru)->get('/guru')->assertOk()
             ->assertDontSee('Pantauan Jurnal Hari Ini')
             ->assertDontSee('Buat Pengajuan Dispensasi')
-            ->assertSee('Ajukan Izin Keluar'); // kartu menu aksi cepat tetap ada
+            ->assertSee('Ajukan Lomba / Izin'); // kartu menu aksi cepat tetap ada
     }
 
     public function test_sticky_bar_waktu_muncul_di_semua_halaman_guru_piket(): void
