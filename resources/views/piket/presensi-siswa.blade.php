@@ -69,7 +69,18 @@
                             <option value="">Sampai selesai hari itu</option>
                             @for ($i = 1; $i <= 13; $i++)<option value="{{ $i }}" @selected(old('jam_ke_selesai', $presensiTerpilih?->jam_ke_selesai) == $i)>JP {{ $i }}</option>@endfor
                         </x-ui.select>
-                        <p class="-mt-1 text-xs text-muted-2 sm:col-span-2">Kosongkan jika dispensasi berlaku sehari penuh.</p>
+                        <p class="-mt-1 text-xs text-muted-2 sm:col-span-2">Kosongkan jika izin berlaku sehari penuh.</p>
+                    </div>
+
+                    <div id="blok-dispen-jenis" class="sm:col-span-2" hidden>
+                        <x-ui.choice
+                            label="Jenis Izin (Khusus Dispen)"
+                            name="jenis"
+                            :options="['izin_keluar' => 'Izin Keluar', 'lomba' => 'Lomba / Dinas']"
+                            :tones="['izin_keluar' => 'izin', 'lomba' => 'hadir']"
+                            :value="old('jenis', 'izin_keluar')"
+                            size="sm"
+                        />
                     </div>
 
                     {{-- Tanggal selesai: hanya untuk Sakit (surat dokter bisa multi-hari) --}}
@@ -163,6 +174,7 @@
                 const radios = document.querySelectorAll('#form-presensi-piket input[name="status"]');
                 const blokJamMasuk = document.getElementById('blok-jam-masuk');
                 const blokDispenJp = document.getElementById('blok-dispen-jp');
+                const blokDispenJenis = document.getElementById('blok-dispen-jenis');
                 const blokTanggalSelesai = document.getElementById('blok-tanggal-selesai');
                 const inputJamMasuk = document.getElementById('jam_masuk');
                 const labelSurat = document.getElementById('label-surat-ui');
@@ -208,6 +220,7 @@
                     if (inputJamMasuk) inputJamMasuk.required = terlambat;
 
                     if (blokDispenJp) blokDispenJp.hidden = !dispen;
+                    if (blokDispenJenis) blokDispenJenis.hidden = !dispen;
                     
                     // Surat dokter (tanggal_selesai) hanya untuk Sakit
                     blokTanggalSelesai.hidden = !sakit;
