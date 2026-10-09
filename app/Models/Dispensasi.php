@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\NotifikasiDispensasi;
 use App\Support\Waktu;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
@@ -185,6 +186,10 @@ class Dispensasi extends Model
             $item->segarkanStatusAkhir();
         }
         $this->refresh();
+
+        // Piket pengaju + pengurus kelas diberi tahu pengajuannya gugur,
+        // biar nggak nunggu-nunggu keputusan yang nggak akan pernah datang.
+        NotifikasiDispensasi::saatDiputuskan($this);
 
         return true;
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\Dispensasi;
 use App\Models\User;
+use App\Support\NotifikasiDispensasi;
 use App\Support\QrDispensasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -133,6 +134,11 @@ class SuratDispensasiController extends Controller
             "Waka {$data['keputusan']} dispensasi #{$dispensasi->id} lewat link WhatsApp",
             $dispensasi
         );
+
+        // Dulu jalur WA ini nggak ngirim notifikasi sama sekali -- piket yang
+        // ngajuin baru tahu kalau buka riwayat. Sekarang sama persis kayak
+        // keputusan Waka lewat web.
+        NotifikasiDispensasi::saatDiputuskan($dispensasi);
 
         return view('dispensasi.persetujuan-wa-selesai', [
             'dispensasi' => $dispensasi,

@@ -7,7 +7,6 @@ use App\Models\Dispensasi;
 use App\Models\Kelas;
 use App\Models\User;
 use App\Notifications\DispensasiBaru;
-use App\Notifications\DispensasiDiputuskan;
 use App\Support\NotifikasiDispensasi;
 use App\Support\Versi;
 use App\Support\WaLink;
@@ -437,13 +436,9 @@ class DispensasiController extends Controller
 
         AuditLog::catat('Keputusan Waka Dispensasi', "Waka {$data['keputusan']} dispensasi #{$dispensasi->id}", $dispensasi);
 
-        $dispensasi->pengaju?->notify(new DispensasiDiputuskan($dispensasi));
-
-        if ($dispensasi->status_akhir === 'approved') {
-            // Guru pengajar (SiswaDispensasiDiKelasAnda) + piket + pengurus
-            // kelas -- lihat App\Support\NotifikasiDispensasi.
-            NotifikasiDispensasi::saatDisetujui($dispensasi);
-        }
+        // Pengaju + (setuju: guru pengajar/piket/pengurus | tolak: piket/pengurus)
+        // -- lihat App\Support\NotifikasiDispensasi.
+        NotifikasiDispensasi::saatDiputuskan($dispensasi);
 
         return redirect()->route('dispensasi.index', ['lihat' => $dispensasi->id])->with(
             'success',

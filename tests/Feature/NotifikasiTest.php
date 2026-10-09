@@ -24,6 +24,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class NotifikasiTest extends TestCase
@@ -327,6 +328,74 @@ class NotifikasiTest extends TestCase
         Notification::assertSentTo($waka, GuruTidakHadir::class);
         Notification::assertSentTo($pengurus, GuruTidakHadirDiKelasAnda::class);
         Notification::assertSentTo($waliUser, GuruTidakHadirDiKelasAnda::class);
+    }
+
+    /** @return array{piket: User, pengurus: User, waka: User, dispensasi: Dispensasi} */
+    private function dispensasiPendingDenganPengurus(): array
+    {
+        $this->travelTo(Carbon::parse('next monday 07:00'));
+
+        $piket = User::factory()->role('guru')->create();
+        $guruPiket = Guru::create(['user_id' => $piket->id, 'nama' => 'Guru Piket']);
+        JadwalPiket::create(['guru_id' => $guruPiket->id, 'hari' => 'senin']);
+
+        $waka = User::factory()->role('waka')->create();
+        $kelas = Kelas::create(['nama' => 'X RPL 1', 'tingkat' => 'X', 'jurusan' => 'RPL']);
+        $pengurus = User::factory()->role('siswa')->create();
+        $siswa = Siswa::create([
+            'user_id' => $pengurus->id, 'kelas_id' => $kelas->id, 'nis' => '001',
+            'nama' => 'Budi', 'jenis_kelamin' => 'L', 'no_absen' => 1, 'jabatan' => 'pengurus',
+        ]);
+
+        $d = Dispensasi::create([
+            'siswa_id' => $siswa->id, 'diajukan_oleh_id' => $piket->id, 'piket_id' => $piket->id,
+            'tanggal' => today(), 'jenis' => 'izin_keluar', 'alasan' => 'Keperluan keluarga', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+
+        return ['piket' => $piket, 'pengurus' => $pengurus, 'waka' => $waka, 'dispensasi' => $d->fresh()];
+    }
+
+    public function test_izin_keluar_ditolak_waka_memberi_tahu_pengaju_dan_pengurus(): void
+    {
+        ['piket' => $piket, 'pengurus' => $pengurus, 'waka' => $waka, 'dispensasi' => $d] = $this->dispensasiPendingDenganPengurus();
+
+        Notification::fake();
+
+        $this->actingAs($waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'rejected'])->assertRedirect();
+
+        Notification::assertSentTo($piket, DispensasiDiputuskan::class);
+        Notification::assertSentTo($pengurus, DispensasiKelas::class);
+        // Pengaju sudah dapat DispensasiDiputuskan -- tidak dobel.
+        Notification::assertNotSentTo($piket, DispensasiKelas::class);
+    }
+
+    public function test_keputusan_lewat_tautan_whatsapp_juga_mengirim_notifikasi(): void
+    {
+        ['piket' => $piket, 'pengurus' => $pengurus, 'waka' => $waka, 'dispensasi' => $d] = $this->dispensasiPendingDenganPengurus();
+
+        Notification::fake();
+
+        $url = URL::temporarySignedRoute('dispensasi.persetujuan', now()->addHour(), ['dispensasi' => $d->id, 'waka' => $waka->id]);
+        $this->post($url, ['keputusan' => 'rejected'])->assertOk();
+
+        Notification::assertSentTo($piket, DispensasiDiputuskan::class);
+        Notification::assertSentTo($pengurus, DispensasiKelas::class);
+    }
+
+    public function test_izin_keluar_batal_otomatis_memberi_tahu_pengaju_dan_pengurus(): void
+    {
+        ['piket' => $piket, 'pengurus' => $pengurus, 'dispensasi' => $d] = $this->dispensasiPendingDenganPengurus();
+
+        Notification::fake();
+        $this->travelTo(now()->addDay()); // hari dispensasinya sudah lewat
+
+        $this->assertTrue($d->fresh()->batalkanKalauKadaluarsa());
+
+        Notification::assertSentTo($piket, DispensasiDiputuskan::class, function ($n) use ($piket) {
+            return str_contains($n->toArray($piket)['title'], 'dibatalkan otomatis');
+        });
+        Notification::assertSentTo($pengurus, DispensasiKelas::class);
     }
 
     public function test_halaman_notifikasi_tampil_dan_bisa_ditandai_dibaca(): void
