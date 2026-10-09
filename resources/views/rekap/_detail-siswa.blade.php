@@ -64,7 +64,7 @@
     </div>
 
     {{-- Tab Pilihan: Rekap Per Mapel vs Riwayat Log --}}
-    <div class="mt-2" x-data="{ tab: 'mapel' }" id="modal-tab-container">
+    <div class="mt-2">
         <div class="flex border-b border-surface-alt gap-2 mb-3">
             <button type="button"
                 id="btn-subtab-mapel"
