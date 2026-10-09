@@ -7,11 +7,13 @@ use App\Models\Dispensasi;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\JadwalPiket;
+use App\Models\JamPelajaran;
 use App\Models\Jurnal;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -420,9 +422,9 @@ class DispensasiTest extends TestCase
     }
 
     /**
-     * Dispensasi PENDING (Waka belum mutusin) yang tanggal MULAI-nya udah kejalan
-     * (hari ini atau sebelumnya) harus otomatis kebatal -- beda dari sudahKadaluarsa()
-     * yang khusus buat yang udah disetujui.
+     * Dispensasi PENDING (Waka belum mutusin) yang batas waktu efektifnya (tanggal
+     * akhir, ditambah jam selesai kalau ada) udah lewat harus otomatis kebatal --
+     * beda dari sudahKadaluarsa() yang khusus buat yang udah disetujui.
      */
     public function test_dispensasi_pending_yang_tanggalnya_udah_lewat_otomatis_batal(): void
     {
@@ -474,6 +476,39 @@ class DispensasiTest extends TestCase
         $this->assertFalse($d->sudahLewatBatasKeputusan());
         $this->assertFalse($d->batalkanKalauKadaluarsa());
         $this->assertSame('pending', $d->fresh()->status_waka);
+    }
+
+    public function test_pending_dengan_batas_jam_otomatis_batal_setelah_jp_terakhir_lewat(): void
+    {
+        // Jam pelajaran kategori senin_kamis: JP 6 selesai 10:20, JP 8 selesai 14:00.
+        JamPelajaran::create(['jam_ke' => 6, 'mulai' => '09:50', 'selesai' => '10:20', 'kategori' => 'senin_kamis']);
+        JamPelajaran::create(['jam_ke' => 8, 'mulai' => '13:00', 'selesai' => '14:00', 'kategori' => 'senin_kamis']);
+
+        $senin = Carbon::parse('next monday 08:00');
+        $this->travelTo($senin);
+        $selasa = $senin->copy()->addDay();
+
+        $d = Dispensasi::create([
+            'siswa_id' => $this->siswa->id, 'diajukan_oleh_id' => $this->piket->id,
+            'tanggal' => $selasa, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 8,
+            'jenis' => 'izin_keluar', 'alasan' => 'Ke dokter', 'status_piket' => 'approved',
+        ]);
+        $d->segarkanStatusAkhir();
+        $d->refresh();
+
+        // Senin sore: belum waktunya, masih bisa diputuskan.
+        $this->travelTo($senin->copy()->setTime(16, 0));
+        $this->assertFalse($d->refresh()->sudahLewatBatasKeputusan());
+
+        // Selasa jam 6 (JP 6, sebelum JP 8 selesai): masih bisa diputuskan.
+        $this->travelTo($selasa->copy()->setTime(9, 0));
+        $this->assertFalse($d->refresh()->sudahLewatBatasKeputusan());
+
+        // Selasa lewat JP 8 (14:01): batas waktu sudah lewat, otomatis batal.
+        $this->travelTo($selasa->copy()->setTime(14, 1));
+        $this->assertTrue($d->refresh()->sudahLewatBatasKeputusan());
+        $this->assertTrue($d->refresh()->batalkanKalauKadaluarsa());
+        $this->assertSame('rejected', $d->fresh()->status_waka);
     }
 
     public function test_buka_halaman_riwayat_dispensasi_otomatis_menyapu_yang_kadaluarsa(): void

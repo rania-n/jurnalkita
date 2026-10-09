@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Waktu;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -102,17 +103,65 @@ class Dispensasi extends Model
     }
 
     /**
-     * true kalau Waka BELUM sempat mutusin dan HARI tanggal MULAI dispensasi ini
-     * udah beneran lewat (BUKAN hari ini lagi, tapi kemarin atau sebelumnya) --
-     * udah nggak relevan lagi diproses. Sengaja BUKAN "hari ini" juga dianggap
-     * lewat -- dispensasi yang diajukan & harusnya diputuskan HARI INI JUGA
-     * (kasus paling umum: piket ajukan pas ada siswa mau izin langsung) tetap
-     * harus bisa diproses sepanjang hari itu. Beda dari sudahKadaluarsa() yang
-     * khusus buat dispensasi yang UDAH disetujui.
+     * Titik akhir efektif dispensasi ini (Carbon penuh, bukan cuma tanggal).
+     *
+     * Batas lamanya cuma peduli TANGGAL (end of day). Tapi izin keluar yang
+     * dibatasi jam (mis. JP 1-8) sebenarnya udah nggak berlaku begitu JP 8
+     * selesai -- itu yang dipakai buat nentuin "pengajuan pending sudah
+     * kebangetan buat diputuskan" (lihat sudahLewatBatasKeputusan()).
+     *
+     * @return Carbon|null null kalau tanggalnya belum/gak jelas (nggak mungkin
+     *                     lewat model, tapi dijaga buat data korup).
+     */
+    public function batasAkhirEfektif(): ?Carbon
+    {
+        $hariTerakhir = $this->tanggal_selesai ?? $this->tanggal;
+        if (! $hariTerakhir) {
+            return null;
+        }
+
+        $akhir = $hariTerakhir->copy()->endOfDay();
+
+        // jam_ke_selesai terisi -> selesainya JP itu pada hari TERAKHIR berlaku.
+        // jam_ke_mulai doang (kosong di akhir) berarti "sampai selesai hari itu".
+        // Jam pelajarannya nggak ketemu (kategori custom belum diatur) ->
+        // aman, anggap akhir hari.
+        if ($this->jam_ke_selesai) {
+            // Nama hari HARUS bentuk Indonesia ('senin'..'jumat') -- itu kunci
+            // kategori jam pelajaran di DB (lihat Waktu::kategoriUntukHari);
+            // translatedFormat('l') ngasih "Monday" dsb., yang nggak bakal
+            // ketemu, dan batas akhirnya diam-diam salah jadi akhir hari.
+            $namaHari = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'][$hariTerakhir->dayOfWeek];
+            $jamSelesai = Waktu::jamSelesaiUntukHari($namaHari, (int) $this->jam_ke_selesai);
+            if ($jamSelesai) {
+                $akhir->setTimeFromTimeString($jamSelesai);
+            }
+        }
+
+        return $akhir;
+    }
+
+    /**
+     * true kalau Waka BELUM sempat mutusin dan dispensasinya udah lewat batas
+     * efektifnya -- udah nggak relevan lagi diproses (siswanya keburu masuk/
+     * pulang/jamnya udah lewat, persetujuan telat nggak ada gunanya lagi).
+     *
+     * Batasnya ikut JAM, bukan cuma tanggal (permintaan pengguna): pengajuan
+     * buat BESOK JP 1-8 masih bisa diputuskan sepanjang besok sampai JP 8
+     * kelar; begitu JP 8 lewat tanpa keputusan, otomatis batal. Pending yang
+     * tanpa batas jam (sepanjang hari) baru batal setelah hari terakhir lewat.
+     *
+     * Beda dari sudahKadaluarsa() yang khusus dispensasi yang UDAH disetujui.
      */
     public function sudahLewatBatasKeputusan(): bool
     {
-        return $this->status_waka === 'pending' && $this->tanggal->copy()->startOfDay()->lt(today());
+        if ($this->status_waka !== 'pending') {
+            return false;
+        }
+
+        $batas = $this->batasAkhirEfektif();
+
+        return $batas !== null && $batas->isPast();
     }
 
     /**
@@ -131,7 +180,7 @@ class Dispensasi extends Model
         foreach ($this->anggotaKelompok() as $item) {
             $item->update([
                 'status_waka' => 'rejected',
-                'catatan_waka' => 'Otomatis dibatalkan sistem — melewati tanggal berlaku tanpa keputusan Waka.',
+                'catatan_waka' => 'Otomatis dibatalkan sistem — melewati batas waktu berlaku tanpa keputusan Waka.',
             ]);
             $item->segarkanStatusAkhir();
         }
