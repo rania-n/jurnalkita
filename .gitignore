@@ -27,3 +27,19 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Config AI pribadi (berisi API key & pilihan model per orang) -- taruh di
+# ~/.config/opencode/opencode.json, jangan di repo.
+/opencode.json
+/opencode.jsonc
+/.opencode/
+/.claude/settings.local.json
+/.claude/worktrees/
+/.claude/scheduled_tasks.lock
+/.playwright-mcp/
+
+# Sisa kerja sekali pakai (skrip patch, dump, output test) di root project.
+/update_*.php
+/*.sql
+/dump*.html
+/test_output.txt
