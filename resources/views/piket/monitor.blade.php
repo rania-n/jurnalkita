@@ -239,7 +239,13 @@
                             if (tampil) tampilDiGrup++;
                         });
 
-                        card.hidden = tampilDiGrup === 0;
+                        // Baris dimuat lewat AJAX hanya saat kartu dibuka. Selama belum
+                        // ada baris di DOM, cocokkan dengan ringkasan pencarian kartu.
+                        const cocok = rows.length > 0
+                            ? tampilDiGrup > 0
+                            : (!q || (card.dataset.cari ?? '').includes(q));
+
+                        card.hidden = !cocok;
                         if (!card.hidden) adaGrupTampil = true;
                     });
 

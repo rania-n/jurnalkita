@@ -75,6 +75,15 @@ class PiketMonitorTest extends TestCase
         // Sengaja tidak dibuatkan jurnal.
     }
 
+    public function test_kartu_grup_membawa_data_pencarian_untuk_baris_yang_belum_dimuat(): void
+    {
+        // Baris jadwal baru dimuat AJAX saat kartu dibuka, jadi pencarian
+        // sebelum itu bergantung pada atribut data-cari di kartu grup.
+        $this->actingAs($this->piket)->get('/piket/monitor')
+            ->assertOk()
+            ->assertSee('data-cari="x rpl 1 ', false);
+    }
+
     public function test_monitor_menampilkan_status_sudah_dan_belum_diisi(): void
     {
         // Daftar grup (kelas) tampil langsung; isi barisnya baru diambil AJAX
