@@ -26,7 +26,7 @@
                 <x-icon name="cancel" :size="48" fill />
             </span>
             <h1 class="text-2xl font-bold text-alpha">Tidak Berlaku</h1>
-            <p class="text-sm text-muted">QR sudah kedaluwarsa, tidak valid, atau dispensasinya belum/tidak disetujui.</p>
+            <p class="text-sm text-muted">QR sudah kedaluwarsa, tidak valid, atau izin keluarnya belum/tidak disetujui.</p>
         @endif
     </div>
 </x-layouts.guest>
