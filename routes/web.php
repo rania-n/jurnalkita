@@ -26,6 +26,12 @@ use App\Http\Controllers\SatpamController;
 use App\Http\Controllers\Sekretaris\JurnalController as VerifikasiJurnalController;
 use App\Http\Controllers\Sekretaris\KelasController as SekretarisKelasController;
 use App\Http\Controllers\SuratDispensasiController;
+use App\Models\AuditLog;
+use App\Models\Jadwal;
+use App\Models\Jurnal;
+use App\Models\PresensiPiket;
+use App\Models\User;
+use App\Support\Versi;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -79,7 +85,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin', 'admin.dashboard')->name('admin.dashboard');
         Route::get('/admin/versi', function () {
             // Dashboard berisi rekap semuanya, memantau pergerakan jurnal cukup mewakili aktivitas harian
-            return response()->json(['versi' => \App\Support\Versi::dari(\App\Models\Jurnal::query())]);
+            return response()->json(['versi' => Versi::dari(Jurnal::query())]);
         })->name('admin.dashboard.versi');
 
         Route::view('/admin/guru', 'admin.guru.index')->name('master.guru.index');
@@ -92,7 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('/admin/mapel', 'admin.mapel.index')->name('master.mapel.index');
         Route::view('/admin/jadwal-pelajaran', 'admin.jadwal-pelajaran.index')->name('master.jadwal-pelajaran.index');
         Route::get('/admin/jadwal-pelajaran/versi', function () {
-            return response()->json(['versi' => \App\Support\Versi::dari(\App\Models\Jadwal::query())]);
+            return response()->json(['versi' => Versi::dari(Jadwal::query())]);
         })->name('master.jadwal-pelajaran.versi');
         Route::view('/admin/jam-pelajaran', 'admin.jam-pelajaran.index')->name('master.jam-pelajaran.index');
         Route::view('/admin/jadwal-piket', 'admin.jadwal-piket.index')->name('master.jadwal-piket.index');
@@ -101,11 +107,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/akun/{user}', [AkunController::class, 'show'])->name('master.akun.show');
         Route::view('/admin/akun-persetujuan', 'admin.akun.persetujuan')->name('master.akun.persetujuan');
         Route::get('/admin/akun-persetujuan/versi', function () {
-            return response()->json(['versi' => \App\Support\Versi::dari(\App\Models\User::query())]);
+            return response()->json(['versi' => Versi::dari(User::query())]);
         })->name('master.akun.persetujuan.versi');
         Route::view('/admin/audit-log', 'admin.audit-log.index')->name('master.audit-log.index');
         Route::get('/admin/audit-log/versi', function () {
-            return response()->json(['versi' => \App\Support\Versi::dari(\App\Models\AuditLog::query())]);
+            return response()->json(['versi' => Versi::dari(AuditLog::query())]);
         })->name('master.audit-log.versi');
         Route::view('/admin/tahun-ajaran', 'admin.tahun-ajaran.index')->name('master.tahun-ajaran.index');
         Route::get('/admin/backup', [BackupController::class, 'index'])->name('master.backup.index');
@@ -252,7 +258,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:guru')->prefix('piket/presensi-siswa')->name('piket.presensi-siswa.')->group(function () {
         Route::get('/', [PiketController::class, 'presensiSiswa'])->name('index');
         Route::get('/versi', function () {
-            return response()->json(['versi' => \App\Support\Versi::dari(\App\Models\PresensiPiket::query())]);
+            return response()->json(['versi' => Versi::dari(PresensiPiket::query())]);
         })->name('versi');
         Route::post('/', [PiketController::class, 'simpanPresensiSiswa'])->name('store');
     });

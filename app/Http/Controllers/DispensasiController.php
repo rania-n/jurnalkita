@@ -153,7 +153,15 @@ class DispensasiController extends Controller
     {
         $this->pastikanBolehLihat();
 
-        return response()->json(['versi' => Versi::dari(Dispensasi::where('status_piket', 'approved'))]);
+        // Scope-nya HARUS sama dengan terfilter() -- kalau beda, fingerprint-nya
+        // bisa berubah padahal tampilan nggak (atau sebaliknya). Contoh: kalau
+        // dihitung tanpa kelompokUtama(), tiap kali ada anggota grup baru,
+        // count-nya naik dan banner "ada data baru" nongol padahal daftar yang
+        // tampil tetap sama (anggota grup disembunyikan, cuma 1 baris utama
+        // yang tampil).
+        return response()->json([
+            'versi' => Versi::dari(Dispensasi::where('status_piket', 'approved')->kelompokUtama()),
+        ]);
     }
 
     /** Ekspor laporan dispensasi (kegiatan piket) sebagai PDF, ikut filter yang sedang aktif. */
