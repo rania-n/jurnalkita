@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-label="jurnalkita - Sistem Jurnal Mengajar dan Presensi Siswa">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1B2A4A"/>
+      <stop offset="1" stop-color="#2A3F6C"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="320" rx="24" fill="url(#bg)"/>
+  <circle cx="1080" cy="40" r="170" fill="#ffffff" fill-opacity="0.05"/>
+  <circle cx="1130" cy="290" r="120" fill="#ffffff" fill-opacity="0.04"/>
+  <circle cx="90" cy="300" r="110" fill="#ffffff" fill-opacity="0.04"/>
+
+  <rect x="96" y="92" width="96" height="96" rx="26" fill="#ffffff"/>
+  <path d="M144 124 C132 116 118 116 108 120 V164 C118 160 132 160 144 168 C156 160 170 160 180 164 V120 C170 116 156 116 144 124 Z" fill="#1B2A4A"/>
+  <path d="M144 124 V168" stroke="#ffffff" stroke-width="3"/>
+
+  <text x="216" y="148" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="68" font-weight="800" fill="#ffffff">jurnalkita</text>
+  <text x="218" y="186" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24" font-weight="500" fill="#CBD5E1">Sistem Jurnal Mengajar &amp; Presensi Siswa</text>
+
+  <g font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" font-weight="700">
+    <rect x="96" y="232" width="118" height="38" rx="19" fill="#D1FFC2"/>
+    <text x="155" y="256" text-anchor="middle" fill="#0A5C36">Hadir</text>
+    <rect x="226" y="232" width="108" height="38" rx="19" fill="#FFF4B8"/>
+    <text x="280" y="256" text-anchor="middle" fill="#C67A00">Sakit</text>
+    <rect x="346" y="232" width="100" height="38" rx="19" fill="#E0F2FE"/>
+    <text x="396" y="256" text-anchor="middle" fill="#0369A1">Izin</text>
+    <rect x="458" y="232" width="108" height="38" rx="19" fill="#FFE4E6"/>
+    <text x="512" y="256" text-anchor="middle" fill="#B91C1C">Alpha</text>
+    <rect x="578" y="232" width="116" height="38" rx="19" fill="#F3E8FF"/>
+    <text x="636" y="256" text-anchor="middle" fill="#6D28D9">Lomba</text>
+  </g>
+
+  <text x="1104" y="262" text-anchor="end" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" font-weight="600" fill="#CBD5E1">SMK Negeri 1 Boyolangu, Tulungagung</text>
+</svg>
