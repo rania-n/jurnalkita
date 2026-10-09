@@ -57,7 +57,7 @@ class PresensiDefaultTest extends TestCase
         // Jurnal JP 7-10 -- overlap sama dispensasi JP9-selesai (9 ada di rentang 7-10).
         $hasil = PresensiDefault::untukKelas(collect([$this->siswa]), $this->kelas->id, today()->toDateString(), 7, 10);
 
-        $this->assertSame('dispensasi', $hasil[$this->siswa->id]['status']);
+        $this->assertSame('izin_keluar', $hasil[$this->siswa->id]['status']);
     }
 
     public function test_dispensasi_sampai_selesai_hari_itu_tidak_kena_ke_jurnal_sebelum_jam_mulainya(): void
@@ -67,7 +67,7 @@ class PresensiDefaultTest extends TestCase
         // Jurnal JP 1-2 -- selesai sebelum dispensasi (JP9-selesai) mulai, nggak overlap.
         $hasil = PresensiDefault::untukKelas(collect([$this->siswa]), $this->kelas->id, today()->toDateString(), 1, 2);
 
-        $this->assertNotSame('dispensasi', $hasil[$this->siswa->id]['status']);
+        $this->assertNotSame('izin_keluar', $hasil[$this->siswa->id]['status']);
     }
 
     public function test_dispensasi_jam_tertentu_yang_overlap_tetap_kena_seperti_biasa(): void
@@ -76,7 +76,7 @@ class PresensiDefaultTest extends TestCase
 
         $hasil = PresensiDefault::untukKelas(collect([$this->siswa]), $this->kelas->id, today()->toDateString(), 7, 10);
 
-        $this->assertSame('dispensasi', $hasil[$this->siswa->id]['status']);
+        $this->assertSame('izin_keluar', $hasil[$this->siswa->id]['status']);
     }
 
     public function test_dispensasi_jam_tertentu_yang_tidak_overlap_tidak_kena(): void
@@ -85,7 +85,7 @@ class PresensiDefaultTest extends TestCase
 
         $hasil = PresensiDefault::untukKelas(collect([$this->siswa]), $this->kelas->id, today()->toDateString(), 7, 10);
 
-        $this->assertNotSame('dispensasi', $hasil[$this->siswa->id]['status']);
+        $this->assertNotSame('izin_keluar', $hasil[$this->siswa->id]['status']);
     }
 
     public function test_dispensasi_sepanjang_hari_selalu_kena_apapun_jam_jurnalnya(): void
@@ -94,7 +94,7 @@ class PresensiDefaultTest extends TestCase
 
         $hasil = PresensiDefault::untukKelas(collect([$this->siswa]), $this->kelas->id, today()->toDateString(), 1, 2);
 
-        $this->assertSame('dispensasi', $hasil[$this->siswa->id]['status']);
+        $this->assertSame('izin_keluar', $hasil[$this->siswa->id]['status']);
     }
 
     /**
@@ -110,7 +110,7 @@ class PresensiDefaultTest extends TestCase
 
         $hasil = PresensiDefault::untukKelas(collect([$this->siswa]), $this->kelas->id, today()->toDateString(), 7, 10);
 
-        $this->assertSame('dispensasi', $hasil[$this->siswa->id]['status']);
+        $this->assertSame('izin_keluar', $hasil[$this->siswa->id]['status']);
         $this->assertStringContainsString('Ke dokter gigi', $hasil[$this->siswa->id]['catatan']);
         $this->assertStringContainsString('JP 6–8', $hasil[$this->siswa->id]['catatan']);
     }
@@ -121,8 +121,11 @@ class PresensiDefaultTest extends TestCase
 
         $hasil = PresensiDefault::untukKelas(collect([$this->siswa]), $this->kelas->id, today()->toDateString(), 7, 10);
 
-        $this->assertSame('dispensasi', $hasil[$this->siswa->id]['status']);
-        $this->assertSame('Lomba', $hasil[$this->siswa->id]['catatan']);
+        $this->assertSame('izin_keluar', $hasil[$this->siswa->id]['status']);
+        // Format catatan "keluar(alasan)" -- dipotong & diwarnai renderer
+        // presensi-grid; kalau jurnal nutup penuh persis sama dispensasinya,
+        // nggak boleh ada tambahan "(JP x-y -- cek manual ...)" di belakangnya.
+        $this->assertSame('keluar(Lomba)', $hasil[$this->siswa->id]['catatan']);
     }
 
     public function test_siswa_tanpa_dispensasi_default_hadir(): void

@@ -219,7 +219,15 @@ class Dispensasi extends Model
         }
     }
 
-    /** Set absensi siswa jadi "dispensasi" untuk jurnal di tanggal & jam yang sesuai. */
+    /**
+     * Set absensi siswa jadi "izin_keluar" untuk jurnal di tanggal & jam yang sesuai.
+     *
+     * Statusnya 'izin_keluar' (BUKAN 'dispensasi') supaya sama persis dengan
+     * yang diisi PresensiDefault::untukKelas() -- kalau beda, satu siswa
+     * bisa punya dua angka berbeda di Rekap Kehadiran tergantung absensinya
+     * ditulis dari sisi mana. Catatannya juga disamakan ("keluar(...)"),
+     * jadi teks yang muncul di grid presensi & di detail jurnal identik.
+     */
     public function terapkanKeAbsensi(): void
     {
         foreach ($this->rentangTanggal() as $tanggal) {
@@ -234,7 +242,7 @@ class Dispensasi extends Model
                         }
                     }
                 })
-                ->update(['status' => 'dispensasi', 'catatan' => $this->alasan ?: 'Dispensasi (disetujui)']);
+                ->update(['status' => 'izin_keluar', 'catatan' => $this->alasan ? "keluar({$this->alasan})" : 'keluar']);
         }
     }
 }

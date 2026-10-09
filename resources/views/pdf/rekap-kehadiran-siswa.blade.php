@@ -114,7 +114,7 @@
                 <th style="width: 35px;" class="text-center">S</th>
                 <th style="width: 35px;" class="text-center">I</th>
                 <th style="width: 35px;" class="text-center">A</th>
-                <th style="width: 40px;" class="text-center">Disp</th>
+                <th style="width: 40px;" class="text-center">IK</th>
             </tr>
         </thead>
         <tbody>
@@ -129,7 +129,7 @@
                     <td class="text-center" style="color: #1d4ed8;">{{ $d['sakit'] }}</td>
                     <td class="text-center" style="color: #b45309;">{{ $d['izin'] }}</td>
                     <td class="text-center" style="color: #b91c1c; font-weight: bold;">{{ $d['alpha'] }}</td>
-                    <td class="text-center" style="color: #7e22ce;">{{ $d['dispensasi'] }}</td>
+                    <td class="text-center" style="color: #7e22ce;">{{ $d['izin_keluar'] }}</td>
                 </tr>
             @empty
                 <tr>
@@ -140,7 +140,7 @@
     </table>
 
     <div class="footer">
-        <span>Keterangan: H = Hadir, S = Sakit, I = Izin, A = Alpha, Disp = Dispensasi</span>
+        <span>Keterangan: H = Hadir, S = Sakit, I = Izin, A = Alpha, IK = Izin Keluar</span>
     </div>
 </body>
 </html>

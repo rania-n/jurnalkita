@@ -10,12 +10,13 @@
     // (kelas isi 36 siswa, biasanya yang nggak hadir cuma segelintir).
     $tidakHadir = $absensis->reject(fn ($a) => $a->status === 'hadir');
 
-    // Siswa berstatus Dispensasi -- catatan (alasan) sudah otomatis kesalin ke
-    // sini pas Dispensasi disetujui (lihat Dispensasi::terapkanKeAbsensi()),
+    // Siswa berstatus Izin Keluar -- catatan (alasan) sudah otomatis kesalin ke
+    // sini pas dispensasi disetujui (lihat Dispensasi::terapkanKeAbsensi()),
     // tapi bukti suratnya sendiri belum ada di sini. Dicari balik per siswa
-    // (cuma buat baris berstatus dispensasi, jumlahnya biasanya sedikit dari
-    // total 1 kelas) biar bisa ditautkan.
-    $dispensasiTerkait = $tidakHadir->filter(fn ($a) => $a->status === 'dispensasi' && $jurnal)
+    // (cuma buat baris izin keluar, jumlahnya biasanya sedikit dari total 1
+    // kelas) biar bisa ditautkan. 'dispensasi' ikut dicocokin karena itu
+    // nama status ini sebelum diganti 'izin_keluar' (data lama masih pakai itu).
+    $dispensasiTerkait = $tidakHadir->filter(fn ($a) => in_array($a->status, ['dispensasi', 'izin_keluar'], true) && $jurnal)
         ->mapWithKeys(fn ($a) => [
             $a->siswa_id => \App\Models\Dispensasi::where('siswa_id', $a->siswa_id)
                 ->where('status_akhir', 'approved')

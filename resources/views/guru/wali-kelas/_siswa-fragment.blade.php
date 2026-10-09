@@ -1,5 +1,9 @@
 @php
-    $labels = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
+    // Label per status absensi di daftar riwayat. 'dispensasi' adalah nama
+    // status lama (sebelum izin keluar jadi status sendiri) -- labelnya
+    // disamakan 'Izin Keluar' soalnya maknanya sama persis; tanpa baris ini,
+    // riwayat lama bakal nunjukin "ucfirst('dispensasi')" = "Dispensasi".
+    $labels = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'izin_keluar' => 'Izin Keluar', 'dispensasi' => 'Izin Keluar'];
 @endphp
 
 @if ($absensis->isEmpty())

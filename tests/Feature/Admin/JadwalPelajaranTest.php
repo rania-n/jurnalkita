@@ -87,7 +87,11 @@ class JadwalPelajaranTest extends TestCase
             'id' => $jadwal->id, 'jam_ke_mulai' => 1, 'jam_ke_selesai' => 1, 'ruang' => 'R1',
         ]))->assertSessionMissing('error');
 
-        $this->assertSame('R1', $jadwal->fresh()->ruang);
+        // 'R1' ditolak validator (daftar ruangan resmi sekarang "R 1" pakai
+        // spasi, ikut format asli PDF jadwal sekolah) -- controller normalisasi
+        // dulu "R1" -> "R 1" sebelum validasi, jadi admin yang terbiasa ngetik
+        // tanpa spasi tetap nggak ditolak. Yang tersimpan ya hasil normalisasinya.
+        $this->assertSame('R 1', $jadwal->fresh()->ruang);
     }
 
     public function test_hari_penuh_untuk_kelas_terdeteksi_benar(): void

@@ -9,8 +9,10 @@
 --}}
 @php
     $statusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
-    $statusAbsen = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
-    $rekap = $jurnal->absensis->countBy('status');
+    // Rekap kehadiran per siswa di jurnal ini. 'dispensasi' (status lama,
+    // sebelum izin keluar jadi status sendiri) sudah digabung ke 'izin_keluar'
+    // oleh RekapKehadiran::hitungStatus() -- lihat penjelasannya di sana.
+    $rekap = \App\Support\RekapKehadiran::hitungStatus($jurnal->absensis->pluck('status'));
     $bisaUbah = $jurnal->bisaDiubah();
     $vs = $jurnal->status_verifikasi;
     $jamJurnal = \App\Support\Waktu::rentangJam($jurnal->jam_ke_mulai, $jurnal->jam_ke_selesai, $jurnal->tanggal);
@@ -33,12 +35,15 @@
         @endif
     </x-alert>
 
-    {{-- Ringkasan Hadir/Sakit/Izin/Alpha/Dispensasi ditaruh paling atas (nggak
+    {{-- Ringkasan Hadir/Sakit/Izin/Izin Keluar/Alpha ditaruh paling atas (nggak
          nunggu scroll ke bawah dulu) -- ini yang paling sering dicek duluan
-         pas buka detail, daripada Jam Pelajaran/Materi dkk. --}}
+         pas buka detail, daripada Jam Pelajaran/Materi dkk. Daftarnya diambil
+         dari RekapKehadiran::ringkasan() biar sama persis kayak popup detail
+         punya pengurus kelas -- dulu tiap file nyatet daftarnya sendiri,
+         jadi gampang melenceng kalau ada status baru. --}}
     <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
-        @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
-            <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
+        @foreach (\App\Support\RekapKehadiran::ringkasan() as $s => [$label, $nada])
+            <x-ui.stat :label="$label" :tone="$nada" :value="$rekap[$s] ?? 0" />
         @endforeach
     </div>
 

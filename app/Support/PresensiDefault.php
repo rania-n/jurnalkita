@@ -56,7 +56,16 @@ class PresensiDefault
                     $catatan .= " ({$labelJamDispen} -- cek manual buat jam di luar itu)";
                 }
 
-                return [$s->id => ['status' => 'izin', 'catatan' => $catatan, 'sumber' => 'dispensasi', 'alasan_izin_keluar' => $d->alasan]];
+                // Status 'izin_keluar' (BUKAN 'dispensasi' dan BUKAN 'izin'
+                // polos) -- dua alasan:
+                //   - Sinkron sama yang ditulis Dispensasi::terapkanKeAbsensi(),
+                //     yang dulu juga nulis 'izin' tapi rekap Kehadiran
+                //     menghitung 'dispensasi', jadi dua sumber ini nunjuk
+                //     angka yang berbeda.
+                //   - 'izin_keluar' sudah DIIZINKAN di form Jurnal (lihat
+                //     validasi 'presensi.*.status'), jadi status ini bisa
+                //     muncul di grid & dihitung di rekap tanpa kasus khusus.
+                return [$s->id => ['status' => 'izin_keluar', 'catatan' => $catatan, 'sumber' => 'dispensasi', 'alasan_izin_keluar' => $d->alasan]];
             }
 
             if ($presensiPiket->has($s->id)) {
@@ -86,7 +95,12 @@ class PresensiDefault
             // udah ngecek ulang dari awal apa dispensasinya beneran masih
             // nyakup jam jurnal ini; kalau nggak ada di situ, berarti udah
             // kelar, harusnya balik "Hadir" lagi.
-            if ($sebelumnya && $sebelumnya['status'] === 'dispensasi') {
+            //
+            // Dua nama status dicek: 'izin_keluar' (sekarang) & 'dispensasi'
+            // (data jurnal lama, sebelum status ini dipisah dari 'izin') --
+            // tanpa yang kedua, carry-over jurnal lama nggak pernah kena
+            // aturan batas waktu ini.
+            if ($sebelumnya && in_array($sebelumnya['status'], ['izin_keluar', 'dispensasi'], true)) {
                 $sebelumnya = null;
             }
 

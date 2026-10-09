@@ -160,7 +160,9 @@ class DispensasiTest extends TestCase
 
         $d->refresh();
         $this->assertSame('approved', $d->status_akhir);
-        $this->assertSame('dispensasi', $absensi->fresh()->status);
+        // Izin keluar yang disetujui dicatat sebagai 'izin_keluar' (BUKAN
+        // 'dispensasi') -- sinkron sama PresensiDefault & RekapKehadiran.
+        $this->assertSame('izin_keluar', $absensi->fresh()->status);
     }
 
     public function test_waka_menolak_menghentikan_alur(): void
@@ -352,7 +354,7 @@ class DispensasiTest extends TestCase
 
         // Jam 1-2 (sebelum jam mulai dispensasi) tetap hadir, jam 5-6 (setelah) jadi dispensasi.
         $this->assertSame('hadir', $absensiPagi->fresh()->status);
-        $this->assertSame('dispensasi', $absensiSore->fresh()->status);
+        $this->assertSame('izin_keluar', $absensiSore->fresh()->status);
     }
 
     public function test_dispensasi_beberapa_hari_menerapkan_ke_absensi_tiap_hari(): void
@@ -381,7 +383,7 @@ class DispensasiTest extends TestCase
         ]);
         $this->actingAs($this->waka)->post("/dispensasi/{$d->id}/waka", ['keputusan' => 'approved']);
 
-        $absensiHari->each(fn (Absensi $a) => $this->assertSame('dispensasi', $a->fresh()->status));
+        $absensiHari->each(fn (Absensi $a) => $this->assertSame('izin_keluar', $a->fresh()->status));
     }
 
     public function test_dispensasi_disetujui_yang_lewat_tanggal_dikategorikan_kadaluarsa(): void

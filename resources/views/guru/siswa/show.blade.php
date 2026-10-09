@@ -13,18 +13,20 @@
         <x-ui.field-static label="No. Absen" icon="tag">{{ $siswa->no_absen ?: '—' }}</x-ui.field-static>
     </div>
 
+    {{-- Ringkasan kehadiran -- urutannya dari RekapKehadiran::ringkasan(), sama
+         kayak popup detail siswa & halaman rekap lainnya. 'dispensasi' (status
+         lama) sudah digabung ke 'izin_keluar' oleh hitungStatus() di
+         controller, jadi kolom ini nggak pernah 0 terus buat data lama. --}}
     <div class="mb-4 flex flex-wrap gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
-        <x-ui.stat label="Hadir" tone="hadir" :value="$rekap['hadir'] ?? 0" />
-        <x-ui.stat label="Sakit" tone="sakit" :value="$rekap['sakit'] ?? 0" />
-        <x-ui.stat label="Izin" tone="izin" :value="$rekap['izin'] ?? 0" />
-        <x-ui.stat label="Alpha" tone="alpha" :value="$rekap['alpha'] ?? 0" />
-        <x-ui.stat label="Dispensasi" tone="dispen" :value="$rekap['dispensasi'] ?? 0" />
+        @foreach (\App\Support\RekapKehadiran::ringkasan() as $status => [$label, $nada])
+            <x-ui.stat :label="$label" :tone="$nada" :value="$rekap[$status] ?? 0" />
+        @endforeach
     </div>
 
     {{-- "Hadir" udah kehitung di ringkasan stat di atas -- di daftar detail
-         ini cuma yang SELAIN hadir (sakit/izin/alpha/dispensasi/tugas) yang
-         ditampilin, biar nggak kepanjangan baris "Hadir" doang yang nggak
-         ada apa-apanya buat dicek. --}}
+         ini cuma yang SELAIN hadir (sakit/izin/terlambat/alpha/izin keluar/
+         tugas) yang ditampilin, biar nggak kepanjangan baris "Hadir" doang
+         yang nggak ada apa-apanya buat dicek. --}}
     @php $riwayat = $absensis->where('status', '!=', 'hadir'); @endphp
 
     <h2 class="mb-3 text-sm font-bold text-ink">Riwayat Kehadiran</h2>
@@ -32,7 +34,7 @@
     @if ($absensis->isEmpty())
         <x-ui.empty icon="event_busy" title="Belum ada riwayat kehadiran" desc="Siswa ini belum pernah muncul di jurnal manapun." />
     @elseif ($riwayat->isEmpty())
-        <x-ui.empty icon="event_available" title="Selalu tercatat Hadir" desc="Belum ada catatan sakit/izin/alpha/dispensasi." />
+        <x-ui.empty icon="event_available" title="Selalu tercatat Hadir" desc="Belum ada catatan sakit, izin, terlambat, alpha, atau izin keluar." />
     @else
         <div class="hidden sm:block">
             <x-admin.table :head="['Tanggal', 'Mapel', 'Status', 'Catatan']">

@@ -6,6 +6,7 @@ use App\Models\Absensi;
 use App\Models\AuditLog;
 use App\Models\Kelas;
 use App\Models\Siswa;
+use App\Support\RekapKehadiran;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -92,7 +93,7 @@ class RekapController extends Controller
                 'sakit' => $r['sakit'] ?? 0,
                 'izin' => $r['izin'] ?? 0,
                 'alpha' => $r['alpha'] ?? 0,
-                'dispensasi' => $r['dispensasi'] ?? 0,
+                'izin_keluar' => $r['izin_keluar'] ?? 0,
             ];
         }
 
@@ -142,7 +143,10 @@ class RekapController extends Controller
                 ->when($sampai, fn ($q2) => $q2->whereDate('tanggal', '<=', $sampai->toDateString())))
             ->get()
             ->groupBy('siswa_id')
-            ->map(fn ($rows) => $rows->countBy('status'));
+            // lewat RekapKehadiran::hitungStatus() -- status lama 'dispensasi'
+            // digabung ke 'izin_keluar', sama seperti halaman rekap lainnya,
+            // biar angka di sini nggak beda sendiri sama rekap wali/pengurus.
+            ->map(fn ($rows) => RekapKehadiran::hitungStatus($rows->pluck('status')));
 
         return [$dari, $sampai, $siswas, $rekap];
     }

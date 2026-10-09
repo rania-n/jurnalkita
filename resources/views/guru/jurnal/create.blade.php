@@ -482,7 +482,7 @@
                             // udah Hadir emang defaultnya, nge-list 36 nama satu-satu
                             // di sini nggak nambah info, cuma bikin ringkasan panjang).
                             const rowsSiswa = form.querySelectorAll('[data-siswa-row]');
-                            const kelompok = { sakit: [], izin: [], alpha: [], dispensasi: [] };
+                            const kelompok = {};
                             let jumlahHadir = 0;
                             rowsSiswa.forEach((row) => {
                                 const status = row.querySelector('input[type="radio"]:checked')?.value ?? 'hadir';
@@ -490,7 +490,7 @@
                                 const nama = row.querySelector('.text-ink')?.textContent.trim() || '(tanpa nama)';
                                 (kelompok[status] ?? (kelompok[status] = [])).push(nama);
                             });
-                            const label = { sakit: 'Sakit', izin: 'Izin', alpha: 'Alpha', dispensasi: 'Dispensasi' };
+                            const label = { sakit: 'Sakit', izin: 'Izin', izin_terlambat: 'Terlambat', alpha: 'Alpha', izin_keluar: 'Izin Keluar', dispensasi: 'Izin Keluar' };
                             const bagianTidakHadir = Object.entries(kelompok)
                                 .filter(([, arr]) => arr.length > 0)
                                 .map(([k, arr]) => `${label[k] || k}: ${arr.join(', ')}`)

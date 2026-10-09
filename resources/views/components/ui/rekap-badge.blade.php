@@ -6,7 +6,9 @@
         'sakit' => 'bg-sakit-soft text-sakit',
         'izin' => 'bg-izin-soft text-izin',
         'alpha' => 'bg-alpha-soft text-alpha',
-        'dispensasi' => 'bg-dispen-soft text-dispen',
+        // 'izin_keluar' (status baru) & 'dispensasi' (status lama di data
+        // sebelum migrasi) sama-sama warna ungu -- satu makna yang sama.
+        'izin_keluar', 'dispensasi' => 'bg-dispen-soft text-dispen',
         default => 'bg-surface-alt text-ink',
     };
 @endphp

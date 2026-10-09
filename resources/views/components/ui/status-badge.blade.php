@@ -12,7 +12,7 @@
         'alpha' => ['bg-alpha-soft text-alpha', 'Alpha'],
         'dispen' => ['bg-dispen-soft text-dispen', 'Dispen'],
         'dispensasi' => ['bg-dispen-soft text-dispen', 'Dispensasi'],
-        'izin_keluar' => ['bg-alpha-soft text-alpha', 'Izin Keluar'],
+        'izin_keluar' => ['bg-dispen-soft text-dispen', 'Izin Keluar'],
         'izin_terlambat' => ['bg-alpha-soft text-alpha', 'Terlambat'],
         'tugas' => ['bg-izin-soft text-izin', 'Tugas'],
         'pending' => ['bg-sakit-soft text-sakit', 'Menunggu'],

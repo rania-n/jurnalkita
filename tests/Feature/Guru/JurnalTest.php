@@ -106,7 +106,7 @@ class JurnalTest extends TestCase
         $this->assertSame(1, Jurnal::where('jadwal_id', $this->jadwal->id)->whereDate('tanggal', today())->count());
     }
 
-    public function test_siswa_dengan_dispensasi_disetujui_otomatis_dispensasi(): void
+    public function test_siswa_dengan_izin_keluar_disetujui_otomatis_tercatat_izin_keluar(): void
     {
         Storage::fake('public');
 
@@ -126,7 +126,7 @@ class JurnalTest extends TestCase
             'foto_bukti' => UploadedFile::fake()->image('kelas.jpg'),
         ]);
 
-        $this->assertSame('dispensasi', Jurnal::first()->absensis()->where('siswa_id', $siswa->id)->value('status'));
+        $this->assertSame('izin_keluar', Jurnal::first()->absensis()->where('siswa_id', $siswa->id)->value('status'));
     }
 
     public function test_form_jurnal_menampilkan_presensi_saat_jadwal_terpilih(): void

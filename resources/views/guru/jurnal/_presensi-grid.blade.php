@@ -9,9 +9,9 @@
 --}}
 @php
     // Default opsi untuk guru (ibu2/bapak2 biar nggak pusing kebanyakan tombol).
-    // Dispensasi dan Izin Keluar secara logis sama-sama 'izin resmi', jadi disembunyikan
-    // dari daftar bawaan. Tapi akan dimunculkan otomatis per-siswa kalau memang
-    // sistem/waka sudah memberikan status tersebut ke siswa yang bersangkutan.
+    // "Izin Keluar" & "Terlambat" bukan bagian dari daftar bawaan -- keduanya
+    // hanya dimunculkan otomatis per-siswa kalau memang sistem/piket sudah
+    // memberikan status tersebut (lihat PresensiDefault & PresensiPiket).
     $defaultStatuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'izin_terlambat' => 'Terlambat', 'alpha' => 'Alpha'];
     $defaultTones = ['hadir' => 'hadir', 'sakit' => 'sakit', 'izin' => 'izin', 'izin_terlambat' => 'alpha', 'alpha' => 'alpha'];
 @endphp
@@ -77,13 +77,16 @@
                     $rowStatuses = $defaultStatuses;
                     $rowTones = $defaultTones;
                     
-                    if ($statusAwal === 'izin_keluar') {
-                        $rowStatuses['izin_keluar'] = 'Izin Keluar';
-                        $rowTones['izin_keluar'] = 'warning';
-                    } elseif ($statusAwal === 'dispensasi') {
-                        $rowStatuses['dispensasi'] = 'Dispensasi';
-                        $rowTones['dispensasi'] = 'dispen';
-                    }
+if ($statusAwal === 'izin_keluar') {
+                         $rowStatuses['izin_keluar'] = 'Izin Keluar';
+                         $rowTones['izin_keluar'] = 'dispen';
+                     } elseif ($statusAwal === 'dispensasi') {
+                         // Status lama -- journals yang sudah terlanjur tersimpan
+                         // sebelum Izin Keluar jadi status sendiri masih pakai
+                         // nilai ini, jadi tetap ditampilkan apa adanya.
+                         $rowStatuses['dispensasi'] = 'Dispensasi';
+                         $rowTones['dispensasi'] = 'dispen';
+                     }
 
                     // Badge "kenapa status ini udah keisi" cuma ditampilkan pas
                     // render AWAL (belum ada input guru sendiri lewat old()) --

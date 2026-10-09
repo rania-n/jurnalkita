@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Siswa;
+use App\Support\RekapKehadiran;
 use Illuminate\View\View;
 
 /**
@@ -31,7 +32,7 @@ class SiswaController extends Controller
             ->sortByDesc(fn ($a) => $a->jurnal->tanggal)
             ->values();
 
-        $rekap = $absensis->countBy('status');
+        $rekap = RekapKehadiran::hitungStatus($absensis->pluck('status'));
 
         return view('guru.siswa.show', compact('siswa', 'absensis', 'rekap'));
     }

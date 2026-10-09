@@ -42,8 +42,9 @@
     @if ($siswas->isEmpty())
         <x-ui.empty icon="school" title="Belum ada siswa di kelas ini" />
     @else
+        @php $kolomRekap = \App\Support\RekapKehadiran::ringkasan(); @endphp
         <div class="hidden sm:block">
-            <x-admin.table :head="['No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi']">
+            <x-admin.table :head="array_merge(['No.', 'Nama'], array_map(fn (array $k) => $k[0], $kolomRekap))">
                 @foreach ($siswas as $s)
                     @php
                         $rHari = $rekapHari[$s->id] ?? collect();
@@ -65,26 +66,12 @@
                                 <x-icon name="chevron_right" :size="16" class="text-muted-2 opacity-50" />
                             </div>
                         </td>
-                        <td class="px-4 py-2.5">
-                            <span data-tipe="hari" class="{{ $tipe === 'hari' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="hadir">{{ $rHari['hadir'] ?? 0 }}</x-ui.rekap-badge></span>
-                            <span data-tipe="mapel" class="{{ $tipe === 'mapel' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="hadir">{{ $rMapel['hadir'] ?? 0 }}</x-ui.rekap-badge></span>
-                        </td>
-                        <td class="px-4 py-2.5">
-                            <span data-tipe="hari" class="{{ $tipe === 'hari' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="sakit">{{ $rHari['sakit'] ?? 0 }}</x-ui.rekap-badge></span>
-                            <span data-tipe="mapel" class="{{ $tipe === 'mapel' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="sakit">{{ $rMapel['sakit'] ?? 0 }}</x-ui.rekap-badge></span>
-                        </td>
-                        <td class="px-4 py-2.5">
-                            <span data-tipe="hari" class="{{ $tipe === 'hari' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="izin">{{ $rHari['izin'] ?? 0 }}</x-ui.rekap-badge></span>
-                            <span data-tipe="mapel" class="{{ $tipe === 'mapel' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="izin">{{ $rMapel['izin'] ?? 0 }}</x-ui.rekap-badge></span>
-                        </td>
-                        <td class="px-4 py-2.5">
-                            <span data-tipe="hari" class="{{ $tipe === 'hari' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="alpha">{{ $rHari['alpha'] ?? 0 }}</x-ui.rekap-badge></span>
-                            <span data-tipe="mapel" class="{{ $tipe === 'mapel' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="alpha">{{ $rMapel['alpha'] ?? 0 }}</x-ui.rekap-badge></span>
-                        </td>
-                        <td class="px-4 py-2.5">
-                            <span data-tipe="hari" class="{{ $tipe === 'hari' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="dispensasi">{{ $rHari['dispensasi'] ?? 0 }}</x-ui.rekap-badge></span>
-                            <span data-tipe="mapel" class="{{ $tipe === 'mapel' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="dispensasi">{{ $rMapel['dispensasi'] ?? 0 }}</x-ui.rekap-badge></span>
-                        </td>
+                        @foreach ($kolomRekap as $status => [, $nada])
+                            <td class="px-4 py-2.5">
+                                <span data-tipe="hari" class="{{ $tipe === 'hari' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="{{ $status }}">{{ $rHari[$status] ?? 0 }}</x-ui.rekap-badge></span>
+                                <span data-tipe="mapel" class="{{ $tipe === 'mapel' ? '' : 'hidden' }}"><x-ui.rekap-badge tone="{{ $status }}">{{ $rMapel[$status] ?? 0 }}</x-ui.rekap-badge></span>
+                            </td>
+                        @endforeach
                     </tr>
                 @endforeach
             </x-admin.table>
@@ -111,7 +98,7 @@
                                 :sakit="$rHari['sakit'] ?? 0"
                                 :izin="$rHari['izin'] ?? 0"
                                 :alpha="$rHari['alpha'] ?? 0"
-                                :dispensasi="$rHari['dispensasi'] ?? 0"
+                                :izin_keluar="$rHari['izin_keluar'] ?? 0"
                             />
                         </div>
                         <div data-tipe="mapel" class="{{ $tipe === 'mapel' ? '' : 'hidden' }}">
@@ -126,7 +113,7 @@
                                 :sakit="$rMapel['sakit'] ?? 0"
                                 :izin="$rMapel['izin'] ?? 0"
                                 :alpha="$rMapel['alpha'] ?? 0"
-                                :dispensasi="$rMapel['dispensasi'] ?? 0"
+                                :izin_keluar="$rMapel['izin_keluar'] ?? 0"
                             />
                         </div>
                     </div>

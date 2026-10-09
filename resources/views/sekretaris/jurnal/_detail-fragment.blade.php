@@ -12,8 +12,11 @@
 --}}
 @php
     $statusGuru = ['hadir' => 'Hadir', 'tidak_hadir' => 'Tidak Hadir'];
-    $statusAbsen = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
-    $rekap = $jurnal->absensis->countBy('status');
+    // Rekap kehadiran per siswa di jurnal ini. 'dispensasi' (status lama,
+    // sebelum izin keluar jadi status sendiri) sudah digabung ke 'izin_keluar'
+    // oleh RekapKehadiran::hitungStatus() -- sama persis kayak popup detail
+    // punya guru, biar angka di kedua sisi nggak pernah beda.
+    $rekap = \App\Support\RekapKehadiran::hitungStatus($jurnal->absensis->pluck('status'));
     // Dua hal beda: "sudah diputuskan" (buat pesan status) vs "boleh isi form
     // verifikasi" (readOnly, mis. Wali Kelas, sengaja nggak pernah boleh --
     // dia cuma LIHAT, bukan pengurus kelas yang berwenang memutuskan).
@@ -37,11 +40,13 @@
         <x-alert type="info">Belum diperiksa pengurus kelas.</x-alert>
     @endif
 
-    {{-- Ringkasan Hadir/Sakit/Izin/Alpha/Dispensasi ditaruh paling atas --
-         yang paling sering dicek duluan pas periksa jurnal. --}}
+    {{-- Ringkasan Hadir/Sakit/Izin/Izin Keluar/Alpha ditaruh paling atas --
+         yang paling sering dicek duluan pas periksa jurnal. Daftarnya diambil
+         dari RekapKehadiran::ringkasan(), sama persis kayak popup detail punya
+         guru -- biar nggak ada 2 versi daftar beda di 2 peran yang sama. --}}
     <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
-        @foreach (['hadir', 'sakit', 'izin', 'alpha', 'dispensasi'] as $s)
-            <x-ui.stat :label="$statusAbsen[$s]" :tone="$s === 'dispensasi' ? 'dispen' : $s" :value="$rekap[$s] ?? 0" />
+        @foreach (\App\Support\RekapKehadiran::ringkasan() as $s => [$label, $nada])
+            <x-ui.stat :label="$label" :tone="$nada" :value="$rekap[$s] ?? 0" />
         @endforeach
     </div>
 

@@ -75,20 +75,24 @@
     @else
         {{-- Desktop: tabel biasa. HP: kartu ringkas (bukan tabel) -- 9 kolom
              kalau ditumpuk per-field kepanjangan, jadi diganti badge angka
-             sejajar tanpa label per kartu (lihat x-ui.rekap-chip-card). --}}
+             sejajar tanpa label per kartu (lihat x-ui.rekap-chip-card).
+             Kolom & urutan badge diambil dari RekapKehadiran::ringkasan() biar
+             header tabel, badge, kartu HP, dan legend selalu sejajar -- dulu
+             tiap bagian nyatet sendiri, gampang melenceng kalau ada status baru. --}}
+        @php $kolomRekap = \App\Support\RekapKehadiran::ringkasan(); @endphp
         <div class="hidden sm:block">
-            <x-admin.table :head="['Kelas', 'No.', 'Nama', 'Hadir', 'Sakit', 'Izin', 'Alpha', 'Dispensasi']">
+            <x-admin.table :head="array_merge(['Kelas', 'No.', 'Nama'], array_map(fn (array $k) => $k[0], $kolomRekap))">
                 @foreach ($siswas as $s)
                     @php $r = $rekap[$s->id] ?? collect(); $alphaTinggi = ($r['alpha'] ?? 0) >= $ambangAlpha; @endphp
                     <tr data-baris-rekap data-cari="{{ strtolower($s->nama.' '.$s->nis) }}" @class(['bg-alpha-soft/30' => $alphaTinggi])>
                         <td class="px-4 py-2.5 text-muted">{{ $s->kelas?->nama ?? '—' }}</td>
                         <td class="px-4 py-2.5 text-muted">{{ $s->no_absen ?? '—' }}</td>
                         <td class="px-4 py-2.5 font-semibold text-ink">{{ $s->nama }}</td>
-                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="hadir">{{ $r['hadir'] ?? 0 }}</x-ui.rekap-badge></td>
-                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="sakit">{{ $r['sakit'] ?? 0 }}</x-ui.rekap-badge></td>
-                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="izin">{{ $r['izin'] ?? 0 }}</x-ui.rekap-badge></td>
-                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="alpha" :class="$alphaTinggi ? 'ring-2 ring-alpha' : ''">{{ $r['alpha'] ?? 0 }}</x-ui.rekap-badge></td>
-                        <td class="px-4 py-2.5"><x-ui.rekap-badge tone="dispensasi">{{ $r['dispensasi'] ?? 0 }}</x-ui.rekap-badge></td>
+                        @foreach ($kolomRekap as $status => [$label, $nada])
+                            <td class="px-4 py-2.5">
+                                <x-ui.rekap-badge tone="{{ $status }}" :class="$status === 'alpha' && $alphaTinggi ? 'ring-2 ring-alpha' : ''">{{ $r[$status] ?? 0 }}</x-ui.rekap-badge>
+                            </td>
+                        @endforeach
                     </tr>
                 @endforeach
             </x-admin.table>
@@ -108,7 +112,7 @@
                         :sakit="$r['sakit'] ?? 0"
                         :izin="$r['izin'] ?? 0"
                         :alpha="$r['alpha'] ?? 0"
-                        :dispensasi="$r['dispensasi'] ?? 0"
+                        :izin_keluar="$r['izin_keluar'] ?? 0"
                         :sorot="$alphaTinggi"
                     />
                 @endforeach

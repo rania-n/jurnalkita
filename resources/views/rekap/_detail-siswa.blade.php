@@ -2,13 +2,20 @@
     $periodeLabel = ($dari || $sampai)
         ? (($dari ? $dari->translatedFormat('d M Y') : 'Awal') . ' – ' . ($sampai ? $sampai->translatedFormat('d M Y') : 'Sekarang'))
         : 'Seluruh Riwayat';
+    // 'dispensasi' = nama status lama (sebelum izin keluar jadi status
+    // sendiri); labelnya disamakan karena maknanya sama persis.
+    // 'izin_terlambat' tidak digabung ke 'izin' -- datang terlambat tetap
+    // dihitung hadir setengah hari, bukan absen (lihat RekapKehadiran).
     $statusMap = [
-        'hadir' => ['label' => 'Hadir', 'tone' => 'hadir'],
-        'sakit' => ['label' => 'Sakit', 'tone' => 'sakit'],
-        'izin' => ['label' => 'Izin', 'tone' => 'izin'],
-        'alpha' => ['label' => 'Alpha', 'tone' => 'alpha'],
-        'dispensasi' => ['label' => 'Dispensasi', 'tone' => 'dispensasi'],
+        'hadir' => ['label' => 'Hadir', 'tone' => 'bg-hadir-soft text-hadir'],
+        'sakit' => ['label' => 'Sakit', 'tone' => 'bg-sakit-soft text-sakit'],
+        'izin' => ['label' => 'Izin', 'tone' => 'bg-izin-soft text-izin'],
+        'izin_terlambat' => ['label' => 'Terlambat', 'tone' => 'bg-alpha-soft text-alpha'],
+        'alpha' => ['label' => 'Alpha', 'tone' => 'bg-alpha-soft text-alpha'],
+        'izin_keluar' => ['label' => 'Izin Keluar', 'tone' => 'bg-dispen-soft text-dispen'],
+        'dispensasi' => ['label' => 'Izin Keluar', 'tone' => 'bg-dispen-soft text-dispen'],
     ];
+    $ringkasanRekap = \App\Support\RekapKehadiran::ringkasan();
 @endphp
 
 <div class="flex flex-col gap-4 text-ink">
@@ -38,11 +45,9 @@
                 <span>Rekap Kehadiran Harian ({{ $totalHari['total'] }} Hari Aktif)</span>
             </p>
             <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
-                <x-ui.stat label="Hadir" tone="hadir" :value="$totalHari['hadir']" />
-                <x-ui.stat label="Sakit" tone="sakit" :value="$totalHari['sakit']" />
-                <x-ui.stat label="Izin" tone="izin" :value="$totalHari['izin']" />
-                <x-ui.stat label="Alpha" tone="alpha" :value="$totalHari['alpha']" />
-                <x-ui.stat label="Dispen" tone="dispen" :value="$totalHari['dispensasi']" />
+                @foreach ($ringkasanRekap as $status => [$label, $nada])
+                    <x-ui.stat :label="$label" :tone="$nada" :value="$totalHari[$status] ?? 0" />
+                @endforeach
             </div>
         </div>
 
@@ -51,11 +56,9 @@
                 <span>Rekap Jam Pelajaran / Mapel ({{ $totalMapel['total'] }} Pertemuan)</span>
             </p>
             <div class="flex gap-1.5 rounded-xl border border-surface-alt bg-card p-2">
-                <x-ui.stat label="Hadir" tone="hadir" :value="$totalMapel['hadir']" />
-                <x-ui.stat label="Sakit" tone="sakit" :value="$totalMapel['sakit']" />
-                <x-ui.stat label="Izin" tone="izin" :value="$totalMapel['izin']" />
-                <x-ui.stat label="Alpha" tone="alpha" :value="$totalMapel['alpha']" />
-                <x-ui.stat label="Dispen" tone="dispen" :value="$totalMapel['dispensasi']" />
+                @foreach ($ringkasanRekap as $status => [$label, $nada])
+                    <x-ui.stat :label="$label" :tone="$nada" :value="$totalMapel[$status] ?? 0" />
+                @endforeach
             </div>
         </div>
     </div>
@@ -90,11 +93,9 @@
                             <tr>
                                 <th class="px-3 py-2">Mata Pelajaran</th>
                                 <th class="px-2 py-2 text-center">Total</th>
-                                <th class="px-2 py-2 text-center">Hadir</th>
-                                <th class="px-2 py-2 text-center">Sakit</th>
-                                <th class="px-2 py-2 text-center">Izin</th>
-                                <th class="px-2 py-2 text-center">Alpha</th>
-                                <th class="px-2 py-2 text-center">Dispen</th>
+                                @foreach ($ringkasanRekap as $label)
+                                    <th class="px-2 py-2 text-center whitespace-nowrap">{{ $label[0] }}</th>
+                                @endforeach
                                 <th class="px-2 py-2 text-center">% Kehadiran</th>
                             </tr>
                         </thead>
@@ -106,11 +107,9 @@
                                         <p class="text-[11px] text-muted-2">Guru: {{ $m['guru'] }}</p>
                                     </td>
                                     <td class="px-2 py-2.5 text-center font-semibold text-muted">{{ $m['total'] }}</td>
-                                    <td class="px-2 py-2.5 text-center"><x-ui.rekap-badge tone="hadir">{{ $m['hadir'] }}</x-ui.rekap-badge></td>
-                                    <td class="px-2 py-2.5 text-center"><x-ui.rekap-badge tone="sakit">{{ $m['sakit'] }}</x-ui.rekap-badge></td>
-                                    <td class="px-2 py-2.5 text-center"><x-ui.rekap-badge tone="izin">{{ $m['izin'] }}</x-ui.rekap-badge></td>
-                                    <td class="px-2 py-2.5 text-center"><x-ui.rekap-badge tone="alpha">{{ $m['alpha'] }}</x-ui.rekap-badge></td>
-                                    <td class="px-2 py-2.5 text-center"><x-ui.rekap-badge tone="dispensasi">{{ $m['dispensasi'] }}</x-ui.rekap-badge></td>
+                                    @foreach ($ringkasanRekap as $status => [$label, $nada])
+                                        <td class="px-2 py-2.5 text-center"><x-ui.rekap-badge tone="{{ $status }}">{{ $m[$status] }}</x-ui.rekap-badge></td>
+                                    @endforeach
                                     <td class="px-2 py-2.5 text-center font-bold {{ $m['persentase'] < 80 ? 'text-alpha' : 'text-hadir' }}">
                                         {{ $m['persentase'] }}%
                                     </td>
@@ -133,7 +132,7 @@
                     @foreach ($riwayat as $a)
                         @php
                             $j = $a->jurnal;
-                            $cfg = $statusMap[$a->status] ?? ['label' => ucfirst($a->status), 'tone' => 'hadir'];
+                            $cfg = $statusMap[$a->status] ?? ['label' => ucfirst($a->status), 'tone' => 'bg-surface-alt text-ink'];
                         @endphp
                         <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-surface-alt bg-card text-xs">
                             <div class="min-w-0 flex-1">
@@ -156,14 +155,10 @@
                                 @endif
                             </div>
                             <div class="shrink-0">
-                                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold {{ match($a->status) {
-                                    'hadir' => 'bg-hadir-soft text-hadir',
-                                    'sakit' => 'bg-sakit-soft text-sakit',
-                                    'izin' => 'bg-izin-soft text-izin',
-                                    'alpha' => 'bg-alpha-soft text-alpha',
-                                    'dispensasi' => 'bg-dispen-soft text-dispen',
-                                    default => 'bg-surface-alt text-ink'
-                                } }}">
+                                {{-- Warna badge diambil dari $cfg (satu sumber
+                                     statusMap) -- dulu match() dobel di sini,
+                                     kalau ada status baru gampang kelewat. --}}
+                                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold {{ $cfg['tone'] }}">
                                     {{ $cfg['label'] }}
                                 </span>
                             </div>

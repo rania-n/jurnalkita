@@ -3,23 +3,30 @@
     persis kayak resources/views/guru/jurnal/_presensi-grid.blade.php (kotak
     cari + batas scroll + catatan disembunyikan di balik tombol), cuma dibuat
     partial terpisah karena bedanya:
-      - Nama siswa nggak di-link (route guru.siswa.show cuma buat role guru/waka,
-        pengurus kelas nggak punya akses ke situ).
-      - Nggak ada auto-isi dispensasi (createPengganti() controller nggak
-        pernah pre-fill dari data dispensasi kayak punya Guru).
+- Nama siswa nggak di-link (route guru.siswa.show cuma buat role guru/waka,
+         pengurus kelas nggak punya akses ke situ).
+       - Nggak ada blok "Mulai masuk JP" seperti punya Guru (pengurus nggak
+         mengubah jam masuk siswa terlambat -- itu wewenang piket).
+       - Status yang bukan dari guru tetap bisa dipilih (mis. Izin Keluar
+         kalau siswa keluar atas persetujuan piket/waka), tapi tombolnya baru
+         dimunculkan kalau sistem sudah nyatet status itu ke siswa ini.
 
     Variabel yang wajib ada di scope pemanggil:
       $siswas       : Collection<Siswa>, urut no_absen
       $presensiAwal : array [siswa_id => ['status' => ..., 'catatan' => ...]] (opsional)
 --}}
 @php
-    $statuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'alpha' => 'Alpha', 'dispensasi' => 'Dispensasi'];
-    $tones = ['hadir' => 'hadir', 'sakit' => 'sakit', 'izin' => 'izin', 'alpha' => 'alpha', 'dispensasi' => 'dispen'];
+    // Daftar bawaan -- sama kayak versi Guru, sengaja tidak includes Izin
+    // Keluar/Terlambat/Dispensasi; keduanya baru dimunculkan per-siswa kalau
+    // memang status itu datang dari sistem (lihat PresensiDefault) biar
+    // pengurus kelas nggak bingung milih status yang bukan wewenangnya.
+    $defaultStatuses = ['hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin', 'izin_terlambat' => 'Terlambat', 'alpha' => 'Alpha'];
+    $defaultTones = ['hadir' => 'hadir', 'sakit' => 'sakit', 'izin' => 'izin', 'izin_terlambat' => 'alpha', 'alpha' => 'alpha'];
 @endphp
 
 <div class="mt-6">
     <h2 class="mb-1 text-sm font-bold text-ink">Presensi ({{ $siswas->count() }} siswa)</h2>
-    <p class="mb-3 text-xs text-muted-2">Semua siswa otomatis berstatus <strong>Hadir</strong>, kecuali yang sudah otomatis ditandai berdasarkan jurnal lain di bawah. Ketik nama untuk mencari, lalu tandai siswa yang Sakit/Izin/Alpha/Dispensasi.</p>
+    <p class="mb-3 text-xs text-muted-2">Semua siswa otomatis berstatus <strong>Hadir</strong>, kecuali yang sudah otomatis ditandai berdasarkan catatan piket atau jurnal lain hari ini. Ketik nama untuk mencari, lalu tandai siswa yang Sakit/Izin/Terlambat/Alpha.</p>
 
     {{-- Dropdown beneran (bukan filter kartu langsung), sama pola kayak versi
          Guru -- lihat catatan lebih detail di guru/jurnal/_presensi-grid.blade.php. --}}
@@ -57,9 +64,22 @@
                     $keteranganAwal = match ($sumberAwal) {
                         'dispensasi' => 'Izin keluar disetujui untuk jam ini',
                         'piket' => 'Dicatat guru piket hari ini',
+                        'piket_terlambat' => 'Terlambat (dicatat guru piket)',
                         'jurnal_lain' => 'Mengikuti jurnal kelas ini jam lain hari ini',
                         default => null,
                     };
+
+                    // Status sistem (izin keluar/terlambat) dimunculkan sebagai
+                    // tombol, persis pola punya Guru -- lihat guru/jurnal/_presensi-grid.
+                    $rowStatuses = $defaultStatuses;
+                    $rowTones = $defaultTones;
+                    if ($statusAwal === 'izin_keluar') {
+                        $rowStatuses['izin_keluar'] = 'Izin Keluar';
+                        $rowTones['izin_keluar'] = 'dispen';
+                    } elseif ($statusAwal === 'dispensasi') {
+                        $rowStatuses['dispensasi'] = 'Dispensasi';
+                        $rowTones['dispensasi'] = 'dispen';
+                    }
                 @endphp
                 <div
                     class="flex flex-col gap-2.5 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]"
@@ -82,15 +102,15 @@
                     </div>
 
                     @php
-                        $dikunciPiket = in_array($sumberAwal, ['piket', 'dispensasi']);
+                        $dikunciPiket = in_array($sumberAwal, ['piket', 'piket_terlambat', 'dispensasi']);
                     @endphp
 
                     <x-ui.choice
                         :name="'presensi[' . $s->id . '][status]'"
-                        :options="$statuses"
-                        :tones="$tones"
+                        :options="$rowStatuses"
+                        :tones="$rowTones"
                         :value="$statusAwal"
-                        :disabled="$dikunciPiket ? array_keys($statuses) : []"
+                        :disabled="$dikunciPiket ? array_keys($rowStatuses) : []"
                         size="sm"
                     />
 

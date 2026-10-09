@@ -51,7 +51,7 @@ class NavigasiGuruPiketTest extends TestCase
      * itu). Tapi menu "Piket" yang dulu berdiri sendiri (cuma nampilin jadwal
      * piket doang, dobel/kurang fungsi) udah dihapus & diganti "Jadwal" --
      * halaman Jadwal udah nampilin jadwal piket + kartu Monitor Piket +
-     * info Dispensasi sekaligus.
+     * info izin keluar sekaligus.
      */
     public function test_menu_hari_piket_ganti_jadwal_bukan_jurnal(): void
     {
@@ -60,7 +60,9 @@ class NavigasiGuruPiketTest extends TestCase
         $this->assertFalse($labels->contains('Riwayat'));
         $this->assertFalse($labels->contains('Piket'));
         $this->assertTrue($labels->contains('Jadwal'));
-        $this->assertTrue($labels->contains('Dispensasi'));
+        // Menu izin keluar sekarang berlabel "Izin Keluar" (bukan "Dispensasi")
+        // -- sama kayak seluruh UI, istilah "dispensasi" cuma tersisa di backend.
+        $this->assertTrue($labels->contains('Izin Keluar'));
     }
 
     public function test_guru_tanpa_piket_sama_sekali_tidak_pernah_lihat_menu_piket(): void
